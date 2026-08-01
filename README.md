@@ -17,10 +17,74 @@ Construido con **Node.js + Express + PostgreSQL + JWT + Nodemailer**.
 
 ### Lo que queda para las siguientes fases (no incluido aún)
 - Rastreo público de paquetes (sin login) por número de tracking.
-- Calculadora de tarifas de envío.
-- Frontend del panel administrativo (ya está el frontend del cliente en `public/index.html`).
+- Frontend de facturación (tarifas y generación de facturas en el panel admin; "Mis facturas" en el dashboard del cliente).
+- Cobro real con pasarela de pago (por ahora, el admin marca las facturas como pagadas manualmente).
 
 Dilo cuando quieras seguir con alguna de estas partes.
+
+## Facturación (nuevo)
+
+Flujo pensado así:
+
+1. El **admin** crea una o varias **tarifas** (ej. "Aéreo estándar": $4.50/lb, cargo mínimo $8, cargo de manejo $2, 1.5% de seguro sobre el valor declarado).
+2. Cuando un paquete llega a la bodega, el admin confirma su **peso real** (puede diferir del estimado que puso el cliente al prealertar).
+3. El admin **genera la factura** de ese paquete eligiendo la tarifa a aplicar. El sistema calcula automáticamente:
+   - `costo_envio = max(peso × precio_libra, cargo_mínimo)`
+   - `seguro = valor_declarado × (%seguro / 100)`
+   - `total = costo_envio + cargo_manejo + seguro`
+4. El **cliente** ve sus facturas (pendientes/pagadas) en su cuenta.
+5. El admin marca la factura como **pagada** cuando recibe el pago (efectivo, transferencia, etc. — no hay pasarela de tarjeta integrada todavía).
+
+### Endpoints de tarifas (admin)
+```
+GET    /api/admin/tarifas
+POST   /api/admin/tarifas       # { nombre, precio_libra, cargo_minimo, cargo_manejo, pct_seguro, activa }
+PUT    /api/admin/tarifas/:id
+DELETE /api/admin/tarifas/:id
+```
+
+### Confirmar peso real de un paquete (admin)
+```
+PATCH /api/admin/paquetes/:id/peso
+{ "peso_real_lb": 2.3 }
+```
+
+### Endpoints de facturas (admin)
+```
+POST  /api/admin/facturas                  # { paquete_id, tarifa_id } -> genera la factura
+GET   /api/admin/facturas                  # todas (filtros: ?estado=&email=)
+PATCH /api/admin/facturas/:id/estado       # { "estado": "pagada" }  (pendiente | pagada | anulada)
+```
+
+### Endpoints de facturas (cliente)
+```
+GET /api/facturas          # mis facturas
+GET /api/facturas/:id      # detalle de una factura mía
+```
+
+### Ejemplo con curl
+
+```bash
+# 1. Crear una tarifa
+curl -X POST http://localhost:3000/api/admin/tarifas \
+  -H "Authorization: Bearer TOKEN_DE_ADMIN" -H "Content-Type: application/json" \
+  -d '{"nombre":"Aéreo estándar","precio_libra":4.5,"cargo_minimo":8,"cargo_manejo":2,"pct_seguro":1.5}'
+
+# 2. Confirmar el peso real de un paquete
+curl -X PATCH http://localhost:3000/api/admin/paquetes/1/peso \
+  -H "Authorization: Bearer TOKEN_DE_ADMIN" -H "Content-Type: application/json" \
+  -d '{"peso_real_lb":2.3}'
+
+# 3. Generar la factura
+curl -X POST http://localhost:3000/api/admin/facturas \
+  -H "Authorization: Bearer TOKEN_DE_ADMIN" -H "Content-Type: application/json" \
+  -d '{"paquete_id":1,"tarifa_id":1}'
+
+# 4. Marcar como pagada
+curl -X PATCH http://localhost:3000/api/admin/facturas/1/estado \
+  -H "Authorization: Bearer TOKEN_DE_ADMIN" -H "Content-Type: application/json" \
+  -d '{"estado":"pagada"}'
+```
 
 ## Panel administrativo (nuevo)
 

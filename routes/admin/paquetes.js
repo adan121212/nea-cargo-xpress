@@ -102,4 +102,34 @@ router.patch(
   }
 );
 
+// --- PATCH /api/admin/paquetes/:id/peso ---
+// El staff confirma el peso real al recibir el paquete en bodega (para facturar con precisión).
+router.patch(
+  '/:id/peso',
+  [body('peso_real_lb').isFloat({ min: 0.01 }).withMessage('Ingresa un peso válido en libras')],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      return res.status(400).json({ errores: errores.array() });
+    }
+
+    try {
+      const resultado = await pool.query(
+        `UPDATE paquetes SET peso_real_lb = $1, fecha_actualizacion = NOW()
+         WHERE id = $2 RETURNING *`,
+        [req.body.peso_real_lb, req.params.id]
+      );
+
+      if (resultado.rows.length === 0) {
+        return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+      }
+
+      return res.json({ mensaje: 'Peso actualizado', paquete: resultado.rows[0] });
+    } catch (error) {
+      console.error('Error en PATCH /admin/paquetes/:id/peso:', error);
+      return res.status(500).json({ mensaje: 'Error interno al actualizar el peso' });
+    }
+  }
+);
+
 module.exports = router;

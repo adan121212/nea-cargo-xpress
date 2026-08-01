@@ -47,4 +47,46 @@ async function enviarCorreoConfirmacion(destinatario, nombre, tokenVerificacion)
   return respuesta.json();
 }
 
-module.exports = { enviarCorreoConfirmacion };
+/**
+ * Envía la factura por correo con el PDF adjunto (vía Resend).
+ */
+async function enviarFacturaPorCorreo(destinatario, nombre, factura, pdfBuffer) {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
+      <h2>¡Hola, ${nombre}!</h2>
+      <p>Adjunto encontrarás la factura <strong>${factura.numero_factura}</strong> de tu paquete
+         (${factura.tienda} — tracking ${factura.numero_tracking}).</p>
+      <p><strong>Total a pagar: $${Number(factura.total).toFixed(2)}</strong></p>
+      <p>Si tienes alguna duda, contáctanos respondiendo este correo.</p>
+    </div>
+  `;
+
+  const respuesta = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM || 'NEA Cargo Xpress <onboarding@resend.dev>',
+      to: destinatario,
+      subject: `Factura ${factura.numero_factura} — NEA Cargo Xpress`,
+      html,
+      attachments: [
+        {
+          filename: `${factura.numero_factura}.pdf`,
+          content: pdfBuffer.toString('base64'),
+        },
+      ],
+    }),
+  });
+
+  if (!respuesta.ok) {
+    const detalle = await respuesta.text();
+    throw new Error(`Resend respondió ${respuesta.status}: ${detalle}`);
+  }
+
+  return respuesta.json();
+}
+
+module.exports = { enviarCorreoConfirmacion, enviarFacturaPorCorreo };
