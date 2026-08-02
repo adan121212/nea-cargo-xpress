@@ -25,9 +25,10 @@ Dilo cuando quieras seguir con alguna de estas partes.
 Pestaña **Mostrador** (la primera que ves al entrar al panel admin) — para cuando el cliente llega en persona a buscar su paquete:
 
 1. Busca al cliente por número de casillero, nombre, correo, o el tracking de un paquete.
-2. Ves todos sus paquetes pendientes de entrega, con el estado de su factura (si tiene una).
+2. Ves todos sus **paquetes pendientes de entrega**, con el estado de su factura (si tiene una), y también cualquier **factura pendiente suelta** (de un paquete que ya se entregó antes pero quedó sin cobrar).
 3. Si la factura está pendiente: eliges el método de pago (efectivo, tarjeta física, transferencia) y el botón **"Cobrar y entregar"** marca la factura como pagada Y el paquete como entregado, en un solo paso.
-4. Si no hay factura pendiente: solo confirmas la entrega.
+4. Para una factura pendiente suelta (sin entrega asociada): botón **"Cobrar"**, marca la factura pagada sin tocar ningún paquete.
+5. Si no hay factura pendiente en un paquete: solo confirmas la entrega.
 
 ### Métodos de pago registrados
 - `efectivo`, `tarjeta`, `transferencia` — los marca el staff manualmente desde el Mostrador.
@@ -37,6 +38,7 @@ Pestaña **Mostrador** (la primera que ves al entrar al panel admin) — para cu
 ```
 GET  /api/admin/mostrador/buscar?q=PN-00042      # busca por casillero, nombre, correo o tracking
 POST /api/admin/mostrador/entregar                # { paquete_id, factura_id?, metodo_pago? }
+POST /api/admin/mostrador/cobrar                  # { factura_id, metodo_pago } - factura suelta, sin entrega
 ```
 
 ## Reportes (nuevo)

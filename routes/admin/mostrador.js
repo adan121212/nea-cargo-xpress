@@ -61,7 +61,24 @@ router.get(
         [usuario.id]
       );
 
-      return res.json({ multiples: false, cliente: usuario, paquetes: paquetesRes.rows });
+      // TODAS las facturas pendientes del cliente, sin importar si su paquete
+      // ya fue entregado o no (ej. quedó pendiente de un retiro anterior).
+      const facturasPendientesRes = await pool.query(
+        `SELECT f.id, f.numero_factura, f.total, f.fecha_creacion,
+                p.tienda, p.numero_tracking, p.estado AS paquete_estado
+         FROM facturas f
+         JOIN paquetes p ON p.id = f.paquete_id
+         WHERE f.usuario_id = $1 AND f.estado = 'pendiente'
+         ORDER BY f.fecha_creacion ASC`,
+        [usuario.id]
+      );
+
+      return res.json({
+        multiples: false,
+        cliente: usuario,
+        paquetes: paquetesRes.rows,
+        facturas_pendientes: facturasPendientesRes.rows,
+      });
     } catch (error) {
       console.error('Error en GET /admin/mostrador/buscar:', error);
       return res.status(500).json({ mensaje: 'Error interno al buscar el cliente' });
@@ -132,6 +149,41 @@ router.post(
       return res.status(500).json({ mensaje: 'Error interno al procesar la entrega' });
     } finally {
       client.release();
+    }
+  }
+);
+
+// --- POST /api/admin/mostrador/cobrar ---
+// Cobra una factura pendiente sin necesidad de entregar un paquete en el mismo
+// paso (ej. una factura que quedó pendiente de una entrega anterior).
+router.post(
+  '/cobrar',
+  [
+    body('factura_id').isInt().withMessage('factura_id es obligatorio'),
+    body('metodo_pago').isIn(['efectivo', 'tarjeta', 'transferencia']).withMessage('Indica el método de pago'),
+  ],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      return res.status(400).json({ errores: errores.array() });
+    }
+
+    try {
+      const resultado = await pool.query(
+        `UPDATE facturas SET estado = 'pagada', fecha_pago = NOW(), metodo_pago = $1
+         WHERE id = $2 AND estado = 'pendiente'
+         RETURNING *`,
+        [req.body.metodo_pago, req.body.factura_id]
+      );
+
+      if (resultado.rows.length === 0) {
+        return res.status(400).json({ mensaje: 'Esta factura ya no está pendiente (puede que ya se haya cobrado).' });
+      }
+
+      return res.json({ mensaje: 'Factura cobrada correctamente', factura: resultado.rows[0] });
+    } catch (error) {
+      console.error('Error en POST /admin/mostrador/cobrar:', error);
+      return res.status(500).json({ mensaje: 'Error interno al cobrar la factura' });
     }
   }
 );

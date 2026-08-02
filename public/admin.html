@@ -1343,7 +1343,7 @@
         return;
       }
 
-      renderResultadoMostrador(data.cliente, data.paquetes);
+      renderResultadoMostrador(data.cliente, data.paquetes, data.facturas_pendientes || []);
     } catch (err) {
       mostrarBanner('#bannerMostrador', 'error', 'No pudimos conectar con el servidor.');
     } finally {
@@ -1351,7 +1351,7 @@
     }
   });
 
-  function renderResultadoMostrador(cliente, paquetes){
+  function renderResultadoMostrador(cliente, paquetes, facturasPendientes){
     const cont = $('#resultadoMostrador');
 
     let html = `
@@ -1361,10 +1361,26 @@
       </div>
     `;
 
-    if (paquetes.length === 0){
-      html += '<div class="empty">Este cliente no tiene paquetes pendientes de entrega.</div>';
+    // IDs de facturas que ya se muestran ligadas a un paquete por entregar,
+    // para no duplicarlas en la lista de "facturas pendientes" de abajo.
+    const idsFacturaEnPaquetes = new Set(paquetes.filter(p => p.factura_id).map(p => p.factura_id));
+    const facturasSueltas = facturasPendientes.filter(f => !idsFacturaEnPaquetes.has(f.id));
+
+    if (facturasSueltas.length > 0){
+      html += `
+        <h2 style="margin-top:20px;">Facturas pendientes (de paquetes ya entregados)</h2>
+        <div id="listaFacturasSueltas"></div>
+      `;
+    }
+
+    if (paquetes.length === 0 && facturasSueltas.length === 0){
+      html += '<div class="empty">Este cliente no tiene paquetes por entregar ni facturas pendientes.</div>';
       cont.innerHTML = html;
       return;
+    }
+
+    if (paquetes.length > 0){
+      html += '<h2 style="margin-top:20px;">Paquetes por entregar</h2>';
     }
 
     html += paquetes.map(p => {
@@ -1448,6 +1464,72 @@
         }
       });
     });
+
+    // Facturas pendientes que no están ligadas a un paquete por entregar
+    // (ej. quedaron pendientes de una entrega anterior).
+    if (facturasSueltas.length > 0){
+      const listaFacturas = $('#listaFacturasSueltas');
+      listaFacturas.innerHTML = facturasSueltas.map(f => {
+        const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+        return `
+          <div class="mostrador-item" data-factura-suelta="${f.id}">
+            <div class="mi-top">
+              <div>
+                <div class="mi-tienda">${escapeHtml(f.numero_factura)}</div>
+                <div class="mi-tracking">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${fecha}</div>
+              </div>
+              <span class="badge badge-prealertado">Pendiente — $${Number(f.total).toFixed(2)}</span>
+            </div>
+            <div class="mi-metodo-pago">
+              <select class="metodo-pago-select">
+                <option value="">Elige método de pago…</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta (física, en oficina)</option>
+                <option value="transferencia">Transferencia</option>
+              </select>
+              <button class="btn-entregar" data-accion="cobrar">Cobrar</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      listaFacturas.querySelectorAll('.mostrador-item').forEach(item => {
+        const btn = item.querySelector('.btn-entregar');
+        btn.addEventListener('click', async () => {
+          const facturaId = item.dataset.facturaSuelta;
+          const select = item.querySelector('.metodo-pago-select');
+          const metodoPago = select.value;
+
+          if (!metodoPago){
+            mostrarBanner('#bannerMostrador', 'error', 'Elige el método de pago antes de cobrar.');
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Procesando…';
+
+          try {
+            const res = await apiAdmin('/admin/mostrador/cobrar', {
+              method: 'POST',
+              body: JSON.stringify({ factura_id: facturaId, metodo_pago: metodoPago }),
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok){
+              mostrarBanner('#bannerMostrador', 'success', '✓ Factura cobrada correctamente.');
+              item.remove();
+            } else {
+              mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'No se pudo cobrar.');
+              btn.disabled = false;
+              btn.textContent = 'Cobrar';
+            }
+          } catch (err) {
+            mostrarBanner('#bannerMostrador', 'error', 'No pudimos conectar con el servidor.');
+            btn.disabled = false;
+          }
+        });
+      });
+    }
   }
 
   // ---------- Reportes ----------
