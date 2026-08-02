@@ -8,11 +8,13 @@ const paquetesRoutes = require('./routes/paquetes');
 const sucursalesRoutes = require('./routes/sucursales');
 const facturasRoutes = require('./routes/facturas');
 const publicoRoutes = require('./routes/publico');
+const pagosRoutes = require('./routes/pagos');
 const adminPaquetesRoutes = require('./routes/admin/paquetes');
 const adminUsuariosRoutes = require('./routes/admin/usuarios');
 const adminSucursalesRoutes = require('./routes/admin/sucursales');
 const adminTarifasRoutes = require('./routes/admin/tarifas');
 const adminFacturasRoutes = require('./routes/admin/facturas');
+const adminReportesRoutes = require('./routes/admin/reportes');
 
 const app = express();
 app.use(express.json());
@@ -24,11 +26,13 @@ app.use('/api/paquetes', paquetesRoutes);
 app.use('/api/sucursales', sucursalesRoutes);
 app.use('/api/facturas', facturasRoutes);
 app.use('/api/public', publicoRoutes);
+app.use('/api/pagos', pagosRoutes);
 app.use('/api/admin/paquetes', adminPaquetesRoutes);
 app.use('/api/admin/usuarios', adminUsuariosRoutes);
 app.use('/api/admin/sucursales', adminSucursalesRoutes);
 app.use('/api/admin/tarifas', adminTarifasRoutes);
 app.use('/api/admin/facturas', adminFacturasRoutes);
+app.use('/api/admin/reportes', adminReportesRoutes);
 
 // Sirve el frontend (public/index.html) desde el mismo servidor,
 // así no hay problemas de CORS al llamar a /api/... desde el navegador.
