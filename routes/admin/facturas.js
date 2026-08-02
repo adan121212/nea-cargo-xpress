@@ -8,7 +8,6 @@ const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
 const { enviarFacturaPorWhatsapp } = require('../../utils/whatsapp');
-
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
@@ -233,5 +232,33 @@ router.patch(
     }
   }
 );
+
+// --- GET /api/admin/facturas/:id/pdf ---
+// El admin puede ver el PDF de cualquier factura (no solo las propias).
+router.get('/:id/pdf', async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
+              u.email AS cliente_email, u.numero_casillero, p.tienda, p.numero_tracking
+       FROM facturas f
+       JOIN usuarios u ON u.id = f.usuario_id
+       JOIN paquetes p ON p.id = f.paquete_id
+       WHERE f.id = $1`,
+      [req.params.id]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Factura no encontrada' });
+    }
+
+    const pdfBuffer = await generarPdfFactura(resultado.rows[0]);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${resultado.rows[0].numero_factura}.pdf"`);
+    return res.send(pdfBuffer);
+  } catch (error) {
+    console.error('Error en GET /admin/facturas/:id/pdf:', error);
+    return res.status(500).json({ mensaje: 'Error interno al generar el PDF' });
+  }
+});
 
 module.exports = router;

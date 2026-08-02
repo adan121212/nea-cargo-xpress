@@ -319,6 +319,35 @@
   .badge-en_panama{ background: rgba(58,110,165,0.12); color:#3a6ea5; }
   .badge-listo_para_retiro{ background: var(--cargo-green-bg); color: var(--cargo-green); }
   .badge-entregado{ background: rgba(12,27,51,0.08); color: var(--ink-soft); }
+  .badge-pendiente{ background: var(--amber-bg); color: var(--accent-dark); }
+  .badge-pagada{ background: var(--cargo-green-bg); color: var(--cargo-green); }
+  .badge-anulada{ background: rgba(12,27,51,0.08); color: var(--ink-soft); }
+
+  .factura-card{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding: 14px 16px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .factura-info .num{ font-family: var(--font-display); font-weight:600; font-size:14.5px; }
+  .factura-info .sub{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
+  .factura-right{ display:flex; align-items:center; gap:12px; }
+  .factura-total{ font-family: var(--font-mono); font-size:14px; font-weight:600; }
+  .btn-pdf{
+    padding: 7px 13px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-pdf:hover{ border-color: var(--accent); color: var(--accent-dark); }
 
   /* Rail de estados */
   .rail{ display:flex; align-items:center; margin-top:12px; gap:2px; }
@@ -498,6 +527,12 @@
             <button class="panel-tab" data-filtro="entregado">Entregados</button>
           </div>
           <div id="listaPaquetes"></div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+          <h2>Mis facturas</h2>
+          <p class="card-sub">Descarga el PDF o revisa si están pendientes de pago.</p>
+          <div id="listaFacturas"></div>
         </div>
       </div>
     </div>
@@ -784,11 +819,69 @@
     return div.innerHTML;
   }
 
+  const ESTADO_FACTURA_LABEL = { pendiente: 'Pendiente de pago', pagada: 'Pagada', anulada: 'Anulada' };
+
+  async function cargarFacturas(){
+    const cont = $('#listaFacturas');
+    try {
+      const res = await apiAutenticado('/facturas');
+      const data = await res.json();
+      const facturas = data.facturas || [];
+
+      if (facturas.length === 0){
+        cont.innerHTML = '<div class="empty">Aún no tienes facturas. Se generan cuando tu paquete llega a la bodega.</div>';
+        return;
+      }
+
+      cont.innerHTML = facturas.map(f => {
+        const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+        return `
+          <div class="factura-card">
+            <div class="factura-info">
+              <div class="num">${escapeHtml(f.numero_factura)}</div>
+              <div class="sub">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${fecha}</div>
+            </div>
+            <div class="factura-right">
+              <span class="badge badge-${f.estado}">${ESTADO_FACTURA_LABEL[f.estado] || f.estado}</span>
+              <span class="factura-total">$${Number(f.total).toFixed(2)}</span>
+              <button class="btn-pdf" data-id="${f.id}">Descargar PDF</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      cont.querySelectorAll('.btn-pdf').forEach(btn => {
+        btn.addEventListener('click', () => descargarFacturaPdf(btn.dataset.id, btn));
+      });
+    } catch (err) {
+      cont.innerHTML = '<div class="empty">No se pudieron cargar tus facturas.</div>';
+    }
+  }
+
+  async function descargarFacturaPdf(id, btn){
+    const textoOriginal = btn.textContent;
+    btn.textContent = 'Descargando…';
+    btn.disabled = true;
+    try {
+      const res = await apiAutenticado(`/facturas/${id}/pdf`);
+      if (!res.ok) throw new Error('No se pudo descargar');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (err) {
+      alert('No se pudo descargar el PDF. Intenta de nuevo.');
+    } finally {
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    }
+  }
+
   // ---------- Arranque de la app ----------
   async function iniciarApp(){
     try {
       await cargarPerfil();
       await cargarPaquetes();
+      await cargarFacturas();
       mostrarApp(true);
     } catch (err) {
       mostrarApp(false);
