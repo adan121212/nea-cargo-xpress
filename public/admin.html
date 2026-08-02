@@ -176,6 +176,29 @@
 
   .empty{ text-align:center; padding: 30px 20px; color: var(--ink-soft); font-size:13.5px; }
 
+  /* ---- Reportes ---- */
+  .rep-stats{ display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; }
+  .rep-stat{ background: var(--paper); border-radius:10px; padding: 16px 18px; }
+  .rep-stat-l{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color: var(--ink-soft); margin-bottom:6px; }
+  .rep-stat-n{ font-family: var(--font-display); font-size:22px; color: var(--ink); }
+  .rep-stat-n.amber{ color: var(--accent-dark); }
+  .rep-stat-sub{ font-size:11px; color: var(--ink-soft); margin-top:4px; }
+  @media (max-width: 760px){ .rep-stats{ grid-template-columns: 1fr 1fr; } }
+
+  .grafico-box{
+    background: var(--paper); border-radius:10px; padding: 18px;
+    display:flex; align-items:flex-end; gap:4px; height:180px; overflow-x:auto;
+  }
+  .grafico-barra{
+    flex:0 0 auto; width:22px; background: var(--accent); border-radius:3px 3px 0 0;
+    position:relative; min-height:2px;
+  }
+  .grafico-barra:hover{ background: var(--accent-dark); }
+  .grafico-vacio{ color: var(--ink-soft); font-size:13px; margin:auto; }
+
+  .rep-cols{ display:grid; grid-template-columns: 1fr 1fr; gap:24px; }
+  @media (max-width: 760px){ .rep-cols{ grid-template-columns: 1fr; } }
+
   .form-inline{ display:grid; grid-template-columns: 1.3fr 1.7fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:18px; }
   .form-inline label{ margin:0 0 5px; }
 
@@ -237,6 +260,7 @@
       <button class="tab-nav-btn" data-tab="facturas">Facturas</button>
       <button class="tab-nav-btn" data-tab="tarifas">Tarifas</button>
       <button class="tab-nav-btn" data-tab="sucursales">Sucursales</button>
+      <button class="tab-nav-btn" data-tab="reportes">Reportes</button>
     </div>
 
     <!-- ---- TAB: Paquetes ---- -->
@@ -475,6 +499,74 @@
       </div>
       <div class="empty" id="emptySucursales" style="display:none;">Aún no hay sucursales creadas.</div>
     </div>
+
+    <!-- ---- TAB: Reportes ---- -->
+    <div class="card tab-panel" id="tabReportes" style="display:none;">
+      <h2>Reportes</h2>
+      <p class="card-sub">Resumen de operaciones en el rango de fechas seleccionado.</p>
+
+      <div class="filtros">
+        <div>
+          <label for="repDesde">Desde</label>
+          <input type="date" id="repDesde">
+        </div>
+        <div>
+          <label for="repHasta">Hasta</label>
+          <input type="date" id="repHasta">
+        </div>
+        <div style="flex:0;">
+          <label>&nbsp;</label>
+          <button class="btn-secondary" id="btnActualizarReporte">Actualizar</button>
+        </div>
+        <div style="flex:0;">
+          <label>&nbsp;</label>
+          <button class="btn-secondary" id="btnExportarCsv">Exportar CSV</button>
+        </div>
+      </div>
+
+      <div class="rep-stats">
+        <div class="rep-stat">
+          <div class="rep-stat-l">Ingresos (pagado)</div>
+          <div class="rep-stat-n" id="repIngresos">$0.00</div>
+          <div class="rep-stat-sub" id="repIngresosCant">0 facturas</div>
+        </div>
+        <div class="rep-stat">
+          <div class="rep-stat-l">Por cobrar (pendiente)</div>
+          <div class="rep-stat-n amber" id="repPendiente">$0.00</div>
+          <div class="rep-stat-sub" id="repPendienteCant">0 facturas</div>
+        </div>
+        <div class="rep-stat">
+          <div class="rep-stat-l">Paquetes nuevos</div>
+          <div class="rep-stat-n" id="repPaquetesNuevos">0</div>
+          <div class="rep-stat-sub">en el rango</div>
+        </div>
+        <div class="rep-stat">
+          <div class="rep-stat-l">Clientes nuevos</div>
+          <div class="rep-stat-n" id="repClientesNuevos">0</div>
+          <div class="rep-stat-sub">en el rango</div>
+        </div>
+      </div>
+
+      <h2 style="margin-top:26px;">Ingresos por día</h2>
+      <div id="graficoIngresos" class="grafico-box"></div>
+
+      <div class="rep-cols">
+        <div>
+          <h2 style="margin-top:26px;">Paquetes por estado</h2>
+          <table>
+            <thead><tr><th>Estado</th><th>Cantidad</th></tr></thead>
+            <tbody id="tbodyEstadoPaquetes"></tbody>
+          </table>
+        </div>
+        <div>
+          <h2 style="margin-top:26px;">Top 5 clientes (por paquetes)</h2>
+          <table>
+            <thead><tr><th>Cliente</th><th>Paquetes</th></tr></thead>
+            <tbody id="tbodyTopClientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -615,6 +707,7 @@
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
       if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); cargarOpcionesFactura(); }
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
+      if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
     });
   });
 
@@ -1151,6 +1244,105 @@
     } finally {
       setCargando(btn, false);
     }
+  });
+
+  // ---------- Reportes ----------
+  const ESTADO_LABEL_REPORTE = {
+    prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
+    en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
+  };
+
+  let ultimoReporte = null;
+
+  function fechaISO(d){ return d.toISOString().slice(0, 10); }
+
+  function inicializarFechasReporte(){
+    if ($('#repDesde').value && $('#repHasta').value) return;
+    const hoy = new Date();
+    const hace30 = new Date(hoy.getTime() - 29 * 24 * 60 * 60 * 1000);
+    $('#repHasta').value = fechaISO(hoy);
+    $('#repDesde').value = fechaISO(hace30);
+  }
+
+  async function cargarReporte(){
+    inicializarFechasReporte();
+    const params = new URLSearchParams({
+      desde: $('#repDesde').value,
+      hasta: $('#repHasta').value,
+    });
+
+    try {
+      const res = await apiAdmin(`/admin/reportes?${params.toString()}`);
+      const data = await res.json();
+      ultimoReporte = data;
+      renderReporte(data);
+    } catch (err) {}
+  }
+
+  function renderReporte(data){
+    $('#repIngresos').textContent = `$${Number(data.ingresos.total).toFixed(2)}`;
+    $('#repIngresosCant').textContent = `${data.ingresos.cantidad} factura${data.ingresos.cantidad == 1 ? '' : 's'}`;
+    $('#repPendiente').textContent = `$${Number(data.pendientes.total).toFixed(2)}`;
+    $('#repPendienteCant').textContent = `${data.pendientes.cantidad} factura${data.pendientes.cantidad == 1 ? '' : 's'}`;
+    $('#repPaquetesNuevos').textContent = data.paquetes_nuevos;
+    $('#repClientesNuevos').textContent = data.clientes_nuevos;
+
+    // Gráfico de barras simple (sin librerías) para ingresos por día.
+    const grafico = $('#graficoIngresos');
+    const dias = data.ingresos_por_dia || [];
+    if (dias.length === 0){
+      grafico.innerHTML = '<div class="grafico-vacio">Sin ingresos registrados en este rango.</div>';
+    } else {
+      const maxTotal = Math.max(...dias.map(d => Number(d.total)), 1);
+      grafico.innerHTML = dias.map(d => {
+        const alturaPx = Math.max((Number(d.total) / maxTotal) * 150, 2);
+        const fecha = new Date(d.dia).toLocaleDateString('es-PA', { day: '2-digit', month: 'short' });
+        return `<div class="grafico-barra" style="height:${alturaPx}px;" title="${fecha}: $${Number(d.total).toFixed(2)}"></div>`;
+      }).join('');
+    }
+
+    // Paquetes por estado
+    const estados = data.paquetes_por_estado || [];
+    $('#tbodyEstadoPaquetes').innerHTML = estados.length
+      ? estados.map(e => `
+          <tr>
+            <td data-label="Estado">${ESTADO_LABEL_REPORTE[e.estado] || e.estado}</td>
+            <td data-label="Cantidad" class="mono">${e.cantidad}</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="2" class="muted">Sin datos</td></tr>';
+
+    // Top clientes
+    const top = data.top_clientes || [];
+    $('#tbodyTopClientes').innerHTML = top.length
+      ? top.map(c => `
+          <tr>
+            <td data-label="Cliente">${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)}<br><span class="muted">${escapeHtml(c.email)}</span></td>
+            <td data-label="Paquetes" class="mono">${c.total_paquetes}</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="2" class="muted">Sin datos</td></tr>';
+  }
+
+  $('#btnActualizarReporte').addEventListener('click', cargarReporte);
+
+  $('#btnExportarCsv').addEventListener('click', () => {
+    if (!ultimoReporte){
+      alert('Primero carga un reporte.');
+      return;
+    }
+    const filas = [['Fecha', 'Ingresos']];
+    (ultimoReporte.ingresos_por_dia || []).forEach(d => {
+      filas.push([new Date(d.dia).toLocaleDateString('es-PA'), Number(d.total).toFixed(2)]);
+    });
+    const csv = filas.map(f => f.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reporte-ingresos-${$('#repDesde').value}-a-${$('#repHasta').value}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   });
 
   // ---------- Arranque ----------
