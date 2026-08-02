@@ -691,7 +691,7 @@
   // ---------- Logout ----------
   $('#btnLogout').addEventListener('click', () => {
     localStorage.removeItem(TOKEN_KEY);
-    mostrarApp(false);
+    window.location.href = 'index.html';
   });
 
   // ---------- Helper de fetch autenticado ----------
