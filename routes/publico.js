@@ -77,4 +77,19 @@ router.get('/rastreo/:tracking', async (req, res) => {
   }
 });
 
+// --- GET /api/public/tarifas ---
+// Pública: cualquiera puede ver las tarifas activas (para mostrarlas o calcular costos).
+router.get('/tarifas', async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `SELECT id, nombre, precio_libra, cargo_minimo, cargo_manejo, pct_seguro
+       FROM tarifas WHERE activa = TRUE ORDER BY precio_libra ASC`
+    );
+    return res.json({ tarifas: resultado.rows });
+  } catch (error) {
+    console.error('Error en GET /public/tarifas:', error);
+    return res.status(500).json({ mensaje: 'Error interno al listar tarifas' });
+  }
+});
+
 module.exports = router;
