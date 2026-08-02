@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEA Cargo Xpress — Mi Casillero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c1b33;
+    --ink-soft: rgba(12,27,51,0.62);
+    --paper:#f1f3f2;
+    --panel:#ffffff;
+    --line: rgba(12,27,51,0.12);
+    --accent:#ff6a1a;
+    --accent-dark:#e2570e;
+    --cargo-green:#177a63;
+    --cargo-green-bg: rgba(23,122,99,0.1);
+    --amber-bg: rgba(255,106,26,0.1);
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+  a{ color:inherit; }
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 16px 28px;
+    background: var(--ink);
+    color: #f1f3f2;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family: var(--font-display);
+    font-weight:700;
+    font-size:17px;
+    letter-spacing:.01em;
+  }
+  .brand .mark{
+    width:30px; height:30px;
+    border-radius:6px;
+    background: var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--font-display);
+    font-weight:700;
+    font-size:14px;
+    color: var(--ink);
+  }
+  .brand small{
+    display:block;
+    font-family: var(--font-body);
+    font-weight:400;
+    font-size:10px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color: rgba(241,243,242,0.55);
+  }
+  .topbar-right{ display:flex; align-items:center; gap:16px; font-size:13px; }
+  .casillero-pill{
+    font-family: var(--font-mono);
+    font-size:12px;
+    letter-spacing:.03em;
+    background: rgba(255,106,26,0.16);
+    color: #ffb27f;
+    padding:5px 10px;
+    border-radius:5px;
+    display:none;
+  }
+  .btn-logout{
+    background:none;
+    border:1px solid rgba(241,243,242,0.25);
+    color:#f1f3f2;
+    padding:7px 14px;
+    border-radius:6px;
+    font-size:13px;
+    font-family: var(--font-body);
+    cursor:pointer;
+    display:none;
+  }
+  .btn-logout:hover{ border-color: rgba(241,243,242,0.5); }
+
+  .wrap{ max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* ---------- Vista de autenticación ---------- */
+  #vistaAuth{ display:flex; justify-content:center; padding-top: 20px; }
+  .auth-shell{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 880px;
+    width:100%;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  .auth-side{
+    background: var(--ink);
+    color:#f1f3f2;
+    padding: 40px 34px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+  .auth-side h1{
+    font-family: var(--font-display);
+    font-size: 26px;
+    line-height:1.18;
+    font-weight:600;
+    margin: 18px 0 12px;
+  }
+  .auth-side p{
+    font-size:14px;
+    line-height:1.6;
+    color: rgba(241,243,242,0.65);
+    max-width: 30ch;
+  }
+  .route{
+    margin-top: 30px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family: var(--font-mono);
+    font-size:11px;
+    letter-spacing:.05em;
+    color: rgba(241,243,242,0.55);
+  }
+  .route .dot{ width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; }
+  .route .track{
+    flex:1;
+    height:1px;
+    background-image: linear-gradient(to right, rgba(241,243,242,0.35) 40%, transparent 0%);
+    background-size: 6px 1px;
+    background-repeat: repeat-x;
+  }
+
+  .auth-form-side{ padding: 40px 34px; }
+  .tabs{ display:flex; gap:4px; margin-bottom: 26px; background: var(--paper); border-radius:8px; padding:3px; }
+  .tab-btn{
+    flex:1;
+    padding: 9px 0;
+    border:none;
+    background:transparent;
+    border-radius:6px;
+    font-family: var(--font-body);
+    font-weight:600;
+    font-size:13px;
+    color: var(--ink-soft);
+    cursor:pointer;
+  }
+  .tab-btn.active{ background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(12,27,51,0.08); }
+
+  label{ display:block; font-size:12.5px; font-weight:600; margin: 14px 0 6px; }
+  label:first-of-type{ margin-top:0; }
+  input{
+    width:100%;
+    padding: 10px 12px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    font-family: var(--font-body);
+    font-size:13.5px;
+    color: var(--ink);
+    background:#fff;
+  }
+  input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  .hint{ font-size:11.5px; color: var(--accent-dark); min-height:14px; margin-top:4px; }
+
+  .btn-primary{
+    width:100%;
+    margin-top:20px;
+    padding: 11px 14px;
+    border:none;
+    border-radius:7px;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .btn-primary:hover{ background: var(--accent-dark); }
+  .btn-primary:disabled{ opacity:.6; cursor:default; }
+  .spinner{
+    width:13px; height:13px; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.45);
+    border-top-color:#fff;
+    animation: spin .7s linear infinite;
+    display:none;
+  }
+  .loading .spinner{ display:inline-block; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .banner{
+    margin-top:16px; padding:11px 13px; border-radius:7px;
+    font-size:13px; line-height:1.5; display:none;
+  }
+  .banner.show{ display:block; }
+  .banner.error{ background: rgba(255,106,26,0.1); color: var(--accent-dark); border:1px solid rgba(255,106,26,0.3); }
+  .banner.success{ background: var(--cargo-green-bg); color: var(--cargo-green); border:1px solid rgba(23,122,99,0.3); }
+
+  /* ---------- App / Dashboard ---------- */
+  #vistaApp{ display:none; }
+  .hero{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap: 24px;
+    flex-wrap:wrap;
+    margin-bottom: 28px;
+  }
+  .hero h1{
+    font-family: var(--font-display);
+    font-size: 24px;
+    margin:0 0 4px;
+  }
+  .hero p{ margin:0; color: var(--ink-soft); font-size:13.5px; }
+
+  .grid2{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:20px; align-items:start; }
+
+  .card{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding: 22px;
+  }
+  .card h2{ font-family: var(--font-display); font-size:15px; margin: 0 0 4px; }
+  .card .card-sub{ font-size:12.5px; color: var(--ink-soft); margin: 0 0 16px; }
+
+  .address-block{
+    background: var(--paper);
+    border-radius:9px;
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size:13px;
+    line-height:1.8;
+  }
+  .address-block .suite{ color: var(--accent-dark); font-weight:600; }
+  .copy-btn{
+    margin-top:12px;
+    width:100%;
+    padding: 8px 10px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-family: var(--font-body);
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .copy-btn:hover{ border-color: var(--accent); color: var(--accent-dark); }
+
+  .stat-row{ display:flex; gap:10px; margin-top:16px; }
+  .stat{
+    flex:1;
+    background: var(--paper);
+    border-radius:9px;
+    padding: 12px 14px;
+  }
+  .stat .n{ font-family: var(--font-display); font-size:20px; }
+  .stat .l{ font-size:11px; color: var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
+
+  /* Prealertar form */
+  .form-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  .form-grid .full{ grid-column: 1 / -1; }
+
+  /* Tabs de la sección de paquetes */
+  .panel-tabs{ display:flex; gap:6px; margin-bottom:18px; }
+  .panel-tab{
+    padding: 8px 16px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:12.5px;
+    font-weight:600;
+    color: var(--ink-soft);
+    cursor:pointer;
+  }
+  .panel-tab.active{ background: var(--ink); color:#fff; border-color: var(--ink); }
+
+  .paquete-card{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding: 14px 16px;
+    margin-bottom:10px;
+  }
+  .paquete-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .paquete-tienda{ font-family: var(--font-display); font-weight:600; font-size:14.5px; }
+  .paquete-tracking{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
+  .paquete-valor{ font-family: var(--font-mono); font-size:13px; white-space:nowrap; }
+
+  .badge{
+    display:inline-block;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.02em;
+  }
+  .badge-prealertado{ background: var(--amber-bg); color: var(--accent-dark); }
+  .badge-en_bodega_miami{ background: rgba(58,110,165,0.12); color:#3a6ea5; }
+  .badge-en_transito{ background: rgba(58,110,165,0.12); color:#3a6ea5; }
+  .badge-en_panama{ background: rgba(58,110,165,0.12); color:#3a6ea5; }
+  .badge-listo_para_retiro{ background: var(--cargo-green-bg); color: var(--cargo-green); }
+  .badge-entregado{ background: rgba(12,27,51,0.08); color: var(--ink-soft); }
+  .badge-pendiente{ background: var(--amber-bg); color: var(--accent-dark); }
+  .badge-pagada{ background: var(--cargo-green-bg); color: var(--cargo-green); }
+  .badge-anulada{ background: rgba(12,27,51,0.08); color: var(--ink-soft); }
+
+  .factura-card{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding: 14px 16px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .factura-info .num{ font-family: var(--font-display); font-weight:600; font-size:14.5px; }
+  .factura-info .sub{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
+  .factura-right{ display:flex; align-items:center; gap:12px; }
+  .factura-total{ font-family: var(--font-mono); font-size:14px; font-weight:600; }
+  .btn-pdf{
+    padding: 7px 13px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-pdf:hover{ border-color: var(--accent); color: var(--accent-dark); }
+
+  .btn-ver-fotos{
+    margin-top:12px;
+    width:100%;
+    padding: 8px 10px;
+    border-radius:7px;
+    border:1px dashed var(--line);
+    background:#fff;
+    font-size:12px;
+    font-weight:600;
+    color: var(--ink-soft);
+    cursor:pointer;
+  }
+  .btn-ver-fotos:hover{ border-color: var(--accent); color: var(--accent-dark); }
+  .mini-galeria{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap:8px;
+    margin-top:10px;
+  }
+  .mini-foto{
+    width:100%; height:90px; object-fit:cover;
+    border-radius:7px; border:1px solid var(--line); cursor:pointer;
+  }
+
+  /* Rail de estados */
+  .rail{ display:flex; align-items:center; margin-top:12px; gap:2px; }
+  .rail .seg{ flex:1; height:4px; border-radius:2px; background: rgba(12,27,51,0.09); }
+  .rail .seg.done{ background: var(--accent); }
+
+  .empty{
+    text-align:center;
+    padding: 34px 20px;
+    color: var(--ink-soft);
+    font-size:13.5px;
+  }
+
+  @media (max-width: 760px){
+    .auth-shell{ grid-template-columns: 1fr; }
+    .auth-side{ display:none; }
+    .grid2{ grid-template-columns: 1fr; }
+    .form-grid{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="mark">N</div>
+    <div>
+      NEA CARGO XPRESS
+      <small>Miami → Panamá</small>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="casillero-pill" id="pillCasillero"></span>
+    <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ======================= VISTA: LOGIN / REGISTRO ======================= -->
+  <div id="vistaAuth">
+    <div class="auth-shell">
+      <div class="auth-side">
+        <div>
+          <div style="font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; color:var(--accent); text-transform:uppercase;">Casillero virtual</div>
+          <h1>Compra en EE.UU.<br>recibe en Panamá.</h1>
+          <p>Crea tu casillero gratis, prealerta cada compra y sigue su recorrido hasta que llega a tus manos.</p>
+        </div>
+        <div class="route">
+          <span class="dot"></span>
+          <span class="track"></span>
+          <span>MIA</span>
+          <span class="track"></span>
+          <span class="dot"></span>
+          <span class="track"></span>
+          <span>PTY</span>
+          <span class="track"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+
+      <div class="auth-form-side">
+        <div class="tabs">
+          <button class="tab-btn active" id="tabLogin">Iniciar sesión</button>
+          <button class="tab-btn" id="tabRegistro">Crear casillero</button>
+        </div>
+
+        <!-- Login -->
+        <form id="formLogin">
+          <label for="loginEmail">Correo electrónico</label>
+          <input id="loginEmail" type="email" placeholder="tu@correo.com">
+          <label for="loginPassword">Contraseña</label>
+          <input id="loginPassword" type="password" placeholder="••••••••">
+          <button class="btn-primary" type="submit" id="btnLogin">
+            <span class="spinner"></span><span>Entrar a mi casillero</span>
+          </button>
+          <div class="banner" id="bannerLogin"></div>
+        </form>
+
+        <!-- Registro -->
+        <form id="formRegistro" style="display:none;">
+          <div class="row2">
+            <div>
+              <label for="regNombre">Nombre</label>
+              <input id="regNombre" type="text" placeholder="Ana">
+            </div>
+            <div>
+              <label for="regApellido">Apellido</label>
+              <input id="regApellido" type="text" placeholder="Pérez">
+            </div>
+          </div>
+          <label for="regEmail">Correo electrónico</label>
+          <input id="regEmail" type="email" placeholder="ana@ejemplo.com">
+          <label for="regTelefono">Teléfono (opcional)</label>
+          <input id="regTelefono" type="tel" placeholder="6123-4567">
+          <label for="regPassword">Contraseña</label>
+          <input id="regPassword" type="password" placeholder="Mínimo 8 caracteres">
+          <button class="btn-primary" type="submit" id="btnRegistro">
+            <span class="spinner"></span><span>Crear mi casillero</span>
+          </button>
+          <div class="banner" id="bannerRegistro"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= VISTA: APP (dashboard) ======================= -->
+  <div id="vistaApp">
+    <div class="hero">
+      <div>
+        <h1 id="saludoNombre">Hola</h1>
+        <p>Este es el estado de tu casillero y tus paquetes.</p>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <!-- Columna izquierda: casillero -->
+      <div class="card">
+        <h2>Mi dirección de casillero</h2>
+        <p class="card-sub">Usa esta dirección al comprar en tiendas de EE.UU.</p>
+        <div class="address-block" id="bloqueDireccion">Cargando…</div>
+        <button class="copy-btn" id="btnCopiar">Copiar dirección</button>
+
+        <div class="stat-row">
+          <div class="stat">
+            <div class="n" id="statTotal">0</div>
+            <div class="l">Paquetes</div>
+          </div>
+          <div class="stat">
+            <div class="n" id="statActivos">0</div>
+            <div class="l">En camino</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna derecha: prealertar + lista -->
+      <div>
+        <div class="card" style="margin-bottom:20px;">
+          <h2>Prealertar un paquete</h2>
+          <p class="card-sub">Avísanos qué compraste antes de que llegue a la bodega.</p>
+          <form id="formPrealerta">
+            <div class="form-grid">
+              <div>
+                <label for="paqTienda">Tienda</label>
+                <input id="paqTienda" type="text" placeholder="Amazon">
+              </div>
+              <div>
+                <label for="paqTracking"># de tracking</label>
+                <input id="paqTracking" type="text" placeholder="1Z999AA10123456784">
+              </div>
+              <div>
+                <label for="paqValor">Valor declarado (USD)</label>
+                <input id="paqValor" type="number" step="0.01" min="0" placeholder="45.99">
+              </div>
+              <div>
+                <label for="paqPeso">Peso aprox. (lb, opcional)</label>
+                <input id="paqPeso" type="number" step="0.01" min="0" placeholder="1.2">
+              </div>
+              <div class="full">
+                <label for="paqDescripcion">Descripción (opcional)</label>
+                <input id="paqDescripcion" type="text" placeholder="Audífonos inalámbricos">
+              </div>
+            </div>
+            <button class="btn-primary" type="submit" id="btnPrealerta">
+              <span class="spinner"></span><span>Prealertar paquete</span>
+            </button>
+            <div class="banner" id="bannerPrealerta"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Mis paquetes</h2>
+          <p class="card-sub">Todo lo que has prealertado, del más reciente al más antiguo.</p>
+          <div class="panel-tabs">
+            <button class="panel-tab active" data-filtro="todos">Todos</button>
+            <button class="panel-tab" data-filtro="activos">En camino</button>
+            <button class="panel-tab" data-filtro="entregado">Entregados</button>
+          </div>
+          <div id="listaPaquetes"></div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+          <h2>Mis facturas</h2>
+          <p class="card-sub">Descarga el PDF o revisa si están pendientes de pago.</p>
+          <div id="listaFacturas"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Cambia esto si tu API vive en otro dominio o puerto.
+  const API_URL = '/api';
+  const TOKEN_KEY = 'nea_cargo_token';
+
+  const ESTADOS = ['prealertado','en_bodega_miami','en_transito','en_panama','listo_para_retiro','entregado'];
+  const ESTADO_LABEL = {
+    prealertado: 'Prealertado',
+    en_bodega_miami: 'En bodega Miami',
+    en_transito: 'En tránsito',
+    en_panama: 'En Panamá',
+    listo_para_retiro: 'Listo para retiro',
+    entregado: 'Entregado',
+  };
+
+  const $ = (sel) => document.querySelector(sel);
+
+  // ---------- Navegación entre vistas ----------
+  function mostrarApp(mostrar){
+    $('#vistaAuth').style.display = mostrar ? 'none' : 'flex';
+    $('#vistaApp').style.display = mostrar ? 'block' : 'none';
+    $('#btnLogout').style.display = mostrar ? 'inline-block' : 'none';
+    $('#pillCasillero').style.display = mostrar ? 'inline-block' : 'none';
+  }
+
+  $('#tabLogin').addEventListener('click', () => {
+    $('#tabLogin').classList.add('active');
+    $('#tabRegistro').classList.remove('active');
+    $('#formLogin').style.display = 'block';
+    $('#formRegistro').style.display = 'none';
+  });
+  $('#tabRegistro').addEventListener('click', () => {
+    $('#tabRegistro').classList.add('active');
+    $('#tabLogin').classList.remove('active');
+    $('#formRegistro').style.display = 'block';
+    $('#formLogin').style.display = 'none';
+  });
+
+  function setCargando(boton, cargando, textoNormal){
+    boton.disabled = cargando;
+    boton.classList.toggle('loading', cargando);
+  }
+
+  function mostrarBanner(id, tipo, mensaje){
+    const el = $(id);
+    el.textContent = mensaje;
+    el.className = 'banner show ' + tipo;
+  }
+
+  // ---------- Registro ----------
+  $('#formRegistro').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnRegistro');
+    const payload = {
+      nombre: $('#regNombre').value.trim(),
+      apellido: $('#regApellido').value.trim(),
+      email: $('#regEmail').value.trim(),
+      telefono: $('#regTelefono').value.trim(),
+      password: $('#regPassword').value,
+    };
+
+    if (!payload.nombre || !payload.apellido || !payload.email || payload.password.length < 8){
+      mostrarBanner('#bannerRegistro', 'error', 'Completa todos los campos. La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+
+    setCargando(btn, true);
+    try {
+      const res = await fetch(`${API_URL}/auth/registro`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 201){
+        mostrarBanner('#bannerRegistro', 'success',
+          `¡Casillero creado! Revisa ${payload.email} para confirmar tu cuenta antes de iniciar sesión.`);
+        $('#formRegistro').reset();
+      } else if (res.status === 409){
+        mostrarBanner('#bannerRegistro', 'error', 'Ese correo ya tiene un casillero registrado.');
+      } else {
+        mostrarBanner('#bannerRegistro', 'error', data.mensaje || 'No se pudo crear el casillero.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerRegistro', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
+  // ---------- Login ----------
+  $('#formLogin').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnLogin');
+    const payload = {
+      email: $('#loginEmail').value.trim(),
+      password: $('#loginPassword').value,
+    };
+
+    setCargando(btn, true);
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok){
+        localStorage.setItem(TOKEN_KEY, data.token);
+        mostrarBanner('#bannerLogin', 'success', '');
+        $('#bannerLogin').className = 'banner';
+        await iniciarApp();
+      } else {
+        mostrarBanner('#bannerLogin', 'error', data.mensaje || 'Correo o contraseña incorrectos.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerLogin', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
+  // ---------- Logout ----------
+  $('#btnLogout').addEventListener('click', () => {
+    localStorage.removeItem(TOKEN_KEY);
+    mostrarApp(false);
+  });
+
+  // ---------- Helper de fetch autenticado ----------
+  async function apiAutenticado(path, opciones = {}){
+    const token = localStorage.getItem(TOKEN_KEY);
+    const res = await fetch(`${API_URL}${path}`, {
+      ...opciones,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(opciones.headers || {}),
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (res.status === 401){
+      localStorage.removeItem(TOKEN_KEY);
+      mostrarApp(false);
+      throw new Error('Sesión expirada');
+    }
+    return res;
+  }
+
+  // ---------- Cargar perfil / casillero ----------
+  async function cargarPerfil(){
+    const res = await apiAutenticado('/casillero/perfil');
+    const data = await res.json();
+    const { usuario, direccion_casillero } = data;
+
+    $('#saludoNombre').textContent = `Hola, ${usuario.nombre}`;
+    $('#pillCasillero').textContent = usuario.numero_casillero;
+
+    $('#bloqueDireccion').innerHTML = `
+      ${direccion_casillero.nombre_destinatario}<br>
+      ${direccion_casillero.linea1}<br>
+      <span class="suite">${direccion_casillero.linea2}</span><br>
+      ${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}<br>
+      ${direccion_casillero.pais}
+    `;
+
+    $('#btnCopiar').onclick = () => {
+      const texto = `${direccion_casillero.nombre_destinatario}\n${direccion_casillero.linea1}\n${direccion_casillero.linea2}\n${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}\n${direccion_casillero.pais}`;
+      navigator.clipboard.writeText(texto).then(() => {
+        $('#btnCopiar').textContent = 'Copiada ✓';
+        setTimeout(() => { $('#btnCopiar').textContent = 'Copiar dirección'; }, 1800);
+      });
+    };
+  }
+
+  // ---------- Prealertar paquete ----------
+  $('#formPrealerta').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnPrealerta');
+    const payload = {
+      tienda: $('#paqTienda').value.trim(),
+      numero_tracking: $('#paqTracking').value.trim(),
+      valor_declarado: parseFloat($('#paqValor').value),
+      peso_lb: $('#paqPeso').value ? parseFloat($('#paqPeso').value) : undefined,
+      descripcion: $('#paqDescripcion').value.trim(),
+    };
+
+    if (!payload.tienda || !payload.numero_tracking || isNaN(payload.valor_declarado)){
+      mostrarBanner('#bannerPrealerta', 'error', 'Completa tienda, tracking y valor declarado.');
+      return;
+    }
+
+    setCargando(btn, true);
+    try {
+      const res = await apiAutenticado('/paquetes/prealertar', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 201){
+        mostrarBanner('#bannerPrealerta', 'success', 'Paquete prealertado. Te avisaremos cuando llegue a la bodega.');
+        $('#formPrealerta').reset();
+        await cargarPaquetes();
+      } else {
+        mostrarBanner('#bannerPrealerta', 'error', data.mensaje || 'No se pudo prealertar el paquete.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerPrealerta', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
+  // ---------- Listar paquetes ----------
+  let paquetesCache = [];
+  let filtroActual = 'todos';
+
+  async function cargarPaquetes(){
+    const res = await apiAutenticado('/paquetes');
+    const data = await res.json();
+    paquetesCache = data.paquetes || [];
+
+    $('#statTotal').textContent = paquetesCache.length;
+    $('#statActivos').textContent = paquetesCache.filter(p => p.estado !== 'entregado').length;
+
+    renderPaquetes();
+  }
+
+  function renderPaquetes(){
+    const cont = $('#listaPaquetes');
+    let lista = paquetesCache;
+
+    if (filtroActual === 'activos') lista = lista.filter(p => p.estado !== 'entregado');
+    if (filtroActual === 'entregado') lista = lista.filter(p => p.estado === 'entregado');
+
+    if (lista.length === 0){
+      cont.innerHTML = '<div class="empty">Aún no hay paquetes en esta categoría.</div>';
+      return;
+    }
+
+    cont.innerHTML = lista.map(p => {
+      const idxEstado = ESTADOS.indexOf(p.estado);
+      const rail = ESTADOS.map((_, i) => `<div class="seg ${i <= idxEstado ? 'done' : ''}"></div>`).join('');
+      const fecha = new Date(p.fecha_prealerta).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+
+      return `
+        <div class="paquete-card">
+          <div class="paquete-top">
+            <div>
+              <div class="paquete-tienda">${escapeHtml(p.tienda)}</div>
+              <div class="paquete-tracking">#${escapeHtml(p.numero_tracking)} · ${fecha}</div>
+            </div>
+            <div style="text-align:right;">
+              <span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span>
+              <div class="paquete-valor">$${Number(p.valor_declarado).toFixed(2)}</div>
+            </div>
+          </div>
+          <div class="rail">${rail}</div>
+          <button class="btn-ver-fotos" data-id="${p.id}">📷 Ver fotos de cómo llegó</button>
+          <div class="mini-galeria" id="galeria-${p.id}" style="display:none;"></div>
+        </div>
+      `;
+    }).join('');
+
+    cont.querySelectorAll('.btn-ver-fotos').forEach(btn => {
+      btn.addEventListener('click', () => toggleFotosPaquete(btn.dataset.id, btn));
+    });
+  }
+
+  async function toggleFotosPaquete(id, btn){
+    const galeria = document.getElementById(`galeria-${id}`);
+    if (galeria.style.display === 'block'){
+      galeria.style.display = 'none';
+      btn.textContent = '📷 Ver fotos de cómo llegó';
+      return;
+    }
+
+    btn.textContent = 'Cargando…';
+    try {
+      const res = await apiAutenticado(`/paquetes/${id}/fotos`);
+      const data = await res.json();
+      const fotos = data.fotos || [];
+
+      galeria.innerHTML = fotos.length
+        ? fotos.map(f => `<img src="${f.url}" class="mini-foto" data-url="${f.url}">`).join('')
+        : '<div class="empty" style="padding:14px;">Aún no hay fotos de este paquete.</div>';
+
+      galeria.querySelectorAll('.mini-foto').forEach(img => {
+        img.addEventListener('click', () => window.open(img.dataset.url, '_blank'));
+      });
+
+      galeria.style.display = 'block';
+      btn.textContent = '📷 Ocultar fotos';
+    } catch (err) {
+      galeria.innerHTML = '<div class="empty" style="padding:14px;">No se pudieron cargar las fotos.</div>';
+      galeria.style.display = 'block';
+      btn.textContent = '📷 Ocultar fotos';
+    }
+  }
+
+  document.querySelectorAll('.panel-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.panel-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filtroActual = btn.dataset.filtro;
+      renderPaquetes();
+    });
+  });
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  const ESTADO_FACTURA_LABEL = { pendiente: 'Pendiente de pago', pagada: 'Pagada', anulada: 'Anulada' };
+
+  async function cargarFacturas(){
+    const cont = $('#listaFacturas');
+    try {
+      const res = await apiAutenticado('/facturas');
+      const data = await res.json();
+      const facturas = data.facturas || [];
+
+      if (facturas.length === 0){
+        cont.innerHTML = '<div class="empty">Aún no tienes facturas. Se generan cuando tu paquete llega a la bodega.</div>';
+        return;
+      }
+
+      cont.innerHTML = facturas.map(f => {
+        const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+        return `
+          <div class="factura-card">
+            <div class="factura-info">
+              <div class="num">${escapeHtml(f.numero_factura)}</div>
+              <div class="sub">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${fecha}</div>
+            </div>
+            <div class="factura-right">
+              <span class="badge badge-${f.estado}">${ESTADO_FACTURA_LABEL[f.estado] || f.estado}</span>
+              <span class="factura-total">$${Number(f.total).toFixed(2)}</span>
+              <button class="btn-pdf" data-id="${f.id}">Descargar PDF</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      cont.querySelectorAll('.btn-pdf').forEach(btn => {
+        btn.addEventListener('click', () => descargarFacturaPdf(btn.dataset.id, btn));
+      });
+    } catch (err) {
+      cont.innerHTML = '<div class="empty">No se pudieron cargar tus facturas.</div>';
+    }
+  }
+
+  async function descargarFacturaPdf(id, btn){
+    const textoOriginal = btn.textContent;
+    btn.textContent = 'Descargando…';
+    btn.disabled = true;
+    try {
+      const res = await apiAutenticado(`/facturas/${id}/pdf`);
+      if (!res.ok) throw new Error('No se pudo descargar');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (err) {
+      alert('No se pudo descargar el PDF. Intenta de nuevo.');
+    } finally {
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    }
+  }
+
+  // ---------- Arranque de la app ----------
+  async function iniciarApp(){
+    try {
+      await cargarPerfil();
+      await cargarPaquetes();
+      await cargarFacturas();
+      mostrarApp(true);
+    } catch (err) {
+      mostrarApp(false);
+    }
+  }
+
+  // Si ya hay un token guardado, entra directo al dashboard.
+  if (localStorage.getItem(TOKEN_KEY)){
+    iniciarApp();
+  }
+</script>
+
+</body>
+</html>
