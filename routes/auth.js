@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const pool = require('../db');
-const { enviarCorreoConfirmacion } = require('../utils/mailer');
+const { enviarCorreoConfirmacion, enviarCorreoRecuperacion } = require('../utils/mailer');
 const { generarNumeroCasillero, direccionCasillero } = require('../utils/casillero');
 
 const router = express.Router();
@@ -166,6 +166,101 @@ router.post(
     } catch (error) {
       console.error('Error en /login:', error);
       return res.status(500).json({ mensaje: 'Error interno al iniciar sesión' });
+    }
+  }
+);
+
+// --- POST /api/auth/olvide-password ---
+// Solicita el enlace de recuperación. Sirve tanto para clientes como para
+// staff/admin — todos comparten la misma tabla de usuarios y este mismo flujo.
+// Por seguridad, siempre responde igual exista o no el correo (no revela
+// si una cuenta existe o no).
+router.post(
+  '/olvide-password',
+  [body('email').isEmail().withMessage('Email inválido').normalizeEmail()],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      return res.status(400).json({ errores: errores.array() });
+    }
+
+    const mensajeGenerico = {
+      mensaje: 'Si ese correo tiene una cuenta con nosotros, te enviamos un enlace para restablecer tu contraseña.',
+    };
+
+    try {
+      const resultado = await pool.query(
+        'SELECT id, nombre, email, verificado FROM usuarios WHERE email = $1',
+        [req.body.email]
+      );
+
+      if (resultado.rows.length === 0 || !resultado.rows[0].verificado) {
+        // No revelamos si el correo existe o no, ni si está sin verificar.
+        return res.json(mensajeGenerico);
+      }
+
+      const usuario = resultado.rows[0];
+      const token = crypto.randomBytes(32).toString('hex');
+      const expira = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+
+      await pool.query(
+        'UPDATE usuarios SET token_reset_password = $1, token_reset_expira = $2 WHERE id = $3',
+        [token, expira, usuario.id]
+      );
+
+      await enviarCorreoRecuperacion(usuario.email, usuario.nombre, token);
+
+      return res.json(mensajeGenerico);
+    } catch (error) {
+      console.error('Error en /olvide-password:', error);
+      // Igual respondemos genérico para no filtrar información ni romper el flujo.
+      return res.json(mensajeGenerico);
+    }
+  }
+);
+
+// --- POST /api/auth/restablecer-password ---
+// Completa el cambio de contraseña usando el token del correo.
+router.post(
+  '/restablecer-password',
+  [
+    body('token').trim().notEmpty().withMessage('Falta el token'),
+    body('password').isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres'),
+  ],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      return res.status(400).json({ errores: errores.array() });
+    }
+
+    const { token, password } = req.body;
+
+    try {
+      const resultado = await pool.query(
+        `SELECT id FROM usuarios
+         WHERE token_reset_password = $1 AND token_reset_expira > NOW()`,
+        [token]
+      );
+
+      if (resultado.rows.length === 0) {
+        return res.status(400).json({
+          mensaje: 'Este enlace ya expiró o no es válido. Solicita uno nuevo.',
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      await pool.query(
+        `UPDATE usuarios
+         SET password_hash = $1, token_reset_password = NULL, token_reset_expira = NULL
+         WHERE id = $2`,
+        [passwordHash, resultado.rows[0].id]
+      );
+
+      return res.json({ mensaje: 'Tu contraseña se actualizó correctamente. Ya puedes iniciar sesión.' });
+    } catch (error) {
+      console.error('Error en /restablecer-password:', error);
+      return res.status(500).json({ mensaje: 'Error interno al restablecer la contraseña' });
     }
   }
 );

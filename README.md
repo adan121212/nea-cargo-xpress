@@ -20,6 +20,23 @@ Construido con **Node.js + Express + PostgreSQL + JWT + Nodemailer**.
 
 Dilo cuando quieras seguir con alguna de estas partes.
 
+## Recuperación de contraseña (nuevo)
+
+Tanto clientes como staff/admin pueden recuperar su contraseña — comparten la misma tabla de usuarios, así que es un solo flujo para ambos.
+
+1. En la pantalla de login (cliente en `app.html`, staff en `admin.html`), clic en "¿Olvidaste tu contraseña?".
+2. Escriben su correo, reciben un enlace por email (válido 1 hora).
+3. El enlace los lleva a `app.html?reset=TOKEN`, donde escriben su nueva contraseña.
+4. Ya pueden iniciar sesión normal (los clientes en `app.html`, el staff en `admin.html`).
+
+Por seguridad, la respuesta de "olvidé mi contraseña" es siempre la misma exista o no el correo — así nadie puede usarlo para adivinar qué correos están registrados.
+
+### Endpoints
+```
+POST /api/auth/olvide-password        # { email } -> envía el enlace si el correo existe
+POST /api/auth/restablecer-password   # { token, password } -> completa el cambio
+```
+
 ## Recepción rápida (nuevo)
 
 Pestaña **Recepción** en el panel admin, pensada para el staff de la bodega en Miami: en vez de buscar cada paquete a mano y cambiarle el estado, escanean (o escriben) el número de tracking de cada caja según va llegando.

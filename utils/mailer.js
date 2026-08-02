@@ -153,4 +153,48 @@ async function enviarCorreoCambioEstado(destinatario, nombre, paquete) {
   return respuesta.json();
 }
 
-module.exports = { enviarCorreoConfirmacion, enviarFacturaPorCorreo, enviarCorreoCambioEstado };
+/**
+ * Envía el correo de recuperación de contraseña con un enlace temporal.
+ */
+async function enviarCorreoRecuperacion(destinatario, nombre, tokenReset) {
+  const enlace = `${process.env.BASE_URL}/app.html?reset=${tokenReset}`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
+      <h2>¡Hola, ${nombre}!</h2>
+      <p>Recibimos una solicitud para restablecer tu contraseña. Si fuiste tú, haz clic en el botón de abajo (el enlace expira en 1 hora):</p>
+      <p style="text-align:center; margin: 24px 0;">
+        <a href="${enlace}"
+           style="background:#ff6a1a;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;">
+          Restablecer mi contraseña
+        </a>
+      </p>
+      <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+      <p><a href="${enlace}">${enlace}</a></p>
+      <p>Si tú no solicitaste esto, puedes ignorar este mensaje — tu contraseña no cambiará.</p>
+    </div>
+  `;
+
+  const respuesta = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM || 'NEA Cargo Xpress <onboarding@resend.dev>',
+      to: destinatario,
+      subject: 'Recupera tu contraseña — NEA Cargo Xpress',
+      html,
+    }),
+  });
+
+  if (!respuesta.ok) {
+    const detalle = await respuesta.text();
+    throw new Error(`Resend respondió ${respuesta.status}: ${detalle}`);
+  }
+
+  return respuesta.json();
+}
+
+module.exports = { enviarCorreoConfirmacion, enviarFacturaPorCorreo, enviarCorreoCambioEstado, enviarCorreoRecuperacion };

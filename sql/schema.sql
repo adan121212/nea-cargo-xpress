@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
     rol VARCHAR(20) NOT NULL DEFAULT 'cliente' CHECK (rol IN ('cliente', 'admin')),
     verificado BOOLEAN NOT NULL DEFAULT FALSE,
     token_verificacion VARCHAR(255),
+    token_reset_password VARCHAR(255),
+    token_reset_expira TIMESTAMP,
     fecha_registro TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
