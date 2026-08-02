@@ -126,6 +126,54 @@
 
   select.estado-select{ font-size:12px; padding:6px 8px; width:auto; }
 
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0;
+    background: rgba(12,27,51,0.5);
+    align-items:center; justify-content:center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background: var(--panel);
+    border-radius:14px;
+    max-width: 560px;
+    width:100%;
+    max-height: 85vh;
+    overflow-y:auto;
+    padding: 24px;
+  }
+  .modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .modal-header h2{ font-family: var(--font-display); font-size:16px; margin:0; }
+  .modal-close{ border:none; background:none; font-size:16px; cursor:pointer; color: var(--ink-soft); }
+  .modal-close:hover{ color: var(--ink); }
+
+  .upload-zone{
+    border: 1.5px dashed var(--line);
+    border-radius:10px;
+    padding: 16px;
+    margin-bottom:18px;
+    text-align:center;
+  }
+  .upload-zone input[type="file"]{ border:none; padding:0; font-size:12.5px; }
+
+  .galeria{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap:10px;
+  }
+  .foto-item{ position:relative; border-radius:8px; overflow:hidden; border:1px solid var(--line); }
+  .foto-item img{ width:100%; height:120px; object-fit:cover; display:block; cursor:pointer; }
+  .foto-item .btn-eliminar-foto{
+    position:absolute; top:5px; right:5px;
+    width:22px; height:22px; border-radius:50%;
+    background: rgba(12,27,51,0.75); color:#fff;
+    border:none; font-size:12px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .foto-item .btn-eliminar-foto:hover{ background: var(--accent-dark); }
+
   .empty{ text-align:center; padding: 30px 20px; color: var(--ink-soft); font-size:13.5px; }
 
   .form-inline{ display:grid; grid-template-columns: 1.3fr 1.7fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:18px; }
@@ -431,6 +479,27 @@
 
 </div>
 
+<!-- ======================= MODAL: Fotos del paquete ======================= -->
+<div id="modalFotos" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="modalFotosTitulo">Fotos del paquete</h2>
+      <button class="modal-close" id="btnCerrarModalFotos">✕</button>
+    </div>
+
+    <div class="upload-zone">
+      <input type="file" id="inputFotos" accept="image/*" multiple>
+      <button class="btn-primary" id="btnSubirFotos" style="margin-top:10px;">
+        <span class="spinner"></span><span>Subir fotos</span>
+      </button>
+      <div class="banner" id="bannerFotos"></div>
+    </div>
+
+    <div class="galeria" id="galeriaFotos"></div>
+    <div class="empty" id="emptyFotos" style="display:none;">Aún no hay fotos de este paquete.</div>
+  </div>
+</div>
+
 <script>
   const API_URL = '/api';
   const TOKEN_KEY = 'nea_cargo_admin_token';
@@ -521,7 +590,20 @@
     return res;
   }
 
-  // ---------- Tabs ----------
+  async function apiAdminFormData(path, formData){
+    const token = localStorage.getItem(TOKEN_KEY);
+    const res = await fetch(`${API_URL}${path}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` }, // sin Content-Type: el navegador arma el boundary del multipart
+      body: formData,
+    });
+    if (res.status === 401 || res.status === 403){
+      localStorage.removeItem(TOKEN_KEY);
+      mostrarAdmin(false);
+      throw new Error('Sesión inválida');
+    }
+    return res;
+  }
   document.querySelectorAll('.tab-nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
@@ -575,9 +657,15 @@
             ${ESTADOS.map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${ESTADO_LABEL[e]}</option>`).join('')}
           </select>
         </td>
-        <td data-label=""></td>
+        <td data-label="">
+          <button class="btn-secondary btn-fotos" data-id="${p.id}">📷 Fotos</button>
+        </td>
       </tr>
     `).join('');
+
+    tbody.querySelectorAll('.btn-fotos').forEach(btn => {
+      btn.addEventListener('click', () => abrirModalFotos(btn.dataset.id));
+    });
 
     tbody.querySelectorAll('.btn-guardar-peso').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -976,6 +1064,94 @@
   }
 
   $('#btnFiltrarFacturas').addEventListener('click', (e) => { e.preventDefault(); cargarFacturas(); });
+
+  // ---------- Modal de fotos ----------
+  let paqueteFotosActual = null;
+
+  async function abrirModalFotos(paqueteId){
+    paqueteFotosActual = paqueteId;
+    $('#modalFotosTitulo').textContent = `Fotos del paquete #${paqueteId}`;
+    $('#inputFotos').value = '';
+    mostrarBanner('#bannerFotos', '', '');
+    $('#modalFotos').classList.add('show');
+    await cargarFotosPaquete(paqueteId);
+  }
+
+  function cerrarModalFotos(){
+    $('#modalFotos').classList.remove('show');
+    paqueteFotosActual = null;
+  }
+
+  $('#btnCerrarModalFotos').addEventListener('click', cerrarModalFotos);
+  $('#modalFotos').addEventListener('click', (e) => {
+    if (e.target.id === 'modalFotos') cerrarModalFotos();
+  });
+
+  async function cargarFotosPaquete(paqueteId){
+    try {
+      const res = await apiAdmin(`/admin/paquetes/${paqueteId}/fotos`);
+      const data = await res.json();
+      renderGaleriaFotos(data.fotos || []);
+    } catch (err) {}
+  }
+
+  function renderGaleriaFotos(fotos){
+    const galeria = $('#galeriaFotos');
+    $('#emptyFotos').style.display = fotos.length ? 'none' : 'block';
+
+    galeria.innerHTML = fotos.map(f => `
+      <div class="foto-item">
+        <img src="${f.url}" alt="Foto del paquete" data-url="${f.url}">
+        <button class="btn-eliminar-foto" data-id="${f.id}" title="Eliminar">✕</button>
+      </div>
+    `).join('');
+
+    galeria.querySelectorAll('img').forEach(img => {
+      img.addEventListener('click', () => window.open(img.dataset.url, '_blank'));
+    });
+
+    galeria.querySelectorAll('.btn-eliminar-foto').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Eliminar esta foto?')) return;
+        try {
+          const res = await apiAdmin(`/admin/paquetes/${paqueteFotosActual}/fotos/${btn.dataset.id}`, {
+            method: 'DELETE',
+          });
+          if (res.ok) await cargarFotosPaquete(paqueteFotosActual);
+        } catch (err) {}
+      });
+    });
+  }
+
+  $('#btnSubirFotos').addEventListener('click', async () => {
+    const input = $('#inputFotos');
+    if (!input.files || input.files.length === 0){
+      mostrarBanner('#bannerFotos', 'error', 'Selecciona al menos una foto.');
+      return;
+    }
+
+    const btn = $('#btnSubirFotos');
+    const formData = new FormData();
+    Array.from(input.files).forEach(file => formData.append('fotos', file));
+
+    setCargando(btn, true);
+    try {
+      const res = await apiAdminFormData(`/admin/paquetes/${paqueteFotosActual}/fotos`, formData);
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 201){
+        mostrarBanner('#bannerFotos', 'success', 'Fotos subidas correctamente.');
+        input.value = '';
+        await cargarFotosPaquete(paqueteFotosActual);
+      } else {
+        mostrarBanner('#bannerFotos', 'error', data.mensaje || 'No se pudieron subir las fotos.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerFotos', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
 
   // ---------- Arranque ----------
   async function iniciarAdmin(){

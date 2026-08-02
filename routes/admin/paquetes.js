@@ -1,8 +1,21 @@
 const express = require('express');
+const multer = require('multer');
 const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
+const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudinary');
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 5 }, // 5MB por foto, hasta 5 fotos a la vez
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Solo se permiten imágenes'));
+    }
+    cb(null, true);
+  },
+});
 
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
@@ -131,5 +144,70 @@ router.patch(
     }
   }
 );
+
+// --- POST /api/admin/paquetes/:id/fotos ---
+// Sube hasta 5 fotos del paquete (ej. al recibirlo en bodega). Campo: "fotos".
+router.post('/:id/fotos', upload.array('fotos', 5), async (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ mensaje: 'Sube al menos una foto (campo "fotos").' });
+  }
+
+  try {
+    const paqueteExiste = await pool.query('SELECT id FROM paquetes WHERE id = $1', [req.params.id]);
+    if (paqueteExiste.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+    }
+
+    const subidas = [];
+    for (const archivo of req.files) {
+      const { url, public_id } = await subirFotoPaquete(archivo.buffer, archivo.mimetype, req.params.id);
+      const resultado = await pool.query(
+        `INSERT INTO paquete_fotos (paquete_id, url, public_id) VALUES ($1, $2, $3) RETURNING *`,
+        [req.params.id, url, public_id]
+      );
+      subidas.push(resultado.rows[0]);
+    }
+
+    return res.status(201).json({ mensaje: 'Fotos subidas', fotos: subidas });
+  } catch (error) {
+    console.error('Error en POST /admin/paquetes/:id/fotos:', error);
+    return res.status(500).json({ mensaje: 'Error interno al subir las fotos' });
+  }
+});
+
+// --- GET /api/admin/paquetes/:id/fotos ---
+router.get('/:id/fotos', async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      'SELECT * FROM paquete_fotos WHERE paquete_id = $1 ORDER BY fecha_subida ASC',
+      [req.params.id]
+    );
+    return res.json({ fotos: resultado.rows });
+  } catch (error) {
+    console.error('Error en GET /admin/paquetes/:id/fotos:', error);
+    return res.status(500).json({ mensaje: 'Error interno al listar las fotos' });
+  }
+});
+
+// --- DELETE /api/admin/paquetes/:id/fotos/:fotoId ---
+router.delete('/:id/fotos/:fotoId', async (req, res) => {
+  try {
+    const foto = await pool.query(
+      'SELECT * FROM paquete_fotos WHERE id = $1 AND paquete_id = $2',
+      [req.params.fotoId, req.params.id]
+    );
+    if (foto.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Foto no encontrada' });
+    }
+
+    await eliminarFotoCloudinary(foto.rows[0].public_id);
+    await pool.query('DELETE FROM paquete_fotos WHERE id = $1', [req.params.fotoId]);
+
+    return res.json({ mensaje: 'Foto eliminada' });
+  } catch (error) {
+    console.error('Error en DELETE /admin/paquetes/:id/fotos/:fotoId:', error);
+    return res.status(500).json({ mensaje: 'Error interno al eliminar la foto' });
+  }
+});
 
 module.exports = router;

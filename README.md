@@ -17,10 +17,30 @@ Construido con **Node.js + Express + PostgreSQL + JWT + Nodemailer**.
 
 ### Lo que queda para las siguientes fases (no incluido aún)
 - Rastreo público de paquetes (sin login) por número de tracking.
-- Frontend de facturación (tarifas y generación de facturas en el panel admin; "Mis facturas" en el dashboard del cliente).
 - Cobro real con pasarela de pago (por ahora, el admin marca las facturas como pagadas manualmente).
 
 Dilo cuando quieras seguir con alguna de estas partes.
+
+## Fotos de paquetes (nuevo)
+
+Cuando el paquete llega a la bodega, el admin puede subirle fotos (ej. cómo llegó, si tiene algún daño visible). Se guardan en **Cloudinary** (no en el propio servidor, porque el disco de Render se borra en cada reinicio).
+
+- **Admin**: en la pestaña Paquetes, botón "📷 Fotos" abre un modal para subir (hasta 5 a la vez, 5MB c/u), ver y eliminar fotos de ese paquete.
+- **Cliente**: en cada paquete de su dashboard, botón "Ver fotos de cómo llegó" muestra las fotos que subió el admin.
+
+### Configurar Cloudinary
+1. Crea una cuenta gratis en [cloudinary.com](https://cloudinary.com).
+2. En el dashboard principal copia: **Cloud name**, **API Key**, **API Secret**.
+3. Agrégalos como variables de entorno: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
+
+### Endpoints
+```
+POST   /api/admin/paquetes/:id/fotos          # admin, multipart/form-data, campo "fotos" (hasta 5)
+GET    /api/admin/paquetes/:id/fotos          # admin
+DELETE /api/admin/paquetes/:id/fotos/:fotoId  # admin
+
+GET    /api/paquetes/:id/fotos                # cliente, solo de su propio paquete
+```
 
 ## Facturación (nuevo)
 

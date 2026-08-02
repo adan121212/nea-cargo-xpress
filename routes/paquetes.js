@@ -81,4 +81,27 @@ router.get('/:id', requiereAutenticacion, async (req, res) => {
   }
 });
 
+// --- GET /api/paquetes/:id/fotos ---
+// Fotos de un paquete propio (ej. cómo llegó a la bodega).
+router.get('/:id/fotos', requiereAutenticacion, async (req, res) => {
+  try {
+    const paquete = await pool.query(
+      'SELECT id FROM paquetes WHERE id = $1 AND usuario_id = $2',
+      [req.params.id, req.usuario.id]
+    );
+    if (paquete.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+    }
+
+    const resultado = await pool.query(
+      'SELECT id, url, fecha_subida FROM paquete_fotos WHERE paquete_id = $1 ORDER BY fecha_subida ASC',
+      [req.params.id]
+    );
+    return res.json({ fotos: resultado.rows });
+  } catch (error) {
+    console.error('Error en GET /paquetes/:id/fotos:', error);
+    return res.status(500).json({ mensaje: 'Error interno al obtener las fotos' });
+  }
+});
+
 module.exports = router;

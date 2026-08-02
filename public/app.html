@@ -950,6 +950,12 @@
   }
 
   // Si ya hay un token guardado, entra directo al dashboard.
+  // Si se llega con ?registro (ej. desde el botón "Crear casillero" de la página principal),
+  // abre directo la pestaña de registro.
+  if (new URLSearchParams(window.location.search).has('registro') && !localStorage.getItem(TOKEN_KEY)){
+    $('#tabRegistro').click();
+  }
+
   if (localStorage.getItem(TOKEN_KEY)){
     iniciarApp();
   }

@@ -88,6 +88,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_factura_paquete_activa
 
 CREATE INDEX IF NOT EXISTS idx_facturas_usuario ON facturas (usuario_id);
 
+CREATE TABLE IF NOT EXISTS paquete_fotos (
+    id SERIAL PRIMARY KEY,
+    paquete_id INTEGER NOT NULL REFERENCES paquetes(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    public_id VARCHAR(255),
+    fecha_subida TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_paquete_fotos_paquete ON paquete_fotos (paquete_id);
+
 -- Tarifa inicial de ejemplo (ajusta los valores a tu negocio real).
 INSERT INTO tarifas (nombre, precio_libra, cargo_minimo, cargo_manejo, pct_seguro, activa)
 VALUES ('Aéreo estándar', 4.50, 8.00, 2.00, 1.5, TRUE)
