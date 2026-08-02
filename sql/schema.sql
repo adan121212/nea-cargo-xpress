@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS facturas (
     seguro NUMERIC(10,2) NOT NULL DEFAULT 0,
     total NUMERIC(10,2) NOT NULL,
     estado VARCHAR(20) NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'pagada', 'anulada')),
+    metodo_pago VARCHAR(20) CHECK (metodo_pago IN ('efectivo', 'tarjeta', 'transferencia', 'pagueloFacil') OR metodo_pago IS NULL),
     token_pdf VARCHAR(64) UNIQUE,
     fecha_creacion TIMESTAMP NOT NULL DEFAULT NOW(),
     fecha_pago TIMESTAMP

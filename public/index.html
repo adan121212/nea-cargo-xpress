@@ -161,11 +161,6 @@
   }
   .rastreo-tab-btn.active{ background: var(--ink); color:#fff; border-color: var(--ink); }
   .rastreo-hint{ font-size:12.5px; color: var(--ink-soft); margin: 0 0 14px; }
-  #YQNum{
-    width:100%; padding: 13px 16px; border-radius:8px; border: 1.5px solid var(--line);
-    font-family: var(--font-mono); font-size:14px; color: var(--ink);
-  }
-  #YQNum:focus-visible{ outline: 2px solid var(--accent); outline-offset:1px; }
 
   .rastreo-box{ max-width: 620px; }
   .rastreo-form{ display:flex; gap:10px; flex-wrap:wrap; }
@@ -418,10 +413,11 @@
 
   <!-- Rastreo mundial: cualquier tracking, cualquier transportista (17TRACK) -->
   <div class="rastreo-box" id="panelRastreoMundial" style="display:none;">
-    <p class="rastreo-hint">Para cualquier número de tracking (USPS, UPS, DHL, FedEx, UniUni, y +3,400 transportistas más), aunque no sea de NEA Cargo Xpress. Servicio provisto por 17TRACK.</p>
-    <input type="text" id="YQNum" maxlength="50" placeholder="Ej. RR123456789CN o UUS6467670502776182">
-    <button class="btn-solid" type="button" onclick="doTrackMundial()" style="margin-top:10px;">Rastrear en el mundo</button>
-    <div id="YQContainer" style="margin-top:18px;"></div>
+    <p class="rastreo-hint">Para cualquier número de tracking (USPS, UPS, DHL, FedEx, UniUni, y +3,400 transportistas más), aunque no sea de NEA Cargo Xpress. Te abrimos el resultado en 17TRACK, el rastreador universal más usado.</p>
+    <form id="formMundial" class="rastreo-form">
+      <input type="text" id="inputMundial" maxlength="50" placeholder="Ej. RR123456789CN o UUS6467670502776182" autocomplete="off">
+      <button class="btn-solid" type="submit">Rastrear en el mundo ↗</button>
+    </form>
   </div>
 </section>
 
@@ -803,8 +799,6 @@
   });
 
   // ---------- Pestañas: rastreo interno vs rastreo mundial ----------
-  let scriptMundialCargado = false;
-
   document.querySelectorAll('.rastreo-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.rastreo-tab-btn').forEach(b => b.classList.remove('active'));
@@ -813,36 +807,19 @@
       const esMundial = btn.dataset.rtab === 'mundial';
       $('#panelRastreoNea').style.display = esMundial ? 'none' : 'block';
       $('#panelRastreoMundial').style.display = esMundial ? 'block' : 'none';
-
-      // Carga el script de 17TRACK solo la primera vez que se abre esta pestaña.
-      if (esMundial && !scriptMundialCargado){
-        const script = document.createElement('script');
-        script.src = '//www.17track.net/externalcall.js';
-        document.body.appendChild(script);
-        scriptMundialCargado = true;
-      }
     });
   });
 
-  // Llamada global usada por el botón "Rastrear en el mundo" (widget de 17TRACK).
-  function doTrackMundial(){
-    const num = document.getElementById('YQNum').value.trim();
+  // Rastreo mundial: abre la página oficial de 17TRACK con el número precargado.
+  $('#formMundial').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const num = $('#inputMundial').value.trim();
     if (!num){
       alert('Escribe un número de tracking.');
       return;
     }
-    if (typeof YQV5 === 'undefined'){
-      alert('El rastreador mundial aún está cargando, intenta de nuevo en un segundo.');
-      return;
-    }
-    YQV5.trackSingle({
-      YQ_ContainerId: 'YQContainer',
-      YQ_Height: 560,
-      YQ_Fc: '0',
-      YQ_Lang: 'es',
-      YQ_Num: num,
-    });
-  }
+    window.open(`https://t.17track.net/es#nums=${encodeURIComponent(num)}`, '_blank');
+  });
 </script>
 
 </body>

@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../db');
 const { requiereAutenticacion } = require('../middleware/auth');
 const { generarPdfFactura } = require('../utils/facturaPdf');
+const { generarEnlacePago } = require('../utils/paguelofacil');
 
 const router = express.Router();
 
@@ -75,6 +76,35 @@ router.get('/:id/pdf', requiereAutenticacion, async (req, res) => {
   } catch (error) {
     console.error('Error en GET /facturas/:id/pdf:', error);
     return res.status(500).json({ mensaje: 'Error interno al generar el PDF' });
+  }
+});
+
+// --- POST /api/facturas/:id/pagar ---
+// Genera un enlace de pago (PagueloFacil) para una factura propia y pendiente.
+// El frontend debe redirigir al navegador a la "url" que devuelve este endpoint.
+router.post('/:id/pagar', requiereAutenticacion, async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `SELECT id, numero_factura, total, estado
+       FROM facturas WHERE id = $1 AND usuario_id = $2`,
+      [req.params.id, req.usuario.id]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Factura no encontrada' });
+    }
+
+    const factura = resultado.rows[0];
+
+    if (factura.estado !== 'pendiente') {
+      return res.status(400).json({ mensaje: `Esta factura ya está en estado "${factura.estado}", no se puede pagar de nuevo.` });
+    }
+
+    const enlace = await generarEnlacePago(factura);
+    return res.json({ url: enlace.url });
+  } catch (error) {
+    console.error('Error en POST /facturas/:id/pagar:', error);
+    return res.status(500).json({ mensaje: 'No se pudo generar el enlace de pago. Intenta de nuevo.' });
   }
 });
 

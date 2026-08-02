@@ -16,12 +16,72 @@ Construido con **Node.js + Express + PostgreSQL + JWT + Nodemailer**.
 - **Listado y detalle de paquetes** → cada cliente ve únicamente sus propios paquetes.
 
 ### Lo que queda para las siguientes fases (no incluido aún)
-- Rastreo público de paquetes (sin login) por número de tracking.
-- Cobro real con pasarela de pago (por ahora, el admin marca las facturas como pagadas manualmente).
+- Producción real: dominio propio en Resend + número de WhatsApp Business verificado + PagueloFacil en modo producción (requiere aprobación KYC de PagueloFacil).
 
 Dilo cuando quieras seguir con alguna de estas partes.
 
-## Fotos de paquetes (nuevo)
+## Mostrador (nuevo)
+
+Pestaña **Mostrador** (la primera que ves al entrar al panel admin) — para cuando el cliente llega en persona a buscar su paquete:
+
+1. Busca al cliente por número de casillero, nombre, correo, o el tracking de un paquete.
+2. Ves todos sus paquetes pendientes de entrega, con el estado de su factura (si tiene una).
+3. Si la factura está pendiente: eliges el método de pago (efectivo, tarjeta física, transferencia) y el botón **"Cobrar y entregar"** marca la factura como pagada Y el paquete como entregado, en un solo paso.
+4. Si no hay factura pendiente: solo confirmas la entrega.
+
+### Métodos de pago registrados
+- `efectivo`, `tarjeta`, `transferencia` — los marca el staff manualmente desde el Mostrador.
+- `pagueloFacil` — se registra automáticamente cuando el cliente paga con tarjeta en línea desde su dashboard.
+
+### Endpoints
+```
+GET  /api/admin/mostrador/buscar?q=PN-00042      # busca por casillero, nombre, correo o tracking
+POST /api/admin/mostrador/entregar                # { paquete_id, factura_id?, metodo_pago? }
+```
+
+## Reportes (nuevo)
+
+Pestaña **Reportes** en el panel admin, con rango de fechas ajustable (por defecto, últimos 30 días):
+
+- Ingresos totales (facturas pagadas) y monto pendiente por cobrar.
+- Paquetes y clientes nuevos en el rango.
+- Gráfico de barras de ingresos por día.
+- Paquetes agrupados por estado.
+- Top 5 clientes por cantidad de paquetes.
+- Exportar a CSV los ingresos por día.
+
+### Endpoint
+```
+GET /api/admin/reportes?desde=2026-01-01&hasta=2026-01-31
+```
+
+## Pago con tarjeta (nuevo)
+
+Se integró **PagueloFacil** (pasarela panameña) mediante su "Enlace de Pago": el cliente hace clic en "Pagar con tarjeta" en una factura pendiente, sale a la página segura de PagueloFacil, paga, y vuelve automáticamente a su dashboard con la factura ya marcada como pagada. **Nunca manejamos números de tarjeta en nuestro servidor.**
+
+> Stripe no está disponible para negocios registrados en Panamá, por eso se usó PagueloFacil.
+
+### Configurar PagueloFacil
+
+1. Para pruebas: regístrate en el ambiente sandbox — https://demo.paguelofacil.com
+2. Para producción real: crea cuenta en https://paguelofacil.com (requiere cuenta bancaria panameña y validación KYC de tu negocio).
+3. En tu cuenta, busca tu **CCLW** (código web / llave de conexión).
+4. Variables de entorno:
+   - `PAGUELOFACIL_CCLW`: tu código web.
+   - `PAGUELOFACIL_ENV`: `production` para cobros reales, cualquier otro valor usa el sandbox de pruebas.
+5. **Opcional pero recomendado**: escribe a customerservice@paguelofacil.com para configurar el **webhook** hacia `https://tu-dominio.com/api/pagos/webhook`. Esto confirma los pagos de forma segura server-to-server, además de la confirmación que ya ocurre cuando el cliente regresa a tu sitio.
+
+### Endpoints
+```
+POST /api/facturas/:id/pagar     # cliente, genera el enlace de pago de una factura propia y pendiente
+GET  /api/pagos/retorno          # PagueloFacil redirige aquí tras el intento de pago
+POST /api/pagos/webhook          # confirmación server-to-server (requiere configurarlo con soporte de PagueloFacil)
+```
+
+### Tarjetas de prueba (sandbox)
+VISA: `4059310181757001` — Mastercard: `5517747952039692`. Cualquier fecha de vencimiento futura y cualquier CVV de 3 dígitos.
+
+## Fotos de paquetes
 
 Cuando el paquete llega a la bodega, el admin puede subirle fotos (ej. cómo llegó, si tiene algún daño visible). Se guardan en **Cloudinary** (no en el propio servidor, porque el disco de Render se borra en cada reinicio).
 

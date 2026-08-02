@@ -15,6 +15,7 @@ const adminSucursalesRoutes = require('./routes/admin/sucursales');
 const adminTarifasRoutes = require('./routes/admin/tarifas');
 const adminFacturasRoutes = require('./routes/admin/facturas');
 const adminReportesRoutes = require('./routes/admin/reportes');
+const adminMostradorRoutes = require('./routes/admin/mostrador');
 
 const app = express();
 app.use(express.json());
@@ -33,6 +34,7 @@ app.use('/api/admin/sucursales', adminSucursalesRoutes);
 app.use('/api/admin/tarifas', adminTarifasRoutes);
 app.use('/api/admin/facturas', adminFacturasRoutes);
 app.use('/api/admin/reportes', adminReportesRoutes);
+app.use('/api/admin/mostrador', adminMostradorRoutes);
 
 // Sirve el frontend (public/index.html) desde el mismo servidor,
 // así no hay problemas de CORS al llamar a /api/... desde el navegador.

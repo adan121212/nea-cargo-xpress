@@ -199,6 +199,32 @@
   .rep-cols{ display:grid; grid-template-columns: 1fr 1fr; gap:24px; }
   @media (max-width: 760px){ .rep-cols{ grid-template-columns: 1fr; } }
 
+  /* ---- Mostrador ---- */
+  .cliente-card{
+    background: var(--paper); border-radius:10px; padding: 16px 18px; margin-bottom:18px;
+  }
+  .cliente-card .nombre{ font-family: var(--font-display); font-size:16px; }
+  .cliente-card .detalle{ font-size:12.5px; color: var(--ink-soft); margin-top:4px; }
+  .cliente-card .detalle span{ font-family: var(--font-mono); }
+
+  .mostrador-item{
+    border:1px solid var(--line); border-radius:10px; padding: 14px 16px; margin-bottom:10px;
+  }
+  .mostrador-item .mi-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
+  .mostrador-item .mi-tienda{ font-family: var(--font-display); font-weight:600; font-size:14.5px; }
+  .mostrador-item .mi-tracking{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
+  .mi-factura-info{ font-size:12.5px; margin-top:8px; }
+  .mi-metodo-pago{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center; }
+  .mi-metodo-pago select{ font-size:12.5px; padding:7px 9px; width:auto; }
+  .btn-entregar{
+    padding: 8px 16px; border-radius:7px; border:none; background: var(--cargo-green);
+    color:#fff; font-size:12.5px; font-weight:700; cursor:pointer;
+  }
+  .btn-entregar:hover{ opacity:.9; }
+  .btn-entregar:disabled{ opacity:.5; cursor:default; }
+  .cliente-multiples button{ display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:13px; }
+  .cliente-multiples button:hover{ border-color: var(--accent); }
+
   .form-inline{ display:grid; grid-template-columns: 1.3fr 1.7fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:18px; }
   .form-inline label{ margin:0 0 5px; }
 
@@ -255,7 +281,8 @@
     </div>
 
     <div class="tabs-nav">
-      <button class="tab-nav-btn active" data-tab="paquetes">Paquetes</button>
+      <button class="tab-nav-btn active" data-tab="mostrador">Mostrador</button>
+      <button class="tab-nav-btn" data-tab="paquetes">Paquetes</button>
       <button class="tab-nav-btn" data-tab="clientes">Clientes</button>
       <button class="tab-nav-btn" data-tab="facturas">Facturas</button>
       <button class="tab-nav-btn" data-tab="tarifas">Tarifas</button>
@@ -264,7 +291,28 @@
     </div>
 
     <!-- ---- TAB: Paquetes ---- -->
-    <div class="card tab-panel" id="tabPaquetes">
+    <!-- ---- TAB: Mostrador ---- -->
+    <div class="card tab-panel" id="tabMostrador">
+      <h2>Buscar cliente</h2>
+      <p class="card-sub">Busca por número de casillero, nombre, correo, o el tracking de un paquete.</p>
+
+      <form id="formBuscarMostrador" class="form-inline" style="grid-template-columns: 1fr auto;">
+        <div>
+          <label for="mostradorQ">Casillero / nombre / correo / tracking</label>
+          <input type="text" id="mostradorQ" placeholder="Ej. PN-00042, Ana Pérez, o 1Z999...">
+        </div>
+        <div>
+          <button class="btn-primary" type="submit" id="btnBuscarMostrador" style="margin-top:0;">
+            <span class="spinner"></span><span>Buscar</span>
+          </button>
+        </div>
+      </form>
+      <div class="banner" id="bannerMostrador"></div>
+
+      <div id="resultadoMostrador"></div>
+    </div>
+
+    <div class="card tab-panel" id="tabPaquetes" style="display:none;">
       <h2>Todos los paquetes</h2>
       <p class="card-sub">Actualiza el estado a medida que avanzan en la ruta Miami → Panamá.</p>
 
@@ -703,6 +751,7 @@
       document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
       const tab = btn.dataset.tab;
       if (tab === 'paquetes') $('#tabPaquetes').style.display = 'block';
+      if (tab === 'mostrador') $('#tabMostrador').style.display = 'block';
       if (tab === 'clientes'){ $('#tabClientes').style.display = 'block'; cargarClientes(); }
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
       if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); cargarOpcionesFactura(); }
@@ -1245,6 +1294,161 @@
       setCargando(btn, false);
     }
   });
+
+  // ---------- Mostrador ----------
+  const ESTADO_LABEL_MOSTRADOR = {
+    prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
+    en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
+  };
+
+  $('#formBuscarMostrador').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const q = $('#mostradorQ').value.trim();
+    if (!q){
+      mostrarBanner('#bannerMostrador', 'error', 'Escribe algo para buscar.');
+      return;
+    }
+
+    const btn = $('#btnBuscarMostrador');
+    setCargando(btn, true);
+    mostrarBanner('#bannerMostrador', '', '');
+    $('#resultadoMostrador').innerHTML = '';
+
+    try {
+      const res = await apiAdmin(`/admin/mostrador/buscar?q=${encodeURIComponent(q)}`);
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok){
+        mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'No se encontró nada.');
+        return;
+      }
+
+      if (data.multiples){
+        $('#resultadoMostrador').innerHTML = `
+          <p class="card-sub">Encontramos varios clientes, elige uno:</p>
+          <div class="cliente-multiples">
+            ${data.clientes.map(c => `
+              <button data-casillero="${escapeHtml(c.numero_casillero)}">
+                ${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)} — ${escapeHtml(c.email)} (${escapeHtml(c.numero_casillero)})
+              </button>
+            `).join('')}
+          </div>
+        `;
+        document.querySelectorAll('.cliente-multiples button').forEach(b => {
+          b.addEventListener('click', () => {
+            $('#mostradorQ').value = b.dataset.casillero;
+            $('#formBuscarMostrador').dispatchEvent(new Event('submit'));
+          });
+        });
+        return;
+      }
+
+      renderResultadoMostrador(data.cliente, data.paquetes);
+    } catch (err) {
+      mostrarBanner('#bannerMostrador', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
+  function renderResultadoMostrador(cliente, paquetes){
+    const cont = $('#resultadoMostrador');
+
+    let html = `
+      <div class="cliente-card">
+        <div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div>
+        <div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono ? ' · ' + escapeHtml(cliente.telefono) : ''}</div>
+      </div>
+    `;
+
+    if (paquetes.length === 0){
+      html += '<div class="empty">Este cliente no tiene paquetes pendientes de entrega.</div>';
+      cont.innerHTML = html;
+      return;
+    }
+
+    html += paquetes.map(p => {
+      const tieneFacturaPendiente = p.factura_id && p.factura_estado === 'pendiente';
+      const facturaInfo = p.factura_id
+        ? `<div class="mi-factura-info">
+             Factura ${escapeHtml(p.numero_factura)}:
+             <span class="badge badge-${p.factura_estado === 'pendiente' ? 'prealertado' : 'listo_para_retiro'}">
+               ${p.factura_estado === 'pendiente' ? `Pendiente — $${Number(p.factura_total).toFixed(2)}` : 'Pagada'}
+             </span>
+           </div>`
+        : '<div class="mi-factura-info muted">Sin factura generada todavía.</div>';
+
+      return `
+        <div class="mostrador-item" data-paquete="${p.id}" data-factura="${p.factura_id || ''}">
+          <div class="mi-top">
+            <div>
+              <div class="mi-tienda">${escapeHtml(p.tienda)}</div>
+              <div class="mi-tracking">#${escapeHtml(p.numero_tracking)}</div>
+            </div>
+            <span class="badge badge-${p.estado}">${ESTADO_LABEL_MOSTRADOR[p.estado] || p.estado}</span>
+          </div>
+          ${facturaInfo}
+          <div class="mi-metodo-pago">
+            ${tieneFacturaPendiente ? `
+              <select class="metodo-pago-select">
+                <option value="">Elige método de pago…</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta (física, en oficina)</option>
+                <option value="transferencia">Transferencia</option>
+              </select>
+              <button class="btn-entregar" data-accion="cobrar-entregar">Cobrar y entregar</button>
+            ` : `
+              <button class="btn-entregar" data-accion="entregar">Marcar como entregado</button>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    cont.innerHTML = html;
+
+    cont.querySelectorAll('.mostrador-item').forEach(item => {
+      const btn = item.querySelector('.btn-entregar');
+      btn.addEventListener('click', async () => {
+        const paqueteId = item.dataset.paquete;
+        const facturaId = item.dataset.factura || null;
+        const select = item.querySelector('.metodo-pago-select');
+        const metodoPago = select ? select.value : null;
+
+        if (select && !metodoPago){
+          mostrarBanner('#bannerMostrador', 'error', 'Elige el método de pago antes de cobrar.');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Procesando…';
+
+        try {
+          const res = await apiAdmin('/admin/mostrador/entregar', {
+            method: 'POST',
+            body: JSON.stringify({
+              paquete_id: paqueteId,
+              factura_id: facturaId || undefined,
+              metodo_pago: metodoPago || undefined,
+            }),
+          });
+          const data = await res.json().catch(() => ({}));
+
+          if (res.ok){
+            mostrarBanner('#bannerMostrador', 'success', '✓ Paquete entregado' + (metodoPago ? ' y factura cobrada.' : '.'));
+            item.remove();
+          } else {
+            mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'No se pudo procesar.');
+            btn.disabled = false;
+            btn.textContent = select ? 'Cobrar y entregar' : 'Marcar como entregado';
+          }
+        } catch (err) {
+          mostrarBanner('#bannerMostrador', 'error', 'No pudimos conectar con el servidor.');
+          btn.disabled = false;
+        }
+      });
+    });
+  }
 
   // ---------- Reportes ----------
   const ESTADO_LABEL_REPORTE = {

@@ -348,6 +348,24 @@
     cursor:pointer;
   }
   .btn-pdf:hover{ border-color: var(--accent); color: var(--accent-dark); }
+  .btn-pagar{
+    padding: 7px 13px;
+    border-radius:7px;
+    border:none;
+    background: var(--accent);
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-pagar:hover{ background: var(--accent-dark); }
+  .banner-pago{
+    max-width: 1040px; margin: 0 auto 18px; padding: 13px 16px; border-radius:8px;
+    font-size:13.5px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .banner-pago.exito{ background: var(--cargo-green-bg); color: var(--cargo-green); border:1px solid rgba(23,122,99,0.3); }
+  .banner-pago.error{ background: var(--amber-bg); color: var(--accent-dark); border:1px solid rgba(255,106,26,0.3); }
+  .banner-pago button{ background:none; border:none; cursor:pointer; font-size:14px; color:inherit; }
 
   .btn-ver-fotos{
     margin-top:12px;
@@ -905,6 +923,7 @@
             <div class="factura-right">
               <span class="badge badge-${f.estado}">${ESTADO_FACTURA_LABEL[f.estado] || f.estado}</span>
               <span class="factura-total">$${Number(f.total).toFixed(2)}</span>
+              ${f.estado === 'pendiente' ? `<button class="btn-pagar" data-id="${f.id}">Pagar con tarjeta</button>` : ''}
               <button class="btn-pdf" data-id="${f.id}">Descargar PDF</button>
             </div>
           </div>
@@ -914,8 +933,33 @@
       cont.querySelectorAll('.btn-pdf').forEach(btn => {
         btn.addEventListener('click', () => descargarFacturaPdf(btn.dataset.id, btn));
       });
+
+      cont.querySelectorAll('.btn-pagar').forEach(btn => {
+        btn.addEventListener('click', () => pagarFactura(btn.dataset.id, btn));
+      });
     } catch (err) {
       cont.innerHTML = '<div class="empty">No se pudieron cargar tus facturas.</div>';
+    }
+  }
+
+  async function pagarFactura(id, btn){
+    const textoOriginal = btn.textContent;
+    btn.textContent = 'Redirigiendo…';
+    btn.disabled = true;
+    try {
+      const res = await apiAutenticado(`/facturas/${id}/pagar`, { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.url){
+        window.location.href = data.url; // el cliente sale a la página segura de PagueloFacil
+        return;
+      }
+      alert(data.mensaje || 'No se pudo iniciar el pago. Intenta de nuevo.');
+    } catch (err) {
+      alert('No pudimos conectar con el servidor.');
+    } finally {
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
     }
   }
 
@@ -955,6 +999,32 @@
   if (new URLSearchParams(window.location.search).has('registro') && !localStorage.getItem(TOKEN_KEY)){
     $('#tabRegistro').click();
   }
+
+  // Si volvemos de intentar pagar una factura con PagueloFacil, mostramos el resultado.
+  (function mostrarResultadoPago(){
+    const params = new URLSearchParams(window.location.search);
+    const pago = params.get('pago');
+    if (!pago) return;
+
+    const mensajes = {
+      exito: { tipo: 'exito', texto: '¡Pago realizado con éxito! Tu factura ya está marcada como pagada.' },
+      fallido: { tipo: 'error', texto: 'El pago no se pudo completar. Puedes intentarlo de nuevo desde "Mis facturas".' },
+      error: { tipo: 'error', texto: 'Ocurrió un problema al confirmar tu pago. Si el cargo se realizó, contáctanos por WhatsApp.' },
+    };
+    const info = mensajes[pago];
+    if (!info) return;
+
+    const banner = document.createElement('div');
+    banner.className = `banner-pago ${info.tipo}`;
+    banner.innerHTML = `<span>${info.texto}</span><button aria-label="Cerrar">✕</button>`;
+    banner.querySelector('button').addEventListener('click', () => banner.remove());
+    document.querySelector('.wrap').prepend(banner);
+
+    // Limpia el parámetro de la URL para que no reaparezca al recargar.
+    params.delete('pago');
+    const nuevaUrl = window.location.pathname + (params.toString() ? `?${params}` : '');
+    window.history.replaceState({}, '', nuevaUrl);
+  })();
 
   if (localStorage.getItem(TOKEN_KEY)){
     iniciarApp();
