@@ -225,6 +225,21 @@
   .cliente-multiples button{ display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:13px; }
   .cliente-multiples button:hover{ border-color: var(--accent); }
 
+  /* ---- Firma digital ---- */
+  .firma-lienzo-box{
+    position:relative; border: 1.5px dashed var(--line); border-radius:10px;
+    overflow:hidden; background:#fff; margin-top:14px; touch-action:none;
+  }
+  #canvasFirma{ display:block; width:100%; height:220px; cursor:crosshair; }
+  .firma-placeholder{
+    position:absolute; top:50%; left:50%; transform: translate(-50%, -50%);
+    color: var(--ink-soft); font-size:13px; pointer-events:none;
+  }
+  .firma-placeholder.oculto{ display:none; }
+  .firma-acciones{ display:flex; gap:10px; margin-top:14px; }
+  .firma-acciones .btn-secondary{ flex:0 0 auto; }
+  .firma-acciones .btn-primary{ flex:1; }
+
   .form-inline{ display:grid; grid-template-columns: 1.3fr 1.7fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:18px; }
   .form-inline label{ margin:0 0 5px; }
 
@@ -637,6 +652,31 @@
 
     <div class="galeria" id="galeriaFotos"></div>
     <div class="empty" id="emptyFotos" style="display:none;">Aún no hay fotos de este paquete.</div>
+  </div>
+</div>
+
+<!-- ======================= MODAL: Firma digital de entrega ======================= -->
+<div id="modalFirma" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Firma de entrega</h2>
+      <button class="modal-close" id="btnCerrarModalFirma">✕</button>
+    </div>
+
+    <p class="card-sub" id="firmaResumen">El cliente debe firmar aquí para confirmar que recibió su paquete.</p>
+
+    <div class="firma-lienzo-box">
+      <canvas id="canvasFirma"></canvas>
+      <div class="firma-placeholder" id="firmaPlaceholder">Firma aquí con el dedo o el mouse</div>
+    </div>
+
+    <div class="firma-acciones">
+      <button class="btn-secondary" id="btnLimpiarFirma">Limpiar</button>
+      <button class="btn-primary" id="btnConfirmarFirma" style="margin-top:0;">
+        <span class="spinner"></span><span>Confirmar entrega</span>
+      </button>
+    </div>
+    <div class="banner" id="bannerFirma"></div>
   </div>
 </div>
 
@@ -1425,7 +1465,7 @@
 
     cont.querySelectorAll('.mostrador-item').forEach(item => {
       const btn = item.querySelector('.btn-entregar');
-      btn.addEventListener('click', async () => {
+      btn.addEventListener('click', () => {
         const paqueteId = item.dataset.paquete;
         const facturaId = item.dataset.factura || null;
         const select = item.querySelector('.metodo-pago-select');
@@ -1436,32 +1476,11 @@
           return;
         }
 
-        btn.disabled = true;
-        btn.textContent = 'Procesando…';
-
-        try {
-          const res = await apiAdmin('/admin/mostrador/entregar', {
-            method: 'POST',
-            body: JSON.stringify({
-              paquete_id: paqueteId,
-              factura_id: facturaId || undefined,
-              metodo_pago: metodoPago || undefined,
-            }),
-          });
-          const data = await res.json().catch(() => ({}));
-
-          if (res.ok){
-            mostrarBanner('#bannerMostrador', 'success', '✓ Paquete entregado' + (metodoPago ? ' y factura cobrada.' : '.'));
-            item.remove();
-          } else {
-            mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'No se pudo procesar.');
-            btn.disabled = false;
-            btn.textContent = select ? 'Cobrar y entregar' : 'Marcar como entregado';
-          }
-        } catch (err) {
-          mostrarBanner('#bannerMostrador', 'error', 'No pudimos conectar con el servidor.');
-          btn.disabled = false;
-        }
+        abrirModalFirma({
+          paqueteId, facturaId, metodoPago,
+          item, btnOriginal: btn,
+          textoOriginal: select ? 'Cobrar y entregar' : 'Marcar como entregado',
+        });
       });
     });
 
@@ -1531,6 +1550,129 @@
       });
     }
   }
+
+  // ---------- Modal de firma digital ----------
+  let entregaPendiente = null;
+  let dibujando = false;
+  let firmaTieneTrazo = false;
+  const canvasFirma = document.getElementById('canvasFirma');
+  const ctxFirma = canvasFirma.getContext('2d');
+
+  function ajustarTamanoCanvas(){
+    const rect = canvasFirma.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    canvasFirma.width = rect.width * ratio;
+    canvasFirma.height = rect.height * ratio;
+    ctxFirma.scale(ratio, ratio);
+    ctxFirma.lineWidth = 2.2;
+    ctxFirma.lineCap = 'round';
+    ctxFirma.strokeStyle = '#0c1b33';
+  }
+
+  function posicionDesdeEvento(e){
+    const rect = canvasFirma.getBoundingClientRect();
+    const punto = e.touches ? e.touches[0] : e;
+    return { x: punto.clientX - rect.left, y: punto.clientY - rect.top };
+  }
+
+  function iniciarTrazo(e){
+    e.preventDefault();
+    dibujando = true;
+    firmaTieneTrazo = true;
+    $('#firmaPlaceholder').classList.add('oculto');
+    const { x, y } = posicionDesdeEvento(e);
+    ctxFirma.beginPath();
+    ctxFirma.moveTo(x, y);
+  }
+
+  function continuarTrazo(e){
+    if (!dibujando) return;
+    e.preventDefault();
+    const { x, y } = posicionDesdeEvento(e);
+    ctxFirma.lineTo(x, y);
+    ctxFirma.stroke();
+  }
+
+  function terminarTrazo(){
+    dibujando = false;
+  }
+
+  canvasFirma.addEventListener('mousedown', iniciarTrazo);
+  canvasFirma.addEventListener('mousemove', continuarTrazo);
+  window.addEventListener('mouseup', terminarTrazo);
+  canvasFirma.addEventListener('touchstart', iniciarTrazo, { passive: false });
+  canvasFirma.addEventListener('touchmove', continuarTrazo, { passive: false });
+  canvasFirma.addEventListener('touchend', terminarTrazo);
+
+  function limpiarCanvasFirma(){
+    ajustarTamanoCanvas();
+    ctxFirma.clearRect(0, 0, canvasFirma.width, canvasFirma.height);
+    firmaTieneTrazo = false;
+    $('#firmaPlaceholder').classList.remove('oculto');
+  }
+
+  function abrirModalFirma(contexto){
+    entregaPendiente = contexto;
+    const resumenTexto = contexto.metodoPago
+      ? `Cobro de $${contexto.item?.querySelector('.badge')?.textContent.replace(/[^0-9.]/g, '') || ''} (${contexto.metodoPago}) — el cliente firma para confirmar que recibió su paquete.`
+      : 'El cliente firma aquí para confirmar que recibió su paquete.';
+    $('#firmaResumen').textContent = resumenTexto;
+    mostrarBanner('#bannerFirma', '', '');
+    $('#modalFirma').classList.add('show');
+    setTimeout(limpiarCanvasFirma, 50); // espera a que el modal sea visible para medir bien el canvas
+  }
+
+  function cerrarModalFirma(){
+    $('#modalFirma').classList.remove('show');
+    entregaPendiente = null;
+  }
+
+  $('#btnCerrarModalFirma').addEventListener('click', cerrarModalFirma);
+  $('#modalFirma').addEventListener('click', (e) => {
+    if (e.target.id === 'modalFirma') cerrarModalFirma();
+  });
+  $('#btnLimpiarFirma').addEventListener('click', limpiarCanvasFirma);
+
+  $('#btnConfirmarFirma').addEventListener('click', async () => {
+    if (!entregaPendiente) return;
+
+    if (!firmaTieneTrazo){
+      mostrarBanner('#bannerFirma', 'error', 'El cliente debe firmar antes de confirmar.');
+      return;
+    }
+
+    const btnConfirmar = $('#btnConfirmarFirma');
+    setCargando(btnConfirmar, true);
+
+    const firmaDataUrl = canvasFirma.toDataURL('image/png');
+    const { paqueteId, facturaId, metodoPago, item, btnOriginal, textoOriginal } = entregaPendiente;
+
+    try {
+      const res = await apiAdmin('/admin/mostrador/entregar', {
+        method: 'POST',
+        body: JSON.stringify({
+          paquete_id: paqueteId,
+          factura_id: facturaId || undefined,
+          metodo_pago: metodoPago || undefined,
+          firma: firmaDataUrl,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok){
+        cerrarModalFirma();
+        mostrarBanner('#bannerMostrador', 'success', '✓ Paquete entregado' + (metodoPago ? ' y factura cobrada.' : '.') + ' Firma guardada.');
+        item.remove();
+      } else {
+        mostrarBanner('#bannerFirma', 'error', data.mensaje || 'No se pudo procesar la entrega.');
+        if (btnOriginal){ btnOriginal.disabled = false; btnOriginal.textContent = textoOriginal; }
+      }
+    } catch (err) {
+      mostrarBanner('#bannerFirma', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btnConfirmar, false);
+    }
+  });
 
   // ---------- Reportes ----------
   const ESTADO_LABEL_REPORTE = {

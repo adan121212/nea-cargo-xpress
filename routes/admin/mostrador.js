@@ -3,6 +3,7 @@ const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
+const { subirFirmaEntrega } = require('../../utils/cloudinary');
 
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
@@ -89,12 +90,17 @@ router.get(
 // --- POST /api/admin/mostrador/entregar ---
 // Entrega un paquete en mostrador. Si tiene una factura pendiente, la cobra
 // (requiere metodo_pago) y la marca pagada en la misma operación.
+// Requiere la firma digital del cliente (data URL de un <canvas>) como
+// comprobante de entrega.
 router.post(
   '/entregar',
   [
     body('paquete_id').isInt().withMessage('paquete_id es obligatorio'),
     body('factura_id').optional({ nullable: true }).isInt(),
     body('metodo_pago').optional({ nullable: true }).isIn(['efectivo', 'tarjeta', 'transferencia']),
+    body('firma')
+      .notEmpty().withMessage('Se requiere la firma digital del cliente para entregar el paquete.')
+      .matches(/^data:image\/png;base64,/).withMessage('Formato de firma inválido.'),
   ],
   async (req, res) => {
     const errores = validationResult(req);
@@ -102,7 +108,7 @@ router.post(
       return res.status(400).json({ errores: errores.array() });
     }
 
-    const { paquete_id, factura_id, metodo_pago } = req.body;
+    const { paquete_id, factura_id, metodo_pago, firma } = req.body;
     const client = await pool.connect();
 
     try {
@@ -135,9 +141,24 @@ router.post(
         }
       }
 
+      // Sube la firma a Cloudinary. Si falla, no dejamos completar la entrega
+      // (es el punto de todo esto: dejar constancia firmada).
+      let firmaSubida;
+      try {
+        firmaSubida = await subirFirmaEntrega(firma, paquete_id);
+      } catch (errorFirma) {
+        await client.query('ROLLBACK');
+        console.error('Error subiendo firma:', errorFirma);
+        return res.status(500).json({ mensaje: 'No se pudo guardar la firma. Intenta de nuevo.' });
+      }
+
       const actualizado = await client.query(
-        `UPDATE paquetes SET estado = 'entregado', fecha_actualizacion = NOW() WHERE id = $1 RETURNING *`,
-        [paquete_id]
+        `UPDATE paquetes
+         SET estado = 'entregado', fecha_actualizacion = NOW(), fecha_entrega = NOW(),
+             firma_url = $1, firma_public_id = $2
+         WHERE id = $3
+         RETURNING *`,
+        [firmaSubida.url, firmaSubida.public_id, paquete_id]
       );
 
       await client.query('COMMIT');
