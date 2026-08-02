@@ -262,4 +262,65 @@ router.get('/:id/pdf', async (req, res) => {
   }
 });
 
+// --- POST /api/admin/facturas/:id/reenviar ---
+// Reenvía una factura ya existente por correo (con PDF) y WhatsApp.
+// Útil cuando el cliente vuelve otro día y pide de nuevo su factura.
+router.post('/:id/reenviar', async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
+              u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero,
+              p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega
+       FROM facturas f
+       JOIN usuarios u ON u.id = f.usuario_id
+       JOIN paquetes p ON p.id = f.paquete_id
+       WHERE f.id = $1`,
+      [req.params.id]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Factura no encontrada' });
+    }
+
+    const factura = resultado.rows[0];
+
+    // Si por alguna razón esta factura vieja no tiene token_pdf (de antes de
+    // esa función), le generamos uno ahora para que el link de WhatsApp funcione.
+    if (!factura.token_pdf) {
+      const nuevoToken = crypto.randomBytes(24).toString('hex');
+      await pool.query('UPDATE facturas SET token_pdf = $1 WHERE id = $2', [nuevoToken, factura.id]);
+      factura.token_pdf = nuevoToken;
+    }
+
+    const envios = { correo_enviado: false, whatsapp_enviado: false, errores_envio: [] };
+
+    try {
+      const pdfBuffer = await generarPdfFactura(factura);
+      await enviarFacturaPorCorreo(factura.cliente_email, factura.cliente_nombre, factura, pdfBuffer);
+      envios.correo_enviado = true;
+    } catch (errorCorreo) {
+      console.error('Error reenviando factura por correo:', errorCorreo);
+      envios.errores_envio.push(`Correo: ${errorCorreo.message}`);
+    }
+
+    if (factura.cliente_telefono) {
+      try {
+        const urlPdfPublica = `${process.env.BASE_URL}/api/public/facturas/${factura.token_pdf}/pdf`;
+        await enviarFacturaPorWhatsapp(factura.cliente_telefono, factura, urlPdfPublica);
+        envios.whatsapp_enviado = true;
+      } catch (errorWhatsapp) {
+        console.error('Error reenviando factura por WhatsApp:', errorWhatsapp);
+        envios.errores_envio.push(`WhatsApp: ${errorWhatsapp.message}`);
+      }
+    } else {
+      envios.errores_envio.push('WhatsApp: el cliente no tiene teléfono registrado.');
+    }
+
+    return res.json({ mensaje: 'Reenvío procesado', envios });
+  } catch (error) {
+    console.error('Error en POST /admin/facturas/:id/reenviar:', error);
+    return res.status(500).json({ mensaje: 'Error interno al reenviar la factura' });
+  }
+});
+
 module.exports = router;

@@ -1206,7 +1206,12 @@
               <option value="anulada" ${f.estado === 'anulada' ? 'selected' : ''}>Anulada</option>
             </select>
           </td>
-          <td data-label=""><button class="btn-secondary btn-ver-pdf" data-id="${f.id}">Ver PDF</button></td>
+          <td data-label="">
+            <div class="row-actions">
+              <button class="btn-secondary btn-ver-pdf" data-id="${f.id}">Ver PDF</button>
+              <button class="btn-secondary btn-reenviar-factura" data-id="${f.id}">Reenviar</button>
+            </div>
+          </td>
         </tr>
       `).join('');
 
@@ -1236,6 +1241,33 @@
             window.open(window.URL.createObjectURL(blob), '_blank');
           } catch (err) {
             alert('No se pudo abrir el PDF.');
+          } finally {
+            btn.textContent = textoOriginal;
+            btn.disabled = false;
+          }
+        });
+      });
+
+      $('#tbodyFacturas').querySelectorAll('.btn-reenviar-factura').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const textoOriginal = btn.textContent;
+          btn.textContent = 'Enviando…';
+          btn.disabled = true;
+          try {
+            const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/reenviar`, { method: 'POST' });
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok){
+              const envios = data.envios || {};
+              const partes = [];
+              partes.push(envios.correo_enviado ? 'Correo ✓' : 'Correo ✗');
+              partes.push(envios.whatsapp_enviado ? 'WhatsApp ✓' : 'WhatsApp ✗');
+              mostrarBanner('#bannerFactura', envios.correo_enviado || envios.whatsapp_enviado ? 'success' : 'error', `Reenvío: ${partes.join(' — ')}`);
+            } else {
+              mostrarBanner('#bannerFactura', 'error', data.mensaje || 'No se pudo reenviar la factura.');
+            }
+          } catch (err) {
+            mostrarBanner('#bannerFactura', 'error', 'No pudimos conectar con el servidor.');
           } finally {
             btn.textContent = textoOriginal;
             btn.disabled = false;

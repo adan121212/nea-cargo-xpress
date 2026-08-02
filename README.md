@@ -153,7 +153,10 @@ PATCH /api/admin/paquetes/:id/peso
 POST  /api/admin/facturas                  # { paquete_id, tarifa_id } -> genera la factura
 GET   /api/admin/facturas                  # todas (filtros: ?estado=&email=)
 PATCH /api/admin/facturas/:id/estado       # { "estado": "pagada" }  (pendiente | pagada | anulada)
+POST  /api/admin/facturas/:id/reenviar     # reenvía la factura por correo (PDF) y WhatsApp
 ```
+
+El botón **"Reenviar"** aparece junto a cada factura en la pestaña Facturas del panel admin — útil cuando el cliente vuelve otro día y pide de nuevo su factura. Regenera el PDF (con la firma de entrega incluida, si ya la tiene) y lo reenvía por ambos canales.
 
 ### Endpoints de facturas (cliente)
 ```
