@@ -1,7 +1,14 @@
--- Ejecuta esto en el SQL Editor de Neon si ya tenías la tabla paquetes creada.
--- Si vas a crear la base desde cero, usa sql/schema.sql directamente.
+-- Ejecuta esto en el SQL Editor de Neon.
+-- Reemplaza el enfoque anterior (firma_url/firma_public_id vía Cloudinary)
+-- por guardar la firma directo en la base de datos, sin depender de ningún
+-- servicio externo. Si ya corriste la migración anterior de firma, esta la
+-- deja correcta; si no, agrega todo lo necesario desde cero.
 
 ALTER TABLE paquetes
-    ADD COLUMN IF NOT EXISTS firma_url TEXT,
-    ADD COLUMN IF NOT EXISTS firma_public_id VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS firma_base64 TEXT,
     ADD COLUMN IF NOT EXISTS fecha_entrega TIMESTAMP;
+
+-- Las columnas anteriores (si las llegaste a crear) ya no se usan y se pueden
+-- borrar opcionalmente. No es obligatorio, pero si quieres limpiar:
+-- ALTER TABLE paquetes DROP COLUMN IF EXISTS firma_url;
+-- ALTER TABLE paquetes DROP COLUMN IF EXISTS firma_public_id;

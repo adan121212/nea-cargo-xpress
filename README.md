@@ -24,17 +24,11 @@ Dilo cuando quieras seguir con alguna de estas partes.
 
 Cuando el staff marca un paquete como entregado desde el **Mostrador**, ahora se abre un lienzo donde el cliente firma con el dedo (en tablet/celular) o el mouse. La firma:
 
-- Se sube a Cloudinary (misma cuenta que ya usas para las fotos de paquetes).
-- Queda guardada como comprobante ligado a ese paquete específico (`firma_url`, `fecha_entrega`).
+- Se guarda **directo en la base de datos**, ligada a ese paquete (`firma_base64`, `fecha_entrega`) — no se sube a Cloudinary ni a ningún otro servicio externo, ni se guarda como un archivo aparte.
 - Es **obligatoria**: no se puede completar la entrega sin firma.
+- **Se estampa automáticamente en el PDF de la factura** de ese paquete (sección "Firma de recibido" con la imagen y la fecha/hora de entrega) — cualquier PDF que se descargue o reenvíe después de la entrega ya la incluye. Si la factura se genera o envía *antes* de la entrega, esa sección simplemente no aparece.
 
 La cobranza (si aplica) y la firma se confirman juntas — el cliente firma una sola vez y eso cierra tanto el pago como la entrega.
-
-### Ver la firma de un paquete
-Por ahora se consulta directo en la base de datos o via la API:
-```
-GET /api/paquetes/:id       # el cliente ve su propia firma en su detalle de paquete (campo firma_url)
-```
 
 ### Endpoint actualizado
 ```

@@ -3,7 +3,6 @@ const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
-const { subirFirmaEntrega } = require('../../utils/cloudinary');
 
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
@@ -141,24 +140,16 @@ router.post(
         }
       }
 
-      // Sube la firma a Cloudinary. Si falla, no dejamos completar la entrega
-      // (es el punto de todo esto: dejar constancia firmada).
-      let firmaSubida;
-      try {
-        firmaSubida = await subirFirmaEntrega(firma, paquete_id);
-      } catch (errorFirma) {
-        await client.query('ROLLBACK');
-        console.error('Error subiendo firma:', errorFirma);
-        return res.status(500).json({ mensaje: 'No se pudo guardar la firma. Intenta de nuevo.' });
-      }
-
+      // Guardamos la firma directo en la base de datos (no se sube a ningún
+      // servicio externo) — es el punto de todo esto: dejar constancia firmada
+      // ligada permanentemente a este paquete.
       const actualizado = await client.query(
         `UPDATE paquetes
          SET estado = 'entregado', fecha_actualizacion = NOW(), fecha_entrega = NOW(),
-             firma_url = $1, firma_public_id = $2
-         WHERE id = $3
+             firma_base64 = $1
+         WHERE id = $2
          RETURNING *`,
-        [firmaSubida.url, firmaSubida.public_id, paquete_id]
+        [firma, paquete_id]
       );
 
       await client.query('COMMIT');

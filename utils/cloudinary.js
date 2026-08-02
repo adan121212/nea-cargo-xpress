@@ -25,16 +25,4 @@ async function eliminarFotoCloudinary(publicId) {
   await cloudinary.uploader.destroy(publicId);
 }
 
-/**
- * Sube la firma digital de entrega (capturada como data URL desde un <canvas>)
- * a Cloudinary. Devuelve la URL pública y el public_id.
- */
-async function subirFirmaEntrega(dataUrl, paqueteId) {
-  const resultado = await cloudinary.uploader.upload(dataUrl, {
-    folder: `nea-cargo/firmas/${paqueteId}`,
-    resource_type: 'image',
-  });
-  return { url: resultado.secure_url, public_id: resultado.public_id };
-}
-
-module.exports = { subirFotoPaquete, eliminarFotoCloudinary, subirFirmaEntrega };
+module.exports = { subirFotoPaquete, eliminarFotoCloudinary };

@@ -54,7 +54,8 @@ router.get('/:id/pdf', requiereAutenticacion, async (req, res) => {
   try {
     const resultado = await pool.query(
       `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
-              u.email AS cliente_email, u.numero_casillero, p.tienda, p.numero_tracking
+              u.email AS cliente_email, u.numero_casillero, p.tienda, p.numero_tracking,
+              p.firma_base64, p.fecha_entrega
        FROM facturas f
        JOIN usuarios u ON u.id = f.usuario_id
        JOIN paquetes p ON p.id = f.paquete_id

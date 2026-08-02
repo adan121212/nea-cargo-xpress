@@ -3,9 +3,22 @@ const PDFDocument = require('pdfkit');
 /**
  * Genera el PDF de una factura y lo devuelve como Buffer.
  * `factura` debe traer también: cliente_nombre, cliente_apellido, cliente_email,
- * numero_casillero, tienda, numero_tracking (los trae el JOIN de las consultas).
+ * numero_casillero, tienda, numero_tracking (los trae el JOIN de las consultas),
+ * y opcionalmente firma_base64 / fecha_entrega (si el paquete ya fue entregado y firmado).
  */
 function generarPdfFactura(factura) {
+  // La firma se guarda directo en la base de datos como data URL
+  // ("data:image/png;base64,...") — solo hay que decodificarla, sin red de por medio.
+  let firmaBuffer = null;
+  if (factura.firma_base64) {
+    try {
+      const base64Limpio = factura.firma_base64.replace(/^data:image\/png;base64,/, '');
+      firmaBuffer = Buffer.from(base64Limpio, 'base64');
+    } catch (error) {
+      console.error('No se pudo decodificar la firma para el PDF:', error);
+    }
+  }
+
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: 50 });
     const chunks = [];
@@ -99,6 +112,39 @@ function generarPdfFactura(factura) {
         50,
         y
       );
+
+    // Firma de recibido (solo si el paquete ya fue entregado y se pudo descargar la imagen)
+    if (firmaBuffer) {
+      y += 30;
+      doc.moveTo(50, y).lineTo(545, y).strokeColor('#e5e7eb').stroke();
+      y += 16;
+
+      doc.fontSize(11).fillColor(tinta).text('Firma de recibido', 50, y);
+      y += 18;
+
+      try {
+        doc.image(firmaBuffer, 50, y, { width: 180, height: 70, fit: [180, 70] });
+      } catch (error) {
+        console.error('No se pudo incrustar la imagen de la firma en el PDF:', error);
+      }
+
+      doc
+        .fontSize(8)
+        .fillColor(gris)
+        .text(
+          factura.fecha_entrega
+            ? `Entregado el ${new Date(factura.fecha_entrega).toLocaleDateString('es-PA', {
+                day: '2-digit', month: 'long', year: 'numeric',
+              })} a las ${new Date(factura.fecha_entrega).toLocaleTimeString('es-PA', {
+                hour: '2-digit', minute: '2-digit',
+              })}`
+            : 'Entregado',
+          50,
+          y + 75
+        );
+
+      y += 95;
+    }
 
     doc
       .fontSize(8)

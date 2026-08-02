@@ -24,8 +24,7 @@ CREATE TABLE IF NOT EXISTS paquetes (
     valor_declarado NUMERIC(10,2),
     peso_lb NUMERIC(6,2),
     peso_real_lb NUMERIC(6,2), -- peso confirmado por el staff al llegar a bodega, usado para facturar
-    firma_url TEXT,
-    firma_public_id VARCHAR(255),
+    firma_base64 TEXT, -- firma digital de entrega, guardada directo (sin subirla a ningún servicio externo)
     fecha_entrega TIMESTAMP,
     estado VARCHAR(30) NOT NULL DEFAULT 'prealertado'
         CHECK (estado IN (
