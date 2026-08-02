@@ -349,6 +349,30 @@
   }
   .btn-pdf:hover{ border-color: var(--accent); color: var(--accent-dark); }
 
+  .btn-ver-fotos{
+    margin-top:12px;
+    width:100%;
+    padding: 8px 10px;
+    border-radius:7px;
+    border:1px dashed var(--line);
+    background:#fff;
+    font-size:12px;
+    font-weight:600;
+    color: var(--ink-soft);
+    cursor:pointer;
+  }
+  .btn-ver-fotos:hover{ border-color: var(--accent); color: var(--accent-dark); }
+  .mini-galeria{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap:8px;
+    margin-top:10px;
+  }
+  .mini-foto{
+    width:100%; height:90px; object-fit:cover;
+    border-radius:7px; border:1px solid var(--line); cursor:pointer;
+  }
+
   /* Rail de estados */
   .rail{ display:flex; align-items:center; margin-top:12px; gap:2px; }
   .rail .seg{ flex:1; height:4px; border-radius:2px; background: rgba(12,27,51,0.09); }
@@ -799,9 +823,46 @@
             </div>
           </div>
           <div class="rail">${rail}</div>
+          <button class="btn-ver-fotos" data-id="${p.id}">📷 Ver fotos de cómo llegó</button>
+          <div class="mini-galeria" id="galeria-${p.id}" style="display:none;"></div>
         </div>
       `;
     }).join('');
+
+    cont.querySelectorAll('.btn-ver-fotos').forEach(btn => {
+      btn.addEventListener('click', () => toggleFotosPaquete(btn.dataset.id, btn));
+    });
+  }
+
+  async function toggleFotosPaquete(id, btn){
+    const galeria = document.getElementById(`galeria-${id}`);
+    if (galeria.style.display === 'block'){
+      galeria.style.display = 'none';
+      btn.textContent = '📷 Ver fotos de cómo llegó';
+      return;
+    }
+
+    btn.textContent = 'Cargando…';
+    try {
+      const res = await apiAutenticado(`/paquetes/${id}/fotos`);
+      const data = await res.json();
+      const fotos = data.fotos || [];
+
+      galeria.innerHTML = fotos.length
+        ? fotos.map(f => `<img src="${f.url}" class="mini-foto" data-url="${f.url}">`).join('')
+        : '<div class="empty" style="padding:14px;">Aún no hay fotos de este paquete.</div>';
+
+      galeria.querySelectorAll('.mini-foto').forEach(img => {
+        img.addEventListener('click', () => window.open(img.dataset.url, '_blank'));
+      });
+
+      galeria.style.display = 'block';
+      btn.textContent = '📷 Ocultar fotos';
+    } catch (err) {
+      galeria.innerHTML = '<div class="empty" style="padding:14px;">No se pudieron cargar las fotos.</div>';
+      galeria.style.display = 'block';
+      btn.textContent = '📷 Ocultar fotos';
+    }
   }
 
   document.querySelectorAll('.panel-tab').forEach(btn => {
