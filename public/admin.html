@@ -573,7 +573,7 @@
 
   $('#btnLogout').addEventListener('click', () => {
     localStorage.removeItem(TOKEN_KEY);
-    mostrarAdmin(false);
+    window.location.href = 'index.html';
   });
 
   async function apiAdmin(path, opciones = {}){
