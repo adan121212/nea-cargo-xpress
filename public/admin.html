@@ -225,6 +225,20 @@
   .cliente-multiples button{ display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:13px; }
   .cliente-multiples button:hover{ border-color: var(--accent); }
 
+  /* ---- Recepción rápida ---- */
+  #recepcionTracking{ font-family: var(--font-mono); font-size:15px; }
+  .recepcion-item{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding: 10px 14px; border-radius:8px; margin-bottom:6px; font-size:13px;
+    border-left: 3px solid var(--cargo-green);
+    background: var(--cargo-green-bg);
+  }
+  .recepcion-item.error{ border-left-color: var(--accent); background: var(--amber-bg); }
+  .recepcion-item .ri-info{ display:flex; flex-direction:column; }
+  .recepcion-item .ri-tracking{ font-family: var(--font-mono); font-weight:600; }
+  .recepcion-item .ri-detalle{ font-size:11.5px; color: var(--ink-soft); }
+  .recepcion-item .ri-hora{ font-size:11px; color: var(--ink-soft); white-space:nowrap; }
+
   /* ---- Firma digital ---- */
   .firma-lienzo-box{
     position:relative; border: 1.5px dashed var(--line); border-radius:10px;
@@ -297,6 +311,7 @@
 
     <div class="tabs-nav">
       <button class="tab-nav-btn active" data-tab="mostrador">Mostrador</button>
+      <button class="tab-nav-btn" data-tab="recepcion">Recepción</button>
       <button class="tab-nav-btn" data-tab="paquetes">Paquetes</button>
       <button class="tab-nav-btn" data-tab="clientes">Clientes</button>
       <button class="tab-nav-btn" data-tab="facturas">Facturas</button>
@@ -325,6 +340,39 @@
       <div class="banner" id="bannerMostrador"></div>
 
       <div id="resultadoMostrador"></div>
+    </div>
+
+    <div class="card tab-panel" id="tabRecepcion" style="display:none;">
+      <h2>Recepción rápida</h2>
+      <p class="card-sub">Escanea o escribe el tracking de cada caja según va llegando a la bodega. Se busca automáticamente entre las prealertas y se marca "En bodega Miami".</p>
+
+      <form id="formRecepcion" class="form-inline" style="grid-template-columns: 1fr auto;">
+        <div>
+          <label for="recepcionTracking">Número de tracking</label>
+          <input type="text" id="recepcionTracking" placeholder="Escanea aquí…" autocomplete="off">
+        </div>
+        <div>
+          <button class="btn-primary" type="submit" id="btnRecepcion" style="margin-top:0;">
+            <span class="spinner"></span><span>Recibir</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="rep-stats" style="grid-template-columns: repeat(2, 1fr); margin-top:18px;">
+        <div class="rep-stat">
+          <div class="rep-stat-l">Recibidos en esta sesión</div>
+          <div class="rep-stat-n" id="recepcionContador">0</div>
+        </div>
+        <div class="rep-stat">
+          <div class="rep-stat-l">Último recibido</div>
+          <div class="rep-stat-n" id="recepcionUltimo" style="font-size:14px;">—</div>
+        </div>
+      </div>
+
+      <div id="recepcionCandidatos" style="margin-top:16px;"></div>
+
+      <h2 style="margin-top:22px;">Historial de esta sesión</h2>
+      <div id="recepcionLog"></div>
     </div>
 
     <div class="card tab-panel" id="tabPaquetes" style="display:none;">
@@ -792,6 +840,7 @@
       const tab = btn.dataset.tab;
       if (tab === 'paquetes') $('#tabPaquetes').style.display = 'block';
       if (tab === 'mostrador') $('#tabMostrador').style.display = 'block';
+      if (tab === 'recepcion'){ $('#tabRecepcion').style.display = 'block'; setTimeout(() => $('#recepcionTracking').focus(), 50); }
       if (tab === 'clientes'){ $('#tabClientes').style.display = 'block'; cargarClientes(); }
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
       if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); cargarOpcionesFactura(); }
@@ -1704,6 +1753,98 @@
     } finally {
       setCargando(btnConfirmar, false);
     }
+  });
+
+  // ---------- Recepción rápida ----------
+  let recepcionContador = 0;
+  const recepcionHistorial = [];
+
+  function agregarAlLogRecepcion(entrada){
+    recepcionHistorial.unshift(entrada);
+    const log = $('#recepcionLog');
+    log.innerHTML = recepcionHistorial.map(e => `
+      <div class="recepcion-item ${e.tipo}">
+        <div class="ri-info">
+          <span class="ri-tracking">${escapeHtml(e.tracking)}</span>
+          <span class="ri-detalle">${escapeHtml(e.detalle)}</span>
+        </div>
+        <span class="ri-hora">${e.hora}</span>
+      </div>
+    `).join('');
+  }
+
+  async function procesarRecepcion(numeroTracking){
+    const banner = null; // usamos el log en vez de un banner fijo
+    try {
+      const res = await apiAdmin('/admin/paquetes/recibir', {
+        method: 'POST',
+        body: JSON.stringify({ numero_tracking: numeroTracking }),
+      });
+      const data = await res.json().catch(() => ({}));
+      const hora = new Date().toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      if (!res.ok){
+        agregarAlLogRecepcion({ tipo: 'error', tracking: numeroTracking, detalle: data.mensaje || 'No se pudo recibir', hora });
+        $('#recepcionCandidatos').innerHTML = '';
+        return;
+      }
+
+      if (data.multiples){
+        $('#recepcionCandidatos').innerHTML = `
+          <div class="banner show error">Hay varios clientes con ese mismo tracking. Elige el correcto:</div>
+          <div class="cliente-multiples">
+            ${data.candidatos.map(c => `
+              <button data-id="${c.id}">${escapeHtml(c.tienda)} — ${escapeHtml(c.cliente_nombre)} (${escapeHtml(c.numero_casillero)})</button>
+            `).join('')}
+          </div>
+        `;
+        document.querySelectorAll('#recepcionCandidatos .cliente-multiples button').forEach(b => {
+          b.addEventListener('click', async () => {
+            const r = await apiAdmin(`/admin/paquetes/recibir/${b.dataset.id}/confirmar`, { method: 'POST' });
+            const d = await r.json().catch(() => ({}));
+            const h = new Date().toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            if (r.ok){
+              recepcionContador++;
+              $('#recepcionContador').textContent = recepcionContador;
+              $('#recepcionUltimo').textContent = d.paquete.numero_tracking;
+              agregarAlLogRecepcion({ tipo: 'ok', tracking: d.paquete.numero_tracking, detalle: 'Recibido en bodega Miami', hora: h });
+            }
+            $('#recepcionCandidatos').innerHTML = '';
+          });
+        });
+        return;
+      }
+
+      $('#recepcionCandidatos').innerHTML = '';
+      recepcionContador++;
+      $('#recepcionContador').textContent = recepcionContador;
+      $('#recepcionUltimo').textContent = data.paquete.numero_tracking;
+      agregarAlLogRecepcion({
+        tipo: 'ok',
+        tracking: data.paquete.numero_tracking,
+        detalle: `${data.cliente.nombre} (${data.cliente.numero_casillero}) — recibido en bodega Miami`,
+        hora,
+      });
+    } catch (err) {
+      const hora = new Date().toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      agregarAlLogRecepcion({ tipo: 'error', tracking: numeroTracking, detalle: 'No pudimos conectar con el servidor', hora });
+    }
+  }
+
+  $('#formRecepcion').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = $('#recepcionTracking');
+    const tracking = input.value.trim();
+    if (!tracking) return;
+
+    input.value = '';
+    input.focus(); // listo para el siguiente escaneo de inmediato
+
+    const btn = $('#btnRecepcion');
+    setCargando(btn, true);
+    await procesarRecepcion(tracking);
+    setCargando(btn, false);
+    input.focus();
   });
 
   // ---------- Reportes ----------

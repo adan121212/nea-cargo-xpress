@@ -89,4 +89,68 @@ async function enviarFacturaPorCorreo(destinatario, nombre, factura, pdfBuffer) 
   return respuesta.json();
 }
 
-module.exports = { enviarCorreoConfirmacion, enviarFacturaPorCorreo };
+const ESTADO_LABEL = {
+  prealertado: 'Prealertado',
+  en_bodega_miami: 'En bodega Miami',
+  en_transito: 'En tránsito',
+  en_panama: 'En Panamá',
+  listo_para_retiro: 'Listo para retiro',
+  entregado: 'Entregado',
+};
+
+const ESTADO_MENSAJE = {
+  en_bodega_miami: 'Tu paquete ya llegó a nuestra bodega en Miami. Pronto lo preparamos para su viaje a Panamá.',
+  en_transito: 'Tu paquete ya salió de Miami y está en camino a Panamá.',
+  en_panama: 'Tu paquete ya llegó a Panamá y está en proceso de clasificación/aduana.',
+  listo_para_retiro: '¡Tu paquete ya está listo para que lo retires en tu sucursal más cercana!',
+  entregado: 'Tu paquete fue entregado. Gracias por confiar en nosotros.',
+};
+
+/**
+ * Envía un correo avisando que el estado de un paquete cambió.
+ * `paquete` debe traer: tienda, numero_tracking, estado.
+ */
+async function enviarCorreoCambioEstado(destinatario, nombre, paquete) {
+  const etiqueta = ESTADO_LABEL[paquete.estado] || paquete.estado;
+  const mensaje = ESTADO_MENSAJE[paquete.estado] || `Tu paquete cambió de estado a: ${etiqueta}.`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
+      <h2>¡Hola, ${nombre}!</h2>
+      <p>${mensaje}</p>
+      <div style="background:#f5f6f8;border-radius:8px;padding:16px;margin:20px 0;">
+        <p style="margin:0 0 6px;"><strong>${paquete.tienda}</strong></p>
+        <p style="margin:0 0 6px;color:#6b7280;">Tracking: ${paquete.numero_tracking}</p>
+        <p style="margin:0;">
+          <span style="background:#ff6a1a;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;">
+            ${etiqueta}
+          </span>
+        </p>
+      </div>
+      <p>Puedes ver el detalle completo iniciando sesión en tu cuenta.</p>
+    </div>
+  `;
+
+  const respuesta = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM || 'NEA Cargo Xpress <onboarding@resend.dev>',
+      to: destinatario,
+      subject: `Tu paquete está: ${etiqueta} — NEA Cargo Xpress`,
+      html,
+    }),
+  });
+
+  if (!respuesta.ok) {
+    const detalle = await respuesta.text();
+    throw new Error(`Resend respondió ${respuesta.status}: ${detalle}`);
+  }
+
+  return respuesta.json();
+}
+
+module.exports = { enviarCorreoConfirmacion, enviarFacturaPorCorreo, enviarCorreoCambioEstado };

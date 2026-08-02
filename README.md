@@ -20,6 +20,41 @@ Construido con **Node.js + Express + PostgreSQL + JWT + Nodemailer**.
 
 Dilo cuando quieras seguir con alguna de estas partes.
 
+## Recepción rápida (nuevo)
+
+Pestaña **Recepción** en el panel admin, pensada para el staff de la bodega en Miami: en vez de buscar cada paquete a mano y cambiarle el estado, escanean (o escriben) el número de tracking de cada caja según va llegando.
+
+- El sistema busca automáticamente entre las **prealertas pendientes** (estado `prealertado`) y, si encuentra coincidencia, la pasa a `en_bodega_miami` de inmediato.
+- Dispara la notificación automática por correo/WhatsApp al cliente (la misma que ya construimos).
+- El campo se vuelve a enfocar solo después de cada escaneo — pensado para trabajar con un lector de código de barras USB (que simplemente "escribe" el número y presiona Enter) sin tocar el mouse.
+- Si dos clientes distintos prealertaron el mismo número de tracking por error, el sistema te deja elegir cuál es antes de continuar.
+- Si no encuentra ninguna prealerta con ese tracking, te avisa (puede ser que el cliente no haya prealertado, o que el número esté mal escrito/escaneado).
+- Lleva un contador e historial de lo recibido en la sesión actual, para ver el ritmo de trabajo.
+
+### Endpoints
+```
+POST /api/admin/paquetes/recibir                     # { numero_tracking } -> busca y recibe automáticamente
+POST /api/admin/paquetes/recibir/:id/confirmar        # cuando hay más de una coincidencia, confirma cuál es
+```
+
+## Notificaciones automáticas de estado (nuevo)
+
+Cuando el admin cambia el estado de un paquete desde la pestaña **Paquetes** (ej. de "prealertado" a "en bodega Miami", o a "listo para retiro"), el cliente recibe automáticamente:
+
+- Un **correo** explicando en qué va su paquete.
+- Un **WhatsApp** con el mismo mensaje (si el cliente tiene teléfono registrado).
+
+Es "best-effort": si el envío falla (por ejemplo, Resend o Twilio no están bien configurados), el cambio de estado **igual se guarda** — no se bloquea la operación por un fallo de notificación. La respuesta del endpoint incluye `notificaciones: { correo_enviado, whatsapp_enviado }` para que sepas si llegó o no.
+
+No se envía notificación desde el **Mostrador** al marcar "entregado" — ahí el cliente ya está presente en persona recibiendo su paquete y firmando, sería redundante.
+
+### Mensajes por estado
+- En bodega Miami → "Ya llegó a nuestra bodega en Miami..."
+- En tránsito → "Ya salió de Miami y está en camino a Panamá."
+- En Panamá → "Ya llegó a Panamá y está en proceso de clasificación/aduana."
+- Listo para retiro → "¡Ya está listo para que lo retires en tu sucursal más cercana!"
+- Entregado → "Fue entregado. Gracias por confiar en nosotros."
+
 ## Firma digital de entrega (nuevo)
 
 Cuando el staff marca un paquete como entregado desde el **Mostrador**, ahora se abre un lienzo donde el cliente firma con el dedo (en tablet/celular) o el mouse. La firma:

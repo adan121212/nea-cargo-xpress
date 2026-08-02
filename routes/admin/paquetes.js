@@ -5,6 +5,8 @@ const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudinary');
+const { enviarCorreoCambioEstado } = require('../../utils/mailer');
+const { enviarWhatsappCambioEstado } = require('../../utils/whatsapp');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -29,8 +31,140 @@ const ESTADOS_VALIDOS = [
   'entregado',
 ];
 
-// --- GET /api/admin/paquetes ---
-// Lista TODOS los paquetes de TODOS los clientes, con filtros opcionales.
+// --- POST /api/admin/paquetes/recibir ---
+// Recepción rápida en bodega: el staff escanea/escribe el número de tracking
+// según van llegando las cajas, y el sistema busca la prealerta y la pasa
+// automáticamente a "en_bodega_miami" — sin tener que buscarla a mano en la lista.
+router.post(
+  '/recibir',
+  [body('numero_tracking').trim().notEmpty().withMessage('Escanea o escribe un número de tracking')],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      return res.status(400).json({ errores: errores.array() });
+    }
+
+    const tracking = req.body.numero_tracking.trim();
+
+    try {
+      const candidatos = await pool.query(
+        `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
+                u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero
+         FROM paquetes p
+         JOIN usuarios u ON u.id = p.usuario_id
+         WHERE p.numero_tracking ILIKE $1 AND p.estado = 'prealertado'
+         ORDER BY p.fecha_prealerta ASC`,
+        [tracking]
+      );
+
+      if (candidatos.rows.length === 0) {
+        return res.status(404).json({
+          mensaje: `No encontramos ninguna prealerta pendiente con el tracking "${tracking}". Verifica el número, o puede que el cliente no lo haya prealertado todavía.`,
+        });
+      }
+
+      // Si por error dos clientes distintos prealertaron el mismo número de
+      // tracking (raro, pero posible), dejamos que el staff elija cuál es.
+      if (candidatos.rows.length > 1) {
+        return res.json({
+          multiples: true,
+          candidatos: candidatos.rows.map((p) => ({
+            id: p.id,
+            tienda: p.tienda,
+            cliente_nombre: `${p.cliente_nombre} ${p.cliente_apellido}`,
+            numero_casillero: p.numero_casillero,
+          })),
+        });
+      }
+
+      const paqueteEncontrado = candidatos.rows[0];
+
+      const actualizado = await pool.query(
+        `UPDATE paquetes SET estado = 'en_bodega_miami', fecha_actualizacion = NOW()
+         WHERE id = $1 RETURNING *`,
+        [paqueteEncontrado.id]
+      );
+      const paquete = actualizado.rows[0];
+
+      const envios = { correo_enviado: false, whatsapp_enviado: false };
+      try {
+        await enviarCorreoCambioEstado(paqueteEncontrado.cliente_email, paqueteEncontrado.cliente_nombre, paquete);
+        envios.correo_enviado = true;
+      } catch (errorCorreo) {
+        console.error('Error notificando recepción por correo:', errorCorreo);
+      }
+      if (paqueteEncontrado.cliente_telefono) {
+        try {
+          await enviarWhatsappCambioEstado(paqueteEncontrado.cliente_telefono, paquete);
+          envios.whatsapp_enviado = true;
+        } catch (errorWhatsapp) {
+          console.error('Error notificando recepción por WhatsApp:', errorWhatsapp);
+        }
+      }
+
+      return res.json({
+        multiples: false,
+        mensaje: 'Paquete recibido en bodega Miami',
+        paquete,
+        cliente: {
+          nombre: `${paqueteEncontrado.cliente_nombre} ${paqueteEncontrado.cliente_apellido}`,
+          numero_casillero: paqueteEncontrado.numero_casillero,
+        },
+        notificaciones: envios,
+      });
+    } catch (error) {
+      console.error('Error en POST /admin/paquetes/recibir:', error);
+      return res.status(500).json({ mensaje: 'Error interno al recibir el paquete' });
+    }
+  }
+);
+
+// --- POST /api/admin/paquetes/recibir/:id/confirmar ---
+// Confirma cuál de los candidatos (cuando hay varios con el mismo tracking) es el correcto.
+router.post('/recibir/:id/confirmar', async (req, res) => {
+  try {
+    const paqueteRes = await pool.query(
+      `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
+              u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero
+       FROM paquetes p
+       JOIN usuarios u ON u.id = p.usuario_id
+       WHERE p.id = $1 AND p.estado = 'prealertado'`,
+      [req.params.id]
+    );
+
+    if (paqueteRes.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Paquete no encontrado o ya no está prealertado' });
+    }
+
+    const info = paqueteRes.rows[0];
+
+    const actualizado = await pool.query(
+      `UPDATE paquetes SET estado = 'en_bodega_miami', fecha_actualizacion = NOW()
+       WHERE id = $1 RETURNING *`,
+      [req.params.id]
+    );
+    const paquete = actualizado.rows[0];
+
+    const envios = { correo_enviado: false, whatsapp_enviado: false };
+    try {
+      await enviarCorreoCambioEstado(info.cliente_email, info.cliente_nombre, paquete);
+      envios.correo_enviado = true;
+    } catch (err) { console.error('Error notificando por correo:', err); }
+    if (info.cliente_telefono) {
+      try {
+        await enviarWhatsappCambioEstado(info.cliente_telefono, paquete);
+        envios.whatsapp_enviado = true;
+      } catch (err) { console.error('Error notificando por WhatsApp:', err); }
+    }
+
+    return res.json({ mensaje: 'Paquete recibido en bodega Miami', paquete, notificaciones: envios });
+  } catch (error) {
+    console.error('Error en POST /admin/paquetes/recibir/:id/confirmar:', error);
+    return res.status(500).json({ mensaje: 'Error interno al recibir el paquete' });
+  }
+});
+
+
 // Query params: ?estado=en_transito&email=ana@ejemplo.com&tracking=1Z999
 router.get(
   '/',
@@ -107,7 +241,40 @@ router.patch(
         return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       }
 
-      return res.json({ mensaje: 'Estado actualizado', paquete: resultado.rows[0] });
+      const paquete = resultado.rows[0];
+
+      // Notifica al cliente (best-effort: si falla el envío, no revertimos
+      // el cambio de estado, solo lo dejamos registrado en el log).
+      const envios = { correo_enviado: false, whatsapp_enviado: false };
+      try {
+        const clienteRes = await pool.query(
+          'SELECT nombre, email, telefono FROM usuarios WHERE id = $1',
+          [paquete.usuario_id]
+        );
+        const cliente = clienteRes.rows[0];
+
+        if (cliente) {
+          try {
+            await enviarCorreoCambioEstado(cliente.email, cliente.nombre, paquete);
+            envios.correo_enviado = true;
+          } catch (errorCorreo) {
+            console.error('Error notificando cambio de estado por correo:', errorCorreo);
+          }
+
+          if (cliente.telefono) {
+            try {
+              await enviarWhatsappCambioEstado(cliente.telefono, paquete);
+              envios.whatsapp_enviado = true;
+            } catch (errorWhatsapp) {
+              console.error('Error notificando cambio de estado por WhatsApp:', errorWhatsapp);
+            }
+          }
+        }
+      } catch (errorNotificacion) {
+        console.error('Error obteniendo datos del cliente para notificar:', errorNotificacion);
+      }
+
+      return res.json({ mensaje: 'Estado actualizado', paquete, notificaciones: envios });
     } catch (error) {
       console.error('Error en PATCH /admin/paquetes/:id/estado:', error);
       return res.status(500).json({ mensaje: 'Error interno al actualizar el estado' });
