@@ -111,11 +111,14 @@ Cuando el staff marca un paquete como entregado desde el **Mostrador**, ahora se
 
 La cobranza (si aplica) y la firma se confirman juntas — el cliente firma una sola vez y eso cierra tanto el pago como la entrega.
 
+**Además:** si esa entrega tiene una factura asociada, el PDF actualizado (ya con la firma estampada) se **reenvía automáticamente** por correo y WhatsApp al cliente en cuanto se confirma la entrega — no hace falta ir a la pestaña Facturas a darle "Reenviar" a mano.
+
 ### Endpoint actualizado
 ```
 POST /api/admin/mostrador/entregar
 # body: { paquete_id, factura_id?, metodo_pago?, firma }
 # "firma" es obligatorio: un data URL "data:image/png;base64,..." del canvas de firma
+# Respuesta incluye: envios_factura: { correo_enviado, whatsapp_enviado }
 ```
 
 ## Mostrador (nuevo)

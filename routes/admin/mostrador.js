@@ -3,6 +3,9 @@ const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
+const { generarPdfFactura } = require('../../utils/facturaPdf');
+const { enviarFacturaPorCorreo } = require('../../utils/mailer');
+const { enviarFacturaPorWhatsapp } = require('../../utils/whatsapp');
 
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
@@ -154,7 +157,55 @@ router.post(
 
       await client.query('COMMIT');
 
-      return res.json({ mensaje: 'Paquete entregado correctamente', paquete: actualizado.rows[0] });
+      const paquete = actualizado.rows[0];
+      const envios = { correo_enviado: false, whatsapp_enviado: false };
+
+      // Si esta entrega tiene una factura asociada, reenviamos el PDF
+      // actualizado (ya con la firma estampada) al cliente automáticamente.
+      if (factura_id) {
+        try {
+          const datosCompletos = await pool.query(
+            `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
+                    u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero,
+                    p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega
+             FROM facturas f
+             JOIN usuarios u ON u.id = f.usuario_id
+             JOIN paquetes p ON p.id = f.paquete_id
+             WHERE f.id = $1`,
+            [factura_id]
+          );
+          const facturaCompleta = datosCompletos.rows[0];
+
+          if (facturaCompleta) {
+            try {
+              const pdfBuffer = await generarPdfFactura(facturaCompleta);
+              await enviarFacturaPorCorreo(
+                facturaCompleta.cliente_email,
+                facturaCompleta.cliente_nombre,
+                facturaCompleta,
+                pdfBuffer
+              );
+              envios.correo_enviado = true;
+            } catch (errorCorreo) {
+              console.error('Error enviando factura tras entrega (correo):', errorCorreo);
+            }
+
+            if (facturaCompleta.cliente_telefono && facturaCompleta.token_pdf) {
+              try {
+                const urlPdfPublica = `${process.env.BASE_URL}/api/public/facturas/${facturaCompleta.token_pdf}/pdf`;
+                await enviarFacturaPorWhatsapp(facturaCompleta.cliente_telefono, facturaCompleta, urlPdfPublica);
+                envios.whatsapp_enviado = true;
+              } catch (errorWhatsapp) {
+                console.error('Error enviando factura tras entrega (WhatsApp):', errorWhatsapp);
+              }
+            }
+          }
+        } catch (errorFactura) {
+          console.error('Error obteniendo la factura para reenviarla tras la entrega:', errorFactura);
+        }
+      }
+
+      return res.json({ mensaje: 'Paquete entregado correctamente', paquete, envios_factura: envios });
     } catch (error) {
       await client.query('ROLLBACK');
       console.error('Error en POST /admin/mostrador/entregar:', error);

@@ -925,7 +925,7 @@
       btn.classList.add('active');
       document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
       const tab = btn.dataset.tab;
-      if (tab === 'paquetes') $('#tabPaquetes').style.display = 'block';
+      if (tab === 'paquetes'){ $('#tabPaquetes').style.display = 'block'; cargarPaquetes(); }
       if (tab === 'mostrador'){ $('#tabMostrador').style.display = 'block'; cargarPendientesMostrador(); }
       if (tab === 'recepcion'){ $('#tabRecepcion').style.display = 'block'; setTimeout(() => $('#recepcionTracking').focus(), 50); }
       if (tab === 'clientes'){ $('#tabClientes').style.display = 'block'; cargarClientes(); }
@@ -1933,7 +1933,14 @@
 
       if (res.ok){
         cerrarModalFirma();
-        mostrarBanner('#bannerMostrador', 'success', '✓ Paquete entregado' + (metodoPago ? ' y factura cobrada.' : '.') + ' Firma guardada.');
+        let mensaje = '✓ Paquete entregado' + (metodoPago ? ' y factura cobrada.' : '.') + ' Firma guardada.';
+        if (data.envios_factura){
+          const partes = [];
+          if (data.envios_factura.correo_enviado) partes.push('correo ✓');
+          if (data.envios_factura.whatsapp_enviado) partes.push('WhatsApp ✓');
+          if (partes.length) mensaje += ` Factura reenviada: ${partes.join(', ')}.`;
+        }
+        mostrarBanner('#bannerMostrador', 'success', mensaje);
         item.remove();
         if (metodoPago) cargarPendientesMostrador();
       } else {
