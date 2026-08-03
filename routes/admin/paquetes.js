@@ -330,6 +330,49 @@ router.patch(
   }
 );
 
+// --- PATCH /api/admin/paquetes/:id/dimensiones ---
+// Guarda largo/ancho/alto (en pulgadas) y calcula el peso volumétrico,
+// para poder facturar por el mayor entre peso real y peso volumétrico.
+router.patch(
+  '/:id/dimensiones',
+  [
+    body('largo_in').isFloat({ min: 0.1 }).withMessage('Ingresa un largo válido'),
+    body('ancho_in').isFloat({ min: 0.1 }).withMessage('Ingresa un ancho válido'),
+    body('alto_in').isFloat({ min: 0.1 }).withMessage('Ingresa un alto válido'),
+  ],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      return res.status(400).json({ errores: errores.array() });
+    }
+
+    const { largo_in, ancho_in, alto_in } = req.body;
+    // Divisor estándar de carga aérea (in³ por libra). Ajusta si tu tarifa usa otro.
+    const DIVISOR_VOLUMETRICO = 166;
+    const pesoVolumetrico = (largo_in * ancho_in * alto_in) / DIVISOR_VOLUMETRICO;
+
+    try {
+      const resultado = await pool.query(
+        `UPDATE paquetes
+         SET largo_in = $1, ancho_in = $2, alto_in = $3,
+             peso_volumetrico_lb = $4, fecha_actualizacion = NOW()
+         WHERE id = $5
+         RETURNING *`,
+        [largo_in, ancho_in, alto_in, pesoVolumetrico.toFixed(2), req.params.id]
+      );
+
+      if (resultado.rows.length === 0) {
+        return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+      }
+
+      return res.json({ mensaje: 'Dimensiones guardadas', paquete: resultado.rows[0] });
+    } catch (error) {
+      console.error('Error en PATCH /admin/paquetes/:id/dimensiones:', error);
+      return res.status(500).json({ mensaje: 'Error interno al guardar las dimensiones' });
+    }
+  }
+);
+
 // --- POST /api/admin/paquetes/:id/fotos ---
 // Sube hasta 5 fotos del paquete (ej. al recibirlo en bodega). Campo: "fotos".
 router.post('/:id/fotos', upload.array('fotos', 5), async (req, res) => {
