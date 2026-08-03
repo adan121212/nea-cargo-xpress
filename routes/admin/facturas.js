@@ -185,7 +185,7 @@ router.get(
     try {
       const resultado = await pool.query(
         `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido, u.email AS cliente_email,
-                p.tienda, p.numero_tracking
+                p.id AS paquete_id, p.tienda, p.numero_tracking, p.estado AS paquete_estado
          FROM facturas f
          JOIN usuarios u ON u.id = f.usuario_id
          JOIN paquetes p ON p.id = f.paquete_id
