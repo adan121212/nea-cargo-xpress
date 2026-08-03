@@ -201,9 +201,15 @@ router.get(
     try {
       const resultado = await pool.query(
         `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
-                u.email AS cliente_email, u.numero_casillero
+                u.email AS cliente_email, u.numero_casillero,
+                f.id AS factura_id, f.numero_factura, f.estado AS factura_estado
          FROM paquetes p
          JOIN usuarios u ON u.id = p.usuario_id
+         LEFT JOIN LATERAL (
+           SELECT * FROM facturas
+           WHERE paquete_id = p.id AND estado <> 'anulada'
+           ORDER BY fecha_creacion DESC LIMIT 1
+         ) f ON TRUE
          ${where}
          ORDER BY p.fecha_prealerta DESC
          LIMIT 200`,

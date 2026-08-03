@@ -122,7 +122,8 @@ POST /api/admin/mostrador/entregar
 
 Pestaña **Mostrador** (la primera que ves al entrar al panel admin) — para cuando el cliente llega en persona a buscar su paquete:
 
-1. Busca al cliente por número de casillero, nombre, correo, o el tracking de un paquete.
+0. **Al abrir la pestaña, ya ves una lista de todas las facturas pendientes** de cualquier cliente, sin tener que buscar nada — solo elegir método de pago y "Cobrar". Ideal para cuando el cliente ya sabes quién es o solo quieres ir cobrando pendientes en general.
+1. Si necesitas algo específico, busca al cliente por número de casillero, nombre, correo, o el tracking de un paquete.
 2. Ves todos sus **paquetes pendientes de entrega**, con el estado de su factura (si tiene una), y también cualquier **factura pendiente suelta** (de un paquete que ya se entregó antes pero quedó sin cobrar).
 3. Si la factura está pendiente: eliges el método de pago (efectivo, tarjeta física, transferencia) y el botón **"Cobrar y entregar"** marca la factura como pagada Y el paquete como entregado, en un solo paso.
 4. Para una factura pendiente suelta (sin entrega asociada): botón **"Cobrar"**, marca la factura pagada sin tocar ningún paquete.
@@ -130,7 +131,7 @@ Pestaña **Mostrador** (la primera que ves al entrar al panel admin) — para cu
 
 ### Métodos de pago registrados
 - `efectivo`, `tarjeta`, `transferencia` — los marca el staff manualmente desde el Mostrador.
-- `pagueloFacil` — se registra automáticamente cuando el cliente paga con tarjeta en línea desde su dashboard.
+- `pagueloFacil` / `yappy` — se registran automáticamente cuando el cliente paga en línea desde su dashboard.
 
 ### Endpoints
 ```

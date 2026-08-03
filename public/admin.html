@@ -1272,14 +1272,16 @@
     try {
       const res = await apiAdmin('/admin/paquetes');
       const data = await res.json();
-      const elegibles = (data.paquetes || []).filter(p => p.peso_real_lb);
+      // Solo paquetes con peso confirmado Y que todavía NO tengan una factura
+      // activa (pendiente o pagada) — una vez facturado, desaparece de aquí.
+      const elegibles = (data.paquetes || []).filter(p => p.peso_real_lb && !p.factura_id);
 
       const select = $('#facturaPaquete');
       select.innerHTML = elegibles.length
         ? elegibles.map(p =>
             `<option value="${p.id}">${escapeHtml(p.cliente_nombre)} — ${escapeHtml(p.tienda)} (${escapeHtml(p.numero_tracking)}) — ${p.peso_real_lb} lb</option>`
           ).join('')
-        : '<option value="">No hay paquetes con peso confirmado</option>';
+        : '<option value="">No hay paquetes pendientes de facturar</option>';
 
       await cargarTarifas(); // también llena el select de tarifas
     } catch (err) {}
