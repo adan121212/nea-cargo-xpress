@@ -372,6 +372,11 @@
       <div class="banner" id="bannerMostrador"></div>
 
       <div id="resultadoMostrador"></div>
+
+      <h2 style="margin-top:26px;">Facturas pendientes</h2>
+      <p class="card-sub">Todas las facturas sin pagar, de cualquier cliente — clic en "Cobrar" para marcarla pagada al instante.</p>
+      <div id="pendientesMostrador"></div>
+      <div class="empty" id="emptyPendientesMostrador" style="display:none;">No hay facturas pendientes ahora mismo. 🎉</div>
     </div>
 
     <div class="card tab-panel" id="tabRecepcion" style="display:none;">
@@ -921,7 +926,7 @@
       document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
       const tab = btn.dataset.tab;
       if (tab === 'paquetes') $('#tabPaquetes').style.display = 'block';
-      if (tab === 'mostrador') $('#tabMostrador').style.display = 'block';
+      if (tab === 'mostrador'){ $('#tabMostrador').style.display = 'block'; cargarPendientesMostrador(); }
       if (tab === 'recepcion'){ $('#tabRecepcion').style.display = 'block'; setTimeout(() => $('#recepcionTracking').focus(), 50); }
       if (tab === 'clientes'){ $('#tabClientes').style.display = 'block'; cargarClientes(); }
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
@@ -1558,6 +1563,84 @@
     }
   });
 
+  // ---------- Facturas pendientes (todas, sin buscar) ----------
+  async function cargarPendientesMostrador(){
+    const cont = $('#pendientesMostrador');
+    try {
+      const res = await apiAdmin('/admin/facturas?estado=pendiente');
+      const data = await res.json();
+      const facturas = data.facturas || [];
+
+      $('#emptyPendientesMostrador').style.display = facturas.length ? 'none' : 'block';
+
+      cont.innerHTML = facturas.map(f => {
+        const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+        return `
+          <div class="mostrador-item" data-factura-pendiente="${f.id}">
+            <div class="mi-top">
+              <div>
+                <div class="mi-tienda">${escapeHtml(f.numero_factura)} — ${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</div>
+                <div class="mi-tracking">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${escapeHtml(f.cliente_email)} · ${fecha}</div>
+              </div>
+              <span class="badge badge-prealertado">$${Number(f.total).toFixed(2)}</span>
+            </div>
+            <div class="mi-metodo-pago">
+              <select class="metodo-pago-select">
+                <option value="">Elige método de pago…</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta (física, en oficina)</option>
+                <option value="transferencia">Transferencia</option>
+              </select>
+              <button class="btn-entregar" data-accion="cobrar">Cobrar</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      cont.querySelectorAll('.mostrador-item').forEach(item => {
+        const btn = item.querySelector('.btn-entregar');
+        btn.addEventListener('click', async () => {
+          const facturaId = item.dataset.facturaPendiente;
+          const select = item.querySelector('.metodo-pago-select');
+          const metodoPago = select.value;
+
+          if (!metodoPago){
+            mostrarBanner('#bannerMostrador', 'error', 'Elige el método de pago antes de cobrar.');
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Procesando…';
+
+          try {
+            const res = await apiAdmin('/admin/mostrador/cobrar', {
+              method: 'POST',
+              body: JSON.stringify({ factura_id: facturaId, metodo_pago: metodoPago }),
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok){
+              mostrarBanner('#bannerMostrador', 'success', '✓ Factura cobrada correctamente.');
+              item.remove();
+              if ($('#pendientesMostrador').children.length === 0){
+                $('#emptyPendientesMostrador').style.display = 'block';
+              }
+            } else {
+              mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'No se pudo cobrar.');
+              btn.disabled = false;
+              btn.textContent = 'Cobrar';
+            }
+          } catch (err) {
+            mostrarBanner('#bannerMostrador', 'error', 'No pudimos conectar con el servidor.');
+            btn.disabled = false;
+          }
+        });
+      });
+    } catch (err) {
+      cont.innerHTML = '';
+    }
+  }
+
   function renderResultadoMostrador(cliente, paquetes, facturasPendientes){
     const cont = $('#resultadoMostrador');
 
@@ -1704,6 +1787,7 @@
             if (res.ok){
               mostrarBanner('#bannerMostrador', 'success', '✓ Factura cobrada correctamente.');
               item.remove();
+              cargarPendientesMostrador();
             } else {
               mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'No se pudo cobrar.');
               btn.disabled = false;
@@ -1830,6 +1914,7 @@
         cerrarModalFirma();
         mostrarBanner('#bannerMostrador', 'success', '✓ Paquete entregado' + (metodoPago ? ' y factura cobrada.' : '.') + ' Firma guardada.');
         item.remove();
+        if (metodoPago) cargarPendientesMostrador();
       } else {
         mostrarBanner('#bannerFirma', 'error', data.mensaje || 'No se pudo procesar la entrega.');
         if (btnOriginal){ btnOriginal.disabled = false; btnOriginal.textContent = textoOriginal; }
@@ -2086,6 +2171,7 @@
   async function iniciarAdmin(){
     try {
       await cargarPaquetes();
+      cargarPendientesMostrador();
       mostrarAdmin(true);
     } catch (err) {
       mostrarAdmin(false);
