@@ -185,6 +185,15 @@
   }
   .foto-item .btn-eliminar-foto:hover{ background: var(--accent-dark); }
 
+  .dim-inputs{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:14px; }
+  .dim-inputs label{ margin: 0 0 5px; }
+  .dim-resultado{
+    margin-top:16px; padding: 12px 14px; border-radius:9px;
+    background: var(--paper); font-size:13px; color: var(--ink-soft); min-height:16px;
+  }
+  .dim-resultado strong{ color: var(--ink); }
+  .dim-resultado .volumetrico-mayor{ color: var(--accent-dark); font-weight:600; }
+
   .empty{ text-align:center; padding: 30px 20px; color: var(--ink-soft); font-size:13.5px; }
 
   /* ---- Reportes ---- */
@@ -417,6 +426,33 @@
           </button>
         </div>
         <div class="banner" id="bannerFotoRapida"></div>
+      </div>
+
+      <div id="medidaRapidaBox" class="foto-rapida-box" style="display:none;">
+        <div class="foto-rapida-titulo">📐 Medidas de <span id="medidaRapidaTracking"></span></div>
+        <p class="card-sub" style="margin:2px 0 10px;">Opcional — mide la caja ahora para calcular el peso volumétrico, antes de pasar al siguiente paquete.</p>
+        <div class="dim-inputs">
+          <div>
+            <label for="medidaRapidaLargo">Largo (in)</label>
+            <input type="number" id="medidaRapidaLargo" step="0.1" min="0" placeholder="Ej. 12">
+          </div>
+          <div>
+            <label for="medidaRapidaAncho">Ancho (in)</label>
+            <input type="number" id="medidaRapidaAncho" step="0.1" min="0" placeholder="Ej. 10">
+          </div>
+          <div>
+            <label for="medidaRapidaAlto">Alto (in)</label>
+            <input type="number" id="medidaRapidaAlto" step="0.1" min="0" placeholder="Ej. 8">
+          </div>
+        </div>
+        <div class="dim-resultado" id="medidaRapidaResultado" style="margin-top:10px;"></div>
+        <div class="foto-rapida-acciones">
+          <button class="btn-secondary" type="button" id="btnMedidaRapidaOmitir">Omitir</button>
+          <button class="btn-primary" type="button" id="btnMedidaRapidaGuardar" style="margin-top:0;">
+            <span class="spinner"></span><span>Guardar medidas</span>
+          </button>
+        </div>
+        <div class="banner" id="bannerMedidaRapida"></div>
       </div>
 
       <div id="recepcionCandidatos" style="margin-top:16px;"></div>
@@ -753,6 +789,40 @@
   </div>
 </div>
 
+<!-- ======================= MODAL: Dimensiones / peso volumétrico ======================= -->
+<div id="modalDimensiones" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Dimensiones del paquete</h2>
+      <button class="modal-close" id="btnCerrarModalDimensiones">✕</button>
+    </div>
+
+    <p class="card-sub">Mide la caja en pulgadas — se usa para calcular el peso volumétrico, y facturar por el mayor entre este y el peso real.</p>
+
+    <div class="dim-inputs">
+      <div>
+        <label for="dimLargo">Largo (in)</label>
+        <input type="number" id="dimLargo" step="0.1" min="0" placeholder="Ej. 12">
+      </div>
+      <div>
+        <label for="dimAncho">Ancho (in)</label>
+        <input type="number" id="dimAncho" step="0.1" min="0" placeholder="Ej. 10">
+      </div>
+      <div>
+        <label for="dimAlto">Alto (in)</label>
+        <input type="number" id="dimAlto" step="0.1" min="0" placeholder="Ej. 8">
+      </div>
+    </div>
+
+    <div class="dim-resultado" id="dimResultado"></div>
+
+    <button class="btn-primary" id="btnGuardarDimensiones" style="margin-top:14px;">
+      <span class="spinner"></span><span>Guardar dimensiones</span>
+    </button>
+    <div class="banner" id="bannerDimensiones"></div>
+  </div>
+</div>
+
 <!-- ======================= MODAL: Firma digital de entrega ======================= -->
 <div id="modalFirma" class="modal-overlay">
   <div class="modal-box">
@@ -980,13 +1050,20 @@
           `}
         </td>
         <td data-label="">
-          <button class="btn-secondary btn-fotos" data-id="${p.id}">📷 Fotos</button>
+          <div class="row-actions">
+            <button class="btn-secondary btn-fotos" data-id="${p.id}">📷 Fotos</button>
+            <button class="btn-secondary btn-dimensiones" data-id="${p.id}" data-largo="${p.largo_in || ''}" data-ancho="${p.ancho_in || ''}" data-alto="${p.alto_in || ''}">📐 Medidas</button>
+          </div>
         </td>
       </tr>
     `).join('');
 
     tbody.querySelectorAll('.btn-fotos').forEach(btn => {
       btn.addEventListener('click', () => abrirModalFotos(btn.dataset.id));
+    });
+
+    tbody.querySelectorAll('.btn-dimensiones').forEach(btn => {
+      btn.addEventListener('click', () => abrirModalDimensiones(btn.dataset.id, btn.dataset.largo, btn.dataset.ancho, btn.dataset.alto));
     });
 
     tbody.querySelectorAll('.btn-guardar-peso').forEach(btn => {
@@ -1432,6 +1509,86 @@
     $('#modalFotos').classList.add('show');
     await cargarFotosPaquete(paqueteId);
   }
+
+  // ---------- Modal de dimensiones / peso volumétrico ----------
+  let paqueteDimensionesActual = null;
+
+  function calcularPesoVolumetricoPreview(largo, ancho, alto){
+    const l = parseFloat(largo), a = parseFloat(ancho), h = parseFloat(alto);
+    if (!l || !a || !h) return null;
+    return Math.ceil(((l * a * h) / 166) * 2) / 2; // redondeado a la media libra
+  }
+
+  function actualizarPreviewDimensiones(){
+    const largo = $('#dimLargo').value;
+    const ancho = $('#dimAncho').value;
+    const alto = $('#dimAlto').value;
+    const peso = calcularPesoVolumetricoPreview(largo, ancho, alto);
+    const resultado = $('#dimResultado');
+
+    if (peso == null){
+      resultado.innerHTML = 'Completa las tres medidas para calcular el peso volumétrico.';
+      return;
+    }
+    resultado.innerHTML = `Peso volumétrico estimado: <strong>${peso} lb</strong><br><span style="font-size:11.5px;">Al facturar, se usa el <span class="volumetrico-mayor">mayor</span> entre este y el peso real confirmado.</span>`;
+  }
+
+  ['dimLargo','dimAncho','dimAlto'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', actualizarPreviewDimensiones);
+  });
+
+  function abrirModalDimensiones(paqueteId, largo, ancho, alto){
+    paqueteDimensionesActual = paqueteId;
+    $('#dimLargo').value = largo || '';
+    $('#dimAncho').value = ancho || '';
+    $('#dimAlto').value = alto || '';
+    mostrarBanner('#bannerDimensiones', '', '');
+    actualizarPreviewDimensiones();
+    $('#modalDimensiones').classList.add('show');
+  }
+
+  function cerrarModalDimensiones(){
+    $('#modalDimensiones').classList.remove('show');
+    paqueteDimensionesActual = null;
+  }
+
+  $('#btnCerrarModalDimensiones').addEventListener('click', cerrarModalDimensiones);
+  $('#modalDimensiones').addEventListener('click', (e) => {
+    if (e.target.id === 'modalDimensiones') cerrarModalDimensiones();
+  });
+
+  $('#btnGuardarDimensiones').addEventListener('click', async () => {
+    const largo = $('#dimLargo').value;
+    const ancho = $('#dimAncho').value;
+    const alto = $('#dimAlto').value;
+
+    if (!largo || !ancho || !alto){
+      mostrarBanner('#bannerDimensiones', 'error', 'Completa las tres medidas antes de guardar.');
+      return;
+    }
+
+    const btn = $('#btnGuardarDimensiones');
+    setCargando(btn, true);
+    try {
+      const res = await apiAdmin(`/admin/paquetes/${paqueteDimensionesActual}/dimensiones`, {
+        method: 'PATCH',
+        body: JSON.stringify({ largo_in: largo, ancho_in: ancho, alto_in: alto }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok){
+        mostrarBanner('#bannerDimensiones', 'success', '✓ Dimensiones guardadas.');
+        setTimeout(cerrarModalDimensiones, 700);
+        cargarPaquetes();
+      } else {
+        mostrarBanner('#bannerDimensiones', 'error', data.mensaje || 'No se pudieron guardar las dimensiones.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerDimensiones', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
 
   function cerrarModalFotos(){
     $('#modalFotos').classList.remove('show');
@@ -2008,6 +2165,7 @@
               $('#recepcionUltimo').textContent = d.paquete.numero_tracking;
               agregarAlLogRecepcion({ tipo: 'ok', tracking: d.paquete.numero_tracking, detalle: 'Recibido en bodega Miami', hora: h });
               mostrarFotoRapida(d.paquete.id, d.paquete.numero_tracking);
+              mostrarMedidaRapida(d.paquete.id, d.paquete.numero_tracking);
             }
             $('#recepcionCandidatos').innerHTML = '';
           });
@@ -2026,6 +2184,7 @@
         hora,
       });
       mostrarFotoRapida(data.paquete.id, data.paquete.numero_tracking);
+      mostrarMedidaRapida(data.paquete.id, data.paquete.numero_tracking);
     } catch (err) {
       const hora = new Date().toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       agregarAlLogRecepcion({ tipo: 'error', tracking: numeroTracking, detalle: 'No pudimos conectar con el servidor', hora });
@@ -2075,6 +2234,73 @@
       }
     } catch (err) {
       mostrarBanner('#bannerFotoRapida', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
+  // ---------- Medidas rápidas (justo después de recibir, junto a la foto) ----------
+  let medidaRapidaPaqueteId = null;
+
+  function mostrarMedidaRapida(paqueteId, tracking){
+    medidaRapidaPaqueteId = paqueteId;
+    $('#medidaRapidaTracking').textContent = tracking;
+    $('#medidaRapidaLargo').value = '';
+    $('#medidaRapidaAncho').value = '';
+    $('#medidaRapidaAlto').value = '';
+    $('#medidaRapidaResultado').innerHTML = '';
+    mostrarBanner('#bannerMedidaRapida', '', '');
+    $('#medidaRapidaBox').style.display = 'block';
+  }
+
+  function ocultarMedidaRapida(){
+    $('#medidaRapidaBox').style.display = 'none';
+    medidaRapidaPaqueteId = null;
+  }
+
+  function actualizarPreviewMedidaRapida(){
+    const peso = calcularPesoVolumetricoPreview(
+      $('#medidaRapidaLargo').value, $('#medidaRapidaAncho').value, $('#medidaRapidaAlto').value
+    );
+    const resultado = $('#medidaRapidaResultado');
+    resultado.innerHTML = peso == null
+      ? 'Completa las tres medidas para calcular el peso volumétrico.'
+      : `Peso volumétrico estimado: <strong>${peso} lb</strong>`;
+  }
+
+  ['medidaRapidaLargo','medidaRapidaAncho','medidaRapidaAlto'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', actualizarPreviewMedidaRapida);
+  });
+
+  $('#btnMedidaRapidaOmitir').addEventListener('click', ocultarMedidaRapida);
+
+  $('#btnMedidaRapidaGuardar').addEventListener('click', async () => {
+    const largo = $('#medidaRapidaLargo').value;
+    const ancho = $('#medidaRapidaAncho').value;
+    const alto = $('#medidaRapidaAlto').value;
+
+    if (!largo || !ancho || !alto){
+      mostrarBanner('#bannerMedidaRapida', 'error', 'Completa las tres medidas, o dale "Omitir".');
+      return;
+    }
+
+    const btn = $('#btnMedidaRapidaGuardar');
+    setCargando(btn, true);
+    try {
+      const res = await apiAdmin(`/admin/paquetes/${medidaRapidaPaqueteId}/dimensiones`, {
+        method: 'PATCH',
+        body: JSON.stringify({ largo_in: largo, ancho_in: ancho, alto_in: alto }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok){
+        mostrarBanner('#bannerMedidaRapida', 'success', '✓ Medidas guardadas.');
+        setTimeout(ocultarMedidaRapida, 700);
+      } else {
+        mostrarBanner('#bannerMedidaRapida', 'error', data.mensaje || 'No se pudieron guardar las medidas.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerMedidaRapida', 'error', 'No pudimos conectar con el servidor.');
     } finally {
       setCargando(btn, false);
     }
