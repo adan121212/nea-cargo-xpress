@@ -369,6 +369,8 @@
     cursor:pointer;
   }
   .btn-pagar:hover{ background: var(--accent-dark); }
+  .btn-yappy{ background: #4b2a8a; }
+  .btn-yappy:hover{ background: #3a2069; }
   .banner-pago{
     max-width: 1040px; margin: 0 auto 18px; padding: 13px 16px; border-radius:8px;
     font-size:13.5px; display:flex; justify-content:space-between; align-items:center; gap:10px;
@@ -1018,12 +1020,22 @@
 
   const ESTADO_FACTURA_LABEL = { pendiente: 'Pendiente de pago', pagada: 'Pagada', anulada: 'Anulada' };
 
+  let yappyDisponible = false;
+
   async function cargarFacturas(){
     const cont = $('#listaFacturas');
     try {
-      const res = await apiAutenticado('/facturas');
-      const data = await res.json();
+      const [resFacturas, resMetodos] = await Promise.all([
+        apiAutenticado('/facturas'),
+        apiAutenticado('/facturas/metodos-pago').catch(() => null),
+      ]);
+      const data = await resFacturas.json();
       const facturas = data.facturas || [];
+
+      if (resMetodos){
+        const metodos = await resMetodos.json().catch(() => ({}));
+        yappyDisponible = Boolean(metodos.yappy);
+      }
 
       if (facturas.length === 0){
         cont.innerHTML = '<div class="empty">Aún no tienes facturas. Se generan cuando tu paquete llega a la bodega.</div>';
@@ -1042,6 +1054,7 @@
               <span class="badge badge-${f.estado}">${ESTADO_FACTURA_LABEL[f.estado] || f.estado}</span>
               <span class="factura-total">$${Number(f.total).toFixed(2)}</span>
               ${f.estado === 'pendiente' ? `<button class="btn-pagar" data-id="${f.id}">Pagar con tarjeta</button>` : ''}
+              ${f.estado === 'pendiente' && yappyDisponible ? `<button class="btn-pagar btn-yappy" data-id="${f.id}">Pagar con Yappy</button>` : ''}
               <button class="btn-pdf" data-id="${f.id}">Descargar PDF</button>
             </div>
           </div>
@@ -1052,8 +1065,12 @@
         btn.addEventListener('click', () => descargarFacturaPdf(btn.dataset.id, btn));
       });
 
-      cont.querySelectorAll('.btn-pagar').forEach(btn => {
+      cont.querySelectorAll('.btn-pagar:not(.btn-yappy)').forEach(btn => {
         btn.addEventListener('click', () => pagarFactura(btn.dataset.id, btn));
+      });
+
+      cont.querySelectorAll('.btn-yappy').forEach(btn => {
+        btn.addEventListener('click', () => pagarFacturaYappy(btn.dataset.id, btn));
       });
     } catch (err) {
       cont.innerHTML = '<div class="empty">No se pudieron cargar tus facturas.</div>';
@@ -1073,6 +1090,27 @@
         return;
       }
       alert(data.mensaje || 'No se pudo iniciar el pago. Intenta de nuevo.');
+    } catch (err) {
+      alert('No pudimos conectar con el servidor.');
+    } finally {
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    }
+  }
+
+  async function pagarFacturaYappy(id, btn){
+    const textoOriginal = btn.textContent;
+    btn.textContent = 'Redirigiendo…';
+    btn.disabled = true;
+    try {
+      const res = await apiAutenticado(`/facturas/${id}/pagar-yappy`, { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.url){
+        window.location.href = data.url; // el cliente sale a la app de Banco General / Yappy
+        return;
+      }
+      alert(data.mensaje || 'No se pudo iniciar el pago con Yappy. Intenta de nuevo.');
     } catch (err) {
       alert('No pudimos conectar con el servidor.');
     } finally {

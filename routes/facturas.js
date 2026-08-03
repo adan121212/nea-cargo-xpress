@@ -3,8 +3,20 @@ const pool = require('../db');
 const { requiereAutenticacion } = require('../middleware/auth');
 const { generarPdfFactura } = require('../utils/facturaPdf');
 const { generarEnlacePago } = require('../utils/paguelofacil');
+const { clienteYappyDisponible, generarEnlacePagoYappy } = require('../utils/yappy');
 
 const router = express.Router();
+
+// --- GET /api/facturas/metodos-pago ---
+// Le dice al frontend qué botones de pago mostrar (Yappy puede no estar
+// configurado todavía). IMPORTANTE: esta ruta va ANTES que cualquier ruta
+// "/:id", si no Express interpretaría "metodos-pago" como un id.
+router.get('/metodos-pago', requiereAutenticacion, async (req, res) => {
+  return res.json({
+    paguelofacil: true,
+    yappy: clienteYappyDisponible(),
+  });
+});
 
 // --- GET /api/facturas ---
 // Lista las facturas del usuario autenticado.
@@ -106,6 +118,42 @@ router.post('/:id/pagar', requiereAutenticacion, async (req, res) => {
   } catch (error) {
     console.error('Error en POST /facturas/:id/pagar:', error);
     return res.status(500).json({ mensaje: 'No se pudo generar el enlace de pago. Intenta de nuevo.' });
+  }
+});
+
+// --- POST /api/facturas/:id/pagar-yappy ---
+// Igual que /pagar, pero genera el enlace con Yappy (Banco General) en vez
+// de PagueloFacil. Solo funciona si ya configuraste YAPPY_MERCHANT_ID /
+// YAPPY_SECRET_KEY (ver utils/yappy.js).
+router.post('/:id/pagar-yappy', requiereAutenticacion, async (req, res) => {
+  if (!clienteYappyDisponible()) {
+    return res.status(503).json({ mensaje: 'El pago con Yappy todavía no está configurado en este sistema.' });
+  }
+
+  try {
+    const resultado = await pool.query(
+      `SELECT f.id, f.numero_factura, f.total, f.estado, u.telefono AS cliente_telefono
+       FROM facturas f
+       JOIN usuarios u ON u.id = f.usuario_id
+       WHERE f.id = $1 AND f.usuario_id = $2`,
+      [req.params.id, req.usuario.id]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Factura no encontrada' });
+    }
+
+    const factura = resultado.rows[0];
+
+    if (factura.estado !== 'pendiente') {
+      return res.status(400).json({ mensaje: `Esta factura ya está en estado "${factura.estado}", no se puede pagar de nuevo.` });
+    }
+
+    const enlace = await generarEnlacePagoYappy(factura);
+    return res.json({ url: enlace.url });
+  } catch (error) {
+    console.error('Error en POST /facturas/:id/pagar-yappy:', error);
+    return res.status(500).json({ mensaje: 'No se pudo generar el enlace de pago con Yappy. Intenta de nuevo.' });
   }
 });
 

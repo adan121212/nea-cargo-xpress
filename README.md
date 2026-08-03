@@ -17,8 +17,36 @@ Construido con **Node.js + Express + PostgreSQL + JWT + Nodemailer**.
 
 ### Lo que queda para las siguientes fases (no incluido aún)
 - Producción real: dominio propio en Resend + número de WhatsApp Business verificado + PagueloFacil en modo producción (requiere aprobación KYC de PagueloFacil).
+- Activar Yappy de verdad (ver sección de abajo — la estructura ya está lista, falta que Banco General te apruebe la cuenta).
 
 Dilo cuando quieras seguir con alguna de estas partes.
+
+## Pago con Yappy (nuevo, requiere activación)
+
+Se dejó preparada la integración con **Yappy** (Banco General) — el método de pago más usado en Panamá — usando el mismo patrón que ya tienes con PagueloFacil (redirección a una página de pago segura + confirmación automática al volver).
+
+**Por qué no está activo todavía:** Yappy solo se puede integrar con credenciales que Banco General entrega al aprobarte **Yappy Comercial** (requiere cuenta comercial de ese banco). El SDK oficial tampoco está en npm — te dan la URL exacta de descarga al aprobarte.
+
+### Cómo activarlo cuando te aprueben
+1. Instala el SDK que Banco General te indique, por ejemplo:
+   ```bash
+   npm install https://github.com/BancoGeneral/Boton-de-Pago-Yappy_Node.js/releases/download/<VERSION>/yappy-node-back-sdk-<VERSION>.tar
+   ```
+2. En `utils/yappy.js`, descomenta la línea `// const YappySDK = require('yappy-node-back-sdk');` (o ajusta el nombre del paquete si te dan otro) y revisa que el constructor (`merchantId`, `secretKey`, `domain`) coincida con la documentación que te entreguen — puede variar levemente entre versiones del SDK.
+3. Agrega las variables de entorno en Render:
+   - `YAPPY_MERCHANT_ID`
+   - `YAPPY_SECRET_KEY`
+4. Listo — el botón "Pagar con Yappy" aparece automáticamente en el dashboard del cliente en cuanto el sistema detecta esas variables configuradas (antes de eso, permanece oculto y solo se ve "Pagar con tarjeta").
+
+### Endpoints
+```
+GET  /api/facturas/metodos-pago         # cliente: qué botones de pago mostrar (yappy: true/false)
+POST /api/facturas/:id/pagar-yappy      # cliente: genera el enlace de pago con Yappy
+GET  /api/pagos/yappy/retorno           # Yappy redirige aquí tras el intento de pago
+```
+
+### Nota sobre "Yappy en Caja"
+Banco General también ofrece **Yappy en Caja**, pensado justo para tu **Mostrador**: generar un QR en pantalla que el cliente escanea ahí mismo para pagar al instante. Es una integración distinta (por API separada) — si te interesa una vez tengas Yappy Comercial activo, se puede agregar como otra fase.
 
 ## Recuperación de contraseña (nuevo)
 
@@ -47,6 +75,7 @@ Pestaña **Recepción** en el panel admin, pensada para el staff de la bodega en
 - Si dos clientes distintos prealertaron el mismo número de tracking por error, el sistema te deja elegir cuál es antes de continuar.
 - Si no encuentra ninguna prealerta con ese tracking, te avisa (puede ser que el cliente no haya prealertado, o que el número esté mal escrito/escaneado).
 - Lleva un contador e historial de lo recibido en la sesión actual, para ver el ritmo de trabajo.
+- **Foto rápida**: justo después de recibir cada paquete, aparece un panel opcional para tomarle/subirle una foto ahí mismo (usa la cámara del celular/tablet directamente gracias a `capture="environment"`), sin tener que ir a la pestaña Paquetes después. Puedes omitirlo si no hace falta, y el campo de tracking sigue listo para el siguiente escaneo mientras tanto.
 
 ### Endpoints
 ```
