@@ -29,7 +29,7 @@
     display:flex; align-items:center; justify-content:space-between;
     padding: 14px 26px; background: var(--ink); color:#f1f3f2;
   }
-  .brand{ display:flex; align-items:center; gap:10px; font-family: var(--font-display); font-weight:700; font-size:16px; }
+  .brand{ display:flex; align-items:center; gap:10px; font-family: var(--font-display); font-weight:700; font-size:16px; text-decoration:none; color:inherit; cursor:pointer; }
   .brand .mark{
     width:28px; height:28px; border-radius:6px; background: var(--accent);
     display:flex; align-items:center; justify-content:center; color: var(--ink); font-weight:700; font-size:13px;
@@ -85,6 +85,13 @@
   .banner{ margin-top:14px; padding:10px 12px; border-radius:7px; font-size:12.5px; line-height:1.5; display:none; }
   .banner.show{ display:block; }
   .banner.error{ background: rgba(255,106,26,0.1); color: var(--accent-dark); border:1px solid rgba(255,106,26,0.3); }
+
+  .link-olvide{
+    display:block; width:100%; text-align:center; background:none; border:none;
+    color: var(--ink-soft); font-size:12.5px; margin-top:12px; cursor:pointer;
+    text-decoration:underline; text-underline-offset:2px;
+  }
+  .link-olvide:hover{ color: var(--accent-dark); }
   .banner.success{ background: var(--cargo-green-bg); color: var(--cargo-green); border:1px solid rgba(23,122,99,0.3); }
 
   /* --- App --- */
@@ -125,8 +132,147 @@
   .badge-entregado{ background: rgba(12,27,51,0.08); color: var(--ink-soft); }
 
   select.estado-select{ font-size:12px; padding:6px 8px; width:auto; }
+  .estado-bloqueado{
+    font-size:11.5px; color: var(--ink-soft); font-weight:600;
+    display:inline-flex; align-items:center; gap:4px;
+  }
+
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0;
+    background: rgba(12,27,51,0.5);
+    align-items:center; justify-content:center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background: var(--panel);
+    border-radius:14px;
+    max-width: 560px;
+    width:100%;
+    max-height: 85vh;
+    overflow-y:auto;
+    padding: 24px;
+  }
+  .modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .modal-header h2{ font-family: var(--font-display); font-size:16px; margin:0; }
+  .modal-close{ border:none; background:none; font-size:16px; cursor:pointer; color: var(--ink-soft); }
+  .modal-close:hover{ color: var(--ink); }
+
+  .upload-zone{
+    border: 1.5px dashed var(--line);
+    border-radius:10px;
+    padding: 16px;
+    margin-bottom:18px;
+    text-align:center;
+  }
+  .upload-zone input[type="file"]{ border:none; padding:0; font-size:12.5px; }
+
+  .galeria{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap:10px;
+  }
+  .foto-item{ position:relative; border-radius:8px; overflow:hidden; border:1px solid var(--line); }
+  .foto-item img{ width:100%; height:120px; object-fit:cover; display:block; cursor:pointer; }
+  .foto-item .btn-eliminar-foto{
+    position:absolute; top:5px; right:5px;
+    width:22px; height:22px; border-radius:50%;
+    background: rgba(12,27,51,0.75); color:#fff;
+    border:none; font-size:12px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .foto-item .btn-eliminar-foto:hover{ background: var(--accent-dark); }
 
   .empty{ text-align:center; padding: 30px 20px; color: var(--ink-soft); font-size:13.5px; }
+
+  /* ---- Reportes ---- */
+  .rep-stats{ display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; }
+  .rep-stat{ background: var(--paper); border-radius:10px; padding: 16px 18px; }
+  .rep-stat-l{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color: var(--ink-soft); margin-bottom:6px; }
+  .rep-stat-n{ font-family: var(--font-display); font-size:22px; color: var(--ink); }
+  .rep-stat-n.amber{ color: var(--accent-dark); }
+  .rep-stat-sub{ font-size:11px; color: var(--ink-soft); margin-top:4px; }
+  @media (max-width: 760px){ .rep-stats{ grid-template-columns: 1fr 1fr; } }
+
+  .grafico-box{
+    background: var(--paper); border-radius:10px; padding: 18px;
+    display:flex; align-items:flex-end; gap:4px; height:180px; overflow-x:auto;
+  }
+  .grafico-barra{
+    flex:0 0 auto; width:22px; background: var(--accent); border-radius:3px 3px 0 0;
+    position:relative; min-height:2px;
+  }
+  .grafico-barra:hover{ background: var(--accent-dark); }
+  .grafico-vacio{ color: var(--ink-soft); font-size:13px; margin:auto; }
+
+  .rep-cols{ display:grid; grid-template-columns: 1fr 1fr; gap:24px; }
+  @media (max-width: 760px){ .rep-cols{ grid-template-columns: 1fr; } }
+
+  /* ---- Mostrador ---- */
+  .cliente-card{
+    background: var(--paper); border-radius:10px; padding: 16px 18px; margin-bottom:18px;
+  }
+  .cliente-card .nombre{ font-family: var(--font-display); font-size:16px; }
+  .cliente-card .detalle{ font-size:12.5px; color: var(--ink-soft); margin-top:4px; }
+  .cliente-card .detalle span{ font-family: var(--font-mono); }
+
+  .mostrador-item{
+    border:1px solid var(--line); border-radius:10px; padding: 14px 16px; margin-bottom:10px;
+  }
+  .mostrador-item .mi-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
+  .mostrador-item .mi-tienda{ font-family: var(--font-display); font-weight:600; font-size:14.5px; }
+  .mostrador-item .mi-tracking{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
+  .mi-factura-info{ font-size:12.5px; margin-top:8px; }
+  .mi-metodo-pago{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center; }
+  .mi-metodo-pago select{ font-size:12.5px; padding:7px 9px; width:auto; }
+  .btn-entregar{
+    padding: 8px 16px; border-radius:7px; border:none; background: var(--cargo-green);
+    color:#fff; font-size:12.5px; font-weight:700; cursor:pointer;
+  }
+  .btn-entregar:hover{ opacity:.9; }
+  .btn-entregar:disabled{ opacity:.5; cursor:default; }
+  .cliente-multiples button{ display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:13px; }
+  .cliente-multiples button:hover{ border-color: var(--accent); }
+
+  /* ---- Recepción rápida ---- */
+  #recepcionTracking{ font-family: var(--font-mono); font-size:15px; }
+  .recepcion-item{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding: 10px 14px; border-radius:8px; margin-bottom:6px; font-size:13px;
+    border-left: 3px solid var(--cargo-green);
+    background: var(--cargo-green-bg);
+  }
+  .recepcion-item.error{ border-left-color: var(--accent); background: var(--amber-bg); }
+  .recepcion-item .ri-info{ display:flex; flex-direction:column; }
+  .recepcion-item .ri-tracking{ font-family: var(--font-mono); font-weight:600; }
+  .recepcion-item .ri-detalle{ font-size:11.5px; color: var(--ink-soft); }
+  .recepcion-item .ri-hora{ font-size:11px; color: var(--ink-soft); white-space:nowrap; }
+
+  .foto-rapida-box{
+    background: var(--cargo-green-bg); border:1px solid rgba(23,122,99,0.3);
+    border-radius:10px; padding: 16px; margin-top:16px;
+  }
+  .foto-rapida-titulo{ font-family: var(--font-display); font-weight:600; font-size:14px; color: var(--cargo-green); }
+  #fotoRapidaInput{ margin-top:8px; font-size:12.5px; }
+  .foto-rapida-acciones{ display:flex; gap:10px; margin-top:12px; }
+  .foto-rapida-acciones .btn-primary{ flex:1; }
+
+  /* ---- Firma digital ---- */
+  .firma-lienzo-box{
+    position:relative; border: 1.5px dashed var(--line); border-radius:10px;
+    overflow:hidden; background:#fff; margin-top:14px; touch-action:none;
+  }
+  #canvasFirma{ display:block; width:100%; height:220px; cursor:crosshair; }
+  .firma-placeholder{
+    position:absolute; top:50%; left:50%; transform: translate(-50%, -50%);
+    color: var(--ink-soft); font-size:13px; pointer-events:none;
+  }
+  .firma-placeholder.oculto{ display:none; }
+  .firma-acciones{ display:flex; gap:10px; margin-top:14px; }
+  .firma-acciones .btn-secondary{ flex:0 0 auto; }
+  .firma-acciones .btn-primary{ flex:1; }
 
   .form-inline{ display:grid; grid-template-columns: 1.3fr 1.7fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:18px; }
   .form-inline label{ margin:0 0 5px; }
@@ -147,12 +293,12 @@
 <body>
 
 <div class="topbar">
-  <div class="brand">
+  <a href="index.html" class="brand">
     <div class="mark">N</div>
     <div>NEA CARGO XPRESS <span class="badge-admin" id="badgeAdmin" style="display:none;">ADMIN</span>
       <small>Panel de operaciones</small>
     </div>
-  </div>
+  </a>
   <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
 </div>
 
@@ -171,7 +317,19 @@
         <button class="btn-primary" type="submit" id="btnLogin">
           <span class="spinner"></span><span>Entrar</span>
         </button>
+        <button type="button" id="btnMostrarOlvide" class="link-olvide">¿Olvidaste tu contraseña?</button>
         <div class="banner" id="bannerLogin"></div>
+      </form>
+
+      <form id="formOlvide" style="display:none;">
+        <p class="sub" style="margin:0 0 14px;">Escribe tu correo y te enviamos un enlace para restablecerla.</p>
+        <label for="olvideEmail">Correo</label>
+        <input id="olvideEmail" type="email" placeholder="admin@neacargo.com">
+        <button class="btn-primary" type="submit" id="btnOlvide">
+          <span class="spinner"></span><span>Enviar enlace</span>
+        </button>
+        <button type="button" id="btnVolverLogin" class="link-olvide">← Volver a iniciar sesión</button>
+        <div class="banner" id="bannerOlvide"></div>
       </form>
     </div>
   </div>
@@ -184,15 +342,90 @@
     </div>
 
     <div class="tabs-nav">
-      <button class="tab-nav-btn active" data-tab="paquetes">Paquetes</button>
+      <button class="tab-nav-btn active" data-tab="mostrador">Mostrador</button>
+      <button class="tab-nav-btn" data-tab="recepcion">Recepción</button>
+      <button class="tab-nav-btn" data-tab="paquetes">Paquetes</button>
       <button class="tab-nav-btn" data-tab="clientes">Clientes</button>
       <button class="tab-nav-btn" data-tab="facturas">Facturas</button>
       <button class="tab-nav-btn" data-tab="tarifas">Tarifas</button>
       <button class="tab-nav-btn" data-tab="sucursales">Sucursales</button>
+      <button class="tab-nav-btn" data-tab="reportes">Reportes</button>
     </div>
 
     <!-- ---- TAB: Paquetes ---- -->
-    <div class="card tab-panel" id="tabPaquetes">
+    <!-- ---- TAB: Mostrador ---- -->
+    <div class="card tab-panel" id="tabMostrador">
+      <h2>Buscar cliente</h2>
+      <p class="card-sub">Busca por número de casillero, nombre, correo, o el tracking de un paquete.</p>
+
+      <form id="formBuscarMostrador" class="form-inline" style="grid-template-columns: 1fr auto;">
+        <div>
+          <label for="mostradorQ">Casillero / nombre / correo / tracking</label>
+          <input type="text" id="mostradorQ" placeholder="Ej. PN-00042, Ana Pérez, o 1Z999...">
+        </div>
+        <div>
+          <button class="btn-primary" type="submit" id="btnBuscarMostrador" style="margin-top:0;">
+            <span class="spinner"></span><span>Buscar</span>
+          </button>
+        </div>
+      </form>
+      <div class="banner" id="bannerMostrador"></div>
+
+      <div id="resultadoMostrador"></div>
+
+      <h2 style="margin-top:26px;">Facturas pendientes</h2>
+      <p class="card-sub">Todas las facturas sin pagar, de cualquier cliente — clic en "Cobrar" para marcarla pagada al instante.</p>
+      <div id="pendientesMostrador"></div>
+      <div class="empty" id="emptyPendientesMostrador" style="display:none;">No hay facturas pendientes ahora mismo. 🎉</div>
+    </div>
+
+    <div class="card tab-panel" id="tabRecepcion" style="display:none;">
+      <h2>Recepción rápida</h2>
+      <p class="card-sub">Escanea o escribe el tracking de cada caja según va llegando a la bodega. Se busca automáticamente entre las prealertas y se marca "En bodega Miami".</p>
+
+      <form id="formRecepcion" class="form-inline" style="grid-template-columns: 1fr auto;">
+        <div>
+          <label for="recepcionTracking">Número de tracking</label>
+          <input type="text" id="recepcionTracking" placeholder="Escanea aquí…" autocomplete="off">
+        </div>
+        <div>
+          <button class="btn-primary" type="submit" id="btnRecepcion" style="margin-top:0;">
+            <span class="spinner"></span><span>Recibir</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="rep-stats" style="grid-template-columns: repeat(2, 1fr); margin-top:18px;">
+        <div class="rep-stat">
+          <div class="rep-stat-l">Recibidos en esta sesión</div>
+          <div class="rep-stat-n" id="recepcionContador">0</div>
+        </div>
+        <div class="rep-stat">
+          <div class="rep-stat-l">Último recibido</div>
+          <div class="rep-stat-n" id="recepcionUltimo" style="font-size:14px;">—</div>
+        </div>
+      </div>
+
+      <div id="fotoRapidaBox" class="foto-rapida-box" style="display:none;">
+        <div class="foto-rapida-titulo">📷 Foto de <span id="fotoRapidaTracking"></span></div>
+        <p class="card-sub" style="margin:2px 0 10px;">Opcional — tómale una foto ahora, antes de pasar al siguiente paquete.</p>
+        <input type="file" id="fotoRapidaInput" accept="image/*" capture="environment" multiple>
+        <div class="foto-rapida-acciones">
+          <button class="btn-secondary" type="button" id="btnFotoRapidaOmitir">Omitir</button>
+          <button class="btn-primary" type="button" id="btnFotoRapidaSubir" style="margin-top:0;">
+            <span class="spinner"></span><span>Subir foto</span>
+          </button>
+        </div>
+        <div class="banner" id="bannerFotoRapida"></div>
+      </div>
+
+      <div id="recepcionCandidatos" style="margin-top:16px;"></div>
+
+      <h2 style="margin-top:22px;">Historial de esta sesión</h2>
+      <div id="recepcionLog"></div>
+    </div>
+
+    <div class="card tab-panel" id="tabPaquetes" style="display:none;">
       <h2>Todos los paquetes</h2>
       <p class="card-sub">Actualiza el estado a medida que avanzan en la ruta Miami → Panamá.</p>
 
@@ -427,8 +660,122 @@
       </div>
       <div class="empty" id="emptySucursales" style="display:none;">Aún no hay sucursales creadas.</div>
     </div>
+
+    <!-- ---- TAB: Reportes ---- -->
+    <div class="card tab-panel" id="tabReportes" style="display:none;">
+      <h2>Reportes</h2>
+      <p class="card-sub">Resumen de operaciones en el rango de fechas seleccionado.</p>
+
+      <div class="filtros">
+        <div>
+          <label for="repDesde">Desde</label>
+          <input type="date" id="repDesde">
+        </div>
+        <div>
+          <label for="repHasta">Hasta</label>
+          <input type="date" id="repHasta">
+        </div>
+        <div style="flex:0;">
+          <label>&nbsp;</label>
+          <button class="btn-secondary" id="btnActualizarReporte">Actualizar</button>
+        </div>
+        <div style="flex:0;">
+          <label>&nbsp;</label>
+          <button class="btn-secondary" id="btnExportarCsv">Exportar CSV</button>
+        </div>
+      </div>
+
+      <div class="rep-stats">
+        <div class="rep-stat">
+          <div class="rep-stat-l">Ingresos (pagado)</div>
+          <div class="rep-stat-n" id="repIngresos">$0.00</div>
+          <div class="rep-stat-sub" id="repIngresosCant">0 facturas</div>
+        </div>
+        <div class="rep-stat">
+          <div class="rep-stat-l">Por cobrar (pendiente)</div>
+          <div class="rep-stat-n amber" id="repPendiente">$0.00</div>
+          <div class="rep-stat-sub" id="repPendienteCant">0 facturas</div>
+        </div>
+        <div class="rep-stat">
+          <div class="rep-stat-l">Paquetes nuevos</div>
+          <div class="rep-stat-n" id="repPaquetesNuevos">0</div>
+          <div class="rep-stat-sub">en el rango</div>
+        </div>
+        <div class="rep-stat">
+          <div class="rep-stat-l">Clientes nuevos</div>
+          <div class="rep-stat-n" id="repClientesNuevos">0</div>
+          <div class="rep-stat-sub">en el rango</div>
+        </div>
+      </div>
+
+      <h2 style="margin-top:26px;">Ingresos por día</h2>
+      <div id="graficoIngresos" class="grafico-box"></div>
+
+      <div class="rep-cols">
+        <div>
+          <h2 style="margin-top:26px;">Paquetes por estado</h2>
+          <table>
+            <thead><tr><th>Estado</th><th>Cantidad</th></tr></thead>
+            <tbody id="tbodyEstadoPaquetes"></tbody>
+          </table>
+        </div>
+        <div>
+          <h2 style="margin-top:26px;">Top 5 clientes (por paquetes)</h2>
+          <table>
+            <thead><tr><th>Cliente</th><th>Paquetes</th></tr></thead>
+            <tbody id="tbodyTopClientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
+</div>
+
+<!-- ======================= MODAL: Fotos del paquete ======================= -->
+<div id="modalFotos" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="modalFotosTitulo">Fotos del paquete</h2>
+      <button class="modal-close" id="btnCerrarModalFotos">✕</button>
+    </div>
+
+    <div class="upload-zone">
+      <input type="file" id="inputFotos" accept="image/*" multiple>
+      <button class="btn-primary" id="btnSubirFotos" style="margin-top:10px;">
+        <span class="spinner"></span><span>Subir fotos</span>
+      </button>
+      <div class="banner" id="bannerFotos"></div>
+    </div>
+
+    <div class="galeria" id="galeriaFotos"></div>
+    <div class="empty" id="emptyFotos" style="display:none;">Aún no hay fotos de este paquete.</div>
+  </div>
+</div>
+
+<!-- ======================= MODAL: Firma digital de entrega ======================= -->
+<div id="modalFirma" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Firma de entrega</h2>
+      <button class="modal-close" id="btnCerrarModalFirma">✕</button>
+    </div>
+
+    <p class="card-sub" id="firmaResumen">El cliente debe firmar aquí para confirmar que recibió su paquete.</p>
+
+    <div class="firma-lienzo-box">
+      <canvas id="canvasFirma"></canvas>
+      <div class="firma-placeholder" id="firmaPlaceholder">Firma aquí con el dedo o el mouse</div>
+    </div>
+
+    <div class="firma-acciones">
+      <button class="btn-secondary" id="btnLimpiarFirma">Limpiar</button>
+      <button class="btn-primary" id="btnConfirmarFirma" style="margin-top:0;">
+        <span class="spinner"></span><span>Confirmar entrega</span>
+      </button>
+    </div>
+    <div class="banner" id="bannerFirma"></div>
+  </div>
 </div>
 
 <script>
@@ -504,7 +851,44 @@
 
   $('#btnLogout').addEventListener('click', () => {
     localStorage.removeItem(TOKEN_KEY);
-    mostrarAdmin(false);
+    window.location.href = 'index.html';
+  });
+
+  // ---------- Olvidé mi contraseña ----------
+  $('#btnMostrarOlvide').addEventListener('click', () => {
+    $('#formLogin').style.display = 'none';
+    $('#formOlvide').style.display = 'block';
+  });
+  $('#btnVolverLogin').addEventListener('click', () => {
+    $('#formOlvide').style.display = 'none';
+    $('#formLogin').style.display = 'block';
+  });
+
+  $('#formOlvide').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnOlvide');
+    const email = $('#olvideEmail').value.trim();
+
+    if (!email){
+      mostrarBanner('#bannerOlvide', 'error', 'Escribe tu correo.');
+      return;
+    }
+
+    setCargando(btn, true);
+    try {
+      const res = await fetch(`${API_URL}/auth/olvide-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      mostrarBanner('#bannerOlvide', 'success', (data.mensaje || 'Si ese correo existe, te enviamos un enlace.') + ' Al abrirlo podrás crear tu nueva contraseña y luego volver aquí a iniciar sesión.');
+      $('#formOlvide').reset();
+    } catch (err) {
+      mostrarBanner('#bannerOlvide', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
   });
 
   async function apiAdmin(path, opciones = {}){
@@ -521,18 +905,34 @@
     return res;
   }
 
-  // ---------- Tabs ----------
+  async function apiAdminFormData(path, formData){
+    const token = localStorage.getItem(TOKEN_KEY);
+    const res = await fetch(`${API_URL}${path}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` }, // sin Content-Type: el navegador arma el boundary del multipart
+      body: formData,
+    });
+    if (res.status === 401 || res.status === 403){
+      localStorage.removeItem(TOKEN_KEY);
+      mostrarAdmin(false);
+      throw new Error('Sesión inválida');
+    }
+    return res;
+  }
   document.querySelectorAll('.tab-nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
       const tab = btn.dataset.tab;
-      if (tab === 'paquetes') $('#tabPaquetes').style.display = 'block';
+      if (tab === 'paquetes'){ $('#tabPaquetes').style.display = 'block'; cargarPaquetes(); }
+      if (tab === 'mostrador'){ $('#tabMostrador').style.display = 'block'; cargarPendientesMostrador(); }
+      if (tab === 'recepcion'){ $('#tabRecepcion').style.display = 'block'; setTimeout(() => $('#recepcionTracking').focus(), 50); }
       if (tab === 'clientes'){ $('#tabClientes').style.display = 'block'; cargarClientes(); }
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
       if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); cargarOpcionesFactura(); }
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
+      if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
     });
   });
 
@@ -571,13 +971,23 @@
         </td>
         <td data-label="Estado"><span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span></td>
         <td data-label="Actualizar">
-          <select class="estado-select" data-id="${p.id}">
-            ${ESTADOS.map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${ESTADO_LABEL[e]}</option>`).join('')}
-          </select>
+          ${p.estado === 'entregado' ? `
+            <span class="estado-bloqueado" title="Ya entregado — el estado no se puede modificar">🔒 Entregado</span>
+          ` : `
+            <select class="estado-select" data-id="${p.id}">
+              ${ESTADOS.map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${ESTADO_LABEL[e]}</option>`).join('')}
+            </select>
+          `}
         </td>
-        <td data-label=""></td>
+        <td data-label="">
+          <button class="btn-secondary btn-fotos" data-id="${p.id}">📷 Fotos</button>
+        </td>
       </tr>
     `).join('');
+
+    tbody.querySelectorAll('.btn-fotos').forEach(btn => {
+      btn.addEventListener('click', () => abrirModalFotos(btn.dataset.id));
+    });
 
     tbody.querySelectorAll('.btn-guardar-peso').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -862,14 +1272,16 @@
     try {
       const res = await apiAdmin('/admin/paquetes');
       const data = await res.json();
-      const elegibles = (data.paquetes || []).filter(p => p.peso_real_lb);
+      // Solo paquetes con peso confirmado Y que todavía NO tengan una factura
+      // activa (pendiente o pagada) — una vez facturado, desaparece de aquí.
+      const elegibles = (data.paquetes || []).filter(p => p.peso_real_lb && !p.factura_id);
 
       const select = $('#facturaPaquete');
       select.innerHTML = elegibles.length
         ? elegibles.map(p =>
             `<option value="${p.id}">${escapeHtml(p.cliente_nombre)} — ${escapeHtml(p.tienda)} (${escapeHtml(p.numero_tracking)}) — ${p.peso_real_lb} lb</option>`
           ).join('')
-        : '<option value="">No hay paquetes con peso confirmado</option>';
+        : '<option value="">No hay paquetes pendientes de facturar</option>';
 
       await cargarTarifas(); // también llena el select de tarifas
     } catch (err) {}
@@ -936,7 +1348,12 @@
               <option value="anulada" ${f.estado === 'anulada' ? 'selected' : ''}>Anulada</option>
             </select>
           </td>
-          <td data-label=""><button class="btn-secondary btn-ver-pdf" data-id="${f.id}">Ver PDF</button></td>
+          <td data-label="">
+            <div class="row-actions">
+              <button class="btn-secondary btn-ver-pdf" data-id="${f.id}">Ver PDF</button>
+              <button class="btn-secondary btn-reenviar-factura" data-id="${f.id}">Reenviar</button>
+            </div>
+          </td>
         </tr>
       `).join('');
 
@@ -972,15 +1389,810 @@
           }
         });
       });
+
+      $('#tbodyFacturas').querySelectorAll('.btn-reenviar-factura').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const textoOriginal = btn.textContent;
+          btn.textContent = 'Enviando…';
+          btn.disabled = true;
+          try {
+            const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/reenviar`, { method: 'POST' });
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok){
+              const envios = data.envios || {};
+              const partes = [];
+              partes.push(envios.correo_enviado ? 'Correo ✓' : 'Correo ✗');
+              partes.push(envios.whatsapp_enviado ? 'WhatsApp ✓' : 'WhatsApp ✗');
+              mostrarBanner('#bannerFactura', envios.correo_enviado || envios.whatsapp_enviado ? 'success' : 'error', `Reenvío: ${partes.join(' — ')}`);
+            } else {
+              mostrarBanner('#bannerFactura', 'error', data.mensaje || 'No se pudo reenviar la factura.');
+            }
+          } catch (err) {
+            mostrarBanner('#bannerFactura', 'error', 'No pudimos conectar con el servidor.');
+          } finally {
+            btn.textContent = textoOriginal;
+            btn.disabled = false;
+          }
+        });
+      });
     } catch (err) {}
   }
 
   $('#btnFiltrarFacturas').addEventListener('click', (e) => { e.preventDefault(); cargarFacturas(); });
 
+  // ---------- Modal de fotos ----------
+  let paqueteFotosActual = null;
+
+  async function abrirModalFotos(paqueteId){
+    paqueteFotosActual = paqueteId;
+    $('#modalFotosTitulo').textContent = `Fotos del paquete #${paqueteId}`;
+    $('#inputFotos').value = '';
+    mostrarBanner('#bannerFotos', '', '');
+    $('#modalFotos').classList.add('show');
+    await cargarFotosPaquete(paqueteId);
+  }
+
+  function cerrarModalFotos(){
+    $('#modalFotos').classList.remove('show');
+    paqueteFotosActual = null;
+  }
+
+  $('#btnCerrarModalFotos').addEventListener('click', cerrarModalFotos);
+  $('#modalFotos').addEventListener('click', (e) => {
+    if (e.target.id === 'modalFotos') cerrarModalFotos();
+  });
+
+  async function cargarFotosPaquete(paqueteId){
+    try {
+      const res = await apiAdmin(`/admin/paquetes/${paqueteId}/fotos`);
+      const data = await res.json();
+      renderGaleriaFotos(data.fotos || []);
+    } catch (err) {}
+  }
+
+  function renderGaleriaFotos(fotos){
+    const galeria = $('#galeriaFotos');
+    $('#emptyFotos').style.display = fotos.length ? 'none' : 'block';
+
+    galeria.innerHTML = fotos.map(f => `
+      <div class="foto-item">
+        <img src="${f.url}" alt="Foto del paquete" data-url="${f.url}">
+        <button class="btn-eliminar-foto" data-id="${f.id}" title="Eliminar">✕</button>
+      </div>
+    `).join('');
+
+    galeria.querySelectorAll('img').forEach(img => {
+      img.addEventListener('click', () => window.open(img.dataset.url, '_blank'));
+    });
+
+    galeria.querySelectorAll('.btn-eliminar-foto').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Eliminar esta foto?')) return;
+        try {
+          const res = await apiAdmin(`/admin/paquetes/${paqueteFotosActual}/fotos/${btn.dataset.id}`, {
+            method: 'DELETE',
+          });
+          if (res.ok) await cargarFotosPaquete(paqueteFotosActual);
+        } catch (err) {}
+      });
+    });
+  }
+
+  $('#btnSubirFotos').addEventListener('click', async () => {
+    const input = $('#inputFotos');
+    if (!input.files || input.files.length === 0){
+      mostrarBanner('#bannerFotos', 'error', 'Selecciona al menos una foto.');
+      return;
+    }
+
+    const btn = $('#btnSubirFotos');
+    const formData = new FormData();
+    Array.from(input.files).forEach(file => formData.append('fotos', file));
+
+    setCargando(btn, true);
+    try {
+      const res = await apiAdminFormData(`/admin/paquetes/${paqueteFotosActual}/fotos`, formData);
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 201){
+        mostrarBanner('#bannerFotos', 'success', 'Fotos subidas correctamente.');
+        input.value = '';
+        await cargarFotosPaquete(paqueteFotosActual);
+      } else {
+        mostrarBanner('#bannerFotos', 'error', data.mensaje || 'No se pudieron subir las fotos.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerFotos', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
+  // ---------- Mostrador ----------
+  const ESTADO_LABEL_MOSTRADOR = {
+    prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
+    en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
+  };
+
+  $('#formBuscarMostrador').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const q = $('#mostradorQ').value.trim();
+    if (!q){
+      mostrarBanner('#bannerMostrador', 'error', 'Escribe algo para buscar.');
+      return;
+    }
+
+    const btn = $('#btnBuscarMostrador');
+    setCargando(btn, true);
+    mostrarBanner('#bannerMostrador', '', '');
+    $('#resultadoMostrador').innerHTML = '';
+
+    try {
+      const res = await apiAdmin(`/admin/mostrador/buscar?q=${encodeURIComponent(q)}`);
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok){
+        mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'No se encontró nada.');
+        return;
+      }
+
+      if (data.multiples){
+        $('#resultadoMostrador').innerHTML = `
+          <p class="card-sub">Encontramos varios clientes, elige uno:</p>
+          <div class="cliente-multiples">
+            ${data.clientes.map(c => `
+              <button data-casillero="${escapeHtml(c.numero_casillero)}">
+                ${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)} — ${escapeHtml(c.email)} (${escapeHtml(c.numero_casillero)})
+              </button>
+            `).join('')}
+          </div>
+        `;
+        document.querySelectorAll('.cliente-multiples button').forEach(b => {
+          b.addEventListener('click', () => {
+            $('#mostradorQ').value = b.dataset.casillero;
+            $('#formBuscarMostrador').dispatchEvent(new Event('submit'));
+          });
+        });
+        return;
+      }
+
+      renderResultadoMostrador(data.cliente, data.paquetes, data.facturas_pendientes || []);
+    } catch (err) {
+      mostrarBanner('#bannerMostrador', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
+  // ---------- Facturas pendientes (todas, sin buscar) ----------
+  async function cargarPendientesMostrador(){
+    const cont = $('#pendientesMostrador');
+    try {
+      const res = await apiAdmin('/admin/facturas?estado=pendiente');
+      const data = await res.json();
+      const facturas = data.facturas || [];
+
+      $('#emptyPendientesMostrador').style.display = facturas.length ? 'none' : 'block';
+
+      cont.innerHTML = facturas.map(f => {
+        const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+        const yaEntregado = f.paquete_estado === 'entregado';
+
+        return `
+          <div class="mostrador-item" data-factura-pendiente="${f.id}" data-paquete-id="${f.paquete_id}" data-ya-entregado="${yaEntregado}">
+            <div class="mi-top">
+              <div>
+                <div class="mi-tienda">${escapeHtml(f.numero_factura)} — ${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</div>
+                <div class="mi-tracking">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${escapeHtml(f.cliente_email)} · ${fecha}</div>
+              </div>
+              <span class="badge badge-prealertado">$${Number(f.total).toFixed(2)}</span>
+            </div>
+            ${!yaEntregado ? `<div class="mi-factura-info">📦 Este paquete <strong>todavía no se ha entregado</strong> — al cobrar, también se pedirá la firma de entrega.</div>` : ''}
+            <div class="mi-metodo-pago">
+              <select class="metodo-pago-select">
+                <option value="">Elige método de pago…</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta (física, en oficina)</option>
+                <option value="transferencia">Transferencia</option>
+              </select>
+              <button class="btn-entregar" data-accion="${yaEntregado ? 'cobrar' : 'cobrar-entregar'}">
+                ${yaEntregado ? 'Cobrar' : 'Cobrar y entregar (con firma)'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      cont.querySelectorAll('.mostrador-item').forEach(item => {
+        const btn = item.querySelector('.btn-entregar');
+        const yaEntregado = item.dataset.yaEntregado === 'true';
+
+        btn.addEventListener('click', async () => {
+          const facturaId = item.dataset.facturaPendiente;
+          const paqueteId = item.dataset.paqueteId;
+          const select = item.querySelector('.metodo-pago-select');
+          const metodoPago = select.value;
+
+          if (!metodoPago){
+            mostrarBanner('#bannerMostrador', 'error', 'Elige el método de pago antes de cobrar.');
+            return;
+          }
+
+          // Paquete NO entregado todavía: hay que pasar por la firma, igual
+          // que en "Cobrar y entregar" de los resultados de búsqueda.
+          if (!yaEntregado){
+            abrirModalFirma({
+              paqueteId, facturaId, metodoPago,
+              item, btnOriginal: btn,
+              textoOriginal: 'Cobrar y entregar (con firma)',
+            });
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Procesando…';
+
+          try {
+            const res = await apiAdmin('/admin/mostrador/cobrar', {
+              method: 'POST',
+              body: JSON.stringify({ factura_id: facturaId, metodo_pago: metodoPago }),
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok){
+              mostrarBanner('#bannerMostrador', 'success', '✓ Factura cobrada correctamente.');
+              item.remove();
+              if ($('#pendientesMostrador').children.length === 0){
+                $('#emptyPendientesMostrador').style.display = 'block';
+              }
+            } else {
+              mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'No se pudo cobrar.');
+              btn.disabled = false;
+              btn.textContent = 'Cobrar';
+            }
+          } catch (err) {
+            mostrarBanner('#bannerMostrador', 'error', 'No pudimos conectar con el servidor.');
+            btn.disabled = false;
+          }
+        });
+      });
+    } catch (err) {
+      cont.innerHTML = '';
+    }
+  }
+
+  function renderResultadoMostrador(cliente, paquetes, facturasPendientes){
+    const cont = $('#resultadoMostrador');
+
+    let html = `
+      <div class="cliente-card">
+        <div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div>
+        <div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono ? ' · ' + escapeHtml(cliente.telefono) : ''}</div>
+      </div>
+    `;
+
+    // IDs de facturas que ya se muestran ligadas a un paquete por entregar,
+    // para no duplicarlas en la lista de "facturas pendientes" de abajo.
+    const idsFacturaEnPaquetes = new Set(paquetes.filter(p => p.factura_id).map(p => p.factura_id));
+    const facturasSueltas = facturasPendientes.filter(f => !idsFacturaEnPaquetes.has(f.id));
+
+    if (facturasSueltas.length > 0){
+      html += `
+        <h2 style="margin-top:20px;">Facturas pendientes (de paquetes ya entregados)</h2>
+        <div id="listaFacturasSueltas"></div>
+      `;
+    }
+
+    if (paquetes.length === 0 && facturasSueltas.length === 0){
+      html += '<div class="empty">Este cliente no tiene paquetes por entregar ni facturas pendientes.</div>';
+      cont.innerHTML = html;
+      return;
+    }
+
+    if (paquetes.length > 0){
+      html += '<h2 style="margin-top:20px;">Paquetes por entregar</h2>';
+    }
+
+    html += paquetes.map(p => {
+      const tieneFacturaPendiente = p.factura_id && p.factura_estado === 'pendiente';
+      const facturaInfo = p.factura_id
+        ? `<div class="mi-factura-info">
+             Factura ${escapeHtml(p.numero_factura)}:
+             <span class="badge badge-${p.factura_estado === 'pendiente' ? 'prealertado' : 'listo_para_retiro'}">
+               ${p.factura_estado === 'pendiente' ? `Pendiente — $${Number(p.factura_total).toFixed(2)}` : 'Pagada'}
+             </span>
+           </div>`
+        : '<div class="mi-factura-info muted">Sin factura generada todavía.</div>';
+
+      return `
+        <div class="mostrador-item" data-paquete="${p.id}" data-factura="${p.factura_id || ''}">
+          <div class="mi-top">
+            <div>
+              <div class="mi-tienda">${escapeHtml(p.tienda)}</div>
+              <div class="mi-tracking">#${escapeHtml(p.numero_tracking)}</div>
+            </div>
+            <span class="badge badge-${p.estado}">${ESTADO_LABEL_MOSTRADOR[p.estado] || p.estado}</span>
+          </div>
+          ${facturaInfo}
+          <div class="mi-metodo-pago">
+            ${tieneFacturaPendiente ? `
+              <select class="metodo-pago-select">
+                <option value="">Elige método de pago…</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta (física, en oficina)</option>
+                <option value="transferencia">Transferencia</option>
+              </select>
+              <button class="btn-entregar" data-accion="cobrar-entregar">Cobrar y entregar</button>
+            ` : `
+              <button class="btn-entregar" data-accion="entregar">Marcar como entregado</button>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    cont.innerHTML = html;
+
+    cont.querySelectorAll('.mostrador-item').forEach(item => {
+      const btn = item.querySelector('.btn-entregar');
+      btn.addEventListener('click', () => {
+        const paqueteId = item.dataset.paquete;
+        const facturaId = item.dataset.factura || null;
+        const select = item.querySelector('.metodo-pago-select');
+        const metodoPago = select ? select.value : null;
+
+        if (select && !metodoPago){
+          mostrarBanner('#bannerMostrador', 'error', 'Elige el método de pago antes de cobrar.');
+          return;
+        }
+
+        abrirModalFirma({
+          paqueteId, facturaId, metodoPago,
+          item, btnOriginal: btn,
+          textoOriginal: select ? 'Cobrar y entregar' : 'Marcar como entregado',
+        });
+      });
+    });
+
+    // Facturas pendientes que no están ligadas a un paquete por entregar
+    // (ej. quedaron pendientes de una entrega anterior).
+    if (facturasSueltas.length > 0){
+      const listaFacturas = $('#listaFacturasSueltas');
+      listaFacturas.innerHTML = facturasSueltas.map(f => {
+        const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+        return `
+          <div class="mostrador-item" data-factura-suelta="${f.id}">
+            <div class="mi-top">
+              <div>
+                <div class="mi-tienda">${escapeHtml(f.numero_factura)}</div>
+                <div class="mi-tracking">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${fecha}</div>
+              </div>
+              <span class="badge badge-prealertado">Pendiente — $${Number(f.total).toFixed(2)}</span>
+            </div>
+            <div class="mi-metodo-pago">
+              <select class="metodo-pago-select">
+                <option value="">Elige método de pago…</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta (física, en oficina)</option>
+                <option value="transferencia">Transferencia</option>
+              </select>
+              <button class="btn-entregar" data-accion="cobrar">Cobrar</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      listaFacturas.querySelectorAll('.mostrador-item').forEach(item => {
+        const btn = item.querySelector('.btn-entregar');
+        btn.addEventListener('click', async () => {
+          const facturaId = item.dataset.facturaSuelta;
+          const select = item.querySelector('.metodo-pago-select');
+          const metodoPago = select.value;
+
+          if (!metodoPago){
+            mostrarBanner('#bannerMostrador', 'error', 'Elige el método de pago antes de cobrar.');
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Procesando…';
+
+          try {
+            const res = await apiAdmin('/admin/mostrador/cobrar', {
+              method: 'POST',
+              body: JSON.stringify({ factura_id: facturaId, metodo_pago: metodoPago }),
+            });
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok){
+              mostrarBanner('#bannerMostrador', 'success', '✓ Factura cobrada correctamente.');
+              item.remove();
+              cargarPendientesMostrador();
+            } else {
+              mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'No se pudo cobrar.');
+              btn.disabled = false;
+              btn.textContent = 'Cobrar';
+            }
+          } catch (err) {
+            mostrarBanner('#bannerMostrador', 'error', 'No pudimos conectar con el servidor.');
+            btn.disabled = false;
+          }
+        });
+      });
+    }
+  }
+
+  // ---------- Modal de firma digital ----------
+  let entregaPendiente = null;
+  let dibujando = false;
+  let firmaTieneTrazo = false;
+  const canvasFirma = document.getElementById('canvasFirma');
+  const ctxFirma = canvasFirma.getContext('2d');
+
+  function ajustarTamanoCanvas(){
+    const rect = canvasFirma.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    canvasFirma.width = rect.width * ratio;
+    canvasFirma.height = rect.height * ratio;
+    ctxFirma.scale(ratio, ratio);
+    ctxFirma.lineWidth = 2.2;
+    ctxFirma.lineCap = 'round';
+    ctxFirma.strokeStyle = '#0c1b33';
+  }
+
+  function posicionDesdeEvento(e){
+    const rect = canvasFirma.getBoundingClientRect();
+    const punto = e.touches ? e.touches[0] : e;
+    return { x: punto.clientX - rect.left, y: punto.clientY - rect.top };
+  }
+
+  function iniciarTrazo(e){
+    e.preventDefault();
+    dibujando = true;
+    firmaTieneTrazo = true;
+    $('#firmaPlaceholder').classList.add('oculto');
+    const { x, y } = posicionDesdeEvento(e);
+    ctxFirma.beginPath();
+    ctxFirma.moveTo(x, y);
+  }
+
+  function continuarTrazo(e){
+    if (!dibujando) return;
+    e.preventDefault();
+    const { x, y } = posicionDesdeEvento(e);
+    ctxFirma.lineTo(x, y);
+    ctxFirma.stroke();
+  }
+
+  function terminarTrazo(){
+    dibujando = false;
+  }
+
+  canvasFirma.addEventListener('mousedown', iniciarTrazo);
+  canvasFirma.addEventListener('mousemove', continuarTrazo);
+  window.addEventListener('mouseup', terminarTrazo);
+  canvasFirma.addEventListener('touchstart', iniciarTrazo, { passive: false });
+  canvasFirma.addEventListener('touchmove', continuarTrazo, { passive: false });
+  canvasFirma.addEventListener('touchend', terminarTrazo);
+
+  function limpiarCanvasFirma(){
+    ajustarTamanoCanvas();
+    ctxFirma.clearRect(0, 0, canvasFirma.width, canvasFirma.height);
+    firmaTieneTrazo = false;
+    $('#firmaPlaceholder').classList.remove('oculto');
+  }
+
+  function abrirModalFirma(contexto){
+    entregaPendiente = contexto;
+    const resumenTexto = contexto.metodoPago
+      ? `Cobro de $${contexto.item?.querySelector('.badge')?.textContent.replace(/[^0-9.]/g, '') || ''} (${contexto.metodoPago}) — el cliente firma para confirmar que recibió su paquete.`
+      : 'El cliente firma aquí para confirmar que recibió su paquete.';
+    $('#firmaResumen').textContent = resumenTexto;
+    mostrarBanner('#bannerFirma', '', '');
+    $('#modalFirma').classList.add('show');
+    setTimeout(limpiarCanvasFirma, 50); // espera a que el modal sea visible para medir bien el canvas
+  }
+
+  function cerrarModalFirma(){
+    $('#modalFirma').classList.remove('show');
+    entregaPendiente = null;
+  }
+
+  $('#btnCerrarModalFirma').addEventListener('click', cerrarModalFirma);
+  $('#modalFirma').addEventListener('click', (e) => {
+    if (e.target.id === 'modalFirma') cerrarModalFirma();
+  });
+  $('#btnLimpiarFirma').addEventListener('click', limpiarCanvasFirma);
+
+  $('#btnConfirmarFirma').addEventListener('click', async () => {
+    if (!entregaPendiente) return;
+
+    if (!firmaTieneTrazo){
+      mostrarBanner('#bannerFirma', 'error', 'El cliente debe firmar antes de confirmar.');
+      return;
+    }
+
+    const btnConfirmar = $('#btnConfirmarFirma');
+    setCargando(btnConfirmar, true);
+
+    const firmaDataUrl = canvasFirma.toDataURL('image/png');
+    const { paqueteId, facturaId, metodoPago, item, btnOriginal, textoOriginal } = entregaPendiente;
+
+    try {
+      const res = await apiAdmin('/admin/mostrador/entregar', {
+        method: 'POST',
+        body: JSON.stringify({
+          paquete_id: paqueteId,
+          factura_id: facturaId || undefined,
+          metodo_pago: metodoPago || undefined,
+          firma: firmaDataUrl,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok){
+        cerrarModalFirma();
+        mostrarBanner('#bannerMostrador', 'success', '✓ Paquete entregado' + (metodoPago ? ' y factura cobrada.' : '.') + ' Firma guardada.');
+        item.remove();
+        if (metodoPago) cargarPendientesMostrador();
+      } else {
+        mostrarBanner('#bannerFirma', 'error', data.mensaje || 'No se pudo procesar la entrega.');
+        if (btnOriginal){ btnOriginal.disabled = false; btnOriginal.textContent = textoOriginal; }
+      }
+    } catch (err) {
+      mostrarBanner('#bannerFirma', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btnConfirmar, false);
+    }
+  });
+
+  // ---------- Recepción rápida ----------
+  let recepcionContador = 0;
+  const recepcionHistorial = [];
+
+  function agregarAlLogRecepcion(entrada){
+    recepcionHistorial.unshift(entrada);
+    const log = $('#recepcionLog');
+    log.innerHTML = recepcionHistorial.map(e => `
+      <div class="recepcion-item ${e.tipo}">
+        <div class="ri-info">
+          <span class="ri-tracking">${escapeHtml(e.tracking)}</span>
+          <span class="ri-detalle">${escapeHtml(e.detalle)}</span>
+        </div>
+        <span class="ri-hora">${e.hora}</span>
+      </div>
+    `).join('');
+  }
+
+  async function procesarRecepcion(numeroTracking){
+    const banner = null; // usamos el log en vez de un banner fijo
+    try {
+      const res = await apiAdmin('/admin/paquetes/recibir', {
+        method: 'POST',
+        body: JSON.stringify({ numero_tracking: numeroTracking }),
+      });
+      const data = await res.json().catch(() => ({}));
+      const hora = new Date().toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      if (!res.ok){
+        agregarAlLogRecepcion({ tipo: 'error', tracking: numeroTracking, detalle: data.mensaje || 'No se pudo recibir', hora });
+        $('#recepcionCandidatos').innerHTML = '';
+        return;
+      }
+
+      if (data.multiples){
+        $('#recepcionCandidatos').innerHTML = `
+          <div class="banner show error">Hay varios clientes con ese mismo tracking. Elige el correcto:</div>
+          <div class="cliente-multiples">
+            ${data.candidatos.map(c => `
+              <button data-id="${c.id}">${escapeHtml(c.tienda)} — ${escapeHtml(c.cliente_nombre)} (${escapeHtml(c.numero_casillero)})</button>
+            `).join('')}
+          </div>
+        `;
+        document.querySelectorAll('#recepcionCandidatos .cliente-multiples button').forEach(b => {
+          b.addEventListener('click', async () => {
+            const r = await apiAdmin(`/admin/paquetes/recibir/${b.dataset.id}/confirmar`, { method: 'POST' });
+            const d = await r.json().catch(() => ({}));
+            const h = new Date().toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            if (r.ok){
+              recepcionContador++;
+              $('#recepcionContador').textContent = recepcionContador;
+              $('#recepcionUltimo').textContent = d.paquete.numero_tracking;
+              agregarAlLogRecepcion({ tipo: 'ok', tracking: d.paquete.numero_tracking, detalle: 'Recibido en bodega Miami', hora: h });
+              mostrarFotoRapida(d.paquete.id, d.paquete.numero_tracking);
+            }
+            $('#recepcionCandidatos').innerHTML = '';
+          });
+        });
+        return;
+      }
+
+      $('#recepcionCandidatos').innerHTML = '';
+      recepcionContador++;
+      $('#recepcionContador').textContent = recepcionContador;
+      $('#recepcionUltimo').textContent = data.paquete.numero_tracking;
+      agregarAlLogRecepcion({
+        tipo: 'ok',
+        tracking: data.paquete.numero_tracking,
+        detalle: `${data.cliente.nombre} (${data.cliente.numero_casillero}) — recibido en bodega Miami`,
+        hora,
+      });
+      mostrarFotoRapida(data.paquete.id, data.paquete.numero_tracking);
+    } catch (err) {
+      const hora = new Date().toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      agregarAlLogRecepcion({ tipo: 'error', tracking: numeroTracking, detalle: 'No pudimos conectar con el servidor', hora });
+    }
+  }
+
+  // ---------- Foto rápida (justo después de recibir) ----------
+  let fotoRapidaPaqueteId = null;
+
+  function mostrarFotoRapida(paqueteId, tracking){
+    fotoRapidaPaqueteId = paqueteId;
+    $('#fotoRapidaTracking').textContent = tracking;
+    $('#fotoRapidaInput').value = '';
+    mostrarBanner('#bannerFotoRapida', '', '');
+    $('#fotoRapidaBox').style.display = 'block';
+  }
+
+  function ocultarFotoRapida(){
+    $('#fotoRapidaBox').style.display = 'none';
+    fotoRapidaPaqueteId = null;
+    $('#recepcionTracking').focus();
+  }
+
+  $('#btnFotoRapidaOmitir').addEventListener('click', ocultarFotoRapida);
+
+  $('#btnFotoRapidaSubir').addEventListener('click', async () => {
+    const input = $('#fotoRapidaInput');
+    if (!input.files || input.files.length === 0){
+      mostrarBanner('#bannerFotoRapida', 'error', 'Selecciona al menos una foto, o dale "Omitir".');
+      return;
+    }
+
+    const btn = $('#btnFotoRapidaSubir');
+    const formData = new FormData();
+    Array.from(input.files).forEach(file => formData.append('fotos', file));
+
+    setCargando(btn, true);
+    try {
+      const res = await apiAdminFormData(`/admin/paquetes/${fotoRapidaPaqueteId}/fotos`, formData);
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 201){
+        mostrarBanner('#bannerFotoRapida', 'success', '✓ Foto guardada.');
+        setTimeout(ocultarFotoRapida, 700);
+      } else {
+        mostrarBanner('#bannerFotoRapida', 'error', data.mensaje || 'No se pudo subir la foto.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerFotoRapida', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
+  $('#formRecepcion').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = $('#recepcionTracking');
+    const tracking = input.value.trim();
+    if (!tracking) return;
+
+    input.value = '';
+    input.focus(); // listo para el siguiente escaneo de inmediato
+
+    const btn = $('#btnRecepcion');
+    setCargando(btn, true);
+    await procesarRecepcion(tracking);
+    setCargando(btn, false);
+    input.focus();
+  });
+
+  // ---------- Reportes ----------
+  const ESTADO_LABEL_REPORTE = {
+    prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
+    en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
+  };
+
+  let ultimoReporte = null;
+
+  function fechaISO(d){ return d.toISOString().slice(0, 10); }
+
+  function inicializarFechasReporte(){
+    if ($('#repDesde').value && $('#repHasta').value) return;
+    const hoy = new Date();
+    const hace30 = new Date(hoy.getTime() - 29 * 24 * 60 * 60 * 1000);
+    $('#repHasta').value = fechaISO(hoy);
+    $('#repDesde').value = fechaISO(hace30);
+  }
+
+  async function cargarReporte(){
+    inicializarFechasReporte();
+    const params = new URLSearchParams({
+      desde: $('#repDesde').value,
+      hasta: $('#repHasta').value,
+    });
+
+    try {
+      const res = await apiAdmin(`/admin/reportes?${params.toString()}`);
+      const data = await res.json();
+      ultimoReporte = data;
+      renderReporte(data);
+    } catch (err) {}
+  }
+
+  function renderReporte(data){
+    $('#repIngresos').textContent = `$${Number(data.ingresos.total).toFixed(2)}`;
+    $('#repIngresosCant').textContent = `${data.ingresos.cantidad} factura${data.ingresos.cantidad == 1 ? '' : 's'}`;
+    $('#repPendiente').textContent = `$${Number(data.pendientes.total).toFixed(2)}`;
+    $('#repPendienteCant').textContent = `${data.pendientes.cantidad} factura${data.pendientes.cantidad == 1 ? '' : 's'}`;
+    $('#repPaquetesNuevos').textContent = data.paquetes_nuevos;
+    $('#repClientesNuevos').textContent = data.clientes_nuevos;
+
+    // Gráfico de barras simple (sin librerías) para ingresos por día.
+    const grafico = $('#graficoIngresos');
+    const dias = data.ingresos_por_dia || [];
+    if (dias.length === 0){
+      grafico.innerHTML = '<div class="grafico-vacio">Sin ingresos registrados en este rango.</div>';
+    } else {
+      const maxTotal = Math.max(...dias.map(d => Number(d.total)), 1);
+      grafico.innerHTML = dias.map(d => {
+        const alturaPx = Math.max((Number(d.total) / maxTotal) * 150, 2);
+        const fecha = new Date(d.dia).toLocaleDateString('es-PA', { day: '2-digit', month: 'short' });
+        return `<div class="grafico-barra" style="height:${alturaPx}px;" title="${fecha}: $${Number(d.total).toFixed(2)}"></div>`;
+      }).join('');
+    }
+
+    // Paquetes por estado
+    const estados = data.paquetes_por_estado || [];
+    $('#tbodyEstadoPaquetes').innerHTML = estados.length
+      ? estados.map(e => `
+          <tr>
+            <td data-label="Estado">${ESTADO_LABEL_REPORTE[e.estado] || e.estado}</td>
+            <td data-label="Cantidad" class="mono">${e.cantidad}</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="2" class="muted">Sin datos</td></tr>';
+
+    // Top clientes
+    const top = data.top_clientes || [];
+    $('#tbodyTopClientes').innerHTML = top.length
+      ? top.map(c => `
+          <tr>
+            <td data-label="Cliente">${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)}<br><span class="muted">${escapeHtml(c.email)}</span></td>
+            <td data-label="Paquetes" class="mono">${c.total_paquetes}</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="2" class="muted">Sin datos</td></tr>';
+  }
+
+  $('#btnActualizarReporte').addEventListener('click', cargarReporte);
+
+  $('#btnExportarCsv').addEventListener('click', () => {
+    if (!ultimoReporte){
+      alert('Primero carga un reporte.');
+      return;
+    }
+    const filas = [['Fecha', 'Ingresos']];
+    (ultimoReporte.ingresos_por_dia || []).forEach(d => {
+      filas.push([new Date(d.dia).toLocaleDateString('es-PA'), Number(d.total).toFixed(2)]);
+    });
+    const csv = filas.map(f => f.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reporte-ingresos-${$('#repDesde').value}-a-${$('#repHasta').value}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  });
+
   // ---------- Arranque ----------
   async function iniciarAdmin(){
     try {
       await cargarPaquetes();
+      cargarPendientesMostrador();
       mostrarAdmin(true);
     } catch (err) {
       mostrarAdmin(false);
