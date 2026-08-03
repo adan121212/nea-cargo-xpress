@@ -229,6 +229,18 @@ router.patch(
     }
 
     try {
+      const actual = await pool.query('SELECT estado FROM paquetes WHERE id = $1', [req.params.id]);
+
+      if (actual.rows.length === 0) {
+        return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+      }
+
+      if (actual.rows[0].estado === 'entregado') {
+        return res.status(400).json({
+          mensaje: 'Este paquete ya fue entregado y su estado no se puede modificar.',
+        });
+      }
+
       const resultado = await pool.query(
         `UPDATE paquetes
          SET estado = $1, fecha_actualizacion = NOW()
