@@ -415,45 +415,9 @@
         </div>
       </div>
 
-      <div id="fotoRapidaBox" class="foto-rapida-box" style="display:none;">
-        <div class="foto-rapida-titulo">📷 Foto de <span id="fotoRapidaTracking"></span></div>
-        <p class="card-sub" style="margin:2px 0 10px;">Opcional — tómale una foto ahora, antes de pasar al siguiente paquete.</p>
-        <input type="file" id="fotoRapidaInput" accept="image/*" capture="environment" multiple>
-        <div class="foto-rapida-acciones">
-          <button class="btn-secondary" type="button" id="btnFotoRapidaOmitir">Omitir</button>
-          <button class="btn-primary" type="button" id="btnFotoRapidaSubir" style="margin-top:0;">
-            <span class="spinner"></span><span>Subir foto</span>
-          </button>
-        </div>
-        <div class="banner" id="bannerFotoRapida"></div>
-      </div>
-
-      <div id="medidaRapidaBox" class="foto-rapida-box" style="display:none;">
-        <div class="foto-rapida-titulo">📐 Medidas de <span id="medidaRapidaTracking"></span></div>
-        <p class="card-sub" style="margin:2px 0 10px;">Opcional — mide la caja ahora para calcular el peso volumétrico, antes de pasar al siguiente paquete.</p>
-        <div class="dim-inputs">
-          <div>
-            <label for="medidaRapidaLargo">Largo (in)</label>
-            <input type="number" id="medidaRapidaLargo" step="0.1" min="0" placeholder="Ej. 12">
-          </div>
-          <div>
-            <label for="medidaRapidaAncho">Ancho (in)</label>
-            <input type="number" id="medidaRapidaAncho" step="0.1" min="0" placeholder="Ej. 10">
-          </div>
-          <div>
-            <label for="medidaRapidaAlto">Alto (in)</label>
-            <input type="number" id="medidaRapidaAlto" step="0.1" min="0" placeholder="Ej. 8">
-          </div>
-        </div>
-        <div class="dim-resultado" id="medidaRapidaResultado" style="margin-top:10px;"></div>
-        <div class="foto-rapida-acciones">
-          <button class="btn-secondary" type="button" id="btnMedidaRapidaOmitir">Omitir</button>
-          <button class="btn-primary" type="button" id="btnMedidaRapidaGuardar" style="margin-top:0;">
-            <span class="spinner"></span><span>Guardar medidas</span>
-          </button>
-        </div>
-        <div class="banner" id="bannerMedidaRapida"></div>
-      </div>
+      <!-- La cámara se activa sola justo después de recibir cada paquete -->
+      <input type="file" id="fotoRapidaInput" accept="image/*" capture="environment" style="display:none;">
+      <div class="banner" id="bannerFotoRapida"></div>
 
       <div id="recepcionCandidatos" style="margin-top:16px;"></div>
 
@@ -2164,8 +2128,7 @@
               $('#recepcionContador').textContent = recepcionContador;
               $('#recepcionUltimo').textContent = d.paquete.numero_tracking;
               agregarAlLogRecepcion({ tipo: 'ok', tracking: d.paquete.numero_tracking, detalle: 'Recibido en bodega Miami', hora: h });
-              mostrarFotoRapida(d.paquete.id, d.paquete.numero_tracking);
-              mostrarMedidaRapida(d.paquete.id, d.paquete.numero_tracking);
+              activarCamaraParaFoto(d.paquete.id, d.paquete.numero_tracking);
             }
             $('#recepcionCandidatos').innerHTML = '';
           });
@@ -2183,126 +2146,47 @@
         detalle: `${data.cliente.nombre} (${data.cliente.numero_casillero}) — recibido en bodega Miami`,
         hora,
       });
-      mostrarFotoRapida(data.paquete.id, data.paquete.numero_tracking);
-      mostrarMedidaRapida(data.paquete.id, data.paquete.numero_tracking);
+      activarCamaraParaFoto(data.paquete.id, data.paquete.numero_tracking);
     } catch (err) {
       const hora = new Date().toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       agregarAlLogRecepcion({ tipo: 'error', tracking: numeroTracking, detalle: 'No pudimos conectar con el servidor', hora });
     }
   }
 
-  // ---------- Foto rápida (justo después de recibir) ----------
+  // ---------- Foto automática (la cámara se abre sola justo después de recibir) ----------
   let fotoRapidaPaqueteId = null;
+  let fotoRapidaTracking = '';
 
-  function mostrarFotoRapida(paqueteId, tracking){
+  function activarCamaraParaFoto(paqueteId, tracking){
     fotoRapidaPaqueteId = paqueteId;
-    $('#fotoRapidaTracking').textContent = tracking;
-    $('#fotoRapidaInput').value = '';
+    fotoRapidaTracking = tracking;
     mostrarBanner('#bannerFotoRapida', '', '');
-    $('#fotoRapidaBox').style.display = 'block';
-  }
-
-  function ocultarFotoRapida(){
-    $('#fotoRapidaBox').style.display = 'none';
-    fotoRapidaPaqueteId = null;
-    $('#recepcionTracking').focus();
-  }
-
-  $('#btnFotoRapidaOmitir').addEventListener('click', ocultarFotoRapida);
-
-  $('#btnFotoRapidaSubir').addEventListener('click', async () => {
     const input = $('#fotoRapidaInput');
-    if (!input.files || input.files.length === 0){
-      mostrarBanner('#bannerFotoRapida', 'error', 'Selecciona al menos una foto, o dale "Omitir".');
-      return;
-    }
+    input.value = '';
+    input.click(); // abre la cámara del celular/tablet directamente
+  }
 
-    const btn = $('#btnFotoRapidaSubir');
+  $('#fotoRapidaInput').addEventListener('change', async () => {
+    const input = $('#fotoRapidaInput');
+    if (!input.files || input.files.length === 0) return; // el usuario canceló la cámara
+
     const formData = new FormData();
-    Array.from(input.files).forEach(file => formData.append('fotos', file));
+    formData.append('fotos', input.files[0]);
 
-    setCargando(btn, true);
+    mostrarBanner('#bannerFotoRapida', '', 'Subiendo foto…');
     try {
       const res = await apiAdminFormData(`/admin/paquetes/${fotoRapidaPaqueteId}/fotos`, formData);
       const data = await res.json().catch(() => ({}));
 
       if (res.status === 201){
-        mostrarBanner('#bannerFotoRapida', 'success', '✓ Foto guardada.');
-        setTimeout(ocultarFotoRapida, 700);
+        mostrarBanner('#bannerFotoRapida', 'success', `✓ Foto guardada para ${fotoRapidaTracking}.`);
       } else {
         mostrarBanner('#bannerFotoRapida', 'error', data.mensaje || 'No se pudo subir la foto.');
       }
     } catch (err) {
       mostrarBanner('#bannerFotoRapida', 'error', 'No pudimos conectar con el servidor.');
     } finally {
-      setCargando(btn, false);
-    }
-  });
-
-  // ---------- Medidas rápidas (justo después de recibir, junto a la foto) ----------
-  let medidaRapidaPaqueteId = null;
-
-  function mostrarMedidaRapida(paqueteId, tracking){
-    medidaRapidaPaqueteId = paqueteId;
-    $('#medidaRapidaTracking').textContent = tracking;
-    $('#medidaRapidaLargo').value = '';
-    $('#medidaRapidaAncho').value = '';
-    $('#medidaRapidaAlto').value = '';
-    $('#medidaRapidaResultado').innerHTML = '';
-    mostrarBanner('#bannerMedidaRapida', '', '');
-    $('#medidaRapidaBox').style.display = 'block';
-  }
-
-  function ocultarMedidaRapida(){
-    $('#medidaRapidaBox').style.display = 'none';
-    medidaRapidaPaqueteId = null;
-  }
-
-  function actualizarPreviewMedidaRapida(){
-    const peso = calcularPesoVolumetricoPreview(
-      $('#medidaRapidaLargo').value, $('#medidaRapidaAncho').value, $('#medidaRapidaAlto').value
-    );
-    const resultado = $('#medidaRapidaResultado');
-    resultado.innerHTML = peso == null
-      ? 'Completa las tres medidas para calcular el peso volumétrico.'
-      : `Peso volumétrico estimado: <strong>${peso} lb</strong>`;
-  }
-
-  ['medidaRapidaLargo','medidaRapidaAncho','medidaRapidaAlto'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', actualizarPreviewMedidaRapida);
-  });
-
-  $('#btnMedidaRapidaOmitir').addEventListener('click', ocultarMedidaRapida);
-
-  $('#btnMedidaRapidaGuardar').addEventListener('click', async () => {
-    const largo = $('#medidaRapidaLargo').value;
-    const ancho = $('#medidaRapidaAncho').value;
-    const alto = $('#medidaRapidaAlto').value;
-
-    if (!largo || !ancho || !alto){
-      mostrarBanner('#bannerMedidaRapida', 'error', 'Completa las tres medidas, o dale "Omitir".');
-      return;
-    }
-
-    const btn = $('#btnMedidaRapidaGuardar');
-    setCargando(btn, true);
-    try {
-      const res = await apiAdmin(`/admin/paquetes/${medidaRapidaPaqueteId}/dimensiones`, {
-        method: 'PATCH',
-        body: JSON.stringify({ largo_in: largo, ancho_in: ancho, alto_in: alto }),
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok){
-        mostrarBanner('#bannerMedidaRapida', 'success', '✓ Medidas guardadas.');
-        setTimeout(ocultarMedidaRapida, 700);
-      } else {
-        mostrarBanner('#bannerMedidaRapida', 'error', data.mensaje || 'No se pudieron guardar las medidas.');
-      }
-    } catch (err) {
-      mostrarBanner('#bannerMedidaRapida', 'error', 'No pudimos conectar con el servidor.');
-    } finally {
-      setCargando(btn, false);
+      $('#recepcionTracking').focus(); // listo para seguir escaneando
     }
   });
 
@@ -2313,7 +2197,6 @@
     if (!tracking) return;
 
     input.value = '';
-    input.focus(); // listo para el siguiente escaneo de inmediato
 
     const btn = $('#btnRecepcion');
     setCargando(btn, true);
