@@ -1577,8 +1577,10 @@
 
       cont.innerHTML = facturas.map(f => {
         const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+        const yaEntregado = f.paquete_estado === 'entregado';
+
         return `
-          <div class="mostrador-item" data-factura-pendiente="${f.id}">
+          <div class="mostrador-item" data-factura-pendiente="${f.id}" data-paquete-id="${f.paquete_id}" data-ya-entregado="${yaEntregado}">
             <div class="mi-top">
               <div>
                 <div class="mi-tienda">${escapeHtml(f.numero_factura)} — ${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</div>
@@ -1586,6 +1588,7 @@
               </div>
               <span class="badge badge-prealertado">$${Number(f.total).toFixed(2)}</span>
             </div>
+            ${!yaEntregado ? `<div class="mi-factura-info">📦 Este paquete <strong>todavía no se ha entregado</strong> — al cobrar, también se pedirá la firma de entrega.</div>` : ''}
             <div class="mi-metodo-pago">
               <select class="metodo-pago-select">
                 <option value="">Elige método de pago…</option>
@@ -1593,7 +1596,9 @@
                 <option value="tarjeta">Tarjeta (física, en oficina)</option>
                 <option value="transferencia">Transferencia</option>
               </select>
-              <button class="btn-entregar" data-accion="cobrar">Cobrar</button>
+              <button class="btn-entregar" data-accion="${yaEntregado ? 'cobrar' : 'cobrar-entregar'}">
+                ${yaEntregado ? 'Cobrar' : 'Cobrar y entregar (con firma)'}
+              </button>
             </div>
           </div>
         `;
@@ -1601,13 +1606,27 @@
 
       cont.querySelectorAll('.mostrador-item').forEach(item => {
         const btn = item.querySelector('.btn-entregar');
+        const yaEntregado = item.dataset.yaEntregado === 'true';
+
         btn.addEventListener('click', async () => {
           const facturaId = item.dataset.facturaPendiente;
+          const paqueteId = item.dataset.paqueteId;
           const select = item.querySelector('.metodo-pago-select');
           const metodoPago = select.value;
 
           if (!metodoPago){
             mostrarBanner('#bannerMostrador', 'error', 'Elige el método de pago antes de cobrar.');
+            return;
+          }
+
+          // Paquete NO entregado todavía: hay que pasar por la firma, igual
+          // que en "Cobrar y entregar" de los resultados de búsqueda.
+          if (!yaEntregado){
+            abrirModalFirma({
+              paqueteId, facturaId, metodoPago,
+              item, btnOriginal: btn,
+              textoOriginal: 'Cobrar y entregar (con firma)',
+            });
             return;
           }
 
