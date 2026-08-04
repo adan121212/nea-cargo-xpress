@@ -42,7 +42,10 @@ async function calcularResumenDia(fecha) {
 }
 
 // --- GET /api/admin/caja/dia?fecha=2026-08-04 ---
-// Resumen del día (sin cerrarlo). Si no se manda ?fecha, usa el día de hoy.
+// Resumen del día. Si ese día YA fue cerrado antes, sincroniza automáticamente
+// el cierre guardado con los cobros reales de ahora mismo (por si se cobró
+// algo después del cierre) — así el cierre nunca queda desactualizado, sin
+// necesidad de que el admin haga nada extra.
 router.get(
   '/dia',
   [query('fecha').optional().isISO8601().withMessage('Fecha inválida')],
@@ -57,21 +60,36 @@ router.get(
     try {
       const { detalle, totalGeneral, cantidadFacturas } = await calcularResumenDia(fecha);
 
-      const cierreExistente = await pool.query(
-        `SELECT c.*, u.nombre AS cerrado_por_nombre, u.apellido AS cerrado_por_apellido
-         FROM cierres_caja c
-         LEFT JOIN usuarios u ON u.id = c.cerrado_por
-         WHERE c.fecha = $1`,
-        [fecha]
-      );
+      const cierreExistente = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [fecha]);
+
+      let cierreActualizado = null;
+      if (cierreExistente.rows.length > 0) {
+        // Ya estaba cerrado: sincroniza los totales guardados con la realidad actual.
+        const actualizado = await pool.query(
+          `UPDATE cierres_caja
+           SET detalle_por_metodo = $1, total_general = $2, cantidad_facturas = $3, actualizado_en = NOW()
+           WHERE fecha = $4
+           RETURNING *`,
+          [JSON.stringify(detalle), totalGeneral, cantidadFacturas, fecha]
+        );
+
+        const conNombre = await pool.query(
+          `SELECT c.*, u.nombre AS cerrado_por_nombre, u.apellido AS cerrado_por_apellido
+           FROM cierres_caja c
+           LEFT JOIN usuarios u ON u.id = c.cerrado_por
+           WHERE c.fecha = $1`,
+          [fecha]
+        );
+        cierreActualizado = conNombre.rows[0];
+      }
 
       return res.json({
         fecha,
         detalle_por_metodo: detalle,
         total_general: totalGeneral,
         cantidad_facturas: cantidadFacturas,
-        cerrado: cierreExistente.rows.length > 0,
-        cierre: cierreExistente.rows[0] || null,
+        cerrado: cierreActualizado !== null,
+        cierre: cierreActualizado,
       });
     } catch (error) {
       console.error('Error en GET /admin/caja/dia:', error);
@@ -81,9 +99,10 @@ router.get(
 );
 
 // --- POST /api/admin/caja/cerrar ---
-// Cierra el día: congela los totales de ese momento en cierres_caja.
-// Una vez cerrado un día, no se puede volver a cerrar (evita duplicados);
-// si necesitas corregirlo, hay que reabrirlo a mano en la base de datos.
+// Marca el día como cerrado por primera vez (registra quién y cuándo).
+// Si ya estaba cerrado, no se puede "re-cerrar" manualmente — pero no hace
+// falta: los totales se sincronizan solos cada vez que se consulta el día
+// (ver GET /dia), así que el cierre existente siempre refleja la realidad.
 router.post(
   '/cerrar',
   [
@@ -107,8 +126,8 @@ router.post(
       const { detalle, totalGeneral, cantidadFacturas } = await calcularResumenDia(fecha);
 
       const resultado = await pool.query(
-        `INSERT INTO cierres_caja (fecha, cerrado_por, detalle_por_metodo, total_general, cantidad_facturas, notas)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO cierres_caja (fecha, cerrado_por, detalle_por_metodo, total_general, cantidad_facturas, notas, actualizado_en)
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())
          RETURNING *`,
         [fecha, req.usuario.id, JSON.stringify(detalle), totalGeneral, cantidadFacturas, notas || null]
       );
