@@ -99,6 +99,7 @@ app.use('/api/admin/tarifas', adminTarifasRoutes);
 app.use('/api/admin/facturas', adminFacturasRoutes);
 app.use('/api/admin/reportes', adminReportesRoutes);
 app.use('/api/admin/mostrador', adminMostradorRoutes);
+app.use('/api/admin/caja', adminCajaRoutes);
 
 // Sirve el frontend (public/index.html) desde el mismo servidor,
 // así no hay problemas de CORS al llamar a /api/... desde el navegador.
