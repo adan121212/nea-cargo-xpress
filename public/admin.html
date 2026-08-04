@@ -2296,7 +2296,8 @@
     if (data.cerrado){
       const c = data.cierre;
       const hora = new Date(c.fecha_cierre).toLocaleString('es-PA', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-      estadoDiv.innerHTML = `<div class="banner show success">🔒 Este día ya fue cerrado el ${hora} por ${escapeHtml(c.cerrado_por_nombre || '')} ${escapeHtml(c.cerrado_por_apellido || '')}.</div>`;
+      const horaSync = c.actualizado_en ? new Date(c.actualizado_en).toLocaleTimeString('es-PA', { hour:'2-digit', minute:'2-digit' }) : null;
+      estadoDiv.innerHTML = `<div class="banner show success">🔒 Este día fue cerrado el ${hora} por ${escapeHtml(c.cerrado_por_nombre || '')} ${escapeHtml(c.cerrado_por_apellido || '')}.${horaSync ? ` Totales sincronizados a las ${horaSync}.` : ''}</div>`;
       cierreBox.innerHTML = '';
     } else {
       estadoDiv.innerHTML = '';
