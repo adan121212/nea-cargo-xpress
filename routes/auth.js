@@ -9,6 +9,11 @@ const { generarNumeroCasillero, direccionCasillero } = require('../utils/casille
 
 const router = express.Router();
 
+// Hash "señuelo" generado una sola vez al arrancar el servidor. Se usa quna
+// el correo no existe, para que bcrypt.compare tarde lo mismo que cuando sí
+// existe — así el tiempo de respuesta no delata si un correo está registrado.
+const HASH_SENUELO = bcrypt.hashSync('contraseña_senuelo_para_evitar_timing_attack', 10);
+
 // --- POST /api/auth/registro ---
 router.post(
   '/registro',
@@ -123,14 +128,16 @@ router.post(
         [email]
       );
 
-      if (resultado.rows.length === 0) {
-        return res.status(401).json({ mensaje: 'Correo o contraseña incorrectos' });
-      }
-
+      // Si el correo no existe, igual corremos un bcrypt.compare contra un
+      // hash señuelo, para que la respuesta tarde lo mismo que cuando el
+      // correo sí existe pero la contraseña es incorrecta. Sin esto, un
+      // atacante podría medir el tiempo de respuesta para saber qué correos
+      // están registrados (timing attack).
       const usuario = resultado.rows[0];
-      const coincide = await bcrypt.compare(password, usuario.password_hash);
+      const hashParaComparar = usuario ? usuario.password_hash : HASH_SENUELO;
+      const coincide = await bcrypt.compare(password, hashParaComparar);
 
-      if (!coincide) {
+      if (!usuario || !coincide) {
         return res.status(401).json({ mensaje: 'Correo o contraseña incorrectos' });
       }
 
@@ -250,9 +257,13 @@ router.post(
 
       const passwordHash = await bcrypt.hash(password, 10);
 
+      // Al cambiar la contraseña, invalidamos cualquier token (sesión) que
+      // haya sido emitido antes de este momento — así, si alguien tenía un
+      // token robado, deja de servirle de inmediato.
       await pool.query(
         `UPDATE usuarios
-         SET password_hash = $1, token_reset_password = NULL, token_reset_expira = NULL
+         SET password_hash = $1, token_reset_password = NULL, token_reset_expira = NULL,
+             token_valido_desde = NOW()
          WHERE id = $2`,
         [passwordHash, resultado.rows[0].id]
       );
