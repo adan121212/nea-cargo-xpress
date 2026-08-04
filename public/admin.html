@@ -663,6 +663,8 @@
     </div>
 
     <!-- ---- TAB: Reportes ---- -->
+    if (tab === 'caja'){ $('#tabCaja').style.display = 'block'; cargarCaja(); cargarHistorialCaja(); }
+    if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
     <div class="card tab-panel" id="tabReportes" style="display:none;">
       <h2>Reportes</h2>
       <p class="card-sub">Resumen de operaciones en el rango de fechas seleccionado.</p>
