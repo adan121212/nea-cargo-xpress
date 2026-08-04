@@ -771,8 +771,53 @@
   }
  
   $('#btnVerCaja').addEventListener('click', (e) => { e.preventDefault(); cargarCaja(); });
+    
  
- 
+ <div class="card tab-panel" id="tabCaja" style="display:none;">
+      <h2>Cierre de caja</h2>
+      <p class="card-sub">Total cobrado en el día, desglosado por método de pago.</p>
+
+      <div class="filtros">
+        <div>
+          <label for="cajaFecha">Fecha</label>
+          <input type="date" id="cajaFecha">
+        </div>
+        <div style="flex:0;">
+          <label>&nbsp;</label>
+          <button class="btn-secondary" id="btnVerCaja">Ver día</button>
+        </div>
+      </div>
+
+      <div id="cajaEstadoDia"></div>
+
+      <div class="rep-stats" id="cajaStats" style="margin-top:16px;"></div>
+
+      <div style="overflow-x:auto; margin-top:18px;">
+        <table>
+          <thead>
+            <tr><th>Método de pago</th><th>Facturas</th><th>Total</th></tr>
+          </thead>
+          <tbody id="tbodyCajaDetalle"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyCajaDetalle" style="display:none;">No hay cobros registrados este día.</div>
+
+      <div id="cajaCierreBox" style="margin-top:20px;"></div>
+      <div class="banner" id="bannerCaja"></div>
+
+      <h2 style="margin-top:28px;">Historial de cierres</h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Total</th><th>Facturas</th><th>Cerrado por</th><th>Hora de cierre</th></tr>
+          </thead>
+          <tbody id="tbodyCajaHistorial"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyCajaHistorial" style="display:none;">Aún no hay cierres registrados.</div>
+    </div>
+
+
 
     <!-- ---- TAB: Reportes ---- -->
     if (tab === 'caja'){ $('#tabCaja').style.display = 'block'; cargarCaja(); cargarHistorialCaja(); }
