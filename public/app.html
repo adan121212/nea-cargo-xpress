@@ -15,12 +15,18 @@
     --line: rgba(12,27,51,0.12);
     --accent:#ff6a1a;
     --accent-dark:#e2570e;
+    --accent-glow: rgba(255,106,26,0.5);
     --cargo-green:#177a63;
     --cargo-green-bg: rgba(23,122,99,0.1);
     --amber-bg: rgba(255,106,26,0.1);
     --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --shadow-card: 0 1px 2px rgba(12,27,51,0.04), 0 10px 30px -12px rgba(12,27,51,0.10);
+    --shadow-card-hover: 0 4px 10px rgba(12,27,51,0.06), 0 20px 44px -16px rgba(12,27,51,0.16);
   }
   *{ box-sizing:border-box; }
   body{
@@ -30,6 +36,11 @@
     font-family: var(--font-body);
   }
   a{ color:inherit; }
+  ::selection{ background: var(--accent); color:#fff; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
 
   /* ---------- Topbar ---------- */
   .topbar{
@@ -37,8 +48,12 @@
     align-items:center;
     justify-content:space-between;
     padding: 16px 28px;
-    background: var(--ink);
+    background: rgba(12,27,51,0.92);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
     color: #f1f3f2;
+    position: sticky; top:0; z-index: 40;
+    border-bottom: 1px solid rgba(241,243,242,0.08);
   }
   .brand{
     display:flex;
@@ -54,13 +69,14 @@
   }
   .brand .mark{
     width:30px; height:30px;
-    border-radius:6px;
+    border-radius:8px;
     background: var(--accent);
     display:flex; align-items:center; justify-content:center;
     font-family: var(--font-display);
     font-weight:700;
     font-size:14px;
     color: var(--ink);
+    box-shadow: 0 0 0 1px rgba(255,106,26,0.3), 0 2px 16px var(--accent-glow);
   }
   .brand small{
     display:block;
@@ -79,48 +95,59 @@
     background: rgba(255,106,26,0.16);
     color: #ffb27f;
     padding:5px 10px;
-    border-radius:5px;
+    border-radius:6px;
     display:none;
+    box-shadow: 0 0 0 1px rgba(255,106,26,0.2);
   }
   .btn-logout{
     background:none;
     border:1px solid rgba(241,243,242,0.25);
     color:#f1f3f2;
     padding:7px 14px;
-    border-radius:6px;
+    border-radius:7px;
     font-size:13px;
-    font-family: var(--font-body);
     cursor:pointer;
     display:none;
+    transition: border-color .15s ease, background .15s ease;
   }
-  .btn-logout:hover{ border-color: rgba(241,243,242,0.5); }
+  .btn-logout:hover{ border-color: rgba(241,243,242,0.5); background: rgba(241,243,242,0.06); }
 
   .wrap{ max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
 
   /* ---------- Vista de autenticación ---------- */
-  #vistaAuth{ display:flex; justify-content:center; padding-top: 20px; }
+  #vistaAuth{ display:flex; justify-content:center; padding-top: 20px; position:relative; }
   .auth-shell{
     display:grid;
     grid-template-columns: 1fr 1fr;
-    max-width: 880px;
+    max-width: 900px;
     width:100%;
     background: var(--panel);
     border:1px solid var(--line);
-    border-radius:14px;
+    border-radius: var(--radius-lg);
     overflow:hidden;
+    box-shadow: 0 30px 80px -24px rgba(12,27,51,0.28);
   }
   .auth-side{
     background: var(--ink);
     color:#f1f3f2;
-    padding: 40px 34px;
+    padding: 42px 36px;
     display:flex;
     flex-direction:column;
     justify-content:space-between;
+    position: relative;
+    overflow:hidden;
   }
+  #authNetworkCanvas{ position:absolute; inset:0; opacity:.7; z-index:0; }
+  .auth-side::before{
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse 70% 60% at 20% 15%, rgba(255,106,26,0.18), transparent 60%);
+    pointer-events:none; z-index:0;
+  }
+  .auth-side > *{ position:relative; z-index:1; }
   .auth-side h1{
     font-family: var(--font-display);
-    font-size: 26px;
-    line-height:1.18;
+    font-size: 27px;
+    line-height:1.16;
     font-weight:600;
     margin: 18px 0 12px;
   }
@@ -140,7 +167,10 @@
     letter-spacing:.05em;
     color: rgba(241,243,242,0.55);
   }
-  .route .dot{ width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; }
+  .route .dot{ width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; box-shadow: 0 0 8px var(--accent-glow); animation: routeDotPulse 1.8s ease-in-out infinite; }
+  .route .dot:nth-child(3){ animation-delay: .3s; }
+  .route .dot:nth-child(5){ animation-delay: .6s; }
+  @keyframes routeDotPulse{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
   .route .track{
     flex:1;
     height:1px;
@@ -149,19 +179,20 @@
     background-repeat: repeat-x;
   }
 
-  .auth-form-side{ padding: 40px 34px; }
-  .tabs{ display:flex; gap:4px; margin-bottom: 26px; background: var(--paper); border-radius:8px; padding:3px; }
+  .auth-form-side{ padding: 42px 36px; }
+  .tabs{ display:flex; gap:4px; margin-bottom: 26px; background: var(--paper); border-radius:9px; padding:3px; }
   .tab-btn{
     flex:1;
     padding: 9px 0;
     border:none;
     background:transparent;
-    border-radius:6px;
+    border-radius:7px;
     font-family: var(--font-body);
     font-weight:600;
     font-size:13px;
     color: var(--ink-soft);
     cursor:pointer;
+    transition: background .15s ease, color .15s ease;
   }
   .tab-btn.active{ background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(12,27,51,0.08); }
 
@@ -169,24 +200,26 @@
   label:first-of-type{ margin-top:0; }
   input{
     width:100%;
-    padding: 10px 12px;
-    border-radius:7px;
+    padding: 11px 13px;
+    border-radius:8px;
     border:1px solid var(--line);
     font-family: var(--font-body);
     font-size:13.5px;
     color: var(--ink);
     background:#fff;
+    transition: border-color .15s ease, box-shadow .15s ease;
   }
-  input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  input:focus-visible{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,106,26,0.14); }
   .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
   .hint{ font-size:11.5px; color: var(--accent-dark); min-height:14px; margin-top:4px; }
 
   .btn-primary{
+    position:relative;
     width:100%;
     margin-top:20px;
-    padding: 11px 14px;
+    padding: 12px 14px;
     border:none;
-    border-radius:7px;
+    border-radius:8px;
     background: var(--accent);
     color: #fff;
     font-family: var(--font-body);
@@ -197,8 +230,17 @@
     align-items:center;
     justify-content:center;
     gap:8px;
+    overflow:hidden;
+    box-shadow: 0 4px 18px var(--accent-glow);
+    transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
   }
-  .btn-primary:hover{ background: var(--accent-dark); }
+  .btn-primary::after{
+    content:''; position:absolute; inset:0; translate: -120% 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
+    transition: translate .5s ease;
+  }
+  .btn-primary:hover:not(:disabled){ background: var(--accent-dark); transform: translateY(-1px); }
+  .btn-primary:hover:not(:disabled)::after{ translate: 120% 0; }
   .btn-primary:disabled{ opacity:.6; cursor:default; }
   .spinner{
     width:13px; height:13px; border-radius:50%;
@@ -211,10 +253,11 @@
   @keyframes spin{ to{ transform: rotate(360deg); } }
 
   .banner{
-    margin-top:16px; padding:11px 13px; border-radius:7px;
+    margin-top:16px; padding:11px 13px; border-radius:9px;
     font-size:13px; line-height:1.5; display:none;
   }
-  .banner.show{ display:block; }
+  .banner.show{ display:block; animation: bannerIn .25s ease; }
+  @keyframes bannerIn{ from{ opacity:0; transform: translateY(-4px); } to{ opacity:1; transform:none; } }
   .banner.error{ background: rgba(255,106,26,0.1); color: var(--accent-dark); border:1px solid rgba(255,106,26,0.3); }
 
   .link-olvide{
@@ -233,46 +276,61 @@
     align-items:flex-end;
     gap: 24px;
     flex-wrap:wrap;
-    margin-bottom: 28px;
+    margin-bottom: 30px;
   }
   .hero h1{
     font-family: var(--font-display);
-    font-size: 24px;
+    font-size: 25px;
     margin:0 0 4px;
+    letter-spacing:-0.01em;
   }
   .hero p{ margin:0; color: var(--ink-soft); font-size:13.5px; }
 
   .grid2{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:20px; align-items:start; }
 
+  .reveal{ opacity:0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+  .reveal.in-view{ opacity:1; transform:none; }
+
   .card{
     background: var(--panel);
     border:1px solid var(--line);
-    border-radius:12px;
+    border-radius: var(--radius-md);
     padding: 22px;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow .2s ease, border-color .2s ease;
   }
+  .card:hover{ box-shadow: var(--shadow-card-hover); }
   .card h2{ font-family: var(--font-display); font-size:15px; margin: 0 0 4px; }
   .card .card-sub{ font-size:12.5px; color: var(--ink-soft); margin: 0 0 16px; }
 
   .address-block{
-    background: var(--paper);
-    border-radius:9px;
-    padding: 14px 16px;
+    background: linear-gradient(160deg, var(--ink), #16294a);
+    color: #f1f3f2;
+    border-radius:10px;
+    padding: 16px 18px;
     font-family: var(--font-mono);
     font-size:13px;
-    line-height:1.8;
+    line-height:1.85;
+    position: relative;
+    overflow:hidden;
   }
-  .address-block .suite{ color: var(--accent-dark); font-weight:600; }
+  .address-block::before{
+    content:''; position:absolute; top:-40%; right:-20%; width:60%; height:120%;
+    background: radial-gradient(circle, rgba(255,106,26,0.14), transparent 70%); pointer-events:none;
+  }
+  .address-block .suite{ color: var(--accent); font-weight:600; text-shadow: 0 0 14px var(--accent-glow); position:relative; }
   .copy-btn{
     margin-top:12px;
     width:100%;
-    padding: 8px 10px;
-    border-radius:7px;
+    padding: 9px 10px;
+    border-radius:8px;
     border:1px solid var(--line);
     background:#fff;
     font-family: var(--font-body);
     font-size:12.5px;
     font-weight:600;
     cursor:pointer;
+    transition: border-color .15s ease, color .15s ease;
   }
   .copy-btn:hover{ border-color: var(--accent); color: var(--accent-dark); }
 
@@ -280,10 +338,11 @@
   .stat{
     flex:1;
     background: var(--paper);
-    border-radius:9px;
-    padding: 12px 14px;
+    border-radius:10px;
+    padding: 13px 14px;
+    transition: background .2s ease;
   }
-  .stat .n{ font-family: var(--font-display); font-size:20px; }
+  .stat .n{ font-family: var(--font-display); font-size:21px; }
   .stat .l{ font-size:11px; color: var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
 
   /* Prealertar form */
@@ -301,15 +360,18 @@
     font-weight:600;
     color: var(--ink-soft);
     cursor:pointer;
+    transition: all .15s ease;
   }
-  .panel-tab.active{ background: var(--ink); color:#fff; border-color: var(--ink); }
+  .panel-tab.active{ background: var(--ink); color:#fff; border-color: var(--ink); box-shadow: 0 4px 14px rgba(12,27,51,0.2); }
 
   .paquete-card{
     border:1px solid var(--line);
     border-radius:10px;
     padding: 14px 16px;
     margin-bottom:10px;
+    transition: border-color .15s ease, transform .15s ease;
   }
+  .paquete-card:hover{ border-color: rgba(255,106,26,0.35); transform: translateX(2px); }
   .paquete-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
   .paquete-tienda{ font-family: var(--font-display); font-weight:600; font-size:14.5px; }
   .paquete-tracking{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
@@ -343,36 +405,41 @@
     align-items:center;
     gap:10px;
     flex-wrap:wrap;
+    transition: border-color .15s ease;
   }
+  .factura-card:hover{ border-color: rgba(255,106,26,0.3); }
   .factura-info .num{ font-family: var(--font-display); font-weight:600; font-size:14.5px; }
   .factura-info .sub{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
   .factura-right{ display:flex; align-items:center; gap:12px; }
   .factura-total{ font-family: var(--font-mono); font-size:14px; font-weight:600; }
   .btn-pdf{
     padding: 7px 13px;
-    border-radius:7px;
+    border-radius:8px;
     border:1px solid var(--line);
     background:#fff;
     font-size:12px;
     font-weight:600;
     cursor:pointer;
+    transition: border-color .15s ease, color .15s ease;
   }
   .btn-pdf:hover{ border-color: var(--accent); color: var(--accent-dark); }
   .btn-pagar{
     padding: 7px 13px;
-    border-radius:7px;
+    border-radius:8px;
     border:none;
     background: var(--accent);
     color:#fff;
     font-size:12px;
     font-weight:700;
     cursor:pointer;
+    box-shadow: 0 2px 12px var(--accent-glow);
+    transition: background .15s ease, transform .15s ease;
   }
-  .btn-pagar:hover{ background: var(--accent-dark); }
-  .btn-yappy{ background: #4b2a8a; }
+  .btn-pagar:hover{ background: var(--accent-dark); transform: translateY(-1px); }
+  .btn-yappy{ background: #4b2a8a; box-shadow: 0 2px 12px rgba(75,42,138,0.4); }
   .btn-yappy:hover{ background: #3a2069; }
   .banner-pago{
-    max-width: 1040px; margin: 0 auto 18px; padding: 13px 16px; border-radius:8px;
+    max-width: 1040px; margin: 0 auto 18px; padding: 13px 16px; border-radius:10px;
     font-size:13.5px; display:flex; justify-content:space-between; align-items:center; gap:10px;
   }
   .banner-pago.exito{ background: var(--cargo-green-bg); color: var(--cargo-green); border:1px solid rgba(23,122,99,0.3); }
@@ -383,13 +450,14 @@
     margin-top:12px;
     width:100%;
     padding: 8px 10px;
-    border-radius:7px;
+    border-radius:8px;
     border:1px dashed var(--line);
     background:#fff;
     font-size:12px;
     font-weight:600;
     color: var(--ink-soft);
     cursor:pointer;
+    transition: border-color .15s ease, color .15s ease;
   }
   .btn-ver-fotos:hover{ border-color: var(--accent); color: var(--accent-dark); }
   .mini-galeria{
@@ -400,13 +468,15 @@
   }
   .mini-foto{
     width:100%; height:90px; object-fit:cover;
-    border-radius:7px; border:1px solid var(--line); cursor:pointer;
+    border-radius:8px; border:1px solid var(--line); cursor:pointer;
+    transition: transform .15s ease;
   }
+  .mini-foto:hover{ transform: scale(1.03); }
 
   /* Rail de estados */
   .rail{ display:flex; align-items:center; margin-top:12px; gap:2px; }
-  .rail .seg{ flex:1; height:4px; border-radius:2px; background: rgba(12,27,51,0.09); }
-  .rail .seg.done{ background: var(--accent); }
+  .rail .seg{ flex:1; height:4px; border-radius:2px; background: rgba(12,27,51,0.09); transition: background .3s ease, box-shadow .3s ease; }
+  .rail .seg.done{ background: var(--accent); box-shadow: 0 0 6px rgba(255,106,26,0.5); }
 
   .empty{
     text-align:center;
@@ -421,6 +491,8 @@
     .grid2{ grid-template-columns: 1fr; }
     .form-grid{ grid-template-columns: 1fr; }
   }
+
+  a:focus-visible, button:focus-visible{ outline: 2px solid var(--accent); outline-offset:2px; border-radius:4px; }
 </style>
 </head>
 <body>
@@ -445,6 +517,7 @@
   <div id="vistaAuth">
     <div class="auth-shell">
       <div class="auth-side">
+        <canvas id="authNetworkCanvas"></canvas>
         <div>
           <div style="font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; color:var(--accent); text-transform:uppercase;">Casillero virtual</div>
           <h1>Compra en EE.UU.<br>recibe en Panamá.</h1>
@@ -545,7 +618,7 @@
 
     <div class="grid2">
       <!-- Columna izquierda: casillero -->
-      <div class="card">
+      <div class="card reveal">
         <h2>Mi dirección de casillero</h2>
         <p class="card-sub">Usa esta dirección al comprar en tiendas de EE.UU.</p>
         <div class="address-block" id="bloqueDireccion">Cargando…</div>
@@ -565,7 +638,7 @@
 
       <!-- Columna derecha: prealertar + lista -->
       <div>
-        <div class="card" style="margin-bottom:20px;">
+        <div class="card reveal" style="margin-bottom:20px;">
           <h2>Prealertar un paquete</h2>
           <p class="card-sub">Avísanos qué compraste antes de que llegue a la bodega.</p>
           <form id="formPrealerta">
@@ -598,7 +671,7 @@
           </form>
         </div>
 
-        <div class="card">
+        <div class="card reveal">
           <h2>Mis paquetes</h2>
           <p class="card-sub">Todo lo que has prealertado, del más reciente al más antiguo.</p>
           <div class="panel-tabs">
@@ -609,7 +682,7 @@
           <div id="listaPaquetes"></div>
         </div>
 
-        <div class="card" style="margin-top:20px;">
+        <div class="card reveal" style="margin-top:20px;">
           <h2>Mis facturas</h2>
           <p class="card-sub">Descarga el PDF o revisa si están pendientes de pago.</p>
           <div id="listaFacturas"></div>
@@ -637,12 +710,80 @@
 
   const $ = (sel) => document.querySelector(sel);
 
+  // ---------- Fondo de partículas del panel de login (mismo lenguaje visual que index.html) ----------
+  (function redParticulasAuth(){
+    const canvas = document.getElementById('authNetworkCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const host = canvas.parentElement;
+    const prefiereReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let puntos = [], ancho, alto;
+
+    function medir(){
+      ancho = host.offsetWidth; alto = host.offsetHeight;
+      canvas.width = ancho * devicePixelRatio;
+      canvas.height = alto * devicePixelRatio;
+      canvas.style.width = ancho + 'px';
+      canvas.style.height = alto + 'px';
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+    function crearPuntos(){
+      const cantidad = Math.min(36, Math.floor((ancho * alto) / 9000));
+      puntos = Array.from({ length: cantidad }, () => ({
+        x: Math.random() * ancho, y: Math.random() * alto,
+        vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.2, r: Math.random() * 1.3 + 0.6,
+      }));
+    }
+    function paso(){
+      ctx.clearRect(0, 0, ancho, alto);
+      const distMax = 110;
+      puntos.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > ancho) p.vx *= -1;
+        if (p.y < 0 || p.y > alto) p.vy *= -1;
+      });
+      for (let i = 0; i < puntos.length; i++){
+        for (let j = i + 1; j < puntos.length; j++){
+          const a = puntos[i], b = puntos[j];
+          const dist = Math.hypot(a.x - b.x, a.y - b.y);
+          if (dist < distMax){
+            ctx.strokeStyle = `rgba(255,106,26,${(1 - dist / distMax) * 0.18})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+      puntos.forEach(p => {
+        ctx.beginPath(); ctx.fillStyle = 'rgba(241,243,242,0.45)';
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+      });
+      if (!prefiereReducido) requestAnimationFrame(paso);
+    }
+    medir(); crearPuntos(); paso();
+    window.addEventListener('resize', () => { medir(); crearPuntos(); });
+  })();
+
+  // ---------- Reveal on scroll para las tarjetas del dashboard ----------
+  function activarReveal(){
+    if (!('IntersectionObserver' in window)){
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){ entry.target.classList.add('in-view'); observer.unobserve(entry.target); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  }
+
   // ---------- Navegación entre vistas ----------
   function mostrarApp(mostrar){
     $('#vistaAuth').style.display = mostrar ? 'none' : 'flex';
     $('#vistaApp').style.display = mostrar ? 'block' : 'none';
     $('#btnLogout').style.display = mostrar ? 'inline-block' : 'none';
     $('#pillCasillero').style.display = mostrar ? 'inline-block' : 'none';
+    if (mostrar) activarReveal();
   }
 
   $('#tabLogin').addEventListener('click', () => {
@@ -1053,7 +1194,6 @@
             <div class="factura-right">
               <span class="badge badge-${f.estado}">${ESTADO_FACTURA_LABEL[f.estado] || f.estado}</span>
               <span class="factura-total">$${Number(f.total).toFixed(2)}</span>
-              ${f.estado === 'pendiente' ? `<button class="btn-pagar" data-id="${f.id}">Pagar con tarjeta</button>` : ''}
               ${f.estado === 'pendiente' && yappyDisponible ? `<button class="btn-pagar btn-yappy" data-id="${f.id}">Pagar con Yappy</button>` : ''}
               <button class="btn-pdf" data-id="${f.id}">Descargar PDF</button>
             </div>
@@ -1065,36 +1205,11 @@
         btn.addEventListener('click', () => descargarFacturaPdf(btn.dataset.id, btn));
       });
 
-      cont.querySelectorAll('.btn-pagar:not(.btn-yappy)').forEach(btn => {
-        btn.addEventListener('click', () => pagarFactura(btn.dataset.id, btn));
-      });
-
       cont.querySelectorAll('.btn-yappy').forEach(btn => {
         btn.addEventListener('click', () => pagarFacturaYappy(btn.dataset.id, btn));
       });
     } catch (err) {
       cont.innerHTML = '<div class="empty">No se pudieron cargar tus facturas.</div>';
-    }
-  }
-
-  async function pagarFactura(id, btn){
-    const textoOriginal = btn.textContent;
-    btn.textContent = 'Redirigiendo…';
-    btn.disabled = true;
-    try {
-      const res = await apiAutenticado(`/facturas/${id}/pagar`, { method: 'POST' });
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data.url){
-        window.location.href = data.url; // el cliente sale a la página segura de PagueloFacil
-        return;
-      }
-      alert(data.mensaje || 'No se pudo iniciar el pago. Intenta de nuevo.');
-    } catch (err) {
-      alert('No pudimos conectar con el servidor.');
-    } finally {
-      btn.textContent = textoOriginal;
-      btn.disabled = false;
     }
   }
 
@@ -1163,7 +1278,7 @@
     $('#tabRegistro').click();
   }
 
-  // Si volvemos de intentar pagar una factura con PagueloFacil, mostramos el resultado.
+  // Si volvemos de intentar pagar una factura con Yappy, mostramos el resultado.
   (function mostrarResultadoPago(){
     const params = new URLSearchParams(window.location.search);
     const pago = params.get('pago');
