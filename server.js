@@ -18,6 +18,7 @@ const adminTarifasRoutes = require('./routes/admin/tarifas');
 const adminFacturasRoutes = require('./routes/admin/facturas');
 const adminReportesRoutes = require('./routes/admin/reportes');
 const adminMostradorRoutes = require('./routes/admin/mostrador');
+const adminCajaRoutes = require('./routes/admin/caja');
 
 const app = express();
 
