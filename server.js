@@ -26,8 +26,21 @@ const app = express();
 // limiting de abajo no funciona correctamente.
 app.set('trust proxy', 1);
 
-// Cabeceras de seguridad (clickjacking, sniffing MIME, etc.)
-app.use(helmet());
+// Cabeceras de seguridad (clickjacking, sniffing MIME, etc.).
+// Se desactivan solo las partes que rompen tu página actual:
+// - contentSecurityPolicy: tu app.html usa <script> y <style> internos
+//   (no en archivos separados), así que el CSP por defecto los bloquea.
+// - crossOriginResourcePolicy / crossOriginEmbedderPolicy: bloqueaban
+//   cargar las fotos de los paquetes desde Cloudinary (dominio externo).
+// El resto de protecciones de Helmet (X-Frame-Options, HSTS, no-sniff, etc.)
+// se mantienen activas.
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 // Deja de anunciar que usamos Express en cada respuesta.
 app.disable('x-powered-by');
