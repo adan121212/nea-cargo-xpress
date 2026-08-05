@@ -103,17 +103,16 @@
   .dropdown .item-sub{ font-size:11px; color: rgba(241,243,242,0.55); }
 
   .nav-toggle{
-  display:none; background:none; border:none; color:#f1f3f2; font-size:22px; cursor:pointer;
-  position: relative; z-index: 50; padding: 8px 10px; -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
+    display:none; background:none; border:none; color:#f1f3f2; font-size:22px; cursor:pointer;
+    position: relative; z-index: 50; padding: 8px 10px; -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
 
   @media (max-width: 860px){
     .nav-menu{
-      position:absolute; top:100%; left:0; right:0; max-height: calc(100vh - 70px);
+      position:absolute; top:100%; left:0; right:0;
       background: rgba(12,27,51,0.98); flex-direction:column; align-items:stretch;
-      padding: 10px 16px; display:none; overflow-y:auto;
-    }
+      padding: 10px 16px; display:none; overflow-y:auto; z-index: 45;
     }
     .nav-menu.open{ display:flex; }
     .nav-toggle{ display:block; }
@@ -803,9 +802,23 @@
   });
 
   // ---------- Menú móvil ----------
- $('#navToggle').addEventListener('click', (e) => {
-    e.stopPropagation();
+  // Calculamos la altura exacta que le falta a la pantalla (en vez de un
+  // número fijo), porque el "blur" del nav crea un contexto que afecta
+  // cómo se posiciona el menú — así siempre cubre justo hasta el fondo,
+  // sin importar el celular ni si la barra de direcciones del navegador
+  // aparece u oculta.
+  function ajustarAlturaMenuMovil(){
+    const nav = document.querySelector('.nav');
+    const menu = $('#navMenu');
+    menu.style.height = (window.innerHeight - nav.getBoundingClientRect().bottom) + 'px';
+  }
+  $('#navToggle').addEventListener('click', () => {
+    const abriendo = !$('#navMenu').classList.contains('open');
+    if (abriendo) ajustarAlturaMenuMovil();
     $('#navMenu').classList.toggle('open');
+  });
+  window.addEventListener('resize', () => {
+    if ($('#navMenu').classList.contains('open')) ajustarAlturaMenuMovil();
   });
 
   // ---------- FAQ acordeón ----------
