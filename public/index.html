@@ -802,7 +802,8 @@
   });
 
   // ---------- Menú móvil ----------
-  $('#navToggle').addEventListener('click', () => {
+ $('#navToggle').addEventListener('click', (e) => {
+    e.stopPropagation();
     $('#navMenu').classList.toggle('open');
   });
 
