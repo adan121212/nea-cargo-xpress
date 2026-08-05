@@ -140,6 +140,18 @@
   .tab-nav-btn:hover{ border-color: rgba(255,106,26,0.4); }
   .tab-nav-btn.active{ background: var(--ink); color:#fff; border-color: var(--ink); box-shadow: 0 4px 16px rgba(12,27,51,0.25); }
 
+  .topbar-right{ display:flex; align-items:center; gap:10px; }
+  .nav-toggle-admin{
+    display:none; background:none; border:none; color:#f1f3f2; font-size:22px; cursor:pointer;
+    padding: 8px 10px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  }
+  @media (max-width: 760px){
+    .nav-toggle-admin{ display:block; }
+    .tabs-nav{ display:none; flex-direction:column; gap:8px; }
+    .tabs-nav.open{ display:flex; }
+    .tabs-nav .tab-nav-btn{ width:100%; text-align:left; border-radius:8px; }
+  }
+
   .card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-card); transition: box-shadow .2s ease; }
   .card h2{ font-family: var(--font-display); font-size:15px; margin:0 0 4px; }
   .card .card-sub{ font-size:12.5px; color: var(--ink-soft); margin:0 0 16px; }
@@ -349,7 +361,10 @@
       <small>Panel de operaciones</small>
     </div>
   </a>
-  <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
+  <div class="topbar-right">
+    <button class="nav-toggle-admin" id="btnMenuMovil" aria-label="Abrir menú">☰</button>
+    <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
+  </div>
 </div>
 
 <div class="wrap">
@@ -1108,7 +1123,15 @@
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
       if (tab === 'caja'){ $('#tabCaja').style.display = 'block'; cargarCaja(); cargarHistorialCaja(); }
       if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
+      // En móvil, cierra el menú de pestañas al elegir una (para no tapar el contenido).
+      if (window.innerWidth <= 760) $('.tabs-nav').classList.remove('open');
     });
+  });
+
+  // ---------- Menú móvil de pestañas (☰ en la esquina) ----------
+  $('#btnMenuMovil').addEventListener('click', (e) => {
+    e.stopPropagation();
+    $('.tabs-nav').classList.toggle('open');
   });
 
   // ---------- Paquetes ----------
