@@ -102,7 +102,11 @@
   .dropdown a:hover, .dropdown button:hover{ background: rgba(241,243,242,0.08); }
   .dropdown .item-sub{ font-size:11px; color: rgba(241,243,242,0.55); }
 
-  .nav-toggle{ display:none; background:none; border:none; color:#f1f3f2; font-size:20px; cursor:pointer; }
+  .nav-toggle{
+  display:none; background:none; border:none; color:#f1f3f2; font-size:22px; cursor:pointer;
+  position: relative; z-index: 50; padding: 8px 10px; -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
 
   @media (max-width: 860px){
     .nav-menu{
