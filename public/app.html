@@ -268,8 +268,70 @@
   .link-olvide:hover{ color: var(--accent-dark); }
   .banner.success{ background: var(--cargo-green-bg); color: var(--cargo-green); border:1px solid rgba(23,122,99,0.3); }
 
-  /* ---------- App / Dashboard ---------- */
+  /* ---------- App / Dashboard con menú lateral ---------- */
   #vistaApp{ display:none; }
+  .app-shell{ display:flex; align-items:stretch; min-height: calc(100vh - 63px); }
+
+  .sidebar{
+    width: 230px; flex-shrink:0;
+    background: var(--ink); color:#f1f3f2;
+    padding: 22px 14px;
+    position: sticky; top:63px; align-self:flex-start; height: calc(100vh - 63px);
+    transition: width .2s ease;
+    overflow-x:hidden;
+  }
+  .sidebar-toggle{
+    background: rgba(241,243,242,0.08); border:none; color:#f1f3f2;
+    width:26px; height:26px; border-radius:50%; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 0 18px auto; font-size:13px; transition: transform .2s ease;
+  }
+  .sidebar-toggle:hover{ background: rgba(241,243,242,0.16); }
+  .sidebar.collapsed{ width: 66px; }
+  .sidebar.collapsed .sidebar-toggle{ transform: rotate(180deg); margin: 0 auto 18px; }
+  .sidebar.collapsed .side-label, .sidebar.collapsed .side-caret{ display:none; }
+  .sidebar.collapsed .side-submenu{ display:none !important; }
+
+  .sidebar-nav{ display:flex; flex-direction:column; gap:3px; }
+  .side-item, .side-subitem{
+    display:flex; align-items:center; gap:11px;
+    width:100%; text-align:left; background:none; border:none; cursor:pointer;
+    color: rgba(241,243,242,0.72); font-family: var(--font-body); font-size:13.5px; font-weight:500;
+    padding: 10px 12px; border-radius:9px; white-space:nowrap;
+    transition: background .15s ease, color .15s ease;
+    border-left: 3px solid transparent;
+  }
+  .side-item:hover, .side-subitem:hover{ background: rgba(241,243,242,0.06); color:#fff; }
+  .side-item.active, .side-subitem.active{
+    background: rgba(255,106,26,0.14); color: var(--accent);
+    border-left-color: var(--accent);
+  }
+  .side-ico{ font-size:15px; flex-shrink:0; width:18px; text-align:center; }
+  .side-caret{ margin-left:auto; font-size:10px; opacity:.6; transition: transform .15s ease; }
+  .side-parent.open .side-caret{ transform: rotate(180deg); }
+  .side-submenu{ display:none; flex-direction:column; gap:2px; margin: 2px 0 6px 14px; padding-left:14px; border-left:1px solid rgba(241,243,242,0.12); }
+  .side-submenu.open{ display:flex; }
+  .side-subitem{ font-size:12.5px; padding: 8px 12px; }
+
+  .app-main{ flex:1; min-width:0; }
+  .app-main-inner{ max-width: 900px; margin:0 auto; padding: 34px 26px 70px; }
+
+  @media (max-width: 860px){
+    .app-shell{ position:relative; }
+    .sidebar{
+      position: fixed; top:63px; left:0; bottom:0; z-index:35;
+      transform: translateX(-100%); transition: transform .2s ease; width: 230px;
+      box-shadow: 20px 0 40px rgba(0,0,0,0.25);
+    }
+    .sidebar.mobile-open{ transform: translateX(0); }
+    .sidebar-toggle{ display:none; }
+    .nav-toggle-app{
+      display:block !important; background:none; border:none; color:#f1f3f2; font-size:20px; cursor:pointer;
+      padding: 8px 10px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    .app-main-inner{ padding: 24px 18px 60px; }
+  }
+
   .hero{
     display:flex;
     justify-content:space-between;
@@ -287,6 +349,14 @@
   .hero p{ margin:0; color: var(--ink-soft); font-size:13.5px; }
 
   .grid2{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:20px; align-items:start; }
+
+  .rep-stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
+  .rep-stat{ background: var(--paper); border-radius:10px; padding: 16px 18px; }
+  .rep-stat-l{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color: var(--ink-soft); margin-bottom:6px; }
+  .rep-stat-n{ font-family: var(--font-display); font-size:22px; color: var(--ink); }
+  .rep-stat-n.amber{ color: var(--accent-dark); }
+  .rep-stat-n.green{ color: var(--cargo-green); }
+  @media (max-width: 620px){ .rep-stats{ grid-template-columns: 1fr; } }
 
   .reveal{ opacity:0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
   .reveal.in-view{ opacity:1; transform:none; }
@@ -507,6 +577,7 @@
   </a>
   <div class="topbar-right">
     <span class="casillero-pill" id="pillCasillero"></span>
+    <button class="nav-toggle-app" id="btnMenuMovilApp" aria-label="Abrir menú" style="display:none;">☰</button>
     <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
   </div>
 </div>
@@ -606,94 +677,155 @@
       </div>
     </div>
   </div>
+  </div>
+  <!-- fin de .wrap: el login queda centrado y angosto, el dashboard usa todo el ancho -->
 
-  <!-- ======================= VISTA: APP (dashboard) ======================= -->
-  <div id="vistaApp">
-    <div class="hero">
-      <div>
-        <h1 id="saludoNombre">Hola</h1>
-        <p>Este es el estado de tu casillero y tus paquetes.</p>
-      </div>
-    </div>
+  <!-- ======================= VISTA: APP (dashboard con menú lateral) ======================= -->
+  <div id="vistaApp" class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <button class="sidebar-toggle" id="btnSidebarToggle" aria-label="Colapsar menú">‹</button>
+      <nav class="sidebar-nav">
+        <button class="side-item active" data-seccion="inicio">
+          <span class="side-ico">🏠</span><span class="side-label">Inicio</span>
+        </button>
+        <button class="side-item" data-seccion="casillero">
+          <span class="side-ico">📍</span><span class="side-label">Casillero</span>
+        </button>
+        <button class="side-item" data-seccion="paquetes">
+          <span class="side-ico">📦</span><span class="side-label">Paquetes</span>
+        </button>
 
-    <div class="grid2">
-      <!-- Columna izquierda: casillero -->
-      <div class="card reveal">
-        <h2>Mi dirección de casillero</h2>
-        <p class="card-sub">Usa esta dirección al comprar en tiendas de EE.UU.</p>
-        <div class="address-block" id="bloqueDireccion">Cargando…</div>
-        <button class="copy-btn" id="btnCopiar">Copiar dirección</button>
+        <button class="side-item side-parent" id="btnFacturasParent">
+          <span class="side-ico">🧾</span><span class="side-label">Facturas</span><span class="side-caret">▾</span>
+        </button>
+        <div class="side-submenu" id="submenuFacturas">
+          <button class="side-subitem active" data-seccion="historial-facturas">Historial de facturas</button>
+          <button class="side-subitem" data-seccion="estado-cuenta">Estado de cuenta</button>
+        </div>
+      </nav>
+    </aside>
 
-        <div class="stat-row">
-          <div class="stat">
-            <div class="n" id="statTotal">0</div>
-            <div class="l">Paquetes</div>
-          </div>
-          <div class="stat">
-            <div class="n" id="statActivos">0</div>
-            <div class="l">En camino</div>
+    <main class="app-main">
+      <div class="app-main-inner">
+        <div class="hero">
+          <div>
+            <h1 id="saludoNombre">Hola</h1>
+            <p id="subtituloSeccion">Este es el estado de tu casillero y tus paquetes.</p>
           </div>
         </div>
-      </div>
 
-      <!-- Columna derecha: prealertar + lista -->
-      <div>
-        <div class="card reveal" style="margin-bottom:20px;">
-          <h2>Prealertar un paquete</h2>
-          <p class="card-sub">Avísanos qué compraste antes de que llegue a la bodega.</p>
-          <form id="formPrealerta">
-            <div class="form-grid">
-              <div>
-                <label for="paqTienda">Tienda</label>
-                <input id="paqTienda" type="text" placeholder="Amazon">
-              </div>
-              <div>
-                <label for="paqTracking"># de tracking</label>
-                <input id="paqTracking" type="text" placeholder="1Z999AA10123456784">
-              </div>
-              <div>
-                <label for="paqValor">Valor declarado (USD)</label>
-                <input id="paqValor" type="number" step="0.01" min="0" placeholder="45.99">
-              </div>
-              <div>
-                <label for="paqPeso">Peso aprox. (lb, opcional)</label>
-                <input id="paqPeso" type="number" step="0.01" min="0" placeholder="1.2">
-              </div>
-              <div class="full">
-                <label for="paqDescripcion">Descripción (opcional)</label>
-                <input id="paqDescripcion" type="text" placeholder="Audífonos inalámbricos">
+        <!-- ---- Sección: Inicio ---- -->
+        <div class="seccion-app" id="seccionInicio">
+          <div class="grid2">
+            <div class="card reveal">
+              <h2>Mi dirección de casillero</h2>
+              <p class="card-sub">Usa esta dirección al comprar en tiendas de EE.UU.</p>
+              <div class="address-block" id="bloqueDireccion">Cargando…</div>
+              <button class="copy-btn" id="btnCopiar">Copiar dirección</button>
+              <div class="stat-row">
+                <div class="stat">
+                  <div class="n" id="statTotal">0</div>
+                  <div class="l">Paquetes</div>
+                </div>
+                <div class="stat">
+                  <div class="n" id="statActivos">0</div>
+                  <div class="l">En camino</div>
+                </div>
               </div>
             </div>
-            <button class="btn-primary" type="submit" id="btnPrealerta">
-              <span class="spinner"></span><span>Prealertar paquete</span>
-            </button>
-            <div class="banner" id="bannerPrealerta"></div>
-          </form>
-        </div>
-
-        <div class="card reveal">
-          <h2>Mis paquetes</h2>
-          <p class="card-sub">Todo lo que has prealertado, del más reciente al más antiguo.</p>
-          <div class="panel-tabs">
-            <button class="panel-tab active" data-filtro="todos">Todos</button>
-            <button class="panel-tab" data-filtro="activos">En camino</button>
-            <button class="panel-tab" data-filtro="entregado">Entregados</button>
+            <div class="card reveal">
+              <h2>Últimos paquetes</h2>
+              <p class="card-sub">Vista rápida — ve a "Paquetes" en el menú para ver todo el historial.</p>
+              <div id="listaPaquetesInicio"></div>
+            </div>
           </div>
-          <div id="listaPaquetes"></div>
         </div>
 
-        <div class="card reveal" style="margin-top:20px;">
-          <h2>Mis facturas</h2>
-          <p class="card-sub">Descarga el PDF o revisa si están pendientes de pago.</p>
-          <div id="listaFacturas"></div>
+        <!-- ---- Sección: Casillero ---- -->
+        <div class="seccion-app" id="seccionCasillero" style="display:none;">
+          <div class="card reveal" style="max-width:520px;">
+            <h2>Mi dirección de casillero</h2>
+            <p class="card-sub">Usa exactamente esta dirección al comprar en cualquier tienda de EE.UU. — el número de casillero (Suite) es lo que nos permite identificar que el paquete es tuyo.</p>
+            <div class="address-block" id="bloqueDireccionCasillero">Cargando…</div>
+            <button class="copy-btn" id="btnCopiarCasillero">Copiar dirección</button>
+          </div>
+        </div>
+
+        <!-- ---- Sección: Paquetes ---- -->
+        <div class="seccion-app" id="seccionPaquetes" style="display:none;">
+          <div class="card reveal" style="margin-bottom:20px;">
+            <h2>Prealertar un paquete</h2>
+            <p class="card-sub">Avísanos qué compraste antes de que llegue a la bodega.</p>
+            <form id="formPrealerta">
+              <div class="form-grid">
+                <div>
+                  <label for="paqTienda">Tienda</label>
+                  <input id="paqTienda" type="text" placeholder="Amazon">
+                </div>
+                <div>
+                  <label for="paqTracking"># de tracking</label>
+                  <input id="paqTracking" type="text" placeholder="1Z999AA10123456784">
+                </div>
+                <div>
+                  <label for="paqValor">Valor declarado (USD)</label>
+                  <input id="paqValor" type="number" step="0.01" min="0" placeholder="45.99">
+                </div>
+                <div>
+                  <label for="paqPeso">Peso aprox. (lb, opcional)</label>
+                  <input id="paqPeso" type="number" step="0.01" min="0" placeholder="1.2">
+                </div>
+                <div class="full">
+                  <label for="paqDescripcion">Descripción (opcional)</label>
+                  <input id="paqDescripcion" type="text" placeholder="Audífonos inalámbricos">
+                </div>
+              </div>
+              <button class="btn-primary" type="submit" id="btnPrealerta">
+                <span class="spinner"></span><span>Prealertar paquete</span>
+              </button>
+              <div class="banner" id="bannerPrealerta"></div>
+            </form>
+          </div>
+
+          <div class="card reveal">
+            <h2>Mis paquetes</h2>
+            <p class="card-sub">Todo lo que has prealertado, del más reciente al más antiguo.</p>
+            <div class="panel-tabs">
+              <button class="panel-tab active" data-filtro="todos">Todos</button>
+              <button class="panel-tab" data-filtro="activos">En camino</button>
+              <button class="panel-tab" data-filtro="entregado">Entregados</button>
+            </div>
+            <div id="listaPaquetes"></div>
+          </div>
+        </div>
+
+        <!-- ---- Sección: Facturas > Historial de facturas ---- -->
+        <div class="seccion-app" id="seccionHistorialFacturas" style="display:none;">
+          <div class="card reveal">
+            <h2>Historial de facturas</h2>
+            <p class="card-sub">Descarga el PDF o revisa si están pendientes de pago.</p>
+            <div id="listaFacturas"></div>
+          </div>
+        </div>
+
+        <!-- ---- Sección: Facturas > Estado de cuenta ---- -->
+        <div class="seccion-app" id="seccionEstadoCuenta" style="display:none;">
+          <div class="card reveal">
+            <h2>Estado de cuenta</h2>
+            <p class="card-sub">Resumen de lo facturado, pagado y pendiente en tu cuenta.</p>
+            <div class="rep-stats" id="cuentaStats"></div>
+          </div>
+          <div class="card reveal" style="margin-top:20px;">
+            <h2>Facturas pendientes de pago</h2>
+            <p class="card-sub">Estas son las que aún debes — puedes pagarlas desde aquí.</p>
+            <div id="listaCuentaPendientes"></div>
+          </div>
         </div>
       </div>
-    </div>
+    </main>
   </div>
 
-</div>
-
 <script>
+
   // Cambia esto si tu API vive en otro dominio o puerto.
   const API_URL = '/api';
   const TOKEN_KEY = 'nea_cargo_token';
@@ -780,11 +912,66 @@
   // ---------- Navegación entre vistas ----------
   function mostrarApp(mostrar){
     $('#vistaAuth').style.display = mostrar ? 'none' : 'flex';
-    $('#vistaApp').style.display = mostrar ? 'block' : 'none';
+    $('#vistaApp').style.display = mostrar ? 'flex' : 'none';
     $('#btnLogout').style.display = mostrar ? 'inline-block' : 'none';
     $('#pillCasillero').style.display = mostrar ? 'inline-block' : 'none';
     if (mostrar) activarReveal();
   }
+
+  // ---------- Menú lateral del dashboard ----------
+  const SECCIONES_INFO = {
+    'inicio': { titulo: (nombre) => `Hola, ${nombre}`, sub: 'Este es el estado de tu casillero y tus paquetes.' },
+    'casillero': { titulo: () => 'Mi casillero', sub: 'Tu dirección personal para comprar en EE.UU.' },
+    'paquetes': { titulo: () => 'Paquetes', sub: 'Prealerta y sigue el estado de cada compra.' },
+    'historial-facturas': { titulo: () => 'Historial de facturas', sub: 'Todas tus facturas, pagadas y pendientes.' },
+    'estado-cuenta': { titulo: () => 'Estado de cuenta', sub: 'Resumen de lo facturado, pagado y pendiente.' },
+  };
+  let nombreUsuarioActual = '';
+
+  const MAPA_SECCION_DIV = {
+    'inicio': 'seccionInicio',
+    'casillero': 'seccionCasillero',
+    'paquetes': 'seccionPaquetes',
+    'historial-facturas': 'seccionHistorialFacturas',
+    'estado-cuenta': 'seccionEstadoCuenta',
+  };
+
+  function irASeccion(seccion){
+    document.querySelectorAll('.seccion-app').forEach(div => div.style.display = 'none');
+    const idDiv = MAPA_SECCION_DIV[seccion];
+    if (idDiv) document.getElementById(idDiv).style.display = 'block';
+
+    document.querySelectorAll('.side-item[data-seccion], .side-subitem[data-seccion]').forEach(el => {
+      el.classList.toggle('active', el.dataset.seccion === seccion);
+    });
+
+    const info = SECCIONES_INFO[seccion];
+    if (info){
+      $('#saludoNombre').textContent = seccion === 'inicio' ? info.titulo(nombreUsuarioActual) : info.titulo();
+      $('#subtituloSeccion').textContent = info.sub;
+    }
+
+    // En móvil, cierra el menú al elegir una sección.
+    if (window.innerWidth <= 860) $('#sidebar').classList.remove('mobile-open');
+  }
+
+  document.querySelectorAll('.side-item[data-seccion], .side-subitem[data-seccion]').forEach(btn => {
+    btn.addEventListener('click', () => irASeccion(btn.dataset.seccion));
+  });
+
+  $('#btnFacturasParent').addEventListener('click', () => {
+    $('#btnFacturasParent').classList.toggle('open');
+    $('#submenuFacturas').classList.toggle('open');
+  });
+
+  $('#btnSidebarToggle').addEventListener('click', () => {
+    $('#sidebar').classList.toggle('collapsed');
+  });
+
+  $('#btnMenuMovilApp').addEventListener('click', (e) => {
+    e.stopPropagation();
+    $('#sidebar').classList.toggle('mobile-open');
+  });
 
   $('#tabLogin').addEventListener('click', () => {
     $('#tabLogin').classList.add('active');
@@ -998,6 +1185,7 @@
     const data = await res.json();
     const { usuario, direccion_casillero } = data;
 
+    nombreUsuarioActual = usuario.nombre;
     $('#saludoNombre').textContent = `Hola, ${usuario.nombre}`;
     $('#pillCasillero').textContent = usuario.numero_casillero;
 
@@ -1008,14 +1196,19 @@
       ${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}<br>
       ${direccion_casillero.pais}
     `;
+    $('#bloqueDireccionCasillero').innerHTML = $('#bloqueDireccion').innerHTML;
 
-    $('#btnCopiar').onclick = () => {
-      const texto = `${direccion_casillero.nombre_destinatario}\n${direccion_casillero.linea1}\n${direccion_casillero.linea2}\n${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}\n${direccion_casillero.pais}`;
-      navigator.clipboard.writeText(texto).then(() => {
-        $('#btnCopiar').textContent = 'Copiada ✓';
-        setTimeout(() => { $('#btnCopiar').textContent = 'Copiar dirección'; }, 1800);
+    const textoDireccion = `${direccion_casillero.nombre_destinatario}\n${direccion_casillero.linea1}\n${direccion_casillero.linea2}\n${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}\n${direccion_casillero.pais}`;
+
+    function copiarDireccion(btn){
+      navigator.clipboard.writeText(textoDireccion).then(() => {
+        const textoOriginal = btn.textContent;
+        btn.textContent = 'Copiada ✓';
+        setTimeout(() => { btn.textContent = textoOriginal; }, 1800);
       });
-    };
+    }
+    $('#btnCopiar').onclick = () => copiarDireccion($('#btnCopiar'));
+    $('#btnCopiarCasillero').onclick = () => copiarDireccion($('#btnCopiarCasillero'));
   }
 
   // ---------- Prealertar paquete ----------
@@ -1070,6 +1263,30 @@
     $('#statActivos').textContent = paquetesCache.filter(p => p.estado !== 'entregado').length;
 
     renderPaquetes();
+    renderPaquetesInicio();
+  }
+
+  function renderPaquetesInicio(){
+    const cont = $('#listaPaquetesInicio');
+    const lista = paquetesCache.slice(0, 3);
+    if (lista.length === 0){
+      cont.innerHTML = '<div class="empty">Aún no has prealertado ningún paquete.</div>';
+      return;
+    }
+    cont.innerHTML = lista.map(p => {
+      const fecha = new Date(p.fecha_prealerta).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+      return `
+        <div class="paquete-card">
+          <div class="paquete-top">
+            <div>
+              <div class="paquete-tienda">${escapeHtml(p.tienda)}</div>
+              <div class="paquete-tracking">#${escapeHtml(p.numero_tracking)} · ${fecha}</div>
+            </div>
+            <span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   function renderPaquetes(){
@@ -1162,6 +1379,7 @@
   const ESTADO_FACTURA_LABEL = { pendiente: 'Pendiente de pago', pagada: 'Pagada', anulada: 'Anulada' };
 
   let yappyDisponible = false;
+  let facturasCache = [];
 
   async function cargarFacturas(){
     const cont = $('#listaFacturas');
@@ -1171,46 +1389,104 @@
         apiAutenticado('/facturas/metodos-pago').catch(() => null),
       ]);
       const data = await resFacturas.json();
-      const facturas = data.facturas || [];
+      facturasCache = data.facturas || [];
 
       if (resMetodos){
         const metodos = await resMetodos.json().catch(() => ({}));
         yappyDisponible = Boolean(metodos.yappy);
       }
 
-      if (facturas.length === 0){
-        cont.innerHTML = '<div class="empty">Aún no tienes facturas. Se generan cuando tu paquete llega a la bodega.</div>';
-        return;
-      }
-
-      cont.innerHTML = facturas.map(f => {
-        const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
-        return `
-          <div class="factura-card">
-            <div class="factura-info">
-              <div class="num">${escapeHtml(f.numero_factura)}</div>
-              <div class="sub">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${fecha}</div>
-            </div>
-            <div class="factura-right">
-              <span class="badge badge-${f.estado}">${ESTADO_FACTURA_LABEL[f.estado] || f.estado}</span>
-              <span class="factura-total">$${Number(f.total).toFixed(2)}</span>
-              ${f.estado === 'pendiente' && yappyDisponible ? `<button class="btn-pagar btn-yappy" data-id="${f.id}">Pagar con Yappy</button>` : ''}
-              <button class="btn-pdf" data-id="${f.id}">Descargar PDF</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      cont.querySelectorAll('.btn-pdf').forEach(btn => {
-        btn.addEventListener('click', () => descargarFacturaPdf(btn.dataset.id, btn));
-      });
-
-      cont.querySelectorAll('.btn-yappy').forEach(btn => {
-        btn.addEventListener('click', () => pagarFacturaYappy(btn.dataset.id, btn));
-      });
+      renderHistorialFacturas();
+      renderEstadoCuenta();
     } catch (err) {
       cont.innerHTML = '<div class="empty">No se pudieron cargar tus facturas.</div>';
     }
+  }
+
+  function renderHistorialFacturas(){
+    const cont = $('#listaFacturas');
+
+    if (facturasCache.length === 0){
+      cont.innerHTML = '<div class="empty">Aún no tienes facturas. Se generan cuando tu paquete llega a la bodega.</div>';
+      return;
+    }
+
+    cont.innerHTML = facturasCache.map(f => {
+      const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+      return `
+        <div class="factura-card">
+          <div class="factura-info">
+            <div class="num">${escapeHtml(f.numero_factura)}</div>
+            <div class="sub">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${fecha}</div>
+          </div>
+          <div class="factura-right">
+            <span class="badge badge-${f.estado}">${ESTADO_FACTURA_LABEL[f.estado] || f.estado}</span>
+            <span class="factura-total">$${Number(f.total).toFixed(2)}</span>
+            ${f.estado === 'pendiente' && yappyDisponible ? `<button class="btn-pagar btn-yappy" data-id="${f.id}">Pagar con Yappy</button>` : ''}
+            <button class="btn-pdf" data-id="${f.id}">Descargar PDF</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    cont.querySelectorAll('.btn-pdf').forEach(btn => {
+      btn.addEventListener('click', () => descargarFacturaPdf(btn.dataset.id, btn));
+    });
+    cont.querySelectorAll('.btn-yappy').forEach(btn => {
+      btn.addEventListener('click', () => pagarFacturaYappy(btn.dataset.id, btn));
+    });
+  }
+
+  function renderEstadoCuenta(){
+    const statsBox = $('#cuentaStats');
+    const pendientesBox = $('#listaCuentaPendientes');
+    if (!statsBox) return; // sección no montada aún
+
+    const pagadas = facturasCache.filter(f => f.estado === 'pagada');
+    const pendientes = facturasCache.filter(f => f.estado === 'pendiente');
+    const totalPagado = pagadas.reduce((acum, f) => acum + Number(f.total), 0);
+    const totalPendiente = pendientes.reduce((acum, f) => acum + Number(f.total), 0);
+    const totalFacturado = totalPagado + totalPendiente;
+
+    statsBox.innerHTML = `
+      <div class="rep-stat">
+        <div class="rep-stat-l">Total facturado</div>
+        <div class="rep-stat-n">$${totalFacturado.toFixed(2)}</div>
+      </div>
+      <div class="rep-stat">
+        <div class="rep-stat-l">Total pagado</div>
+        <div class="rep-stat-n green">$${totalPagado.toFixed(2)}</div>
+      </div>
+      <div class="rep-stat">
+        <div class="rep-stat-l">Saldo pendiente</div>
+        <div class="rep-stat-n amber">$${totalPendiente.toFixed(2)}</div>
+      </div>
+    `;
+
+    if (pendientes.length === 0){
+      pendientesBox.innerHTML = '<div class="empty">No tienes facturas pendientes de pago. 🎉</div>';
+      return;
+    }
+
+    pendientesBox.innerHTML = pendientes.map(f => {
+      const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+      return `
+        <div class="factura-card">
+          <div class="factura-info">
+            <div class="num">${escapeHtml(f.numero_factura)}</div>
+            <div class="sub">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${fecha}</div>
+          </div>
+          <div class="factura-right">
+            <span class="factura-total">$${Number(f.total).toFixed(2)}</span>
+            ${yappyDisponible ? `<button class="btn-pagar btn-yappy" data-id="${f.id}">Pagar con Yappy</button>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    pendientesBox.querySelectorAll('.btn-yappy').forEach(btn => {
+      btn.addEventListener('click', () => pagarFacturaYappy(btn.dataset.id, btn));
+    });
   }
 
   async function pagarFacturaYappy(id, btn){
@@ -1258,6 +1534,7 @@
       await cargarPerfil();
       await cargarPaquetes();
       await cargarFacturas();
+      irASeccion('inicio');
       mostrarApp(true);
     } catch (err) {
       mostrarApp(false);
