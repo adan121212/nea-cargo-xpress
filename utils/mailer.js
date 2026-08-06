@@ -197,4 +197,60 @@ async function enviarCorreoRecuperacion(destinatario, nombre, tokenReset) {
   return respuesta.json();
 }
 
-module.exports = { enviarCorreoConfirmacion, enviarFacturaPorCorreo, enviarCorreoCambioEstado, enviarCorreoRecuperacion, enviarCorreoNuevoRegistroAdmin };
+/**
+ * Te avisa a TI (el dueño/admin) cuando un cliente nuevo se registra.
+ * Se manda al correo configurado en ADMIN_NOTIFICACION_EMAIL.
+ */
+async function enviarCorreoNuevoRegistroAdmin(usuario) {
+  const correoAdmin = process.env.ADMIN_NOTIFICACION_EMAIL;
+  if (!correoAdmin) {
+    console.warn('ADMIN_NOTIFICACION_EMAIL no configurado — se omite el aviso de nuevo registro.');
+    return;
+  }
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
+      <h2>Nuevo cliente registrado</h2>
+      <div style="background:#f5f6f8;border-radius:8px;padding:16px;margin:20px 0;">
+        <p style="margin:0 0 6px;"><strong>${usuario.nombre} ${usuario.apellido}</strong></p>
+        <p style="margin:0 0 6px;color:#6b7280;">${usuario.email}</p>
+        ${usuario.telefono ? `<p style="margin:0 0 6px;color:#6b7280;">${usuario.telefono}</p>` : ''}
+        <p style="margin:0;">
+          <span style="background:#ff6a1a;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;">
+            ${usuario.numero_casillero}
+          </span>
+        </p>
+      </div>
+      <p>Todavía debe confirmar su correo antes de poder iniciar sesión.</p>
+    </div>
+  `;
+
+  const respuesta = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM || 'NEA Cargo Xpress <onboarding@resend.dev>',
+      to: correoAdmin,
+      subject: `Nuevo registro: ${usuario.nombre} ${usuario.apellido} — NEA Cargo Xpress`,
+      html,
+    }),
+  });
+
+  if (!respuesta.ok) {
+    const detalle = await respuesta.text();
+    throw new Error(`Resend respondió ${respuesta.status}: ${detalle}`);
+  }
+
+  return respuesta.json();
+}
+
+module.exports = {
+  enviarCorreoConfirmacion,
+  enviarFacturaPorCorreo,
+  enviarCorreoCambioEstado,
+  enviarCorreoRecuperacion,
+  enviarCorreoNuevoRegistroAdmin,
+};
