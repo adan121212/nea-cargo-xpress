@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const pool = require('../db');
-const { enviarCorreoConfirmacion, enviarCorreoRecuperacion } = require('../utils/mailer');
+const { enviarCorreoConfirmacion, enviarCorreoRecuperacion, enviarCorreoNuevoRegistroAdmin } = require('../utils/mailer');
 const { generarNumeroCasillero, direccionCasillero } = require('../utils/casillero');
 
 const router = express.Router();
@@ -62,10 +62,15 @@ router.post(
       ]);
 
       await client.query('COMMIT');
-
       await enviarCorreoConfirmacion(email, nombre, tokenVerificacion);
 
+      // Best-effort: si falla el aviso al admin, no afecta el registro del cliente.
+      enviarCorreoNuevoRegistroAdmin({ ...nuevoUsuario, telefono, numero_casillero: numeroCasillero }).catch((error) => {
+        console.error('No se pudo enviar el aviso de nuevo registro al admin:', error);
+      });
+
       return res.status(201).json({
+        
         mensaje: 'Cuenta creada correctamente. Revisa tu correo para confirmarla.',
         usuario: { ...nuevoUsuario, numero_casillero: numeroCasillero },
       });
