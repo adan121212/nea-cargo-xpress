@@ -912,6 +912,7 @@
   // ---------- Navegación entre vistas ----------
   function mostrarApp(mostrar){
     $('#vistaAuth').style.display = mostrar ? 'none' : 'flex';
+    document.querySelector('.wrap').style.display = mostrar ? 'none' : 'block';
     $('#vistaApp').style.display = mostrar ? 'flex' : 'none';
     $('#btnLogout').style.display = mostrar ? 'inline-block' : 'none';
     $('#pillCasillero').style.display = mostrar ? 'inline-block' : 'none';
