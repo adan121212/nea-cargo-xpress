@@ -320,7 +320,7 @@
     .app-shell{ position:relative; }
     .sidebar{
       position: fixed; top:63px; left:0; bottom:0; z-index:35;
-      transform: translateX(-100%); transition: transform .2s ease; width: 230px;
+      transform: translateX(-100%); transition: transform .2s ease; width: min(280px, 82vw);
       box-shadow: 20px 0 40px rgba(0,0,0,0.25);
     }
     .sidebar.mobile-open{ transform: translateX(0); }
@@ -330,6 +330,11 @@
       padding: 8px 10px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
     }
     .app-main-inner{ padding: 24px 18px 60px; }
+    .sidebar-scrim{
+      display:none; position:fixed; top:63px; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.45); z-index:34;
+    }
+    .sidebar-scrim.show{ display:block; }
   }
 
   .hero{
@@ -682,6 +687,7 @@
 
   <!-- ======================= VISTA: APP (dashboard con menú lateral) ======================= -->
   <div id="vistaApp" class="app-shell">
+    <div class="sidebar-scrim" id="sidebarScrim"></div>
     <aside class="sidebar" id="sidebar">
       <button class="sidebar-toggle" id="btnSidebarToggle" aria-label="Colapsar menú">‹</button>
       <nav class="sidebar-nav">
@@ -1006,7 +1012,7 @@
     if (seccion === 'autorizados') cargarAutorizados();
 
     // En móvil, cierra el menú al elegir una sección.
-    if (window.innerWidth <= 860) $('#sidebar').classList.remove('mobile-open');
+    if (window.innerWidth <= 860) cerrarMenuMovil();
   }
 
   document.querySelectorAll('.side-item[data-seccion], .side-subitem[data-seccion]').forEach(btn => {
@@ -1022,10 +1028,21 @@
     $('#sidebar').classList.toggle('collapsed');
   });
 
+  function abrirMenuMovil(){
+    $('#sidebar').classList.add('mobile-open');
+    $('#sidebarScrim').classList.add('show');
+  }
+  function cerrarMenuMovil(){
+    $('#sidebar').classList.remove('mobile-open');
+    $('#sidebarScrim').classList.remove('show');
+  }
+
   $('#btnMenuMovilApp').addEventListener('click', (e) => {
     e.stopPropagation();
-    $('#sidebar').classList.toggle('mobile-open');
+    if ($('#sidebar').classList.contains('mobile-open')) cerrarMenuMovil();
+    else abrirMenuMovil();
   });
+  $('#sidebarScrim').addEventListener('click', cerrarMenuMovil);
 
   $('#tabLogin').addEventListener('click', () => {
     $('#tabLogin').classList.add('active');
