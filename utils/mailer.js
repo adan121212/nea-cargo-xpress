@@ -197,4 +197,4 @@ async function enviarCorreoRecuperacion(destinatario, nombre, tokenReset) {
   return respuesta.json();
 }
 
-module.exports = { enviarCorreoConfirmacion, enviarFacturaPorCorreo, enviarCorreoCambioEstado, enviarCorreoRecuperacion };
+module.exports = { enviarCorreoConfirmacion, enviarFacturaPorCorreo, enviarCorreoCambioEstado, enviarCorreoRecuperacion, enviarCorreoNuevoRegistroAdmin };
