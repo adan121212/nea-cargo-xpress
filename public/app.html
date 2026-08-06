@@ -702,6 +702,10 @@
           <button class="side-subitem active" data-seccion="historial-facturas">Historial de facturas</button>
           <button class="side-subitem" data-seccion="estado-cuenta">Estado de cuenta</button>
         </div>
+
+        <button class="side-item" data-seccion="autorizados">
+          <span class="side-ico">🛡️</span><span class="side-label">Autorizados</span>
+        </button>
       </nav>
     </aside>
 
@@ -820,6 +824,51 @@
             <div id="listaCuentaPendientes"></div>
           </div>
         </div>
+
+        <!-- ---- Sección: Autorizados ---- -->
+        <div class="seccion-app" id="seccionAutorizados" style="display:none;">
+          <div class="card reveal">
+            <h2>¿Qué son los autorizados?</h2>
+            <p class="card-sub">Si tú no puedes recoger tu pedido, puedes asignar aquí hasta 3 personas que puedan recogerlo por ti. Escribe su nombre y cédula completos y sin errores — en la sucursal se los pedirán para verificar.</p>
+
+            <form id="formAutorizados">
+              <div class="form-grid" style="margin-bottom:14px;">
+                <div>
+                  <label for="aut1Nombre">Nombre persona 1</label>
+                  <input id="aut1Nombre" type="text" placeholder="Nombre completo">
+                </div>
+                <div>
+                  <label for="aut1Cedula">Cédula persona 1</label>
+                  <input id="aut1Cedula" type="text" placeholder="8-123-4567">
+                </div>
+              </div>
+              <div class="form-grid" style="margin-bottom:14px;">
+                <div>
+                  <label for="aut2Nombre">Nombre persona 2</label>
+                  <input id="aut2Nombre" type="text" placeholder="Nombre completo">
+                </div>
+                <div>
+                  <label for="aut2Cedula">Cédula persona 2</label>
+                  <input id="aut2Cedula" type="text" placeholder="8-123-4567">
+                </div>
+              </div>
+              <div class="form-grid" style="margin-bottom:14px;">
+                <div>
+                  <label for="aut3Nombre">Nombre persona 3</label>
+                  <input id="aut3Nombre" type="text" placeholder="Nombre completo">
+                </div>
+                <div>
+                  <label for="aut3Cedula">Cédula persona 3</label>
+                  <input id="aut3Cedula" type="text" placeholder="8-123-4567">
+                </div>
+              </div>
+              <button class="btn-primary" type="submit" id="btnGuardarAutorizados" style="max-width:220px;">
+                <span class="spinner"></span><span>Guardar</span>
+              </button>
+              <div class="banner" id="bannerAutorizados"></div>
+            </form>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -926,6 +975,7 @@
     'paquetes': { titulo: () => 'Paquetes', sub: 'Prealerta y sigue el estado de cada compra.' },
     'historial-facturas': { titulo: () => 'Historial de facturas', sub: 'Todas tus facturas, pagadas y pendientes.' },
     'estado-cuenta': { titulo: () => 'Estado de cuenta', sub: 'Resumen de lo facturado, pagado y pendiente.' },
+    'autorizados': { titulo: () => 'Autorizados', sub: 'Personas que pueden retirar tu pedido por ti.' },
   };
   let nombreUsuarioActual = '';
 
@@ -935,6 +985,7 @@
     'paquetes': 'seccionPaquetes',
     'historial-facturas': 'seccionHistorialFacturas',
     'estado-cuenta': 'seccionEstadoCuenta',
+    'autorizados': 'seccionAutorizados',
   };
 
   function irASeccion(seccion){
@@ -951,6 +1002,8 @@
       $('#saludoNombre').textContent = seccion === 'inicio' ? info.titulo(nombreUsuarioActual) : info.titulo();
       $('#subtituloSeccion').textContent = info.sub;
     }
+
+    if (seccion === 'autorizados') cargarAutorizados();
 
     // En móvil, cierra el menú al elegir una sección.
     if (window.innerWidth <= 860) $('#sidebar').classList.remove('mobile-open');
@@ -1530,6 +1583,63 @@
   }
 
   // ---------- Arranque de la app ----------
+  // ---------- Autorizados ----------
+  async function cargarAutorizados(){
+    try {
+      const res = await apiAutenticado('/autorizados');
+      const data = await res.json();
+      const lista = data.autorizados || [];
+
+      // Limpia los 3 slots primero, luego llena los que existan.
+      for (let i = 1; i <= 3; i++){
+        $(`#aut${i}Nombre`).value = '';
+        $(`#aut${i}Cedula`).value = '';
+      }
+      lista.forEach((persona, i) => {
+        if (i >= 3) return;
+        $(`#aut${i + 1}Nombre`).value = persona.nombre;
+        $(`#aut${i + 1}Cedula`).value = persona.cedula;
+      });
+    } catch (err) {}
+  }
+
+  $('#formAutorizados').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnGuardarAutorizados');
+
+    const autorizados = [1, 2, 3]
+      .map(i => ({
+        nombre: $(`#aut${i}Nombre`).value.trim(),
+        cedula: $(`#aut${i}Cedula`).value.trim(),
+      }))
+      .filter(p => p.nombre || p.cedula);
+
+    const incompleto = autorizados.find(p => !p.nombre || !p.cedula);
+    if (incompleto){
+      mostrarBanner('#bannerAutorizados', 'error', 'Completa nombre y cédula de cada persona que agregues (o deja el par vacío para no usarlo).');
+      return;
+    }
+
+    setCargando(btn, true);
+    try {
+      const res = await apiAutenticado('/autorizados', {
+        method: 'PUT',
+        body: JSON.stringify({ autorizados }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok){
+        mostrarBanner('#bannerAutorizados', 'success', '✓ Autorizados guardados correctamente.');
+      } else {
+        mostrarBanner('#bannerAutorizados', 'error', data.mensaje || 'No se pudieron guardar los autorizados.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerAutorizados', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
   async function iniciarApp(){
     try {
       await cargarPerfil();
