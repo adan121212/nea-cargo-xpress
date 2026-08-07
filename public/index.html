@@ -389,27 +389,27 @@
       <div class="nav-item">
         <button class="nav-btn" data-dropdown="ddSesion">Iniciar sesión <span class="caret">▾</span></button>
         <div class="dropdown" id="ddSesion">
-          <a href="app.html">Iniciar sesión<span class="item-sub">Ya tengo un casillero</span></a>
-          <a href="app.html?registro">Crear casillero<span class="item-sub">Es gratis, toma 2 minutos</span></a>
-          <a href="admin.html">Acceso staff<span class="item-sub">Panel de operaciones</span></a>
+          <a href="app.html" class="dropdown-link">Iniciar sesión<span class="item-sub">Ya tengo un casillero</span></a>
+          <a href="app.html?registro" class="dropdown-link">Crear casillero<span class="item-sub">Es gratis, toma 2 minutos</span></a>
+          <a href="admin.html" class="dropdown-link">Acceso staff<span class="item-sub">Panel de operaciones</span></a>
         </div>
       </div>
       <div class="nav-item">
         <button class="nav-btn" data-dropdown="ddPreguntas">Preguntas <span class="caret">▾</span></button>
         <div class="dropdown" id="ddPreguntas">
-          <a href="#faq-prealertar" class="faq-link">¿Cómo prealerto un paquete?</a>
-          <a href="#faq-tiempo" class="faq-link">¿Cuánto tarda en llegar?</a>
-          <a href="#faq-costo" class="faq-link">¿Cómo se calcula el costo?</a>
-          <a href="#preguntas">Ver todas las preguntas</a>
+          <a href="#faq-prealertar" class="dropdown-link faq-link">¿Cómo prealerto un paquete?</a>
+          <a href="#faq-tiempo" class="dropdown-link faq-link">¿Cuánto tarda en llegar?</a>
+          <a href="#faq-costo" class="dropdown-link faq-link">¿Cómo se calcula el costo?</a>
+          <a href="#preguntas" class="dropdown-link">Ver todas las preguntas</a>
         </div>
       </div>
       <a href="#rastreo" class="nav-btn">Rastrear paquete</a>
       <div class="nav-item right">
         <button class="nav-btn" data-dropdown="ddContacto">Contáctanos <span class="caret">▾</span></button>
         <div class="dropdown" id="ddContacto">
-          <a href="https://wa.me/50762937497" target="_blank" rel="noopener">WhatsApp<span class="item-sub">+507 6293-7497</span></a>
-          <a href="mailto:info@neacargoxpress.com">Correo<span class="item-sub">info@neacargoxpress.com</span></a>
-          <a href="#sucursales">Nuestras sucursales<span class="item-sub">Puntos de retiro en Panamá</span></a>
+          <a href="https://wa.me/50762937497" target="_blank" rel="noopener" class="dropdown-link">WhatsApp<span class="item-sub">+507 6293-7497</span></a>
+          <a href="mailto:info@neacargoxpress.com" class="dropdown-link">Correo<span class="item-sub">info@neacargoxpress.com</span></a>
+          <a href="#sucursales" class="dropdown-link">Nuestras sucursales<span class="item-sub">Puntos de retiro en Panamá</span></a>
         </div>
       </div>
       <a href="app.html?registro" class="nav-btn cta">Crear casillero gratis</a>
@@ -788,22 +788,24 @@
   document.querySelectorAll('[data-count-to]').forEach(animarContador);
 
   // ---------- Dropdowns del nav ----------
+  function cerrarTodosLosDropdowns(){
+    document.querySelectorAll('.nav-item.open').forEach(item => {
+      item.classList.remove('open');
+      const menu = item.querySelector('.dropdown');
+      if (menu) menu.style.display = ''; // por si quedó algo forzado, lo limpia
+    });
+  }
+
   document.querySelectorAll('.nav-btn[data-dropdown]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const item = btn.closest('.nav-item');
       const yaAbierto = item.classList.contains('open');
-      document.querySelectorAll('.nav-item.open').forEach(i => i.classList.remove('open'));
-      if (!yaAbierto){
-        item.classList.add('open');
-        const menu = item.querySelector('.dropdown');
-        if (menu) menu.style.display = ''; // limpia cualquier "display:none" forzado antes
-      }
+      cerrarTodosLosDropdowns();
+      if (!yaAbierto) item.classList.add('open');
     });
   });
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item.open').forEach(i => i.classList.remove('open'));
-  });
+  document.addEventListener('click', cerrarTodosLosDropdowns);
 
   // ---------- Menú móvil ----------
   // Calculamos la altura exacta que le falta a la pantalla (en vez de un
@@ -816,7 +818,11 @@
     const menu = $('#navMenu');
     menu.style.height = (window.innerHeight - nav.getBoundingClientRect().bottom) + 'px';
   }
-  $('#navToggle').addEventListener('click', () => {
+  function cerrarMenuMovilPrincipal(){
+    $('#navMenu').classList.remove('open');
+  }
+  $('#navToggle').addEventListener('click', (e) => {
+    e.stopPropagation();
     const abriendo = !$('#navMenu').classList.contains('open');
     if (abriendo) ajustarAlturaMenuMovil();
     $('#navMenu').classList.toggle('open');
@@ -832,35 +838,39 @@
     });
   });
 
-  // ---------- Enlaces del menú "Preguntas" ----------
-  // Abren la pregunta específica (no solo saltan a la sección) y cierran
-  // el dropdown de navegación al hacer clic, ANTES de saltar a la pregunta
-  // (si no, el dropdown se queda tapando la respuesta mientras se mueve la página).
-  document.querySelectorAll('.faq-link').forEach(link => {
+  // ---------- TODOS los enlaces dentro de cualquier dropdown ----------
+  // Un solo listener para las tres listas (Iniciar sesión, Preguntas,
+  // Contáctanos): sea que el enlace vaya a otra página, a un correo/WhatsApp,
+  // o a una sección de esta misma página, el menú se cierra SIEMPRE al
+  // hacer clic, de inmediato — antes de que pase cualquier otra cosa.
+  document.querySelectorAll('.dropdown-link').forEach(link => {
     link.addEventListener('click', (e) => {
-      e.preventDefault();
       e.stopPropagation();
+      const href = link.getAttribute('href') || '';
+      const esPreguntaEspecifica = link.classList.contains('faq-link');
+      const esAnclaEnEstaPagina = href.startsWith('#');
 
-      // Cierra el dropdown de inmediato (quita la clase Y fuerza el estilo,
-      // por si algo más lo estaba manteniendo abierto).
-      document.querySelectorAll('.nav-item.open').forEach(item => {
-        item.classList.remove('open');
-        const menu = item.querySelector('.dropdown');
-        if (menu) menu.style.display = 'none';
-      });
-      // También cierra el menú hamburguesa si estuviera abierto en móvil.
-      $('#navMenu')?.classList.remove('open');
+      // Cierra el/los menú(s) de inmediato, siempre, sin excepción.
+      cerrarTodosLosDropdowns();
+      cerrarMenuMovilPrincipal();
 
-      const destino = document.querySelector(link.getAttribute('href'));
-      if (destino){
-        document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('open'));
-        destino.classList.add('open');
-        // Pequeña espera para que el dropdown termine de cerrarse antes de
+      if (esAnclaEnEstaPagina){
+        e.preventDefault();
+        const destino = document.querySelector(href);
+        if (!destino) return;
+
+        if (esPreguntaEspecifica){
+          document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('open'));
+          destino.classList.add('open');
+        }
+        // Pequeña espera para que el menú termine de cerrarse antes de
         // empezar el scroll — así no se ve el salto con el menú todavía encima.
         setTimeout(() => {
           destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 60);
       }
+      // Si no es un ancla (ej. app.html, admin.html, mailto:, wa.me/...),
+      // no hacemos preventDefault — el navegador navega normal.
     });
   });
 
