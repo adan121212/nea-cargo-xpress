@@ -397,9 +397,9 @@
       <div class="nav-item">
         <button class="nav-btn" data-dropdown="ddPreguntas">Preguntas <span class="caret">▾</span></button>
         <div class="dropdown" id="ddPreguntas">
-          <a href="#preguntas">¿Cómo prealerto un paquete?</a>
-          <a href="#preguntas">¿Cuánto tarda en llegar?</a>
-          <a href="#preguntas">¿Cómo se calcula el costo?</a>
+          <a href="#faq-prealertar" class="faq-link">¿Cómo prealerto un paquete?</a>
+          <a href="#faq-tiempo" class="faq-link">¿Cuánto tarda en llegar?</a>
+          <a href="#faq-costo" class="faq-link">¿Cómo se calcula el costo?</a>
           <a href="#preguntas">Ver todas las preguntas</a>
         </div>
       </div>
@@ -589,15 +589,15 @@
     <p>¿No encuentras tu respuesta? Escríbenos por WhatsApp, te contestamos rápido.</p>
   </div>
   <div id="faqLista">
-    <div class="faq-item open">
+    <div class="faq-item open" id="faq-prealertar">
       <div class="faq-q"><span>¿Cómo prealerto un paquete?</span><span class="plus">+</span></div>
       <div class="faq-a">Desde tu dashboard, en la sección "Prealertar un paquete", ingresa la tienda, el número de tracking, una descripción y el valor declarado. Así lo identificamos apenas llega a la bodega.</div>
     </div>
-    <div class="faq-item">
+    <div class="faq-item" id="faq-tiempo">
       <div class="faq-q"><span>¿Cuánto tarda en llegar a Panamá?</span><span class="plus">+</span></div>
       <div class="faq-a">En promedio de 4 a 7 días hábiles desde que el paquete sale de nuestra bodega en Miami, dependiendo del volumen y la aduana.</div>
     </div>
-    <div class="faq-item">
+    <div class="faq-item" id="faq-costo">
       <div class="faq-q"><span>¿Cómo se calcula el costo del envío?</span><span class="plus">+</span></div>
       <div class="faq-a">Se cobra por el peso real del paquete confirmado en bodega (precio por libra), con un cargo mínimo por envío. Si agregas seguro, se suma un porcentaje sobre el valor declarado. Verás el detalle completo en tu factura.</div>
     </div>
@@ -825,6 +825,22 @@
   document.querySelectorAll('.faq-q').forEach(q => {
     q.addEventListener('click', () => {
       q.closest('.faq-item').classList.toggle('open');
+    });
+  });
+
+  // ---------- Enlaces del menú "Preguntas" ----------
+  // Abren la pregunta específica (no solo saltan a la sección) y cierran
+  // el dropdown de navegación al hacer clic.
+  document.querySelectorAll('.faq-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const destino = document.querySelector(link.getAttribute('href'));
+      if (destino){
+        e.preventDefault();
+        document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('open'));
+        destino.classList.add('open');
+        destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      document.querySelectorAll('.nav-item.open').forEach(i => i.classList.remove('open'));
     });
   });
 
