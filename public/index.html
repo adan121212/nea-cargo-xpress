@@ -794,7 +794,11 @@
       const item = btn.closest('.nav-item');
       const yaAbierto = item.classList.contains('open');
       document.querySelectorAll('.nav-item.open').forEach(i => i.classList.remove('open'));
-      if (!yaAbierto) item.classList.add('open');
+      if (!yaAbierto){
+        item.classList.add('open');
+        const menu = item.querySelector('.dropdown');
+        if (menu) menu.style.display = ''; // limpia cualquier "display:none" forzado antes
+      }
     });
   });
   document.addEventListener('click', () => {
@@ -830,17 +834,33 @@
 
   // ---------- Enlaces del menú "Preguntas" ----------
   // Abren la pregunta específica (no solo saltan a la sección) y cierran
-  // el dropdown de navegación al hacer clic.
+  // el dropdown de navegación al hacer clic, ANTES de saltar a la pregunta
+  // (si no, el dropdown se queda tapando la respuesta mientras se mueve la página).
   document.querySelectorAll('.faq-link').forEach(link => {
     link.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Cierra el dropdown de inmediato (quita la clase Y fuerza el estilo,
+      // por si algo más lo estaba manteniendo abierto).
+      document.querySelectorAll('.nav-item.open').forEach(item => {
+        item.classList.remove('open');
+        const menu = item.querySelector('.dropdown');
+        if (menu) menu.style.display = 'none';
+      });
+      // También cierra el menú hamburguesa si estuviera abierto en móvil.
+      $('#navMenu')?.classList.remove('open');
+
       const destino = document.querySelector(link.getAttribute('href'));
       if (destino){
-        e.preventDefault();
         document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('open'));
         destino.classList.add('open');
-        destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Pequeña espera para que el dropdown termine de cerrarse antes de
+        // empezar el scroll — así no se ve el salto con el menú todavía encima.
+        setTimeout(() => {
+          destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 60);
       }
-      document.querySelectorAll('.nav-item.open').forEach(i => i.classList.remove('open'));
     });
   });
 
