@@ -2381,14 +2381,22 @@
     if (resultados.length > 0){
       const totalCobrado = $('#ftTotal').textContent;
       const nums = resultados.map(f => f.numero_factura).join(', ');
-      $('#facturadorResultado').style.display = 'block';
-      $('#facturadorResultado').innerHTML = `
-        <div class="ft-result">
-          <div class="ft-result-title">✓ ${resultados.length} factura${resultados.length > 1 ? 's' : ''} generada${resultados.length > 1 ? 's' : ''} y cobrada${resultados.length > 1 ? 's' : ''}</div>
-          <div class="ft-result-meta">${nums} · ${totalCobrado} · ${facturadorMetodoPago} · PDF y correo enviados al cliente</div>
-        </div>
-      `;
-      recalcularTotales();
+
+      // Muestra el éxito brevemente y luego limpia toda la pantalla
+      mostrarBanner('#bannerMostrador', 'success', `✓ ${nums} · ${totalCobrado} · ${facturadorMetodoPago} · PDF y correo enviados al cliente`);
+
+      // Limpia todo después de 3 segundos
+      setTimeout(() => {
+        $('#resultadoMostrador').innerHTML = '';
+        $('#facturadorResumen').style.display = 'none';
+        $('#facturadorResultado').style.display = 'none';
+        $('#bannerMostrador').innerHTML = '';
+        $('#mostradorQ').value = '';
+        facturadorMetodoPago = '';
+        document.querySelectorAll('.ft-pago-btn').forEach(b => b.classList.remove('selected'));
+        $('#mostradorQ').focus();
+      }, 3000);
+
       cargarPendientesMostrador();
     }
     if (errores > 0){
