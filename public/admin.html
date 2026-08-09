@@ -1520,7 +1520,12 @@
         await cargarOpcionesFactura();
         await cargarFacturas();
       } else {
-        mostrarBanner('#bannerFactura', 'error', data.mensaje || 'No se pudo generar la factura.');
+        // Si la caja está cerrada, mostramos un mensaje más claro con enlace a la pestaña de caja.
+        if (data.caja_cerrada) {
+          mostrarBanner('#bannerFactura', 'error', `🔒 ${data.mensaje}`);
+        } else {
+          mostrarBanner('#bannerFactura', 'error', data.mensaje || 'No se pudo generar la factura.');
+        }
       }
     } catch (err) {
       mostrarBanner('#bannerFactura', 'error', 'No pudimos conectar con el servidor.');
@@ -2565,16 +2570,70 @@
       alert('Primero carga un reporte.');
       return;
     }
-    const filas = [['Fecha', 'Ingresos']];
-    (ultimoReporte.ingresos_por_dia || []).forEach(d => {
-      filas.push([new Date(d.dia).toLocaleDateString('es-PA'), Number(d.total).toFixed(2)]);
-    });
-    const csv = filas.map(f => f.join(',')).join('\n');
+
+    const desde = $('#repDesde').value;
+    const hasta = $('#repHasta').value;
+    const fmtFecha = (d) => d ? new Date(d).toLocaleDateString('es-PA', { day:'2-digit', month:'2-digit', year:'numeric' }) : '—';
+    const fmtNum  = (n) => `$${Number(n || 0).toFixed(2)}`;
+
+    // Función para escapar campos con comas o comillas
+    const esc = (v) => {
+      const s = String(v ?? '');
+      return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+
+    const seccion = (titulo) => ['', `=== ${titulo} ===`];
+
+    const filas = [
+      // Encabezado del reporte
+      [`NEA CARGO XPRESS — REPORTE DE OPERACIONES`],
+      [`Período: ${fmtFecha(desde)} al ${fmtFecha(hasta)}`],
+      [`Generado: ${fmtFecha(new Date().toISOString())}`],
+      [],
+
+      // Resumen general
+      ...seccion('RESUMEN GENERAL'),
+      ['Concepto', 'Cantidad', 'Monto'],
+      ['Ingresos cobrados', ultimoReporte.ingresos?.cantidad ?? '0', fmtNum(ultimoReporte.ingresos?.total)],
+      ['Facturas pendientes de cobro', ultimoReporte.pendientes?.cantidad ?? '0', fmtNum(ultimoReporte.pendientes?.total)],
+      ['Paquetes nuevos en el período', ultimoReporte.paquetes_nuevos ?? '0', ''],
+      ['Clientes nuevos en el período', ultimoReporte.clientes_nuevos ?? '0', ''],
+      [],
+
+      // Ingresos por día
+      ...seccion('INGRESOS POR DÍA'),
+      ['Fecha', 'Total cobrado'],
+      ...(ultimoReporte.ingresos_por_dia || []).map(d => [
+        fmtFecha(d.dia),
+        fmtNum(d.total),
+      ]),
+      [],
+
+      // Estado de paquetes
+      ...seccion('PAQUETES POR ESTADO'),
+      ['Estado', 'Cantidad'],
+      ...(ultimoReporte.paquetes_por_estado || []).map(e => [
+        e.estado?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '—',
+        e.cantidad,
+      ]),
+      [],
+
+      // Top clientes
+      ...seccion('TOP 5 CLIENTES (por paquetes)'),
+      ['Cliente', 'Correo', 'Total paquetes'],
+      ...(ultimoReporte.top_clientes || []).map(c => [
+        `${c.nombre} ${c.apellido}`,
+        c.email,
+        c.total_paquetes,
+      ]),
+    ];
+
+    const csv = '\uFEFF' + filas.map(f => f.map(esc).join(',')).join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `reporte-ingresos-${$('#repDesde').value}-a-${$('#repHasta').value}.csv`;
+    a.download = `NEA-Reporte-${desde}-a-${hasta}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   });
