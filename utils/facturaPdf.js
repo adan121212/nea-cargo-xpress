@@ -1,192 +1,259 @@
 const PDFDocument = require('pdfkit');
 
+// ── Colores de marca NEA Cargo Xpress ──────────────────────────────────────
+const NAVY   = '#0c1b33';
+const ORANGE = '#ff6a1a';
+const GRAY   = '#6b7280';
+const LIGHT  = '#f1f3f2';
+const LINE   = '#e5e7eb';
+const WHITE  = '#ffffff';
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function fmt$(n){ return `$${Number(n || 0).toFixed(2)}`; }
+
+function fmtFecha(d){
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('es-PA', {
+    day: '2-digit', month: 'long', year: 'numeric',
+  });
+}
+
+function estadoLabel(estado){
+  const labels = {
+    pendiente: 'Pendiente de pago',
+    pagada:    'Pagada',
+    anulada:   'Anulada',
+  };
+  return labels[estado] || estado;
+}
+
+// Dibuja un rectángulo con esquinas redondeadas (PDFKit no tiene roundedRect nativo en v0.15)
+function roundRect(doc, x, y, w, h, r, fillColor, strokeColor){
+  doc.save();
+  doc.roundedRect(x, y, w, h, r);
+  if (fillColor)   { doc.fillColor(fillColor); doc.fill(); }
+  if (strokeColor) { doc.strokeColor(strokeColor); doc.stroke(); }
+  doc.restore();
+}
+
+// ── Función principal ──────────────────────────────────────────────────────
 /**
- * Genera el PDF de una factura y lo devuelve como Buffer.
- * `factura` debe traer también: cliente_nombre, cliente_apellido, cliente_email,
- * numero_casillero, tienda, numero_tracking (los trae el JOIN de las consultas),
- * y opcionalmente firma_base64 / fecha_entrega (si el paquete ya fue entregado y firmado).
+ * Genera el PDF de una factura de NEA Cargo Xpress.
+ * @param {Object} factura  Fila combinada de facturas + usuarios + paquetes.
+ * @returns {Promise<Buffer>}
  */
-function generarPdfFactura(factura) {
-  // La firma se guarda directo en la base de datos como data URL
-  // ("data:image/png;base64,...") — solo hay que decodificarla, sin red de por medio.
-  let firmaBuffer = null;
-  if (factura.firma_base64) {
-    try {
-      const base64Limpio = factura.firma_base64.replace(/^data:image\/png;base64,/, '');
-      firmaBuffer = Buffer.from(base64Limpio, 'base64');
-    } catch (error) {
-      console.error('No se pudo decodificar la firma para el PDF:', error);
-    }
-  }
-
+async function generarPdfFactura(factura) {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: 'A4', margin: 0 });
-    const chunks = [];
-
-    doc.on('data', (chunk) => chunks.push(chunk));
-    doc.on('end', () => resolve(Buffer.concat(chunks)));
-    doc.on('error', reject);
-
-    // ---------- Paleta de marca ----------
-    const TINTA = '#0c1b33';
-    const NARANJA = '#ff6a1a';
-    const NARANJA_OSC = '#e2570e';
-    const GRIS = '#6b7280';
-    const GRIS_CLARO = '#9aa3b2';
-    const LINEA = '#e4e7ec';
-    const PAPEL = '#f5f6f8';
-    const VERDE = '#177a63';
-    const VERDE_BG = '#e7f3f0';
-    const AMBAR_BG = '#fff1e8';
-
-    const MARGEN_IZQ = 50;
-    const MARGEN_DER = 545;
-    const ANCHO_CONTENIDO = MARGEN_DER - MARGEN_IZQ;
-
-    const money = (n) => `$${Number(n || 0).toFixed(2)}`;
-    const fechaLarga = (d) =>
-      new Date(d).toLocaleDateString('es-PA', { day: '2-digit', month: 'long', year: 'numeric' });
-
-    // ============ BANDA SUPERIOR (marca) ============
-    doc.rect(0, 0, 595, 118).fill(TINTA);
-
-    // Marca cuadrada tipo "logo"
-    doc.roundedRect(MARGEN_IZQ, 34, 34, 34, 7).fill(NARANJA);
-    doc.font('Helvetica-Bold').fontSize(15).fillColor(TINTA).text('N', MARGEN_IZQ, 43, { width: 34, align: 'center' });
-
-    doc
-      .font('Helvetica-Bold').fontSize(15).fillColor('#ffffff')
-      .text('NEA CARGO XPRESS', MARGEN_IZQ + 44, 38);
-    doc
-      .font('Helvetica').fontSize(8.5).fillColor('#aab3c4')
-      .text('MIAMI  →  PANAMÁ', MARGEN_IZQ + 44, 58, { characterSpacing: 0.6 });
-
-    // Número de factura + fecha, alineado a la derecha
-    doc
-      .font('Helvetica-Bold').fontSize(20).fillColor(NARANJA)
-      .text(factura.numero_factura || `FAC-${String(factura.id).padStart(6, '0')}`, 300, 36, {
-        width: 245, align: 'right',
+    try {
+      const doc = new PDFDocument({
+        size: 'LETTER',
+        margins: { top: 40, bottom: 40, left: 50, right: 50 },
+        info: {
+          Title:  `Factura ${factura.numero_factura}`,
+          Author: 'NEA Cargo Xpress',
+        },
       });
-    doc
-      .font('Helvetica').fontSize(9).fillColor('#c7ccd6')
-      .text(`Emitida el ${fechaLarga(factura.fecha_creacion)}`, 300, 62, { width: 245, align: 'right' });
 
-    // Badge de estado
-    const estadoInfo = {
-      pagada: { texto: 'PAGADA', color: VERDE, bg: '#dff0ec' },
-      pendiente: { texto: 'PENDIENTE DE PAGO', color: NARANJA_OSC, bg: '#ffe2cf' },
-      anulada: { texto: 'ANULADA', color: '#9aa3b2', bg: '#e9ebef' },
-    }[factura.estado] || { texto: factura.estado, color: '#9aa3b2', bg: '#e9ebef' };
+      const chunks = [];
+      doc.on('data', chunk => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
 
-    const badgeAncho = doc.font('Helvetica-Bold').fontSize(9).widthOfString(estadoInfo.texto) + 24;
-    doc.roundedRect(545 - badgeAncho, 84, badgeAncho, 20, 10).fill(estadoInfo.bg);
-    doc
-      .font('Helvetica-Bold').fontSize(9).fillColor(estadoInfo.color)
-      .text(estadoInfo.texto, 545 - badgeAncho, 90, { width: badgeAncho, align: 'center' });
+      const W = doc.page.width - 100;  // ancho útil
+      const LM = 50;                    // margen izquierdo
 
-    // ============ TARJETAS: cliente + paquete ============
-    let y = 148;
-    const anchoTarjeta = (ANCHO_CONTENIDO - 14) / 2;
+      // ══════════════════════════════════════════════════════════════════
+      // CABECERA
+      // ══════════════════════════════════════════════════════════════════
+      // Bloque navy de fondo
+      doc.rect(0, 0, doc.page.width, 110).fill(NAVY);
 
-    doc.roundedRect(MARGEN_IZQ, y, anchoTarjeta, 90, 8).fillAndStroke(PAPEL, PAPEL);
-    doc.roundedRect(MARGEN_IZQ + anchoTarjeta + 14, y, anchoTarjeta, 90, 8).fillAndStroke(PAPEL, PAPEL);
+      // Logo: cuadrado naranja con "N"
+      doc.roundedRect(LM, 20, 60, 60, 8).fill(ORANGE);
+      doc.font('Helvetica-Bold').fontSize(28).fillColor(NAVY)
+         .text('N', LM, 36, { width: 60, align: 'center' });
 
-    const colB = MARGEN_IZQ + anchoTarjeta + 14;
+      // Nombre de la empresa
+      doc.font('Helvetica-Bold').fontSize(18).fillColor(WHITE)
+         .text('NEA CARGO XPRESS', LM + 72, 28);
+      doc.font('Helvetica').fontSize(9).fillColor('#94a3b8')
+         .text('Miami → Panamá · Casillero Virtual', LM + 72, 50);
 
-    doc.font('Helvetica-Bold').fontSize(9).fillColor(NARANJA_OSC)
-      .text('FACTURADO A', MARGEN_IZQ + 16, y + 14, { characterSpacing: 0.4 });
-    doc.font('Helvetica-Bold').fontSize(11).fillColor(TINTA)
-      .text(`${factura.cliente_nombre || ''} ${factura.cliente_apellido || ''}`, MARGEN_IZQ + 16, y + 30);
-    doc.font('Helvetica').fontSize(9).fillColor(GRIS)
-      .text(factura.cliente_email || '', MARGEN_IZQ + 16, y + 47)
-      .text(`Casillero: ${factura.numero_casillero || '—'}`, MARGEN_IZQ + 16, y + 62);
+      // Etiqueta FACTURA + número
+      const estado = factura.estado || 'pendiente';
+      const colorEstado = estado === 'pagada' ? '#22c55e' : estado === 'anulada' ? '#ef4444' : ORANGE;
+      doc.font('Helvetica-Bold').fontSize(22).fillColor(WHITE)
+         .text('FACTURA', 0, 22, { width: doc.page.width - 50, align: 'right' });
+      doc.font('Helvetica-Bold').fontSize(13).fillColor(ORANGE)
+         .text(factura.numero_factura || '—', 0, 48, { width: doc.page.width - 50, align: 'right' });
+      // Badge de estado
+      const badgeText = estadoLabel(estado).toUpperCase();
+      const badgeW = 110, badgeH = 20, badgeX = doc.page.width - 50 - badgeW, badgeY = 68;
+      doc.roundedRect(badgeX, badgeY, badgeW, badgeH, 4).fill(colorEstado);
+      doc.font('Helvetica-Bold').fontSize(8).fillColor(WHITE)
+         .text(badgeText, badgeX, badgeY + 5, { width: badgeW, align: 'center' });
 
-    doc.font('Helvetica-Bold').fontSize(9).fillColor(NARANJA_OSC)
-      .text('PAQUETE', colB + 16, y + 14, { characterSpacing: 0.4 });
-    doc.font('Helvetica-Bold').fontSize(11).fillColor(TINTA)
-      .text(factura.tienda || '—', colB + 16, y + 30);
-    doc.font('Helvetica').fontSize(9).fillColor(GRIS)
-      .text(`Tracking: ${factura.numero_tracking || '—'}`, colB + 16, y + 47)
-      .text(`Peso facturado: ${factura.peso_facturado_lb} lb`, colB + 16, y + 62);
+      doc.y = 130;
 
-    // ============ TABLA DE CONCEPTOS ============
-    y += 90 + 30;
+      // ══════════════════════════════════════════════════════════════════
+      // DATOS: Cliente y Fechas lado a lado
+      // ══════════════════════════════════════════════════════════════════
+      const colW = (W - 20) / 2;
 
-    doc.font('Helvetica-Bold').fontSize(10.5).fillColor(TINTA).text('Detalle de cargos', MARGEN_IZQ, y);
-    y += 22;
+      // Bloque cliente
+      roundRect(doc, LM, doc.y, colW, 115, 6, LIGHT, LINE);
+      doc.font('Helvetica-Bold').fontSize(8).fillColor(ORANGE)
+         .text('DATOS DEL CLIENTE', LM + 12, doc.y + 12);
+      const clienteY = doc.y + 26;
+      const nombreCliente = `${factura.cliente_nombre || ''} ${factura.cliente_apellido || ''}`.trim();
+      doc.font('Helvetica-Bold').fontSize(11).fillColor(NAVY)
+         .text(nombreCliente, LM + 12, clienteY, { width: colW - 24 });
+      doc.font('Helvetica').fontSize(9).fillColor(GRAY)
+         .text(factura.cliente_email || '—', LM + 12, clienteY + 16, { width: colW - 24 })
+         .text(`Casillero: ${factura.numero_casillero || '—'}`, LM + 12, clienteY + 30)
+         .text(`Teléfono: ${factura.cliente_telefono || 'No registrado'}`, LM + 12, clienteY + 44)
+         .text(`Retiro autorizado: ${factura.firma_base64 ? 'Firma digital adjunta' : 'Pendiente'}`, LM + 12, clienteY + 58);
 
-    // Encabezado de tabla
-    doc.rect(MARGEN_IZQ, y, ANCHO_CONTENIDO, 24).fill(TINTA);
-    doc.font('Helvetica-Bold').fontSize(9).fillColor('#ffffff')
-      .text('CONCEPTO', MARGEN_IZQ + 12, y + 8)
-      .text('MONTO', MARGEN_IZQ, y + 8, { width: ANCHO_CONTENIDO - 12, align: 'right' });
-    y += 24;
+      // Bloque fechas
+      const bX2 = LM + colW + 20;
+      roundRect(doc, bX2, doc.y - 115, colW, 115, 6, LIGHT, LINE);
+      doc.font('Helvetica-Bold').fontSize(8).fillColor(ORANGE)
+         .text('INFORMACIÓN DE LA FACTURA', bX2 + 12, doc.y - 115 + 12);
+      const filaFecha = (label, valor, offsetY) => {
+        doc.font('Helvetica-Bold').fontSize(8).fillColor(GRAY)
+           .text(label, bX2 + 12, doc.y - 115 + 26 + offsetY);
+        doc.font('Helvetica').fontSize(9).fillColor(NAVY)
+           .text(valor, bX2 + 12, doc.y - 115 + 36 + offsetY, { width: colW - 24 });
+      };
+      filaFecha('Fecha de emisión',   fmtFecha(factura.fecha_creacion), 0);
+      filaFecha('Fecha de pago',      fmtFecha(factura.fecha_pago),     26);
+      filaFecha('Fecha de entrega',   fmtFecha(factura.fecha_entrega),  52);
+      filaFecha('Método de pago',     factura.metodo_pago ? factura.metodo_pago.charAt(0).toUpperCase() + factura.metodo_pago.slice(1) : 'Pendiente', 78);
 
-    const filaConcepto = (label, valor, i) => {
-      const alturaFila = 26;
-      if (i % 2 === 1) {
-        doc.rect(MARGEN_IZQ, y, ANCHO_CONTENIDO, alturaFila).fill(PAPEL);
+      doc.y += 20;
+
+      // ══════════════════════════════════════════════════════════════════
+      // DETALLE DEL PAQUETE
+      // ══════════════════════════════════════════════════════════════════
+      doc.moveDown(0.5);
+      doc.font('Helvetica-Bold').fontSize(8).fillColor(ORANGE)
+         .text('DETALLE DEL ENVÍO', LM, doc.y);
+      doc.moveDown(0.3);
+
+      // Encabezado de tabla
+      const tableTop = doc.y;
+      doc.rect(LM, tableTop, W, 22).fill(NAVY);
+      const cols = [
+        { label: 'DESCRIPCIÓN',      x: LM + 10,       w: W * 0.38 },
+        { label: 'TRACKING',         x: LM + W * 0.40, w: W * 0.28 },
+        { label: 'PESO (LB)',        x: LM + W * 0.70, w: W * 0.14 },
+        { label: 'VALOR DECLARADO', x: LM + W * 0.85, w: W * 0.14 },
+      ];
+      cols.forEach(col => {
+        doc.font('Helvetica-Bold').fontSize(7.5).fillColor(WHITE)
+           .text(col.label, col.x, tableTop + 7, { width: col.w, align: 'left' });
+      });
+
+      // Fila de datos del paquete
+      const rowY = tableTop + 22;
+      doc.rect(LM, rowY, W, 28).fill(WHITE).stroke(LINE);
+      const cellData = [
+        factura.tienda || '—',
+        factura.numero_tracking || '—',
+        `${Number(factura.peso_facturado_lb || 0).toFixed(2)} lb`,
+        fmt$(factura.valor_declarado),
+      ];
+      cols.forEach((col, i) => {
+        doc.font(i === 0 ? 'Helvetica-Bold' : 'Helvetica').fontSize(9).fillColor(NAVY)
+           .text(cellData[i], col.x, rowY + 8, { width: col.w - 5 });
+      });
+
+      doc.y = rowY + 28 + 18;
+
+      // ══════════════════════════════════════════════════════════════════
+      // DESGLOSE DE COBROS
+      // ══════════════════════════════════════════════════════════════════
+      doc.font('Helvetica-Bold').fontSize(8).fillColor(ORANGE)
+         .text('DESGLOSE DE COBROS', LM, doc.y);
+      doc.moveDown(0.3);
+
+      const desglose = [
+        [`Flete (${Number(factura.peso_facturado_lb || 0).toFixed(2)} lb × $${Number(factura.precio_libra || 0).toFixed(2)}/lb)`, fmt$(factura.costo_envio)],
+        ['Cargo de manejo', fmt$(factura.cargo_manejo)],
+        ['Seguro (sobre valor declarado)', fmt$(factura.seguro)],
+      ];
+
+      const desgloseTop = doc.y;
+      const dW = 360;
+      const dX = LM + W - dW;
+
+      desglose.forEach(([label, valor], i) => {
+        const dy = desgloseTop + i * 22;
+        if (i % 2 === 0) doc.rect(dX, dy, dW, 22).fill('#f9fafb');
+        doc.font('Helvetica').fontSize(9.5).fillColor(GRAY)
+           .text(label, dX + 10, dy + 6);
+        doc.font('Helvetica-Bold').fontSize(9.5).fillColor(NAVY)
+           .text(valor, dX, dy + 6, { width: dW - 10, align: 'right' });
+      });
+
+      // Línea divisoria
+      const totalY = desgloseTop + desglose.length * 22 + 6;
+      doc.moveTo(dX, totalY).lineTo(dX + dW, totalY).strokeColor(ORANGE).lineWidth(1.5).stroke();
+
+      // Total
+      doc.rect(dX, totalY + 2, dW, 30).fill(NAVY);
+      doc.font('Helvetica-Bold').fontSize(10).fillColor('#94a3b8')
+         .text('TOTAL A PAGAR', dX + 10, totalY + 10);
+      doc.font('Helvetica-Bold').fontSize(16).fillColor(ORANGE)
+         .text(fmt$(factura.total), dX, totalY + 8, { width: dW - 10, align: 'right' });
+
+      doc.y = totalY + 46;
+
+      // ══════════════════════════════════════════════════════════════════
+      // FIRMA DIGITAL (si existe)
+      // ══════════════════════════════════════════════════════════════════
+      if (factura.firma_base64) {
+        doc.moveDown(0.8);
+        doc.font('Helvetica-Bold').fontSize(8).fillColor(ORANGE)
+           .text('FIRMA DE RETIRO', LM, doc.y);
+        doc.moveDown(0.3);
+        const firmaY = doc.y;
+        roundRect(doc, LM, firmaY, 200, 70, 6, LIGHT, LINE);
+        try {
+          const firmaBuffer = Buffer.from(factura.firma_base64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+          doc.image(firmaBuffer, LM + 5, firmaY + 5, { width: 190, height: 60, fit: [190, 60] });
+        } catch (e) {
+          doc.font('Helvetica').fontSize(8).fillColor(GRAY)
+             .text('Firma registrada', LM + 10, firmaY + 25);
+        }
+        doc.font('Helvetica').fontSize(7.5).fillColor(GRAY)
+           .text(`Retiro: ${fmtFecha(factura.fecha_entrega)}`, LM, firmaY + 76);
       }
-      doc.font('Helvetica').fontSize(9.5).fillColor(GRIS)
-        .text(label, MARGEN_IZQ + 12, y + 8, { width: ANCHO_CONTENIDO - 130 });
-      doc.font('Helvetica-Bold').fontSize(9.5).fillColor(TINTA)
-        .text(money(valor), MARGEN_IZQ, y + 8, { width: ANCHO_CONTENIDO - 12, align: 'right' });
-      y += alturaFila;
-    };
 
-    filaConcepto(`Costo de envío  (${factura.peso_facturado_lb} lb × $${factura.precio_libra}/lb)`, factura.costo_envio, 0);
-    filaConcepto('Cargo de manejo', factura.cargo_manejo, 1);
-    filaConcepto('Seguro', factura.seguro, 2);
+      // ══════════════════════════════════════════════════════════════════
+      // PIE DE PÁGINA
+      // ══════════════════════════════════════════════════════════════════
+      const footerY = doc.page.height - 70;
+      doc.rect(0, footerY, doc.page.width, 70).fill(NAVY);
 
-    doc.moveTo(MARGEN_IZQ, y).lineTo(MARGEN_DER, y).strokeColor(LINEA).lineWidth(1).stroke();
+      doc.font('Helvetica-Bold').fontSize(9).fillColor(WHITE)
+         .text('NEA CARGO XPRESS', LM, footerY + 14);
+      doc.font('Helvetica').fontSize(8).fillColor('#94a3b8')
+         .text('Miami → Panamá · Casillero Virtual', LM, footerY + 26)
+         .text('+507 6293-7497', LM, footerY + 38)
+         .text('info@neacargoxpress.com', LM, footerY + 50);
 
-    // ============ TOTAL ============
-    y += 14;
-    const totalAncho = 200;
-    doc.roundedRect(MARGEN_DER - totalAncho, y, totalAncho, 40, 8).fill(TINTA);
-    doc.font('Helvetica').fontSize(9.5).fillColor('#c7ccd6')
-      .text('TOTAL A PAGAR', MARGEN_DER - totalAncho + 16, y + 9);
-    doc.font('Helvetica-Bold').fontSize(17).fillColor(NARANJA)
-      .text(money(factura.total), MARGEN_DER - totalAncho, y + 22, { width: totalAncho - 16, align: 'right' });
+      doc.font('Helvetica').fontSize(7.5).fillColor('#94a3b8')
+         .text(
+           'Este documento es un comprobante interno de NEA Cargo Xpress.\nNo es una factura fiscal electrónica ante la DGI.',
+           0, footerY + 16,
+           { width: doc.page.width - 50, align: 'right' }
+         );
 
-    y += 40 + 34;
-
-    // ============ FIRMA DE RECIBIDO ============
-    if (firmaBuffer) {
-      doc.roundedRect(MARGEN_IZQ, y, ANCHO_CONTENIDO, 130, 8).strokeColor(LINEA).lineWidth(1).stroke();
-
-      doc.font('Helvetica-Bold').fontSize(10).fillColor(VERDE)
-        .text('✓  FIRMA DE RECIBIDO', MARGEN_IZQ + 16, y + 14, { characterSpacing: 0.3 });
-
-      try {
-        doc.roundedRect(MARGEN_IZQ + 16, y + 34, 200, 78, 6).fillAndStroke('#ffffff', LINEA);
-        doc.image(firmaBuffer, MARGEN_IZQ + 24, y + 40, { fit: [184, 62] });
-      } catch (error) {
-        console.error('No se pudo incrustar la imagen de la firma en el PDF:', error);
-      }
-
-      const fechaEntregaTxt = factura.fecha_entrega
-        ? `Entregado el ${fechaLarga(factura.fecha_entrega)} a las ${new Date(factura.fecha_entrega).toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit' })}`
-        : 'Paquete entregado';
-
-      doc.font('Helvetica').fontSize(9).fillColor(GRIS)
-        .text(fechaEntregaTxt, MARGEN_IZQ + 240, y + 44, { width: ANCHO_CONTENIDO - 260 });
-      doc.font('Helvetica').fontSize(8).fillColor(GRIS_CLARO)
-        .text('El cliente firmó digitalmente al momento de recibir el paquete en mostrador, confirmando conformidad con el contenido y estado del envío.', MARGEN_IZQ + 240, y + 60, { width: ANCHO_CONTENIDO - 260 });
-
-      y += 130 + 24;
+      doc.end();
+    } catch (err) {
+      reject(err);
     }
-
-    // ============ PIE DE PÁGINA ============
-    doc.moveTo(MARGEN_IZQ, 760).lineTo(MARGEN_DER, 760).strokeColor(LINEA).lineWidth(1).stroke();
-    doc.font('Helvetica-Bold').fontSize(9).fillColor(TINTA)
-      .text('NEA Cargo Xpress', MARGEN_IZQ, 772);
-    doc.font('Helvetica').fontSize(8).fillColor(GRIS_CLARO)
-      .text('Gracias por tu preferencia · Miami → Panamá', MARGEN_IZQ, 786);
-    doc.font('Helvetica').fontSize(8).fillColor(GRIS_CLARO)
-      .text('Documento generado automáticamente', 0, 772, { width: MARGEN_DER, align: 'right' });
-
-    doc.end();
   });
 }
 
