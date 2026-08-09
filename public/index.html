@@ -111,7 +111,9 @@
   @media (max-width: 860px){
     .nav-menu{
       position:absolute; top:100%; left:0; right:0;
-      background: rgba(12,27,51,0.98); flex-direction:column; align-items:stretch;
+      background: var(--ink); backdrop-filter: none; -webkit-backdrop-filter: none;
+      isolation: isolate;
+      flex-direction:column; align-items:stretch;
       padding: 10px 16px; display:none; overflow-y:auto; z-index: 45;
     }
     .nav-menu.open{ display:flex; }
@@ -838,12 +840,14 @@
     });
   });
 
-  // ---------- TODOS los enlaces dentro de cualquier dropdown ----------
-  // Un solo listener para las tres listas (Iniciar sesión, Preguntas,
-  // Contáctanos): sea que el enlace vaya a otra página, a un correo/WhatsApp,
-  // o a una sección de esta misma página, el menú se cierra SIEMPRE al
-  // hacer clic, de inmediato — antes de que pase cualquier otra cosa.
-  document.querySelectorAll('.dropdown-link').forEach(link => {
+  // ---------- TODOS los enlaces del menú (sueltos y dentro de dropdowns) ----------
+  // Cubre las tres listas desplegables (Iniciar sesión, Preguntas,
+  // Contáctanos) Y los enlaces sueltos de la barra ("Rastrear paquete",
+  // "Crear casillero gratis"). Sea que el enlace vaya a otra página, a un
+  // correo/WhatsApp, o a una sección de esta misma página, el menú se
+  // cierra SIEMPRE al hacer clic, de inmediato.
+  const enlacesDelMenu = document.querySelectorAll('.dropdown-link, .nav-menu > a.nav-btn');
+  enlacesDelMenu.forEach(link => {
     link.addEventListener('click', (e) => {
       e.stopPropagation();
       const href = link.getAttribute('href') || '';
@@ -866,8 +870,8 @@
         // Pequeña espera para que el menú termine de cerrarse antes de
         // empezar el scroll — así no se ve el salto con el menú todavía encima.
         setTimeout(() => {
-          destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 60);
+          destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
       }
       // Si no es un ancla (ej. app.html, admin.html, mailto:, wa.me/...),
       // no hacemos preventDefault — el navegador navega normal.
