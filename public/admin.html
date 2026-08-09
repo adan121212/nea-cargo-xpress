@@ -524,7 +524,10 @@
           <p class="card-sub" style="margin:0;">Selecciona facturas pendientes y cóbralas al instante.</p>
         </div>
         <form id="formBuscarMostrador" class="fac-search-form">
-          <input type="text" id="mostradorQ" placeholder="Buscar por casillero, nombre, correo o tracking…">
+          <div style="position:relative;flex:1;">
+            <input type="text" id="mostradorQ" placeholder="Buscar por casillero, nombre, correo o tracking…" autocomplete="off">
+            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">F1 = selector</span>
+          </div>
           <button class="btn-primary" type="submit" id="btnBuscarMostrador">
             <span class="spinner"></span><span>Buscar</span>
           </button>
@@ -1041,6 +1044,24 @@
 </div>
 
 <!-- ======================= MODAL: Firma digital de entrega ======================= -->
+<!-- Modal selector F1 de clientes -->
+<div id="modalF1Clientes" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-start;justify-content:center;padding-top:80px;">
+  <div style="background:#fff;border-radius:14px;width:560px;max-width:calc(100vw - 32px);overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);">
+    <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;color:var(--ink-soft);">🔍</span>
+      <input type="text" id="f1SearchInput" placeholder="Nombre, casillero o correo..." autocomplete="off"
+        style="flex:1;border:none;background:transparent;font-size:14px;outline:none;color:var(--ink);">
+      <kbd style="font-size:11px;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:2px 7px;color:var(--ink-soft);">Esc</kbd>
+    </div>
+    <div id="f1ClientesList" style="max-height:340px;overflow-y:auto;"></div>
+    <div style="padding:8px 16px;border-top:1px solid var(--line);display:flex;gap:16px;font-size:11px;color:var(--ink-soft);">
+      <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">↑↓</kbd> Navegar</span>
+      <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">Enter</kbd> Seleccionar</span>
+      <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">Esc</kbd> Cerrar</span>
+    </div>
+  </div>
+</div>
+
 <div id="modalFirma" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-header">
@@ -2941,6 +2962,104 @@
     a.download = `NEA-Reporte-${desde}-a-${hasta}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
+  });
+
+  // ---------- Selector F1 de clientes ----------
+  let f1ClientesCache = [];
+  let f1Filtrados = [];
+  let f1Activo = 0;
+
+  function iniciales(nombre){
+    return nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  function f1Render(){
+    const list = $('#f1ClientesList');
+    if (f1Filtrados.length === 0){
+      list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ink-soft);font-size:13px;">No se encontraron clientes</div>';
+      return;
+    }
+    list.innerHTML = f1Filtrados.map((c, i) => `
+      <div class="f1-row${i === f1Activo ? ' f1-row-active' : ''}" data-idx="${i}"
+           style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--line);transition:background .1s;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:50%;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#1e40af;flex-shrink:0;">${iniciales(c.nombre)}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--ink);">${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)}</div>
+            <div style="font-size:12px;color:var(--ink-soft);">${escapeHtml(c.email)}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:var(--font-mono);font-size:11.5px;background:var(--paper);padding:2px 8px;border-radius:4px;color:var(--ink-soft);">${escapeHtml(c.numero_casillero)}</span>
+        </div>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.f1-row').forEach(row => {
+      row.addEventListener('mouseenter', () => {
+        f1Activo = parseInt(row.dataset.idx);
+        f1Render();
+      });
+      row.addEventListener('click', () => f1Seleccionar(parseInt(row.dataset.idx)));
+    });
+  }
+
+  async function f1Abrir(){
+    const overlay = $('#modalF1Clientes');
+    overlay.style.display = 'flex';
+    $('#f1SearchInput').value = '';
+    f1Activo = 0;
+
+    if (f1ClientesCache.length === 0){
+      try {
+        const res = await apiAdmin('/admin/clientes?limit=100');
+        const data = await res.json();
+        f1ClientesCache = data.clientes || [];
+      } catch(e) { f1ClientesCache = []; }
+    }
+    f1Filtrados = [...f1ClientesCache];
+    f1Render();
+    setTimeout(() => $('#f1SearchInput').focus(), 50);
+  }
+
+  function f1Cerrar(){
+    $('#modalF1Clientes').style.display = 'none';
+  }
+
+  function f1Seleccionar(idx){
+    const c = f1Filtrados[idx];
+    if (!c) return;
+    $('#mostradorQ').value = c.numero_casillero;
+    f1Cerrar();
+    $('#formBuscarMostrador').dispatchEvent(new Event('submit'));
+  }
+
+  $('#f1SearchInput').addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    f1Activo = 0;
+    f1Filtrados = q
+      ? f1ClientesCache.filter(c =>
+          `${c.nombre} ${c.apellido}`.toLowerCase().includes(q) ||
+          c.email.toLowerCase().includes(q) ||
+          c.numero_casillero.toLowerCase().includes(q)
+        )
+      : [...f1ClientesCache];
+    f1Render();
+  });
+
+  $('#f1SearchInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Escape'){ f1Cerrar(); return; }
+    if (e.key === 'ArrowDown'){ f1Activo = Math.min(f1Activo + 1, f1Filtrados.length - 1); f1Render(); }
+    if (e.key === 'ArrowUp'){ f1Activo = Math.max(f1Activo - 1, 0); f1Render(); }
+    if (e.key === 'Enter'){ f1Seleccionar(f1Activo); }
+  });
+
+  $('#modalF1Clientes').addEventListener('click', (e) => {
+    if (e.target === $('#modalF1Clientes')) f1Cerrar();
+  });
+
+  $('#mostradorQ').addEventListener('keydown', (e) => {
+    if (e.key === 'F1'){ e.preventDefault(); f1Abrir(); }
   });
 
   // ---------- Arranque ----------
