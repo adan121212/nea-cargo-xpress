@@ -3012,9 +3012,9 @@
 
     if (f1ClientesCache.length === 0){
       try {
-        const res = await apiAdmin('/admin/clientes?limit=100');
+        const res = await apiAdmin('/admin/usuarios');
         const data = await res.json();
-        f1ClientesCache = data.clientes || [];
+        f1ClientesCache = data.usuarios || [];
       } catch(e) { f1ClientesCache = []; }
     }
     f1Filtrados = [...f1ClientesCache];
@@ -3056,6 +3056,10 @@
 
   $('#modalF1Clientes').addEventListener('click', (e) => {
     if (e.target === $('#modalF1Clientes')) f1Cerrar();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('#modalF1Clientes').style.display === 'flex') f1Cerrar();
   });
 
   $('#mostradorQ').addEventListener('keydown', (e) => {
