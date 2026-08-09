@@ -27,6 +27,23 @@ router.post(
     }
 
     const { paquete_id, tarifa_id } = req.body;
+
+    // ── Verificar si la caja de HOY ya fue cerrada ──────────────────────────
+    // Si la caja del día de hoy está cerrada, no permitimos generar nuevas
+    // facturas para mantener el cierre limpio y evitar diferencias en el corte.
+    const hoy = new Date().toISOString().slice(0, 10);
+    const cajaHoy = await pool.query(
+      'SELECT id FROM cierres_caja WHERE fecha = $1',
+      [hoy]
+    );
+    if (cajaHoy.rows.length > 0) {
+      return res.status(409).json({
+        mensaje: `La caja del ${hoy} ya fue cerrada. No se pueden generar nuevas facturas para hoy. Si necesitas facturar de todas formas, contacta a un administrador para reabrir la caja.`,
+        caja_cerrada: true,
+      });
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     const client = await pool.connect();
 
     try {
@@ -264,7 +281,6 @@ router.get('/:id/pdf', async (req, res) => {
 
 // --- POST /api/admin/facturas/:id/reenviar ---
 // Reenvía una factura ya existente por correo (con PDF) y WhatsApp.
-// Útil cuando el cliente vuelve otro día y pide de nuevo su factura.
 router.post('/:id/reenviar', async (req, res) => {
   try {
     const resultado = await pool.query(
@@ -284,8 +300,6 @@ router.post('/:id/reenviar', async (req, res) => {
 
     const factura = resultado.rows[0];
 
-    // Si por alguna razón esta factura vieja no tiene token_pdf (de antes de
-    // esa función), le generamos uno ahora para que el link de WhatsApp funcione.
     if (!factura.token_pdf) {
       const nuevoToken = crypto.randomBytes(24).toString('hex');
       await pool.query('UPDATE facturas SET token_pdf = $1 WHERE id = $2', [nuevoToken, factura.id]);
