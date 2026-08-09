@@ -6,14 +6,11 @@ const { requiereAdmin } = require('../../middleware/admin');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
 const { enviarFacturaPorWhatsapp } = require('../../utils/whatsapp');
-
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
 // --- GET /api/admin/mostrador/buscar?q=... ---
-// Busca un cliente por número de casillero, correo, nombre, o por el tracking
-// de uno de sus paquetes. Devuelve al cliente y todos sus paquetes NO entregados,
-// cada uno con su factura más reciente (si tiene).
+// Busca un cliente y devuelve también sus autorizados para verificar en mostrador.
 router.get(
   '/buscar',
   [query('q').trim().notEmpty().withMessage('Escribe un casillero, nombre, correo o tracking')],
@@ -22,9 +19,7 @@ router.get(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
-
     const q = `%${req.query.q}%`;
-
     try {
       const usuarioRes = await pool.query(
         `SELECT DISTINCT u.id, u.nombre, u.apellido, u.email, u.telefono, u.numero_casillero
@@ -37,17 +32,19 @@ router.get(
          LIMIT 5`,
         [q]
       );
-
       if (usuarioRes.rows.length === 0) {
         return res.status(404).json({ mensaje: 'No encontramos ningún cliente con esos datos.' });
       }
-
-      // Si hay varias coincidencias (ej. nombre común), el staff elige cuál es.
       if (usuarioRes.rows.length > 1) {
         return res.json({ multiples: true, clientes: usuarioRes.rows });
       }
-
       const usuario = usuarioRes.rows[0];
+
+      // ── Autorizados del cliente ─────────────────────────────────────────
+      const autorizadosRes = await pool.query(
+        `SELECT id, nombre, cedula FROM autorizados WHERE usuario_id = $1 ORDER BY id ASC`,
+        [usuario.id]
+      );
 
       const paquetesRes = await pool.query(
         `SELECT p.*,
@@ -64,8 +61,6 @@ router.get(
         [usuario.id]
       );
 
-      // TODAS las facturas pendientes del cliente, sin importar si su paquete
-      // ya fue entregado o no (ej. quedó pendiente de un retiro anterior).
       const facturasPendientesRes = await pool.query(
         `SELECT f.id, f.numero_factura, f.total, f.fecha_creacion,
                 p.tienda, p.numero_tracking, p.estado AS paquete_estado
@@ -79,6 +74,7 @@ router.get(
       return res.json({
         multiples: false,
         cliente: usuario,
+        autorizados: autorizadosRes.rows,   // ← NUEVO
         paquetes: paquetesRes.rows,
         facturas_pendientes: facturasPendientesRes.rows,
       });
@@ -90,19 +86,18 @@ router.get(
 );
 
 // --- POST /api/admin/mostrador/entregar ---
-// Entrega un paquete en mostrador. Si tiene una factura pendiente, la cobra
-// (requiere metodo_pago) y la marca pagada en la misma operación.
-// Requiere la firma digital del cliente (data URL de un <canvas>) como
-// comprobante de entrega.
+// Entrega un paquete en mostrador. Ahora también guarda quién lo retiró.
 router.post(
   '/entregar',
   [
     body('paquete_id').isInt().withMessage('paquete_id es obligatorio'),
     body('factura_id').optional({ nullable: true }).isInt(),
-    body('metodo_pago').optional({ nullable: true }).isIn(['efectivo', 'tarjeta', 'transferencia']),
+    body('metodo_pago').optional({ nullable: true }).isIn(['efectivo', 'tarjeta', 'transferencia', 'yappy']),
     body('firma')
       .notEmpty().withMessage('Se requiere la firma digital del cliente para entregar el paquete.')
       .matches(/^data:image\/png;base64,/).withMessage('Formato de firma inválido.'),
+    body('retirado_por_nombre').trim().notEmpty().withMessage('Indica el nombre de quien retira el paquete.'),
+    body('retirado_por_cedula').trim().notEmpty().withMessage('Indica la cédula de quien retira el paquete.'),
   ],
   async (req, res) => {
     const errores = validationResult(req);
@@ -110,7 +105,7 @@ router.post(
       return res.status(400).json({ errores: errores.array() });
     }
 
-    const { paquete_id, factura_id, metodo_pago, firma } = req.body;
+    const { paquete_id, factura_id, metodo_pago, firma, retirado_por_nombre, retirado_por_cedula } = req.body;
     const client = await pool.connect();
 
     try {
@@ -130,11 +125,10 @@ router.post(
           await client.query('ROLLBACK');
           return res.status(404).json({ mensaje: 'Factura no encontrada' });
         }
-
         if (facturaRes.rows[0].estado === 'pendiente') {
           if (!metodo_pago) {
             await client.query('ROLLBACK');
-            return res.status(400).json({ mensaje: 'Indica el método de pago (efectivo, tarjeta o transferencia) para cobrar esta factura.' });
+            return res.status(400).json({ mensaje: 'Indica el método de pago para cobrar esta factura.' });
           }
           await client.query(
             `UPDATE facturas SET estado = 'pagada', fecha_pago = NOW(), metodo_pago = $1 WHERE id = $2`,
@@ -143,31 +137,31 @@ router.post(
         }
       }
 
-      // Guardamos la firma directo en la base de datos (no se sube a ningún
-      // servicio externo) — es el punto de todo esto: dejar constancia firmada
-      // ligada permanentemente a este paquete.
+      // Guarda la firma + quién retiró el paquete
       const actualizado = await client.query(
         `UPDATE paquetes
-         SET estado = 'entregado', fecha_actualizacion = NOW(), fecha_entrega = NOW(),
-             firma_base64 = $1
-         WHERE id = $2
+         SET estado = 'entregado',
+             fecha_actualizacion = NOW(),
+             fecha_entrega = NOW(),
+             firma_base64 = $1,
+             retirado_por_nombre = $2,
+             retirado_por_cedula = $3
+         WHERE id = $4
          RETURNING *`,
-        [firma, paquete_id]
+        [firma, retirado_por_nombre.trim(), retirado_por_cedula.trim(), paquete_id]
       );
 
       await client.query('COMMIT');
-
       const paquete = actualizado.rows[0];
-      const envios = { correo_enviado: false, whatsapp_enviado: false };
 
-      // Si esta entrega tiene una factura asociada, reenviamos el PDF
-      // actualizado (ya con la firma estampada) al cliente automáticamente.
+      const envios = { correo_enviado: false, whatsapp_enviado: false };
       if (factura_id) {
         try {
           const datosCompletos = await pool.query(
             `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
                     u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero,
-                    p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega
+                    p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega,
+                    p.retirado_por_nombre, p.retirado_por_cedula
              FROM facturas f
              JOIN usuarios u ON u.id = f.usuario_id
              JOIN paquetes p ON p.id = f.paquete_id
@@ -175,7 +169,6 @@ router.post(
             [factura_id]
           );
           const facturaCompleta = datosCompletos.rows[0];
-
           if (facturaCompleta) {
             try {
               const pdfBuffer = await generarPdfFactura(facturaCompleta);
@@ -189,7 +182,6 @@ router.post(
             } catch (errorCorreo) {
               console.error('Error enviando factura tras entrega (correo):', errorCorreo);
             }
-
             if (facturaCompleta.cliente_telefono && facturaCompleta.token_pdf) {
               try {
                 const urlPdfPublica = `${process.env.BASE_URL}/api/public/facturas/${facturaCompleta.token_pdf}/pdf`;
@@ -205,7 +197,12 @@ router.post(
         }
       }
 
-      return res.json({ mensaje: 'Paquete entregado correctamente', paquete, envios_factura: envios });
+      return res.json({
+        mensaje: 'Paquete entregado correctamente',
+        paquete,
+        retirado_por: { nombre: retirado_por_nombre, cedula: retirado_por_cedula },
+        envios_factura: envios,
+      });
     } catch (error) {
       await client.query('ROLLBACK');
       console.error('Error en POST /admin/mostrador/entregar:', error);
@@ -217,20 +214,17 @@ router.post(
 );
 
 // --- POST /api/admin/mostrador/cobrar ---
-// Cobra una factura pendiente sin necesidad de entregar un paquete en el mismo
-// paso (ej. una factura que quedó pendiente de una entrega anterior).
 router.post(
   '/cobrar',
   [
     body('factura_id').isInt().withMessage('factura_id es obligatorio'),
-    body('metodo_pago').isIn(['efectivo', 'tarjeta', 'transferencia']).withMessage('Indica el método de pago'),
+    body('metodo_pago').isIn(['efectivo', 'tarjeta', 'transferencia', 'yappy']).withMessage('Indica el método de pago'),
   ],
   async (req, res) => {
     const errores = validationResult(req);
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
-
     try {
       const resultado = await pool.query(
         `UPDATE facturas SET estado = 'pagada', fecha_pago = NOW(), metodo_pago = $1
@@ -238,11 +232,9 @@ router.post(
          RETURNING *`,
         [req.body.metodo_pago, req.body.factura_id]
       );
-
       if (resultado.rows.length === 0) {
-        return res.status(400).json({ mensaje: 'Esta factura ya no está pendiente (puede que ya se haya cobrado).' });
+        return res.status(400).json({ mensaje: 'Esta factura ya no está pendiente.' });
       }
-
       return res.json({ mensaje: 'Factura cobrada correctamente', factura: resultado.rows[0] });
     } catch (error) {
       console.error('Error en POST /admin/mostrador/cobrar:', error);
