@@ -303,19 +303,6 @@
   .autorizado-nombre{ font-weight:600; color: var(--ink); }
   .autorizado-cedula{ color: var(--ink-soft); font-family: var(--font-mono); font-size:11.5px; }
 
-  .retiro-box{
-    background: #fff8f0; border: 1px solid #fed7aa;
-    border-radius:10px; padding:14px 16px; margin-bottom:18px;
-  }
-  .retiro-titulo{ font-weight:700; font-size:12px; color: var(--accent-dark); margin-bottom:10px; }
-  .retiro-select{ width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid var(--line); font-family: var(--font-body); font-size:13px; background:#fff; color: var(--ink); margin-bottom:8px; }
-  .btn-bypass{
-    margin-top:10px; background:none; border:none;
-    font-size:11.5px; color: var(--ink-soft); cursor:pointer;
-    text-decoration:underline; text-underline-offset:2px; padding:0;
-  }
-  .btn-bypass:hover{ color: var(--ink); }
-
   .mostrador-item{
     border:1px solid var(--line); border-radius:10px; padding: 14px 16px; margin-bottom:10px;
   }
@@ -1925,14 +1912,6 @@
             </div>
             ${!yaEntregado ? `
               <div class="mi-factura-info">📦 Este paquete <strong>todavía no se ha entregado</strong> — al cobrar, también se pedirá la firma de entrega.</div>
-              <div class="retiro-box" style="margin:10px 0 6px;">
-                <div class="retiro-titulo">✍️ ¿Quién retira?</div>
-                <select class="retiro-select retiro-select-pendiente">
-                  <option value="">— Selecciona o escribe —</option>
-                  <option value="titular">El titular</option>
-                </select>
-                <button type="button" class="btn-bypass bypass-pendiente" data-bypass="false">⚡ Bypass</button>
-              </div>
             ` : ''}
             <div class="mi-metodo-pago">
               <select class="metodo-pago-select">
@@ -1950,18 +1929,6 @@
         `;
       }).join('');
 
-      // Listener del Bypass en tarjetas de facturas pendientes
-      cont.querySelectorAll('.bypass-pendiente').forEach(bpBtn => {
-        bpBtn.addEventListener('click', () => {
-          const active = bpBtn.dataset.bypass !== 'true';
-          bpBtn.dataset.bypass = active;
-          bpBtn.textContent = active ? '✅ Bypass activo' : '⚡ Bypass';
-          bpBtn.style.color = active ? '#177a63' : '';
-          const selPend = bpBtn.closest('.retiro-box')?.querySelector('.retiro-select-pendiente');
-          if (selPend) selPend.disabled = active;
-        });
-      });
-
       cont.querySelectorAll('.mostrador-item').forEach(item => {
         const btn = item.querySelector('.btn-entregar');
         const yaEntregado = item.dataset.yaEntregado === 'true';
@@ -1977,31 +1944,10 @@
             return;
           }
 
-          // Paquete NO entregado todavía: hay que pasar por la firma, igual
-          // que en "Cobrar y entregar" de los resultados de búsqueda.
+          // Paquete NO entregado todavía: hay que pasar por la firma
           if (!yaEntregado){
-            const bypassBtn = item.querySelector('.bypass-pendiente');
-            const esBypass = bypassBtn?.dataset.bypass === 'true';
-            let retiroNombre = 'No registrado (bypass)', retiroCedula = 'N/A';
-            if (!esBypass) {
-              const selPend = item.querySelector('.retiro-select-pendiente');
-              const selVal = selPend?.value || '';
-              try {
-                const parsed = JSON.parse(selVal);
-                retiroNombre = parsed.nombre;
-                retiroCedula = parsed.cedula || 'N/A';
-              } catch(e) {
-                retiroNombre = '';
-              }
-              if (!retiroNombre){
-                mostrarBanner('#bannerMostrador', 'error', 'Selecciona quién retira o usa ⚡ Bypass.');
-                return;
-              }
-            }
             abrirModalFirma({
               paqueteId, facturaId, metodoPago,
-              retiradoPorNombre: retiroNombre,
-              retiradoPorCedula: retiroCedula,
               item, btnOriginal: btn,
               textoOriginal: 'Cobrar y entregar (con firma)',
             });
@@ -2050,18 +1996,6 @@
         <div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono ? ' · ' + escapeHtml(cliente.telefono) : ''}</div>
       </div>
     `;
-
-    // ── Select: quién retira ─────────────────────────────────────────────────
-    html += `
-      <div class="retiro-box" id="retiroBox">
-        <div class="retiro-titulo">✍️ ¿Quién retira el paquete?</div>
-        <select class="retiro-select" id="retiroSelect">
-          <option value="">— Selecciona quién retira —</option>
-        </select>
-        <button type="button" class="btn-bypass" id="btnBypass">⚡ Bypass — entregar sin registrar quién vino</button>
-      </div>
-    `;
-
     const idsFacturaEnPaquetes = new Set(paquetes.filter(p => p.factura_id).map(p => p.factura_id));
     const facturasSueltas = facturasPendientes.filter(f => !idsFacturaEnPaquetes.has(f.id));
 
@@ -2123,35 +2057,6 @@
 
     cont.innerHTML = html;
 
-    // ── Select de retiro: titular + autorizados ──────────────────────────────
-    const sel = $('#retiroSelect');
-    if (sel) {
-      sel.innerHTML = '<option value="">— Selecciona quién retira —</option>';
-      const optTitular = document.createElement('option');
-      optTitular.value = JSON.stringify({ nombre: `${cliente.nombre} ${cliente.apellido}`, cedula: '' });
-      optTitular.textContent = `👤 ${cliente.nombre} ${cliente.apellido} (titular)`;
-      sel.appendChild(optTitular);
-      (autorizados || []).forEach(a => {
-        const opt = document.createElement('option');
-        opt.value = JSON.stringify({ nombre: a.nombre, cedula: a.cedula });
-        opt.textContent = `🛡️ ${a.nombre} — Cédula: ${a.cedula}`;
-        sel.appendChild(opt);
-      });
-    }
-
-    // Bypass
-    const bypassBtn = $('#btnBypass');
-    if (bypassBtn) {
-      bypassBtn.dataset.bypass = 'false';
-      bypassBtn.addEventListener('click', () => {
-        const active = bypassBtn.dataset.bypass !== 'true';
-        bypassBtn.dataset.bypass = active;
-        bypassBtn.textContent = active ? '✅ Bypass activo' : '⚡ Bypass — entregar sin registrar quién vino';
-        bypassBtn.style.color = active ? '#177a63' : '';
-        if (sel) sel.disabled = active;
-      });
-    }
-
     cont.querySelectorAll('.mostrador-item').forEach(item => {
       const btn = item.querySelector('.btn-entregar');
       btn.addEventListener('click', () => {
@@ -2159,29 +2064,6 @@
         const facturaId = item.dataset.factura || null;
         const select = item.querySelector('.metodo-pago-select');
         const metodoPago = select ? select.value : null;
-
-        // Leer quién retira: select o bypass
-        let retiroNombre = '', retiroCedula = 'N/A';
-        const esBypass = $('#btnBypass')?.dataset.bypass === 'true';
-        if (esBypass) {
-          retiroNombre = 'No registrado (bypass)';
-          retiroCedula = 'N/A';
-        } else {
-          const selVal = $('#retiroSelect')?.value;
-          if (selVal) {
-            try {
-              const parsed = JSON.parse(selVal);
-              retiroNombre = parsed.nombre;
-              retiroCedula = parsed.cedula || 'N/A';
-            } catch(e) {}
-          }
-        }
-
-        if (!retiroNombre){
-          mostrarBanner('#bannerMostrador', 'error', 'Selecciona quién retira el paquete o usa ⚡ Bypass.');
-          return;
-        }
-
         if (select && !metodoPago){
           mostrarBanner('#bannerMostrador', 'error', 'Elige el método de pago antes de cobrar.');
           return;
@@ -2189,8 +2071,6 @@
 
         abrirModalFirma({
           paqueteId, facturaId, metodoPago,
-          retiradoPorNombre: retiroNombre,
-          retiradoPorCedula: retiroCedula || 'N/A',
           item, btnOriginal: btn,
           textoOriginal: select ? 'Cobrar y entregar' : 'Marcar como entregado',
         });
@@ -2358,7 +2238,7 @@
     setCargando(btnConfirmar, true);
 
     const firmaDataUrl = canvasFirma.toDataURL('image/png');
-    const { paqueteId, facturaId, metodoPago, retiradoPorNombre, retiradoPorCedula, item, btnOriginal, textoOriginal } = entregaPendiente;
+    const { paqueteId, facturaId, metodoPago, item, btnOriginal, textoOriginal } = entregaPendiente;
 
     try {
       const res = await apiAdmin('/admin/mostrador/entregar', {
@@ -2367,9 +2247,7 @@
           paquete_id: paqueteId,
           factura_id: facturaId || undefined,
           metodo_pago: metodoPago || undefined,
-          firma: firmaDataUrl,
-          retirado_por_nombre: retiradoPorNombre,
-          retirado_por_cedula: retiradoPorCedula,
+          firma: firmaDataUrl
         }),
       });
       const data = await res.json().catch(() => ({}));
