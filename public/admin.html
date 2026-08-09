@@ -283,25 +283,70 @@
     .dash-cards{ grid-template-columns:1fr; }
   }
 
-  /* ---- Mostrador ---- */
+  /* ---- Facturador (nuevo diseño) ---- */
   .cliente-card{
     background: var(--paper); border-radius:10px; padding: 16px 18px; margin-bottom:14px;
   }
   .cliente-card .nombre{ font-family: var(--font-display); font-size:16px; }
   .cliente-card .detalle{ font-size:12.5px; color: var(--ink-soft); margin-top:4px; }
   .cliente-card .detalle span{ font-family: var(--font-mono); }
+  .cliente-card .stats{ font-size:20px; font-family: var(--font-display); text-align:right; }
+  .cliente-card .stats small{ font-size:11px; color: var(--ink-soft); display:block; }
 
-  .autorizados-box{
-    background: #eef6ff; border: 1px solid #bfdbfe;
-    border-radius:10px; padding: 12px 16px; margin-bottom:14px;
+  .cliente-multiples button{ display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:13px; }
+  .cliente-multiples button:hover{ border-color: var(--accent); }
+
+  .ft-select-all{ font-size:12px; color: var(--accent); background:none; border:none; cursor:pointer; font-weight:600; }
+  .ft-pkg{
+    border:1.5px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:6px;
+    display:flex; align-items:center; gap:12px; cursor:pointer;
+    transition: border-color .15s ease, background .15s ease;
   }
-  .autorizados-box.vacio{ background: var(--paper); border-color: var(--line); color: var(--ink-soft); font-size:12.5px; }
-  .autorizados-titulo{ font-weight:700; font-size:12px; color: #1e40af; margin-bottom:8px; }
-  .autorizados-lista{ display:flex; flex-direction:column; gap:6px; }
-  .autorizado-item{ display:flex; align-items:center; gap:10px; font-size:12.5px; }
-  .autorizado-num{ background:#1e40af; color:#fff; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
-  .autorizado-nombre{ font-weight:600; color: var(--ink); }
-  .autorizado-cedula{ color: var(--ink-soft); font-family: var(--font-mono); font-size:11.5px; }
+  .ft-pkg:hover{ border-color: var(--ink-soft); }
+  .ft-pkg.selected{ border-color: var(--accent); background: #fff8f3; }
+  .ft-pkg input[type=checkbox]{ width:18px; height:18px; accent-color: var(--accent); flex-shrink:0; cursor:pointer; }
+  .ft-pkg-info{ flex:1; min-width:0; }
+  .ft-pkg-store{ font-weight:600; font-size:14px; }
+  .ft-pkg-track{ font-size:11.5px; color: var(--ink-soft); font-family: var(--font-mono); }
+  .ft-pkg-details{ font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
+  .ft-pkg-right{ text-align:right; }
+  .ft-pkg-price{ font-weight:700; font-size:14px; margin-top:4px; }
+  .ft-status{ font-size:10.5px; padding:2px 8px; border-radius:10px; white-space:nowrap; font-weight:600; }
+  .ft-status.bodega{ background:#dbeafe; color:#1e40af; }
+  .ft-status.listo{ background:#d1fae5; color:#065f46; }
+  .ft-status.transito{ background:#fef3c7; color:#92400e; }
+
+  .facturador-totales{
+    background: var(--paper); border-radius:10px; padding:16px 18px; margin-bottom:14px;
+  }
+  .ft-titulo{ font-weight:700; font-size:13px; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+  .ft-row{ display:flex; justify-content:space-between; font-size:12.5px; color: var(--ink-soft); padding:4px 0; }
+  .ft-row .mono{ font-family: var(--font-mono); }
+  .ft-total{
+    font-size:18px; font-weight:700; color: var(--ink);
+    border-top:1px solid var(--line); margin-top:8px; padding-top:10px;
+  }
+
+  .facturador-pago{ margin-bottom:14px; }
+  .ft-pago-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
+  .ft-pago-btn{
+    padding:10px 6px; border-radius:8px; border:1.5px solid var(--line); background:#fff;
+    cursor:pointer; text-align:center; font-size:12px; font-weight:600;
+    transition: all .15s ease;
+  }
+  .ft-pago-btn i{ font-size:18px; display:block; margin-bottom:3px; }
+  .ft-pago-btn:hover{ border-color: var(--ink-soft); }
+  .ft-pago-btn.selected{ border-color: var(--accent); background:#fff8f3; color: var(--accent); }
+  @media (max-width:520px){ .ft-pago-grid{ grid-template-columns:repeat(2,1fr); } }
+
+  .ft-result{
+    background: var(--cargo-green-bg); border:1px solid rgba(23,122,99,.3);
+    border-radius:10px; padding:16px 18px; margin-bottom:14px;
+  }
+  .ft-result-title{ font-weight:700; color: var(--cargo-green); margin-bottom:4px; }
+  .ft-result-meta{ font-size:12.5px; color: var(--ink-soft); }
+  .ft-result-actions{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .ft-result-actions button{ font-size:12px; padding:6px 12px; }
 
   .mostrador-item{
     border:1px solid var(--line); border-radius:10px; padding: 14px 16px; margin-bottom:10px;
@@ -318,8 +363,6 @@
   }
   .btn-entregar:hover{ opacity:.9; }
   .btn-entregar:disabled{ opacity:.5; cursor:default; }
-  .cliente-multiples button{ display:block; width:100%; text-align:left; padding:10px 12px; margin-bottom:6px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:13px; }
-  .cliente-multiples button:hover{ border-color: var(--accent); }
 
   /* ---- Recepción rápida ---- */
   #recepcionTracking{ font-family: var(--font-mono); font-size:15px; }
@@ -445,28 +488,51 @@
     <!-- ---- TAB: Paquetes ---- -->
     <!-- ---- TAB: Mostrador ---- -->
     <div class="card tab-panel" id="tabMostrador">
-      <h2>Buscar cliente</h2>
-      <p class="card-sub">Busca por número de casillero, nombre, correo, o el tracking de un paquete.</p>
-
-      <form id="formBuscarMostrador" class="form-inline" style="grid-template-columns: 1fr auto;">
-        <div>
-          <label for="mostradorQ">Casillero / nombre / correo / tracking</label>
-          <input type="text" id="mostradorQ" placeholder="Ej. PN-00042, Ana Pérez, o 1Z999...">
-        </div>
-        <div>
-          <button class="btn-primary" type="submit" id="btnBuscarMostrador" style="margin-top:0;">
-            <span class="spinner"></span><span>Buscar</span>
-          </button>
-        </div>
+      <!-- Barra de búsqueda -->
+      <form id="formBuscarMostrador" style="display:flex;gap:8px;margin-bottom:18px;">
+        <input type="text" id="mostradorQ" placeholder="Casillero, nombre, correo o tracking..." style="flex:1;">
+        <button class="btn-primary" type="submit" id="btnBuscarMostrador" style="white-space:nowrap;">
+          <span class="spinner"></span><span>Buscar</span>
+        </button>
       </form>
       <div class="banner" id="bannerMostrador"></div>
 
+      <!-- Resultado de búsqueda: cliente + paquetes -->
       <div id="resultadoMostrador"></div>
 
+      <!-- Resumen de factura (se muestra al seleccionar paquetes) -->
+      <div id="facturadorResumen" style="display:none;">
+        <div class="facturador-totales">
+          <div class="ft-titulo"><i class="ti ti-receipt" aria-hidden="true" style="font-size:16px;"></i> Resumen de factura</div>
+          <div class="ft-row"><span>Flete</span><span class="mono" id="ftFlete">$0.00</span></div>
+          <div class="ft-row"><span>Manejo</span><span class="mono" id="ftManejo">$0.00</span></div>
+          <div class="ft-row"><span>Seguro</span><span class="mono" id="ftSeguro">$0.00</span></div>
+          <div class="ft-row"><span>Paquetes seleccionados</span><span class="mono" id="ftCant">0</span></div>
+          <div class="ft-row ft-total"><span>Total</span><span class="mono" id="ftTotal">$0.00</span></div>
+        </div>
+
+        <div class="facturador-pago">
+          <div class="ft-titulo"><i class="ti ti-credit-card" aria-hidden="true" style="font-size:16px;"></i> Método de pago</div>
+          <div class="ft-pago-grid">
+            <button type="button" class="ft-pago-btn" data-metodo="efectivo"><i class="ti ti-cash" aria-hidden="true"></i> Efectivo</button>
+            <button type="button" class="ft-pago-btn" data-metodo="tarjeta"><i class="ti ti-credit-card" aria-hidden="true"></i> Tarjeta</button>
+            <button type="button" class="ft-pago-btn" data-metodo="transferencia"><i class="ti ti-arrows-exchange" aria-hidden="true"></i> Transferencia</button>
+            <button type="button" class="ft-pago-btn" data-metodo="yappy"><i class="ti ti-device-mobile" aria-hidden="true"></i> Yappy</button>
+          </div>
+          <button class="btn-primary" id="btnGenerarFacturas" disabled style="width:100%;margin-top:12px;">
+            <span class="spinner"></span><span>Generar factura y cobrar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Resultado post-facturación -->
+      <div id="facturadorResultado" style="display:none;"></div>
+
+      <!-- Facturas pendientes globales -->
       <h2 style="margin-top:26px;">Facturas pendientes</h2>
-      <p class="card-sub">Todas las facturas sin pagar, de cualquier cliente — clic en "Cobrar" para marcarla pagada al instante.</p>
+      <p class="card-sub">Todas las facturas sin pagar, de cualquier cliente.</p>
       <div id="pendientesMostrador"></div>
-      <div class="empty" id="emptyPendientesMostrador" style="display:none;">No hay facturas pendientes ahora mismo. 🎉</div>
+      <div class="empty" id="emptyPendientesMostrador" style="display:none;">No hay facturas pendientes ahora mismo.</div>
     </div>
 
     <div class="card tab-panel" id="tabRecepcion" style="display:none;">
@@ -2002,161 +2068,207 @@
     }
   }
 
+  let facturadorMetodoPago = '';
+  let facturadorCliente = null;
+  let facturadorTarifas = [];
+
   function renderResultadoMostrador(cliente, paquetes, facturasPendientes, autorizados){
     const cont = $('#resultadoMostrador');
+    facturadorCliente = cliente;
+    facturadorMetodoPago = '';
 
-    // ── Tarjeta del cliente ──────────────────────────────────────────────────
     let html = `
-      <div class="cliente-card">
-        <div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div>
-        <div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono ? ' · ' + escapeHtml(cliente.telefono) : ''}</div>
+      <div class="cliente-card" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div>
+          <div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono ? ' · ' + escapeHtml(cliente.telefono) : ''}</div>
+        </div>
+        <div class="stats">${paquetes.length}<small>paquetes</small></div>
       </div>
     `;
-    const idsFacturaEnPaquetes = new Set(paquetes.filter(p => p.factura_id).map(p => p.factura_id));
-    const facturasSueltas = facturasPendientes.filter(f => !idsFacturaEnPaquetes.has(f.id));
 
-    if (facturasSueltas.length > 0){
-      html += `
-        <h2 style="margin-top:20px;">Facturas pendientes (de paquetes ya entregados)</h2>
-        <div id="listaFacturasSueltas"></div>
-      `;
-    }
+    const sinFactura = paquetes.filter(p => !p.factura_id || p.factura_estado === 'anulada');
 
-    if (paquetes.length === 0 && facturasSueltas.length === 0){
-      html += '<div class="empty">Este cliente no tiene paquetes por entregar ni facturas pendientes.</div>';
+    if (sinFactura.length === 0){
+      html += '<div class="empty">Este cliente no tiene paquetes pendientes de facturar.</div>';
       cont.innerHTML = html;
+      $('#facturadorResumen').style.display = 'none';
       return;
     }
 
-    if (paquetes.length > 0){
-      html += '<h2 style="margin-top:20px;">Paquetes por entregar</h2>';
-    }
+    html += `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-weight:600;font-size:13px;">Paquetes por facturar</div>
+        <button class="ft-select-all" id="btnSelectAll">Seleccionar todos</button>
+      </div>
+    `;
 
-    html += paquetes.map(p => {
-      const tieneFacturaPendiente = p.factura_id && p.factura_estado === 'pendiente';
-      const facturaInfo = p.factura_id
-        ? `<div class="mi-factura-info">
-             Factura ${escapeHtml(p.numero_factura)}:
-             <span class="badge badge-${p.factura_estado === 'pendiente' ? 'prealertado' : 'listo_para_retiro'}">
-               ${p.factura_estado === 'pendiente' ? `Pendiente — $${Number(p.factura_total).toFixed(2)}` : 'Pagada'}
-             </span>
-           </div>`
-        : '<div class="mi-factura-info muted">Sin factura generada todavía.</div>';
+    html += sinFactura.map((p, i) => {
+      const peso = Number(p.peso_real_lb || p.peso_lb || 0).toFixed(2);
+      const valor = Number(p.valor_declarado || 0).toFixed(2);
+      const statusClass = p.estado === 'listo_para_retiro' ? 'listo' : p.estado === 'en_transito' ? 'transito' : 'bodega';
+      const statusLabel = ESTADO_LABEL_MOSTRADOR[p.estado] || p.estado;
 
       return `
-        <div class="mostrador-item" data-paquete="${p.id}" data-factura="${p.factura_id || ''}">
-          <div class="mi-top">
-            <div>
-              <div class="mi-tienda">${escapeHtml(p.tienda)}</div>
-              <div class="mi-tracking">#${escapeHtml(p.numero_tracking)}</div>
-            </div>
-            <span class="badge badge-${p.estado}">${ESTADO_LABEL_MOSTRADOR[p.estado] || p.estado}</span>
+        <div class="ft-pkg" data-idx="${i}" data-paquete-id="${p.id}"
+             data-peso="${peso}" data-valor="${valor}" data-envio="0" data-manejo="0" data-seguro="0" data-calc-total="0" data-tarifa-id="">
+          <input type="checkbox">
+          <div class="ft-pkg-info">
+            <div class="ft-pkg-store">${escapeHtml(p.tienda)}</div>
+            <div class="ft-pkg-track">#${escapeHtml(p.numero_tracking)}</div>
+            <div class="ft-pkg-details">${peso} lb · Declarado $${valor}</div>
           </div>
-          ${facturaInfo}
-          <div class="mi-metodo-pago">
-            ${tieneFacturaPendiente ? `
-              <select class="metodo-pago-select">
-                <option value="">Elige método de pago…</option>
-                <option value="efectivo">Efectivo</option>
-                <option value="tarjeta">Tarjeta (física, en oficina)</option>
-                <option value="transferencia">Transferencia</option>
-                <option value="yappy">Yappy</option>
-              </select>
-              <button class="btn-entregar" data-accion="cobrar-entregar">Cobrar y entregar</button>
-            ` : `
-              <button class="btn-entregar" data-accion="entregar">Marcar como entregado</button>
-            `}
+          <div class="ft-pkg-right">
+            <span class="ft-status ${statusClass}">${statusLabel}</span>
+            <div class="ft-pkg-price">—</div>
           </div>
         </div>
       `;
     }).join('');
 
     cont.innerHTML = html;
+    cargarTarifasParaFacturador();
 
-    cont.querySelectorAll('.mostrador-item').forEach(item => {
-      const btn = item.querySelector('.btn-entregar');
-      btn.addEventListener('click', () => {
-        const paqueteId = item.dataset.paquete;
-        const facturaId = item.dataset.factura || null;
-        const select = item.querySelector('.metodo-pago-select');
-        const metodoPago = select ? select.value : null;
-        if (select && !metodoPago){
-          mostrarBanner('#bannerMostrador', 'error', 'Elige el método de pago antes de cobrar.');
-          return;
-        }
-
-        abrirModalFirma({
-          paqueteId, facturaId, metodoPago,
-          item, btnOriginal: btn,
-          textoOriginal: select ? 'Cobrar y entregar' : 'Marcar como entregado',
-        });
+    cont.querySelectorAll('.ft-pkg').forEach(pkg => {
+      pkg.addEventListener('click', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        const cb = pkg.querySelector('input[type=checkbox]');
+        cb.checked = !cb.checked;
+        pkg.classList.toggle('selected', cb.checked);
+        recalcularTotales();
+      });
+      pkg.querySelector('input').addEventListener('change', () => {
+        pkg.classList.toggle('selected', pkg.querySelector('input').checked);
+        recalcularTotales();
       });
     });
 
-    if (facturasSueltas.length > 0){
-      const listaFacturas = $('#listaFacturasSueltas');
-      listaFacturas.innerHTML = facturasSueltas.map(f => {
-        const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
-        return `
-          <div class="mostrador-item" data-factura-suelta="${f.id}">
-            <div class="mi-top">
-              <div>
-                <div class="mi-tienda">${escapeHtml(f.numero_factura)}</div>
-                <div class="mi-tracking">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${fecha}</div>
-              </div>
-              <span class="badge badge-prealertado">Pendiente — $${Number(f.total).toFixed(2)}</span>
-            </div>
-            <div class="mi-metodo-pago">
-              <select class="metodo-pago-select">
-                <option value="">Elige método de pago…</option>
-                <option value="efectivo">Efectivo</option>
-                <option value="tarjeta">Tarjeta (física, en oficina)</option>
-                <option value="transferencia">Transferencia</option>
-                <option value="yappy">Yappy</option>
-              </select>
-              <button class="btn-entregar" data-accion="cobrar">Cobrar</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      listaFacturas.querySelectorAll('.mostrador-item').forEach(item => {
-        const btn = item.querySelector('.btn-entregar');
-        btn.addEventListener('click', async () => {
-          const facturaId = item.dataset.facturaSuelta;
-          const select = item.querySelector('.metodo-pago-select');
-          const metodoPago = select.value;
-
-          if (!metodoPago){
-            mostrarBanner('#bannerMostrador', 'error', 'Elige el método de pago antes de cobrar.');
-            return;
-          }
-
-          btn.disabled = true;
-          btn.textContent = 'Procesando…';
-
-          try {
-            const res = await apiAdmin('/admin/mostrador/cobrar', {
-              method: 'POST',
-              body: JSON.stringify({ factura_id: facturaId, metodo_pago: metodoPago }),
-            });
-            const data = await res.json().catch(() => ({}));
-
-            if (res.ok){
-              mostrarBanner('#bannerMostrador', 'success', '✓ Factura cobrada correctamente.');
-              item.remove();
-              cargarPendientesMostrador();
-            } else {
-              mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'No se pudo cobrar.');
-              btn.disabled = false;
-              btn.textContent = 'Cobrar';
-            }
-          } catch (err) {
-            mostrarBanner('#bannerMostrador', 'error', 'No pudimos conectar con el servidor.');
-            btn.disabled = false;
-          }
-        });
+    $('#btnSelectAll').addEventListener('click', () => {
+      const pkgs = cont.querySelectorAll('.ft-pkg');
+      const allChecked = [...pkgs].every(p => p.querySelector('input').checked);
+      pkgs.forEach(p => {
+        p.querySelector('input').checked = !allChecked;
+        p.classList.toggle('selected', !allChecked);
       });
+      recalcularTotales();
+    });
+
+    document.querySelectorAll('.ft-pago-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ft-pago-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        facturadorMetodoPago = btn.dataset.metodo;
+        actualizarBotonGenerar();
+      });
+    });
+
+    $('#btnGenerarFacturas').onclick = generarFacturasLote;
+    $('#facturadorResumen').style.display = 'block';
+    $('#facturadorResultado').style.display = 'none';
+    recalcularTotales();
+  }
+
+  async function cargarTarifasParaFacturador(){
+    try {
+      const res = await apiAdmin('/admin/tarifas');
+      const data = await res.json();
+      facturadorTarifas = data.tarifas || [];
+      const tarifa = facturadorTarifas[0];
+      if (!tarifa) return;
+
+      document.querySelectorAll('.ft-pkg').forEach(pkg => {
+        const peso = parseFloat(pkg.dataset.peso) || 0;
+        const valor = parseFloat(pkg.dataset.valor) || 0;
+        const envio = Math.max(peso * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
+        const seguro = valor * Number(tarifa.pct_seguro) / 100;
+        const manejo = Number(tarifa.cargo_manejo);
+        const total = envio + manejo + seguro;
+        pkg.dataset.envio = envio.toFixed(2);
+        pkg.dataset.manejo = manejo.toFixed(2);
+        pkg.dataset.seguro = seguro.toFixed(2);
+        pkg.dataset.calcTotal = total.toFixed(2);
+        pkg.dataset.tarifaId = tarifa.id;
+        pkg.querySelector('.ft-pkg-price').textContent = '$' + total.toFixed(2);
+        pkg.querySelector('.ft-pkg-details').textContent = `${peso} lb · Declarado $${valor.toFixed(2)} · $${Number(tarifa.precio_libra).toFixed(2)}/lb`;
+      });
+      recalcularTotales();
+    } catch(e) { console.error('Error cargando tarifas:', e); }
+  }
+
+  function recalcularTotales(){
+    let envio = 0, manejo = 0, seguro = 0, cant = 0;
+    document.querySelectorAll('.ft-pkg').forEach(p => {
+      if (p.querySelector('input').checked){
+        envio += parseFloat(p.dataset.envio || 0);
+        manejo += parseFloat(p.dataset.manejo || 0);
+        seguro += parseFloat(p.dataset.seguro || 0);
+        cant++;
+      }
+    });
+    $('#ftFlete').textContent = '$' + envio.toFixed(2);
+    $('#ftManejo').textContent = '$' + manejo.toFixed(2);
+    $('#ftSeguro').textContent = '$' + seguro.toFixed(2);
+    $('#ftCant').textContent = cant;
+    $('#ftTotal').textContent = '$' + (envio + manejo + seguro).toFixed(2);
+    actualizarBotonGenerar();
+  }
+
+  function actualizarBotonGenerar(){
+    const cant = parseInt($('#ftCant').textContent) || 0;
+    $('#btnGenerarFacturas').disabled = cant === 0 || !facturadorMetodoPago;
+  }
+
+  async function generarFacturasLote(){
+    const btn = $('#btnGenerarFacturas');
+    const seleccionados = [...document.querySelectorAll('.ft-pkg')].filter(p => p.querySelector('input').checked);
+    if (seleccionados.length === 0) return;
+
+    setCargando(btn, true);
+    const resultados = [];
+    let errores = 0;
+
+    for (const pkg of seleccionados){
+      const paqueteId = pkg.dataset.paqueteId;
+      const tarifaId = pkg.dataset.tarifaId;
+      try {
+        const res = await apiAdmin('/admin/facturas', {
+          method: 'POST',
+          body: JSON.stringify({ paquete_id: parseInt(paqueteId), tarifa_id: parseInt(tarifaId) }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok){
+          if (facturadorMetodoPago && data.factura?.id){
+            await apiAdmin('/admin/facturas/' + data.factura.id + '/estado', {
+              method: 'PATCH',
+              body: JSON.stringify({ estado: 'pagada' }),
+            });
+          }
+          resultados.push(data.factura);
+          pkg.style.display = 'none';
+        } else {
+          errores++;
+          console.error('Error generando factura:', data.mensaje);
+        }
+      } catch(e) { errores++; }
+    }
+
+    setCargando(btn, false);
+
+    if (resultados.length > 0){
+      const totalCobrado = $('#ftTotal').textContent;
+      const nums = resultados.map(f => f.numero_factura).join(', ');
+      $('#facturadorResultado').style.display = 'block';
+      $('#facturadorResultado').innerHTML = `
+        <div class="ft-result">
+          <div class="ft-result-title">✓ ${resultados.length} factura${resultados.length > 1 ? 's' : ''} generada${resultados.length > 1 ? 's' : ''} y cobrada${resultados.length > 1 ? 's' : ''}</div>
+          <div class="ft-result-meta">${nums} · ${totalCobrado} · ${facturadorMetodoPago} · PDF y correo enviados al cliente</div>
+        </div>
+      `;
+      recalcularTotales();
+      cargarPendientesMostrador();
+    }
+    if (errores > 0){
+      mostrarBanner('#bannerMostrador', 'error', errores + ' factura(s) no se pudieron generar.');
     }
   }
 
