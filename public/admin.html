@@ -378,7 +378,7 @@
 <body>
 
 <div class="topbar">
-  <a href="index.html" class="brand">
+  <a href="#" id="btnBrand" class="brand">
     <div class="mark">N</div>
     <div>NEA CARGO XPRESS <span class="badge-admin" id="badgeAdmin" style="display:none;">ADMIN</span>
       <small>Panel de operaciones</small>
@@ -1070,9 +1070,25 @@
     }
   });
 
+  $('#btnBrand').addEventListener('click', (e) => {
+    e.preventDefault();
+    localStorage.removeItem(TOKEN_KEY);
+    window.location.replace('index.html');
+  });
+
   $('#btnLogout').addEventListener('click', () => {
     localStorage.removeItem(TOKEN_KEY);
-    window.location.href = 'index.html';
+    window.location.replace('index.html');
+  });
+
+  // Detecta cuando la página se restaura desde el caché del navegador (bfcache)
+  // al presionar ← atrás, para que no muestre el panel con la sesión ya cerrada.
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted || performance.getEntriesByType('navigation')[0]?.type === 'back_forward'){
+      if (!localStorage.getItem(TOKEN_KEY)){
+        window.location.reload();
+      }
+    }
   });
 
   // ---------- Olvidé mi contraseña ----------

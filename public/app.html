@@ -1894,16 +1894,27 @@
     $('#formRestablecer').style.display = 'block';
   }
 
+  // Detecta cuando la página se restaura desde el caché del navegador (bfcache)
+  // al presionar ← atrás. En ese caso el JS no se re-ejecuta, así que hay que
+  // verificar manualmente si la sesión sigue viva.
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted || performance.getEntriesByType('navigation')[0]?.type === 'back_forward'){
+      // Si no hay token, la sesión se cerró — recarga forzada para mostrar el login
+      if (!localStorage.getItem(TOKEN_KEY)){
+        window.location.reload();
+      }
+    }
+  });
+
   // Bloquea el botón "← atrás" del navegador cuando hay sesión activa.
-  // Si alguien hace clic en ← desde el dashboard, vuelve a entrar al dashboard.
   if (localStorage.getItem(TOKEN_KEY)){
-    // Reemplaza la entrada actual del historial para que no quede el login atrás
     window.history.replaceState({ app: true }, '', window.location.href);
-    // Si el usuario presiona ← y vuelve a esta página con sesión activa, entra al dashboard
     window.addEventListener('popstate', () => {
       if (localStorage.getItem(TOKEN_KEY)){
         window.history.pushState({ app: true }, '', window.location.href);
         iniciarApp();
+      } else {
+        window.location.reload();
       }
     });
     iniciarApp();
