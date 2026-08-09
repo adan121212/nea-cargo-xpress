@@ -1050,7 +1050,7 @@
     }
 
     if (seccion === 'autorizados') cargarAutorizados();
-    if (seccion === 'perfil') cargarPerfil();
+    if (seccion === 'perfil') cargarDatosPerfil();
 
     // En móvil, cierra el menú al elegir una sección.
     if (window.innerWidth <= 860) cerrarMenuMovil();
@@ -1699,7 +1699,7 @@
   });
 
   // ---------- Perfil ----------
-  async function cargarPerfil(){
+  async function cargarDatosPerfil(){
     try {
       const res = await apiAutenticado('/perfil');
       const data = await res.json();
