@@ -641,7 +641,10 @@
             <div>
               <label for="recNuevoCasillero">Casillero del cliente</label>
               <div style="display:flex;gap:6px;">
-                <input id="recNuevoCasillero" type="text" placeholder="NEA-00042">
+                <div style="position:relative;flex:1;">
+                  <input id="recNuevoCasillero" type="text" placeholder="NEA-00042 — o presiona F1">
+                  <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">F1</span>
+                </div>
                 <button type="button" id="btnBuscarClienteRec" class="btn-secondary" style="white-space:nowrap;">Buscar</button>
               </div>
               <div id="recClienteEncontrado" style="display:none;margin-top:6px;padding:8px 12px;background:var(--paper);border-radius:8px;font-size:12.5px;"></div>
@@ -3095,6 +3098,7 @@
   let f1ClientesCache = [];
   let f1Filtrados = [];
   let f1Activo = 0;
+  let f1Destino = 'facturador'; // 'facturador' o 'recepcion'
 
   function iniciales(nombre){
     return nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -3131,7 +3135,8 @@
     });
   }
 
-  async function f1Abrir(){
+  async function f1Abrir(destino = 'facturador'){
+    f1Destino = destino;
     const overlay = $('#modalF1Clientes');
     overlay.style.display = 'flex';
     $('#f1SearchInput').value = '';
@@ -3156,9 +3161,18 @@
   function f1Seleccionar(idx){
     const c = f1Filtrados[idx];
     if (!c) return;
-    $('#mostradorQ').value = c.numero_casillero;
-    f1Cerrar();
-    $('#formBuscarMostrador').dispatchEvent(new Event('submit'));
+
+    if (f1Destino === 'recepcion'){
+      // Llena el campo de casillero en Recepción y dispara la búsqueda del cliente
+      $('#recNuevoCasillero').value = c.numero_casillero;
+      f1Cerrar();
+      $('#btnBuscarClienteRec').click();
+    } else {
+      // Llena el campo del Facturador y lanza la búsqueda
+      $('#mostradorQ').value = c.numero_casillero;
+      f1Cerrar();
+      $('#formBuscarMostrador').dispatchEvent(new Event('submit'));
+    }
   }
 
   $('#f1SearchInput').addEventListener('input', (e) => {
@@ -3190,7 +3204,15 @@
   });
 
   $('#mostradorQ').addEventListener('keydown', (e) => {
-    if (e.key === 'F1'){ e.preventDefault(); f1Abrir(); }
+    if (e.key === 'F1'){ e.preventDefault(); f1Abrir('facturador'); }
+  });
+
+  // F1 en el campo de casillero de Recepción (sin prealerta)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F1' && document.activeElement?.id === 'recNuevoCasillero'){
+      e.preventDefault();
+      f1Abrir('recepcion');
+    }
   });
 
   // ---------- Arranque ----------
