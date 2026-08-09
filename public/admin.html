@@ -1056,7 +1056,7 @@
     <div id="f1ClientesList" style="max-height:340px;overflow-y:auto;"></div>
     <div style="padding:8px 16px;border-top:1px solid var(--line);display:flex;gap:16px;font-size:11px;color:var(--ink-soft);">
       <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">↑↓</kbd> Navegar</span>
-      <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">Enter</kbd> Seleccionar</span>
+      <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">Enter</kbd> o doble clic para seleccionar</span>
       <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">Esc</kbd> Cerrar</span>
     </div>
   </div>
@@ -2996,11 +2996,11 @@
     `).join('');
 
     list.querySelectorAll('.f1-row').forEach(row => {
-      row.addEventListener('mouseenter', () => {
+      row.addEventListener('click', () => {
         f1Activo = parseInt(row.dataset.idx);
         f1Render();
       });
-      row.addEventListener('click', () => f1Seleccionar(parseInt(row.dataset.idx)));
+      row.addEventListener('dblclick', () => f1Seleccionar(parseInt(row.dataset.idx)));
     });
   }
 
