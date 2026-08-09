@@ -308,6 +308,28 @@
     border-radius:10px; padding:14px 16px; margin-bottom:18px;
   }
   .retiro-titulo{ font-weight:700; font-size:12px; color: var(--accent-dark); margin-bottom:10px; }
+  .retiro-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px; }
+  .retiro-chip{
+    display:flex; align-items:center; gap:6px;
+    border:1.5px solid var(--line); border-radius:20px;
+    padding: 6px 14px; cursor:pointer; font-size:12.5px;
+    background:#fff; color: var(--ink); transition: all .15s ease;
+  }
+  .retiro-chip:hover{ border-color: var(--accent); color: var(--accent); }
+  .retiro-chip.selected{ background: var(--accent); color:#fff; border-color: var(--accent); }
+  .retiro-chip .chip-cedula{ font-size:11px; opacity:.8; font-family: var(--font-mono); }
+  .retiro-chip-otro{
+    border:1.5px dashed var(--line); border-radius:20px;
+    padding: 6px 14px; cursor:pointer; font-size:12px;
+    background:transparent; color: var(--ink-soft); transition: all .15s ease;
+  }
+  .retiro-chip-otro:hover{ border-color: var(--accent-dark); color: var(--accent-dark); }
+  .btn-bypass{
+    margin-top:10px; background:none; border:none;
+    font-size:11.5px; color: var(--ink-soft); cursor:pointer;
+    text-decoration:underline; text-underline-offset:2px; padding:0;
+  }
+  .btn-bypass:hover{ color: var(--ink); }
 
   .mostrador-item{
     border:1px solid var(--line); border-radius:10px; padding: 14px 16px; margin-bottom:10px;
@@ -1919,17 +1941,21 @@
             ${!yaEntregado ? `
               <div class="mi-factura-info">📦 Este paquete <strong>todavía no se ha entregado</strong> — al cobrar, también se pedirá la firma de entrega.</div>
               <div class="retiro-box" style="margin:10px 0 6px;">
-                <div class="retiro-titulo">✍️ Datos de quien retira</div>
-                <div class="row2">
-                  <div>
-                    <label>Nombre completo</label>
-                    <input type="text" class="retiro-nombre-input" placeholder="Como aparece en la cédula">
-                  </div>
-                  <div>
-                    <label>Número de cédula</label>
-                    <input type="text" class="retiro-cedula-input" placeholder="8-123-4567">
+                <div class="retiro-titulo">✍️ ¿Quién retira?</div>
+                <div class="retiro-chips chips-pendiente"></div>
+                <div class="retiro-campos" style="display:none;">
+                  <div class="row2" style="margin-top:8px;">
+                    <div>
+                      <label>Nombre completo</label>
+                      <input type="text" class="retiro-nombre-input" placeholder="Como aparece en la cédula">
+                    </div>
+                    <div>
+                      <label>Número de cédula</label>
+                      <input type="text" class="retiro-cedula-input" placeholder="8-123-4567">
+                    </div>
                   </div>
                 </div>
+                <button type="button" class="btn-bypass bypass-pendiente">⚡ Bypass</button>
               </div>
             ` : ''}
             <div class="mi-metodo-pago">
@@ -1947,6 +1973,18 @@
           </div>
         `;
       }).join('');
+
+      // Listener del Bypass en tarjetas de facturas pendientes
+      cont.querySelectorAll('.bypass-pendiente').forEach(bpBtn => {
+        bpBtn.addEventListener('click', () => {
+          bpBtn.dataset.bypass = bpBtn.dataset.bypass === 'true' ? 'false' : 'true';
+          const active = bpBtn.dataset.bypass === 'true';
+          bpBtn.textContent = active ? '✅ Bypass activo — sin registrar' : '⚡ Bypass';
+          bpBtn.style.color = active ? '#177a63' : '';
+          const camposDiv = bpBtn.closest('.retiro-box')?.querySelector('.retiro-campos');
+          if (camposDiv) camposDiv.style.display = active ? 'none' : 'block';
+        });
+      });
 
       cont.querySelectorAll('.mostrador-item').forEach(item => {
         const btn = item.querySelector('.btn-entregar');
@@ -1966,10 +2004,12 @@
           // Paquete NO entregado todavía: hay que pasar por la firma, igual
           // que en "Cobrar y entregar" de los resultados de búsqueda.
           if (!yaEntregado){
-            const retiroNombre = item.querySelector('.retiro-nombre-input')?.value.trim() || '';
-            const retiroCedula = item.querySelector('.retiro-cedula-input')?.value.trim() || '';
-            if (!retiroNombre || !retiroCedula){
-              mostrarBanner('#bannerMostrador', 'error', 'Ingresa el nombre y cédula de quien retira antes de continuar.');
+            const bypassBtn = item.querySelector('.bypass-pendiente');
+            const esBypass = bypassBtn?.dataset.bypass === 'true';
+            const retiroNombre = esBypass ? 'No registrado (bypass)' : (item.querySelector('.retiro-nombre-input')?.value.trim() || '');
+            const retiroCedula = esBypass ? 'N/A' : (item.querySelector('.retiro-cedula-input')?.value.trim() || 'N/A');
+            if (!esBypass && !retiroNombre){
+              mostrarBanner('#bannerMostrador', 'error', 'Ingresa el nombre de quien retira o usa ⚡ Bypass.');
               item.querySelector('.retiro-nombre-input')?.focus();
               return;
             }
@@ -2026,41 +2066,24 @@
       </div>
     `;
 
-    // ── Autorizados ──────────────────────────────────────────────────────────
-    if (autorizados && autorizados.length > 0){
-      html += `
-        <div class="autorizados-box">
-          <div class="autorizados-titulo">🛡️ Personas autorizadas a retirar</div>
-          <div class="autorizados-lista">
-            ${autorizados.map((a, i) => `
-              <div class="autorizado-item">
-                <span class="autorizado-num">${i + 1}</span>
-                <span class="autorizado-nombre">${escapeHtml(a.nombre)}</span>
-                <span class="autorizado-cedula">Cédula: ${escapeHtml(a.cedula)}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
-    } else {
-      html += `<div class="autorizados-box vacio">Sin personas autorizadas registradas — solo el titular puede retirar.</div>`;
-    }
-
-    // ── Campos: quién retira ─────────────────────────────────────────────────
+    // ── Campos: quién retira (chips se llenan después con construirChips) ────
     html += `
-      <div class="retiro-box">
-        <div class="retiro-titulo">✍️ Datos de quien retira</div>
-        <div class="row2">
-          <div>
-            <label for="retiroNombre">Nombre completo</label>
-            <input id="retiroNombre" type="text" placeholder="Como aparece en la cédula">
-          </div>
-          <div>
-            <label for="retiroCedula">Número de cédula</label>
-            <input id="retiroCedula" type="text" placeholder="8-123-4567">
+      <div class="retiro-box" id="retiroBox">
+        <div class="retiro-titulo">✍️ ¿Quién retira el paquete?</div>
+        <div class="retiro-chips" id="retiroChips"></div>
+        <div class="retiro-campos" id="retirocampos" style="display:none;">
+          <div class="row2" style="margin-top:10px;">
+            <div>
+              <label for="retiroNombre">Nombre completo</label>
+              <input id="retiroNombre" type="text" placeholder="Como aparece en la cédula">
+            </div>
+            <div>
+              <label for="retiroCedula">Número de cédula</label>
+              <input id="retiroCedula" type="text" placeholder="8-123-4567">
+            </div>
           </div>
         </div>
-        <p class="hint" style="margin-top:6px;">Verifica que la cédula coincida con el titular o uno de los autorizados de arriba.</p>
+        <button type="button" class="btn-bypass" id="btnBypass">⚡ Bypass — entregar sin registrar quién vino</button>
       </div>
     `;
 
@@ -2125,6 +2148,9 @@
 
     cont.innerHTML = html;
 
+    // Llena los chips con el titular + autorizados
+    construirChips(cliente, autorizados);
+
     cont.querySelectorAll('.mostrador-item').forEach(item => {
       const btn = item.querySelector('.btn-entregar');
       btn.addEventListener('click', () => {
@@ -2133,12 +2159,18 @@
         const select = item.querySelector('.metodo-pago-select');
         const metodoPago = select ? select.value : null;
 
-        const retiroNombre = $('#retiroNombre').value.trim();
-        const retiroCedula = $('#retiroCedula').value.trim();
+        // Leer quién retira: chip seleccionado, campos manuales, o bypass
+        let retiroNombre, retiroCedula;
+        if (retiroSeleccionado){
+          retiroNombre = retiroSeleccionado.nombre;
+          retiroCedula = retiroSeleccionado.cedula || $('#retiroCedula')?.value.trim() || 'N/A';
+        } else {
+          retiroNombre = $('#retiroNombre')?.value.trim() || '';
+          retiroCedula = $('#retiroCedula')?.value.trim() || '';
+        }
 
-        if (!retiroNombre || !retiroCedula){
-          mostrarBanner('#bannerMostrador', 'error', 'Ingresa el nombre y cédula de quien retira antes de continuar.');
-          $('#retiroNombre').focus();
+        if (!retiroNombre){
+          mostrarBanner('#bannerMostrador', 'error', 'Selecciona quién retira el paquete o usa el Bypass.');
           return;
         }
 
@@ -2150,7 +2182,7 @@
         abrirModalFirma({
           paqueteId, facturaId, metodoPago,
           retiradoPorNombre: retiroNombre,
-          retiradoPorCedula: retiroCedula,
+          retiradoPorCedula: retiroCedula || 'N/A',
           item, btnOriginal: btn,
           textoOriginal: select ? 'Cobrar y entregar' : 'Marcar como entregado',
         });
