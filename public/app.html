@@ -712,6 +712,10 @@
         <button class="side-item" data-seccion="autorizados">
           <span class="side-ico">🛡️</span><span class="side-label">Autorizados</span>
         </button>
+
+        <button class="side-item" data-seccion="perfil">
+          <span class="side-ico">👤</span><span class="side-label">Mi perfil</span>
+        </button>
       </nav>
     </aside>
 
@@ -875,6 +879,39 @@
             </form>
           </div>
         </div>
+        <!-- ---- Sección: Perfil ---- -->
+        <div class="seccion-app" id="seccionPerfil" style="display:none;">
+          <div class="card reveal" style="margin-bottom:20px;">
+            <h2>Mi información</h2>
+            <p class="card-sub">Actualiza tu número de teléfono de contacto.</p>
+            <form id="formTelefono">
+              <label for="perfilTelefono">Teléfono</label>
+              <input id="perfilTelefono" type="tel" placeholder="6123-4567">
+              <button class="btn-primary" type="submit" id="btnGuardarTelefono" style="max-width:200px;margin-top:14px;">
+                <span class="spinner"></span><span>Guardar teléfono</span>
+              </button>
+              <div class="banner" id="bannerTelefono"></div>
+            </form>
+          </div>
+
+          <div class="card reveal">
+            <h2>Cambiar contraseña</h2>
+            <p class="card-sub">Por seguridad, necesitas ingresar tu contraseña actual.</p>
+            <form id="formPassword">
+              <label for="passActual">Contraseña actual</label>
+              <input id="passActual" type="password" placeholder="••••••••">
+              <label for="passNueva">Nueva contraseña</label>
+              <input id="passNueva" type="password" placeholder="Mínimo 8 caracteres">
+              <label for="passConfirmar">Confirmar nueva contraseña</label>
+              <input id="passConfirmar" type="password" placeholder="Repite la nueva contraseña">
+              <button class="btn-primary" type="submit" id="btnCambiarPassword" style="max-width:200px;margin-top:14px;">
+                <span class="spinner"></span><span>Cambiar contraseña</span>
+              </button>
+              <div class="banner" id="bannerPassword"></div>
+            </form>
+          </div>
+        </div>
+
       </div>
     </main>
   </div>
@@ -982,6 +1019,7 @@
     'historial-facturas': { titulo: () => 'Historial de facturas', sub: 'Todas tus facturas, pagadas y pendientes.' },
     'estado-cuenta': { titulo: () => 'Estado de cuenta', sub: 'Resumen de lo facturado, pagado y pendiente.' },
     'autorizados': { titulo: () => 'Autorizados', sub: 'Personas que pueden retirar tu pedido por ti.' },
+    'perfil': { titulo: () => 'Mi perfil', sub: 'Actualiza tu información de contacto y contraseña.' },
   };
   let nombreUsuarioActual = '';
 
@@ -992,6 +1030,7 @@
     'historial-facturas': 'seccionHistorialFacturas',
     'estado-cuenta': 'seccionEstadoCuenta',
     'autorizados': 'seccionAutorizados',
+    'perfil': 'seccionPerfil',
   };
 
   function irASeccion(seccion){
@@ -1010,6 +1049,7 @@
     }
 
     if (seccion === 'autorizados') cargarAutorizados();
+    if (seccion === 'perfil') cargarPerfil();
 
     // En móvil, cierra el menú al elegir una sección.
     if (window.innerWidth <= 860) cerrarMenuMovil();
@@ -1652,6 +1692,89 @@
       }
     } catch (err) {
       mostrarBanner('#bannerAutorizados', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
+  // ---------- Perfil ----------
+  async function cargarPerfil(){
+    try {
+      const res = await apiAutenticado('/perfil');
+      const data = await res.json();
+      if (data.perfil?.telefono){
+        $('#perfilTelefono').value = data.perfil.telefono;
+      }
+    } catch (err) {}
+  }
+
+  $('#formTelefono').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnGuardarTelefono');
+    const telefono = $('#perfilTelefono').value.trim();
+    if (!telefono){
+      mostrarBanner('#bannerTelefono', 'error', 'Escribe tu número de teléfono.');
+      return;
+    }
+    setCargando(btn, true);
+    try {
+      const res = await apiAutenticado('/perfil/telefono', {
+        method: 'PATCH',
+        body: JSON.stringify({ telefono }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok){
+        mostrarBanner('#bannerTelefono', 'success', '✓ Teléfono actualizado correctamente.');
+      } else {
+        mostrarBanner('#bannerTelefono', 'error', data.mensaje || 'No se pudo actualizar el teléfono.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerTelefono', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+
+  $('#formPassword').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnCambiarPassword');
+    const password_actual   = $('#passActual').value;
+    const password_nueva    = $('#passNueva').value;
+    const password_confirmar = $('#passConfirmar').value;
+
+    if (!password_actual || !password_nueva || !password_confirmar){
+      mostrarBanner('#bannerPassword', 'error', 'Completa todos los campos.');
+      return;
+    }
+    if (password_nueva.length < 8){
+      mostrarBanner('#bannerPassword', 'error', 'La nueva contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (password_nueva !== password_confirmar){
+      mostrarBanner('#bannerPassword', 'error', 'Las contraseñas nuevas no coinciden.');
+      return;
+    }
+
+    setCargando(btn, true);
+    try {
+      const res = await apiAutenticado('/perfil/password', {
+        method: 'PATCH',
+        body: JSON.stringify({ password_actual, password_nueva, password_confirmar }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok){
+        mostrarBanner('#bannerPassword', 'success', '✓ ' + (data.mensaje || 'Contraseña actualizada. Inicia sesión de nuevo.'));
+        $('#formPassword').reset();
+        // Cierra la sesión después de 2 segundos para que el cliente inicie de nuevo
+        setTimeout(() => {
+          localStorage.removeItem(TOKEN_KEY);
+          window.location.reload();
+        }, 2500);
+      } else {
+        mostrarBanner('#bannerPassword', 'error', data.mensaje || 'No se pudo cambiar la contraseña.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerPassword', 'error', 'No pudimos conectar con el servidor.');
     } finally {
       setCargando(btn, false);
     }
