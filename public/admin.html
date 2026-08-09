@@ -308,22 +308,7 @@
     border-radius:10px; padding:14px 16px; margin-bottom:18px;
   }
   .retiro-titulo{ font-weight:700; font-size:12px; color: var(--accent-dark); margin-bottom:10px; }
-  .retiro-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px; }
-  .retiro-chip{
-    display:flex; align-items:center; gap:6px;
-    border:1.5px solid var(--line); border-radius:20px;
-    padding: 6px 14px; cursor:pointer; font-size:12.5px;
-    background:#fff; color: var(--ink); transition: all .15s ease;
-  }
-  .retiro-chip:hover{ border-color: var(--accent); color: var(--accent); }
-  .retiro-chip.selected{ background: var(--accent); color:#fff; border-color: var(--accent); }
-  .retiro-chip .chip-cedula{ font-size:11px; opacity:.8; font-family: var(--font-mono); }
-  .retiro-chip-otro{
-    border:1.5px dashed var(--line); border-radius:20px;
-    padding: 6px 14px; cursor:pointer; font-size:12px;
-    background:transparent; color: var(--ink-soft); transition: all .15s ease;
-  }
-  .retiro-chip-otro:hover{ border-color: var(--accent-dark); color: var(--accent-dark); }
+  .retiro-select{ width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid var(--line); font-family: var(--font-body); font-size:13px; background:#fff; color: var(--ink); margin-bottom:8px; }
   .btn-bypass{
     margin-top:10px; background:none; border:none;
     font-size:11.5px; color: var(--ink-soft); cursor:pointer;
@@ -1942,20 +1927,11 @@
               <div class="mi-factura-info">📦 Este paquete <strong>todavía no se ha entregado</strong> — al cobrar, también se pedirá la firma de entrega.</div>
               <div class="retiro-box" style="margin:10px 0 6px;">
                 <div class="retiro-titulo">✍️ ¿Quién retira?</div>
-                <div class="retiro-chips chips-pendiente"></div>
-                <div class="retiro-campos" style="display:none;">
-                  <div class="row2" style="margin-top:8px;">
-                    <div>
-                      <label>Nombre completo</label>
-                      <input type="text" class="retiro-nombre-input" placeholder="Como aparece en la cédula">
-                    </div>
-                    <div>
-                      <label>Número de cédula</label>
-                      <input type="text" class="retiro-cedula-input" placeholder="8-123-4567">
-                    </div>
-                  </div>
-                </div>
-                <button type="button" class="btn-bypass bypass-pendiente">⚡ Bypass</button>
+                <select class="retiro-select retiro-select-pendiente">
+                  <option value="">— Selecciona o escribe —</option>
+                  <option value="titular">El titular</option>
+                </select>
+                <button type="button" class="btn-bypass bypass-pendiente" data-bypass="false">⚡ Bypass</button>
               </div>
             ` : ''}
             <div class="mi-metodo-pago">
@@ -1977,12 +1953,12 @@
       // Listener del Bypass en tarjetas de facturas pendientes
       cont.querySelectorAll('.bypass-pendiente').forEach(bpBtn => {
         bpBtn.addEventListener('click', () => {
-          bpBtn.dataset.bypass = bpBtn.dataset.bypass === 'true' ? 'false' : 'true';
-          const active = bpBtn.dataset.bypass === 'true';
-          bpBtn.textContent = active ? '✅ Bypass activo — sin registrar' : '⚡ Bypass';
+          const active = bpBtn.dataset.bypass !== 'true';
+          bpBtn.dataset.bypass = active;
+          bpBtn.textContent = active ? '✅ Bypass activo' : '⚡ Bypass';
           bpBtn.style.color = active ? '#177a63' : '';
-          const camposDiv = bpBtn.closest('.retiro-box')?.querySelector('.retiro-campos');
-          if (camposDiv) camposDiv.style.display = active ? 'none' : 'block';
+          const selPend = bpBtn.closest('.retiro-box')?.querySelector('.retiro-select-pendiente');
+          if (selPend) selPend.disabled = active;
         });
       });
 
@@ -2006,12 +1982,21 @@
           if (!yaEntregado){
             const bypassBtn = item.querySelector('.bypass-pendiente');
             const esBypass = bypassBtn?.dataset.bypass === 'true';
-            const retiroNombre = esBypass ? 'No registrado (bypass)' : (item.querySelector('.retiro-nombre-input')?.value.trim() || '');
-            const retiroCedula = esBypass ? 'N/A' : (item.querySelector('.retiro-cedula-input')?.value.trim() || 'N/A');
-            if (!esBypass && !retiroNombre){
-              mostrarBanner('#bannerMostrador', 'error', 'Ingresa el nombre de quien retira o usa ⚡ Bypass.');
-              item.querySelector('.retiro-nombre-input')?.focus();
-              return;
+            let retiroNombre = 'No registrado (bypass)', retiroCedula = 'N/A';
+            if (!esBypass) {
+              const selPend = item.querySelector('.retiro-select-pendiente');
+              const selVal = selPend?.value || '';
+              try {
+                const parsed = JSON.parse(selVal);
+                retiroNombre = parsed.nombre;
+                retiroCedula = parsed.cedula || 'N/A';
+              } catch(e) {
+                retiroNombre = '';
+              }
+              if (!retiroNombre){
+                mostrarBanner('#bannerMostrador', 'error', 'Selecciona quién retira o usa ⚡ Bypass.');
+                return;
+              }
             }
             abrirModalFirma({
               paqueteId, facturaId, metodoPago,
@@ -2066,23 +2051,13 @@
       </div>
     `;
 
-    // ── Campos: quién retira (chips se llenan después con construirChips) ────
+    // ── Select: quién retira ─────────────────────────────────────────────────
     html += `
       <div class="retiro-box" id="retiroBox">
         <div class="retiro-titulo">✍️ ¿Quién retira el paquete?</div>
-        <div class="retiro-chips" id="retiroChips"></div>
-        <div class="retiro-campos" id="retirocampos" style="display:none;">
-          <div class="row2" style="margin-top:10px;">
-            <div>
-              <label for="retiroNombre">Nombre completo</label>
-              <input id="retiroNombre" type="text" placeholder="Como aparece en la cédula">
-            </div>
-            <div>
-              <label for="retiroCedula">Número de cédula</label>
-              <input id="retiroCedula" type="text" placeholder="8-123-4567">
-            </div>
-          </div>
-        </div>
+        <select class="retiro-select" id="retiroSelect">
+          <option value="">— Selecciona quién retira —</option>
+        </select>
         <button type="button" class="btn-bypass" id="btnBypass">⚡ Bypass — entregar sin registrar quién vino</button>
       </div>
     `;
@@ -2148,8 +2123,34 @@
 
     cont.innerHTML = html;
 
-    // Llena los chips con el titular + autorizados
-    construirChips(cliente, autorizados);
+    // ── Select de retiro: titular + autorizados ──────────────────────────────
+    const sel = $('#retiroSelect');
+    if (sel) {
+      sel.innerHTML = '<option value="">— Selecciona quién retira —</option>';
+      const optTitular = document.createElement('option');
+      optTitular.value = JSON.stringify({ nombre: `${cliente.nombre} ${cliente.apellido}`, cedula: '' });
+      optTitular.textContent = `👤 ${cliente.nombre} ${cliente.apellido} (titular)`;
+      sel.appendChild(optTitular);
+      (autorizados || []).forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = JSON.stringify({ nombre: a.nombre, cedula: a.cedula });
+        opt.textContent = `🛡️ ${a.nombre} — Cédula: ${a.cedula}`;
+        sel.appendChild(opt);
+      });
+    }
+
+    // Bypass
+    const bypassBtn = $('#btnBypass');
+    if (bypassBtn) {
+      bypassBtn.dataset.bypass = 'false';
+      bypassBtn.addEventListener('click', () => {
+        const active = bypassBtn.dataset.bypass !== 'true';
+        bypassBtn.dataset.bypass = active;
+        bypassBtn.textContent = active ? '✅ Bypass activo' : '⚡ Bypass — entregar sin registrar quién vino';
+        bypassBtn.style.color = active ? '#177a63' : '';
+        if (sel) sel.disabled = active;
+      });
+    }
 
     cont.querySelectorAll('.mostrador-item').forEach(item => {
       const btn = item.querySelector('.btn-entregar');
@@ -2159,18 +2160,25 @@
         const select = item.querySelector('.metodo-pago-select');
         const metodoPago = select ? select.value : null;
 
-        // Leer quién retira: chip seleccionado, campos manuales, o bypass
-        let retiroNombre, retiroCedula;
-        if (retiroSeleccionado){
-          retiroNombre = retiroSeleccionado.nombre;
-          retiroCedula = retiroSeleccionado.cedula || $('#retiroCedula')?.value.trim() || 'N/A';
+        // Leer quién retira: select o bypass
+        let retiroNombre = '', retiroCedula = 'N/A';
+        const esBypass = $('#btnBypass')?.dataset.bypass === 'true';
+        if (esBypass) {
+          retiroNombre = 'No registrado (bypass)';
+          retiroCedula = 'N/A';
         } else {
-          retiroNombre = $('#retiroNombre')?.value.trim() || '';
-          retiroCedula = $('#retiroCedula')?.value.trim() || '';
+          const selVal = $('#retiroSelect')?.value;
+          if (selVal) {
+            try {
+              const parsed = JSON.parse(selVal);
+              retiroNombre = parsed.nombre;
+              retiroCedula = parsed.cedula || 'N/A';
+            } catch(e) {}
+          }
         }
 
         if (!retiroNombre){
-          mostrarBanner('#bannerMostrador', 'error', 'Selecciona quién retira el paquete o usa el Bypass.');
+          mostrarBanner('#bannerMostrador', 'error', 'Selecciona quién retira el paquete o usa ⚡ Bypass.');
           return;
         }
 
