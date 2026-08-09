@@ -268,6 +268,14 @@
   .link-olvide:hover{ color: var(--accent-dark); }
   .banner.success{ background: var(--cargo-green-bg); color: var(--cargo-green); border:1px solid rgba(23,122,99,0.3); }
 
+  .reg-tipo-tabs{ display:flex; gap:6px; margin-bottom:18px; }
+  .reg-tipo-btn{
+    flex:1; padding:10px; border-radius:8px; border:1.5px solid var(--line);
+    background:#fff; font-family: var(--font-body); font-size:13px; font-weight:600;
+    color: var(--ink-soft); cursor:pointer; transition: all .15s ease;
+  }
+  .reg-tipo-btn.active{ background: var(--ink); color:#fff; border-color: var(--ink); }
+
   /* ---------- App / Dashboard con menú lateral ---------- */
   #vistaApp{ display:none; }
   .app-shell{ display:flex; align-items:stretch; min-height: calc(100vh - 63px); }
@@ -658,16 +666,41 @@
 
         <!-- Registro -->
         <form id="formRegistro" style="display:none;">
-          <div class="row2">
-            <div>
-              <label for="regNombre">Nombre</label>
-              <input id="regNombre" type="text" placeholder="Ana">
-            </div>
-            <div>
-              <label for="regApellido">Apellido</label>
-              <input id="regApellido" type="text" placeholder="Pérez">
+          <!-- Selector Personal / Empresa -->
+          <div class="reg-tipo-tabs">
+            <button type="button" class="reg-tipo-btn active" data-tipo="personal">👤 Personal</button>
+            <button type="button" class="reg-tipo-btn" data-tipo="empresa">🏢 Empresa</button>
+          </div>
+          <input type="hidden" id="regTipoCuenta" value="personal">
+
+          <!-- Campos personales -->
+          <div id="camposPersonal">
+            <div class="row2">
+              <div>
+                <label for="regNombre">Nombre</label>
+                <input id="regNombre" type="text" placeholder="Ana">
+              </div>
+              <div>
+                <label for="regApellido">Apellido</label>
+                <input id="regApellido" type="text" placeholder="Pérez">
+              </div>
             </div>
           </div>
+
+          <!-- Campos empresa -->
+          <div id="camposEmpresa" style="display:none;">
+            <label for="regRazonSocial">Razón social</label>
+            <input id="regRazonSocial" type="text" placeholder="Ferretería López S.A.">
+            <label for="regRuc">RUC</label>
+            <input id="regRuc" type="text" placeholder="123-456-789">
+            <label for="regNombreContacto">Nombre del contacto</label>
+            <input id="regNombreContacto" type="text" placeholder="Carlos López">
+            <label for="regAvisoOperacion">Aviso de operación (PDF, obligatorio)</label>
+            <input id="regAvisoOperacion" type="file" accept="application/pdf" style="border:none;padding:6px 0;">
+            <div class="hint" id="hintAviso"></div>
+          </div>
+
+          <!-- Campos comunes -->
           <label for="regEmail">Correo electrónico</label>
           <input id="regEmail" type="email" placeholder="ana@ejemplo.com">
           <label for="regTelefono">Teléfono (opcional)</label>
@@ -1191,40 +1224,93 @@
     el.className = 'banner show ' + tipo;
   }
 
+  // ---------- Selector Personal / Empresa en el registro ----------
+  document.querySelectorAll('.reg-tipo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.reg-tipo-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tipo = btn.dataset.tipo;
+      $('#regTipoCuenta').value = tipo;
+      $('#camposPersonal').style.display = tipo === 'personal' ? 'block' : 'none';
+      $('#camposEmpresa').style.display  = tipo === 'empresa'  ? 'block' : 'none';
+    });
+  });
+
   // ---------- Registro ----------
   $('#formRegistro').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = $('#btnRegistro');
-    const payload = {
-      nombre: $('#regNombre').value.trim(),
-      apellido: $('#regApellido').value.trim(),
-      email: $('#regEmail').value.trim(),
-      telefono: $('#regTelefono').value.trim(),
-      password: $('#regPassword').value,
-    };
+    const tipo = $('#regTipoCuenta').value;
+    const email    = $('#regEmail').value.trim();
+    const telefono = $('#regTelefono').value.trim();
+    const password = $('#regPassword').value;
 
-    if (!payload.nombre || !payload.apellido || !payload.email || payload.password.length < 8){
+    // Validación básica en el cliente
+    if (!email || password.length < 8){
       mostrarBanner('#bannerRegistro', 'error', 'Completa todos los campos. La contraseña debe tener al menos 8 caracteres.');
       return;
     }
 
+    // Construimos un FormData para poder enviar el PDF junto con los datos
+    const formData = new FormData();
+    formData.append('tipo_cuenta', tipo);
+    formData.append('email', email);
+    formData.append('telefono', telefono);
+    formData.append('password', password);
+
+    if (tipo === 'personal'){
+      const nombre   = $('#regNombre').value.trim();
+      const apellido = $('#regApellido').value.trim();
+      if (!nombre || !apellido){
+        mostrarBanner('#bannerRegistro', 'error', 'Escribe tu nombre y apellido.');
+        return;
+      }
+      formData.append('nombre', nombre);
+      formData.append('apellido', apellido);
+    } else {
+      const razon_social    = $('#regRazonSocial').value.trim();
+      const ruc             = $('#regRuc').value.trim();
+      const nombre_contacto = $('#regNombreContacto').value.trim();
+      const archivo         = $('#regAvisoOperacion').files[0];
+      if (!razon_social || !ruc || !nombre_contacto){
+        mostrarBanner('#bannerRegistro', 'error', 'Completa razón social, RUC y nombre del contacto.');
+        return;
+      }
+      if (!archivo){
+        mostrarBanner('#bannerRegistro', 'error', 'El aviso de operación en PDF es obligatorio para empresas.');
+        $('#hintAviso').textContent = '⚠ Debes subir el aviso de operación';
+        return;
+      }
+      $('#hintAviso').textContent = '';
+      formData.append('razon_social', razon_social);
+      formData.append('ruc', ruc);
+      formData.append('nombre_contacto', nombre_contacto);
+      formData.append('aviso_operacion', archivo);
+    }
+
     setCargando(btn, true);
     try {
+      // Sin Content-Type: el navegador pone automáticamente el boundary del multipart
       const res = await fetch(`${API_URL}/auth/registro`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: formData,
       });
       const data = await res.json().catch(() => ({}));
 
       if (res.status === 201){
         mostrarBanner('#bannerRegistro', 'success',
-          `¡Casillero creado! Revisa ${payload.email} para confirmar tu cuenta antes de iniciar sesión.`);
+          `¡Casillero creado! Revisa ${email} para confirmar tu cuenta antes de iniciar sesión.`);
         $('#formRegistro').reset();
+        document.querySelectorAll('.reg-tipo-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.reg-tipo-btn[data-tipo="personal"]').classList.add('active');
+        $('#regTipoCuenta').value = 'personal';
+        $('#camposPersonal').style.display = 'block';
+        $('#camposEmpresa').style.display  = 'none';
       } else if (res.status === 409){
         mostrarBanner('#bannerRegistro', 'error', 'Ese correo ya tiene un casillero registrado.');
       } else {
-        mostrarBanner('#bannerRegistro', 'error', data.mensaje || 'No se pudo crear el casillero.');
+        const errores = data.errores?.map(e => e.msg).join(' · ') || data.mensaje || 'No se pudo crear el casillero.';
+        mostrarBanner('#bannerRegistro', 'error', errores);
       }
     } catch (err) {
       mostrarBanner('#bannerRegistro', 'error', 'No pudimos conectar con el servidor.');
