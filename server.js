@@ -91,6 +91,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/casillero', casilleroRoutes);
 app.use('/api/paquetes', paquetesRoutes);
 app.use('/api/autorizados', autorizadosRoutes);
+app.use('/api/perfil', perfilRoutes);
 app.use('/api/sucursales', sucursalesRoutes);
 app.use('/api/facturas', facturasRoutes);
 app.use('/api/public', publicoRoutes);
