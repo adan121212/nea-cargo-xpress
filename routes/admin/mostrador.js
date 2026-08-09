@@ -10,7 +10,6 @@ const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
 // --- GET /api/admin/mostrador/buscar?q=... ---
-// Busca un cliente y devuelve también sus autorizados para verificar en mostrador.
 router.get(
   '/buscar',
   [query('q').trim().notEmpty().withMessage('Escribe un casillero, nombre, correo o tracking')],
@@ -40,7 +39,6 @@ router.get(
       }
       const usuario = usuarioRes.rows[0];
 
-      // ── Autorizados del cliente ─────────────────────────────────────────
       const autorizadosRes = await pool.query(
         `SELECT id, nombre, cedula FROM autorizados WHERE usuario_id = $1 ORDER BY id ASC`,
         [usuario.id]
@@ -74,7 +72,7 @@ router.get(
       return res.json({
         multiples: false,
         cliente: usuario,
-        autorizados: autorizadosRes.rows,   // ← NUEVO
+        autorizados: autorizadosRes.rows,
         paquetes: paquetesRes.rows,
         facturas_pendientes: facturasPendientesRes.rows,
       });
@@ -86,7 +84,6 @@ router.get(
 );
 
 // --- POST /api/admin/mostrador/entregar ---
-// Entrega un paquete en mostrador. Ahora también guarda quién lo retiró.
 router.post(
   '/entregar',
   [
@@ -135,7 +132,6 @@ router.post(
         }
       }
 
-      // Guarda la firma + quién retiró el paquete
       const actualizado = await client.query(
         `UPDATE paquetes
          SET estado = 'entregado',
@@ -156,8 +152,7 @@ router.post(
           const datosCompletos = await pool.query(
             `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
                     u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero,
-                    p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega,
-                    p.retirado_por_nombre, p.retirado_por_cedula
+                    p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega
              FROM facturas f
              JOIN usuarios u ON u.id = f.usuario_id
              JOIN paquetes p ON p.id = f.paquete_id
@@ -196,7 +191,6 @@ router.post(
       return res.json({
         mensaje: 'Paquete entregado correctamente',
         paquete,
-        retirado_por: { nombre: retirado_por_nombre, cedula: retirado_por_cedula },
         envios_factura: envios,
       });
     } catch (error) {
