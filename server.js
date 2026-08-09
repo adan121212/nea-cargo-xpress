@@ -7,6 +7,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const casilleroRoutes = require('./routes/casillero');
 const autorizadosRoutes = require('./routes/autorizados');
+const perfilRoutes = require('./routes/perfil');
 const paquetesRoutes = require('./routes/paquetes');
 const sucursalesRoutes = require('./routes/sucursales');
 const facturasRoutes = require('./routes/facturas');
