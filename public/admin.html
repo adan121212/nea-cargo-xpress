@@ -1916,13 +1916,29 @@
               </div>
               <span class="badge badge-prealertado">$${Number(f.total).toFixed(2)}</span>
             </div>
-            ${!yaEntregado ? `<div class="mi-factura-info">📦 Este paquete <strong>todavía no se ha entregado</strong> — al cobrar, también se pedirá la firma de entrega.</div>` : ''}
+            ${!yaEntregado ? `
+              <div class="mi-factura-info">📦 Este paquete <strong>todavía no se ha entregado</strong> — al cobrar, también se pedirá la firma de entrega.</div>
+              <div class="retiro-box" style="margin:10px 0 6px;">
+                <div class="retiro-titulo">✍️ Datos de quien retira</div>
+                <div class="row2">
+                  <div>
+                    <label>Nombre completo</label>
+                    <input type="text" class="retiro-nombre-input" placeholder="Como aparece en la cédula">
+                  </div>
+                  <div>
+                    <label>Número de cédula</label>
+                    <input type="text" class="retiro-cedula-input" placeholder="8-123-4567">
+                  </div>
+                </div>
+              </div>
+            ` : ''}
             <div class="mi-metodo-pago">
               <select class="metodo-pago-select">
                 <option value="">Elige método de pago…</option>
                 <option value="efectivo">Efectivo</option>
                 <option value="tarjeta">Tarjeta (física, en oficina)</option>
                 <option value="transferencia">Transferencia</option>
+                <option value="yappy">Yappy</option>
               </select>
               <button class="btn-entregar" data-accion="${yaEntregado ? 'cobrar' : 'cobrar-entregar'}">
                 ${yaEntregado ? 'Cobrar' : 'Cobrar y entregar (con firma)'}
@@ -1950,11 +1966,11 @@
           // Paquete NO entregado todavía: hay que pasar por la firma, igual
           // que en "Cobrar y entregar" de los resultados de búsqueda.
           if (!yaEntregado){
-            const retiroNombre = $('#retiroNombre') ? $('#retiroNombre').value.trim() : '';
-            const retiroCedula = $('#retiroCedula') ? $('#retiroCedula').value.trim() : '';
+            const retiroNombre = item.querySelector('.retiro-nombre-input')?.value.trim() || '';
+            const retiroCedula = item.querySelector('.retiro-cedula-input')?.value.trim() || '';
             if (!retiroNombre || !retiroCedula){
               mostrarBanner('#bannerMostrador', 'error', 'Ingresa el nombre y cédula de quien retira antes de continuar.');
-              if ($('#retiroNombre')) $('#retiroNombre').focus();
+              item.querySelector('.retiro-nombre-input')?.focus();
               return;
             }
             abrirModalFirma({
