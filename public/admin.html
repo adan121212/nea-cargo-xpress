@@ -529,7 +529,7 @@
         <form id="formBuscarMostrador" class="fac-search-form">
           <div style="position:relative;flex:1;">
             <input type="text" id="mostradorQ" placeholder="Buscar por casillero, nombre, correo o tracking…" autocomplete="off">
-            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">F1 = selector</span>
+            <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">1 = selector</span>
           </div>
           <button class="btn-primary" type="submit" id="btnBuscarMostrador">
             <span class="spinner"></span><span>Buscar</span>
@@ -642,8 +642,8 @@
               <label for="recNuevoCasillero">Casillero del cliente</label>
               <div style="display:flex;gap:6px;">
                 <div style="position:relative;flex:1;">
-                  <input id="recNuevoCasillero" type="text" placeholder="NEA-00042 — o presiona F1">
-                  <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">F1</span>
+                  <input id="recNuevoCasillero" type="text" placeholder="NEA-00042 — o presiona 1">
+                  <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">1</span>
                 </div>
                 <button type="button" id="btnBuscarClienteRec" class="btn-secondary" style="white-space:nowrap;">Buscar</button>
               </div>
@@ -3204,12 +3204,12 @@
   });
 
   $('#mostradorQ').addEventListener('keydown', (e) => {
-    if (e.key === 'F1'){ e.preventDefault(); f1Abrir('facturador'); }
+    if (e.key === '1'){ e.preventDefault(); f1Abrir('facturador'); }
   });
 
   // F1 en el campo de casillero de Recepción (sin prealerta)
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'F1' && document.activeElement?.id === 'recNuevoCasillero'){
+    if (e.key === '1' && document.activeElement?.id === 'recNuevoCasillero'){
       e.preventDefault();
       f1Abrir('recepcion');
     }
