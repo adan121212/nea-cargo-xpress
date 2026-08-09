@@ -2347,6 +2347,13 @@
     const seleccionados = [...document.querySelectorAll('.ft-pkg')].filter(p => p.querySelector('input').checked);
     if (seleccionados.length === 0) return;
 
+    // Validar que ningún seleccionado tenga flete en cero
+    const sinFlete = seleccionados.filter(p => parseFloat(p.dataset.envio || 0) === 0);
+    if (sinFlete.length > 0){
+      mostrarBanner('#bannerMostrador', 'error', '⚠ Hay paquetes sin flete calculado. Ve a la pestaña Paquetes, ingresa el peso o volumen y vuelve a intentar.');
+      return;
+    }
+
     setCargando(btn, true);
     const resultados = [];
     let errores = 0;
