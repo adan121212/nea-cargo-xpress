@@ -2208,10 +2208,27 @@
       </div>
     `;
 
-    const sinFactura = paquetes.filter(p => !p.factura_id || p.factura_estado === 'anulada');
+    const sinFacturaTodos = paquetes.filter(p => !p.factura_id || p.factura_estado === 'anulada');
+
+    // Solo se muestran los que YA están listos para facturar de verdad:
+    // con peso registrado (real o aproximado) y con valor declarado > 0.
+    const sinFactura = sinFacturaTodos.filter(p => {
+      const tienePeso = Number(p.peso_real_lb || p.peso_lb || 0) > 0;
+      const tieneValor = Number(p.valor_declarado || 0) > 0;
+      return tienePeso && tieneValor;
+    });
+
+    const noListos = sinFacturaTodos.length - sinFactura.length;
+
+    if (sinFacturaTodos.length === 0){
+      html += '<div class="empty">Este cliente no tiene paquetes pendientes de facturar.</div>';
+      cont.innerHTML = html;
+      $('#facturadorResumen').style.display = 'none';
+      return;
+    }
 
     if (sinFactura.length === 0){
-      html += '<div class="empty">Este cliente no tiene paquetes pendientes de facturar.</div>';
+      html += `<div class="empty">⚠ Este cliente tiene ${noListos} paquete${noListos > 1 ? 's' : ''} sin peso o sin valor declarado — ve a la pestaña Paquetes y complétalos antes de poder facturar.</div>`;
       cont.innerHTML = html;
       $('#facturadorResumen').style.display = 'none';
       return;
@@ -2219,30 +2236,33 @@
 
     html += `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <div style="font-weight:600;font-size:13px;">Paquetes por facturar</div>
+        <div style="font-weight:600;font-size:13px;">Paquetes listos para facturar</div>
         <button class="ft-select-all" id="btnSelectAll">Seleccionar todos</button>
       </div>
     `;
+
+    if (noListos > 0){
+      html += `<div class="empty" style="margin-bottom:10px;padding:10px 14px;">⚠ ${noListos} paquete${noListos > 1 ? 's' : ''} más de este cliente ${noListos > 1 ? 'no aparecen' : 'no aparece'} aquí por faltarle peso o valor declarado. Complétalo en la pestaña Paquetes.</div>`;
+    }
 
     html += sinFactura.map((p, i) => {
       const peso = Number(p.peso_real_lb || p.peso_lb || 0).toFixed(2);
       const valor = Number(p.valor_declarado || 0).toFixed(2);
       const statusClass = p.estado === 'listo_para_retiro' ? 'listo' : p.estado === 'en_transito' ? 'transito' : 'bodega';
       const statusLabel = ESTADO_LABEL_MOSTRADOR[p.estado] || p.estado;
-      const sinPeso = !p.peso_real_lb && !p.peso_lb;
 
       return `
-        <div class="ft-pkg${sinPeso ? ' ft-pkg-sinpeso' : ''}" data-idx="${i}" data-paquete-id="${p.id}"
-             data-peso="${peso}" data-valor="${valor}" data-envio="0" data-manejo="0" data-seguro="0" data-calc-total="0" data-tarifa-id="" ${sinPeso ? 'data-sin-peso="true"' : ''}>
-          <input type="checkbox" ${sinPeso ? 'disabled title="Registra el peso primero en la pestaña Paquetes"' : ''}>
+        <div class="ft-pkg" data-idx="${i}" data-paquete-id="${p.id}"
+             data-peso="${peso}" data-valor="${valor}" data-envio="0" data-manejo="0" data-seguro="0" data-calc-total="0" data-tarifa-id="">
+          <input type="checkbox">
           <div class="ft-pkg-info">
             <div class="ft-pkg-store">${escapeHtml(p.tienda)}</div>
             <div class="ft-pkg-track">#${escapeHtml(p.numero_tracking)}</div>
-            <div class="ft-pkg-details">${sinPeso ? '<span style="color:#d97706;font-weight:600;">⚠ Sin peso registrado — ve a Paquetes y ponle el peso primero</span>' : `${peso} lb · Declarado $${valor}`}</div>
+            <div class="ft-pkg-details">${peso} lb · Declarado $${valor}</div>
           </div>
           <div class="ft-pkg-right">
             <span class="ft-status ${statusClass}">${statusLabel}</span>
-            <div class="ft-pkg-price">${sinPeso ? '—' : '…'}</div>
+            <div class="ft-pkg-price">…</div>
           </div>
         </div>
       `;
@@ -2254,14 +2274,12 @@
     cont.querySelectorAll('.ft-pkg').forEach(pkg => {
       pkg.addEventListener('click', (e) => {
         if (e.target.tagName === 'INPUT') return;
-        if (pkg.dataset.sinPeso === 'true') return; // sin peso, no se puede seleccionar
         const cb = pkg.querySelector('input[type=checkbox]');
         cb.checked = !cb.checked;
         pkg.classList.toggle('selected', cb.checked);
         recalcularTotales();
       });
       pkg.querySelector('input').addEventListener('change', () => {
-        if (pkg.dataset.sinPeso === 'true') return;
         pkg.classList.toggle('selected', pkg.querySelector('input').checked);
         recalcularTotales();
       });
