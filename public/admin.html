@@ -1950,8 +1950,17 @@
           // Paquete NO entregado todavía: hay que pasar por la firma, igual
           // que en "Cobrar y entregar" de los resultados de búsqueda.
           if (!yaEntregado){
+            const retiroNombre = $('#retiroNombre') ? $('#retiroNombre').value.trim() : '';
+            const retiroCedula = $('#retiroCedula') ? $('#retiroCedula').value.trim() : '';
+            if (!retiroNombre || !retiroCedula){
+              mostrarBanner('#bannerMostrador', 'error', 'Ingresa el nombre y cédula de quien retira antes de continuar.');
+              if ($('#retiroNombre')) $('#retiroNombre').focus();
+              return;
+            }
             abrirModalFirma({
               paqueteId, facturaId, metodoPago,
+              retiradoPorNombre: retiroNombre,
+              retiradoPorCedula: retiroCedula,
               item, btnOriginal: btn,
               textoOriginal: 'Cobrar y entregar (con firma)',
             });
