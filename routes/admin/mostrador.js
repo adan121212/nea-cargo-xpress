@@ -96,8 +96,6 @@ router.post(
     body('firma')
       .notEmpty().withMessage('Se requiere la firma digital del cliente para entregar el paquete.')
       .matches(/^data:image\/png;base64,/).withMessage('Formato de firma inválido.'),
-    body('retirado_por_nombre').trim().notEmpty().withMessage('Indica el nombre de quien retira el paquete.'),
-    body('retirado_por_cedula').trim().notEmpty().withMessage('Indica la cédula de quien retira el paquete.'),
   ],
   async (req, res) => {
     const errores = validationResult(req);
@@ -105,7 +103,7 @@ router.post(
       return res.status(400).json({ errores: errores.array() });
     }
 
-    const { paquete_id, factura_id, metodo_pago, firma, retirado_por_nombre, retirado_por_cedula } = req.body;
+    const { paquete_id, factura_id, metodo_pago, firma } = req.body;
     const client = await pool.connect();
 
     try {
@@ -143,12 +141,10 @@ router.post(
          SET estado = 'entregado',
              fecha_actualizacion = NOW(),
              fecha_entrega = NOW(),
-             firma_base64 = $1,
-             retirado_por_nombre = $2,
-             retirado_por_cedula = $3
-         WHERE id = $4
+             firma_base64 = $1
+         WHERE id = $2
          RETURNING *`,
-        [firma, retirado_por_nombre.trim(), retirado_por_cedula.trim(), paquete_id]
+        [firma, paquete_id]
       );
 
       await client.query('COMMIT');
