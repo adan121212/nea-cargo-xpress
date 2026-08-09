@@ -108,9 +108,18 @@ const ESTADO_MENSAJE = {
 
 /**
  * Envía un correo avisando que el estado de un paquete cambió.
+ * Solo se envía para los estados que realmente importan al cliente:
+ * "en_bodega_miami" (ya llegó a Miami) y "listo_para_retiro" (puede ir a buscarlo).
+ * Los estados intermedios (en_transito, en_panama, entregado) no generan correo
+ * para no saturar al cliente con notificaciones innecesarias.
  * `paquete` debe traer: tienda, numero_tracking, estado.
  */
 async function enviarCorreoCambioEstado(destinatario, nombre, paquete) {
+  const ESTADOS_QUE_NOTIFICAN = ['en_bodega_miami', 'listo_para_retiro'];
+  if (!ESTADOS_QUE_NOTIFICAN.includes(paquete.estado)) {
+    return; // no enviamos correo para este estado
+  }
+
   const etiqueta = ESTADO_LABEL[paquete.estado] || paquete.estado;
   const mensaje = ESTADO_MENSAJE[paquete.estado] || `Tu paquete cambió de estado a: ${etiqueta}.`;
 
