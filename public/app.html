@@ -581,7 +581,7 @@
 <body>
 
 <div class="topbar">
-  <a href="index.html" class="brand">
+  <a href="#" id="btnBrand" class="brand">
     <div class="mark">N</div>
     <div>
       NEA CARGO XPRESS
@@ -1353,9 +1353,17 @@
   });
 
   // ---------- Logout ----------
+  $('#btnBrand').addEventListener('click', (e) => {
+    e.preventDefault();
+    localStorage.removeItem(TOKEN_KEY);
+    // replace: borra app.html del historial, no se puede volver atrás
+    window.location.replace('index.html');
+  });
+
   $('#btnLogout').addEventListener('click', () => {
     localStorage.removeItem(TOKEN_KEY);
-    window.location.href = 'index.html';
+    // replace: no se puede volver atrás al dashboard con el botón ←
+    window.location.replace('index.html');
   });
 
   // ---------- Helper de fetch autenticado ----------
@@ -1886,41 +1894,25 @@
     $('#formRestablecer').style.display = 'block';
   }
 
-  // Si ya hay un token guardado, entra directo al dashboard.
-  // Si se llega con ?registro (ej. desde el botón "Crear casillero" de la página principal),
-  // abre directo la pestaña de registro.
-  if (new URLSearchParams(window.location.search).has('registro') && !localStorage.getItem(TOKEN_KEY)){
-    $('#tabRegistro').click();
+  // Bloquea el botón "← atrás" del navegador cuando hay sesión activa.
+  // Si alguien hace clic en ← desde el dashboard, vuelve a entrar al dashboard.
+  if (localStorage.getItem(TOKEN_KEY)){
+    // Reemplaza la entrada actual del historial para que no quede el login atrás
+    window.history.replaceState({ app: true }, '', window.location.href);
+    // Si el usuario presiona ← y vuelve a esta página con sesión activa, entra al dashboard
+    window.addEventListener('popstate', () => {
+      if (localStorage.getItem(TOKEN_KEY)){
+        window.history.pushState({ app: true }, '', window.location.href);
+        iniciarApp();
+      }
+    });
+    iniciarApp();
   }
 
-  // Si volvemos de intentar pagar una factura con Yappy, mostramos el resultado.
-  (function mostrarResultadoPago(){
-    const params = new URLSearchParams(window.location.search);
-    const pago = params.get('pago');
-    if (!pago) return;
-
-    const mensajes = {
-      exito: { tipo: 'exito', texto: '¡Pago realizado con éxito! Tu factura ya está marcada como pagada.' },
-      fallido: { tipo: 'error', texto: 'El pago no se pudo completar. Puedes intentarlo de nuevo desde "Mis facturas".' },
-      error: { tipo: 'error', texto: 'Ocurrió un problema al confirmar tu pago. Si el cargo se realizó, contáctanos por WhatsApp.' },
-    };
-    const info = mensajes[pago];
-    if (!info) return;
-
-    const banner = document.createElement('div');
-    banner.className = `banner-pago ${info.tipo}`;
-    banner.innerHTML = `<span>${info.texto}</span><button aria-label="Cerrar">✕</button>`;
-    banner.querySelector('button').addEventListener('click', () => banner.remove());
-    document.querySelector('.wrap').prepend(banner);
-
-    // Limpia el parámetro de la URL para que no reaparezca al recargar.
-    params.delete('pago');
-    const nuevaUrl = window.location.pathname + (params.toString() ? `?${params}` : '');
-    window.history.replaceState({}, '', nuevaUrl);
-  })();
-
-  if (localStorage.getItem(TOKEN_KEY)){
-    iniciarApp();
+  // Si se llega con ?registro (ej. desde el botón "Crear casillero" de la página principal),
+  // abre directo la pestaña de registro — solo si NO hay sesión activa.
+  if (new URLSearchParams(window.location.search).has('registro') && !localStorage.getItem(TOKEN_KEY)){
+    $('#tabRegistro').click();
   }
 </script>
 
