@@ -1,12 +1,15 @@
 const express = require('express');
 const multer = require('multer');
+const crypto = require('crypto');
 const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudinary');
-const { enviarCorreoCambioEstado } = require('../../utils/mailer');
+const { enviarCorreoCambioEstado, enviarFacturaListaParaRetiro } = require('../../utils/mailer');
 const { enviarWhatsappCambioEstado } = require('../../utils/whatsapp');
+const { generarNumeroFactura } = require('../../utils/factura');
+const { generarPdfFactura } = require('../../utils/facturaPdf');
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024, files: 5 },
@@ -263,10 +266,10 @@ router.patch(
 
 // --- PATCH /api/admin/paquetes/:id/peso ---
 // El staff confirma el peso real al recibir el paquete en bodega.
-// Una vez confirmado (peso_confirmado = true), el peso queda BLOQUEADO —
-// esta ruta rechaza cualquier intento posterior de cambiarlo, para que el
-// número que se usó para facturar quede protegido de errores o cambios
-// accidentales después del hecho.
+// Al confirmarse (queda bloqueado con peso_confirmado = true), automáticamente:
+//   1. Genera la factura (con la tarifa activa) en estado PENDIENTE de pago.
+//   2. Cambia el paquete a "listo_para_retiro".
+//   3. Envía al cliente: el PDF de la factura + el aviso de que puede pasar a recogerlo.
 router.patch(
   '/:id/peso',
   [body('peso_real_lb').isFloat({ min: 0.01 }).withMessage('Ingresa un peso válido en libras')],
@@ -275,8 +278,10 @@ router.patch(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
+
+    const client = await pool.connect();
     try {
-      const actual = await pool.query('SELECT peso_confirmado FROM paquetes WHERE id = $1', [req.params.id]);
+      const actual = await client.query('SELECT * FROM paquetes WHERE id = $1', [req.params.id]);
       if (actual.rows.length === 0) {
         return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       }
@@ -286,15 +291,112 @@ router.patch(
           peso_bloqueado: true,
         });
       }
-      const resultado = await pool.query(
-        `UPDATE paquetes SET peso_real_lb = $1, peso_confirmado = TRUE, fecha_actualizacion = NOW()
-         WHERE id = $2 RETURNING *`,
-        [req.body.peso_real_lb, req.params.id]
+
+      const paquete = actual.rows[0];
+      const pesoConfirmado = req.body.peso_real_lb;
+
+      // ¿Ya tiene una factura activa? (evita duplicar si alguien confirma dos veces)
+      const facturaExistente = await client.query(
+        `SELECT id FROM facturas WHERE paquete_id = $1 AND estado <> 'anulada'`,
+        [req.params.id]
       );
-      return res.json({ mensaje: 'Peso confirmado y bloqueado', paquete: resultado.rows[0] });
+
+      await client.query('BEGIN');
+
+      // 1. Bloquea el peso
+      await client.query(
+        `UPDATE paquetes SET peso_real_lb = $1, peso_confirmado = TRUE, fecha_actualizacion = NOW()
+         WHERE id = $2`,
+        [pesoConfirmado, req.params.id]
+      );
+
+      let facturaGenerada = null;
+
+      if (facturaExistente.rows.length === 0) {
+        // Tarifa activa (la más reciente configurada — misma lógica que usa el Facturador)
+        const tarifaRes = await client.query('SELECT * FROM tarifas ORDER BY id ASC LIMIT 1');
+        if (tarifaRes.rows.length === 0) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ mensaje: 'No hay ninguna tarifa configurada. Ve a la pestaña Tarifas y crea una antes de confirmar pesos.' });
+        }
+        const tarifa = tarifaRes.rows[0];
+
+        const costoEnvio = Math.max(Number(pesoConfirmado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
+        const seguro = paquete.valor_declarado ? (Number(paquete.valor_declarado) * Number(tarifa.pct_seguro)) / 100 : 0;
+        const cargoManejo = Number(tarifa.cargo_manejo);
+        const total = costoEnvio + cargoManejo + seguro;
+
+        const insercion = await client.query(
+          `INSERT INTO facturas
+             (paquete_id, usuario_id, tarifa_id, peso_facturado_lb, precio_libra,
+              costo_envio, cargo_manejo, seguro, total, token_pdf, estado)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'pendiente')
+           RETURNING *`,
+          [
+            req.params.id, paquete.usuario_id, tarifa.id,
+            pesoConfirmado, tarifa.precio_libra,
+            costoEnvio.toFixed(2), cargoManejo.toFixed(2), seguro.toFixed(2), total.toFixed(2),
+            crypto.randomBytes(24).toString('hex'),
+          ]
+        );
+        facturaGenerada = insercion.rows[0];
+        const numeroFactura = generarNumeroFactura(facturaGenerada.id);
+        await client.query('UPDATE facturas SET numero_factura = $1 WHERE id = $2', [numeroFactura, facturaGenerada.id]);
+        facturaGenerada.numero_factura = numeroFactura;
+      }
+
+      // 2. El paquete pasa a listo_para_retiro
+      await client.query(
+        `UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW()
+         WHERE id = $1 AND estado NOT IN ('entregado', 'listo_para_retiro')`,
+        [req.params.id]
+      );
+
+      await client.query('COMMIT');
+
+      const paqueteActualizado = (await pool.query('SELECT * FROM paquetes WHERE id = $1', [req.params.id])).rows[0];
+
+      // 3. Notificación: UN SOLO correo combinado (factura + listo para retiro)
+      const envios = { correo_enviado: false };
+      if (facturaGenerada) {
+        try {
+          const datosCompletos = await pool.query(
+            `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
+                    u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero,
+                    p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega
+             FROM facturas f
+             JOIN usuarios u ON u.id = f.usuario_id
+             JOIN paquetes p ON p.id = f.paquete_id
+             WHERE f.id = $1`,
+            [facturaGenerada.id]
+          );
+          const fd = datosCompletos.rows[0];
+          if (fd) {
+            try {
+              const pdfBuffer = await generarPdfFactura(fd);
+              await enviarFacturaListaParaRetiro(fd.cliente_email, fd.cliente_nombre, fd, pdfBuffer);
+              envios.correo_enviado = true;
+            } catch (errCorreo) {
+              console.error('Error enviando correo combinado tras confirmar peso:', errCorreo);
+            }
+          }
+        } catch (errDatos) {
+          console.error('Error obteniendo datos para notificar tras confirmar peso:', errDatos);
+        }
+      }
+
+      return res.json({
+        mensaje: 'Peso confirmado y bloqueado',
+        paquete: paqueteActualizado,
+        factura: facturaGenerada,
+        envios,
+      });
     } catch (error) {
+      await client.query('ROLLBACK');
       console.error('Error en PATCH /admin/paquetes/:id/peso:', error);
       return res.status(500).json({ mensaje: 'Error interno al actualizar el peso' });
+    } finally {
+      client.release();
     }
   }
 );
