@@ -271,6 +271,16 @@ router.patch(
 
       let nota_ajuste = null;
 
+      // Al anular: liberar el paquete para que pueda refacturarse
+      if (req.body.estado === 'anulada') {
+        await pool.query(
+          `UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW()
+           WHERE id = (SELECT paquete_id FROM facturas WHERE id = $1)
+           AND estado NOT IN ('entregado')`,
+          [req.params.id]
+        );
+      }
+
       // Si se está anulando una factura que estaba pagada, verificar si su caja ya está cerrada
       if (req.body.estado === 'anulada' && facturaAntes.estado === 'pagada' && facturaAntes.fecha_pago) {
         const fechaPagoStr = new Date(facturaAntes.fecha_pago).toISOString().slice(0, 10);
