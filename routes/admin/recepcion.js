@@ -150,4 +150,44 @@ router.post('/crear', [
   }
 });
 
+// --- PATCH /api/admin/recepcion/:id/dimensiones ---
+// Guarda las dimensiones del paquete y calcula el peso volumétrico.
+// Fórmula estándar de carga aérea: (largo × ancho × alto en pulgadas) / 139.
+// El peso real del paquete queda como el MAYOR entre el peso ya registrado
+// y el volumétrico calculado — así nunca se subcobra un paquete grande y liviano.
+router.patch('/:id/dimensiones', [
+  body('largo_in').isFloat({ min: 0.1 }).withMessage('El largo es obligatorio'),
+  body('ancho_in').isFloat({ min: 0.1 }).withMessage('El ancho es obligatorio'),
+  body('alto_in').isFloat({ min: 0.1 }).withMessage('El alto es obligatorio'),
+], async (req, res) => {
+  const errores = validationResult(req);
+  if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
+
+  const { largo_in, ancho_in, alto_in } = req.body;
+  const pesoVolumetrico = (Number(largo_in) * Number(ancho_in) * Number(alto_in)) / 139;
+
+  try {
+    const actual = await pool.query('SELECT peso_real_lb, peso_lb FROM paquetes WHERE id = $1', [req.params.id]);
+    if (actual.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+
+    const pesoActual = Number(actual.rows[0].peso_real_lb || actual.rows[0].peso_lb || 0);
+    const pesoFinal = Math.max(pesoActual, pesoVolumetrico);
+
+    const resultado = await pool.query(
+      `UPDATE paquetes
+       SET largo_in = $1, ancho_in = $2, alto_in = $3,
+           peso_volumetrico_lb = $4, peso_real_lb = $5,
+           fecha_actualizacion = NOW()
+       WHERE id = $6
+       RETURNING *`,
+      [largo_in, ancho_in, alto_in, pesoVolumetrico.toFixed(2), pesoFinal.toFixed(2), req.params.id]
+    );
+
+    return res.json({ mensaje: 'Dimensiones guardadas', paquete: resultado.rows[0], peso_volumetrico: pesoVolumetrico.toFixed(2) });
+  } catch (error) {
+    console.error('Error en PATCH /admin/recepcion/:id/dimensiones:', error);
+    return res.status(500).json({ mensaje: 'Error interno al guardar dimensiones' });
+  }
+});
+
 module.exports = router;
