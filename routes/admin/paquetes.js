@@ -7,7 +7,6 @@ const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudinary');
 const { enviarCorreoCambioEstado, enviarFacturaListaParaRetiro } = require('../../utils/mailer');
-const { enviarWhatsappCambioEstado } = require('../../utils/whatsapp');
 const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const upload = multer({
@@ -22,7 +21,6 @@ const upload = multer({
 });
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
-
 const ESTADOS_VALIDOS = [
   'prealertado',
   'en_bodega_miami',
@@ -31,120 +29,6 @@ const ESTADOS_VALIDOS = [
   'listo_para_retiro',
   'entregado',
 ];
-
-// --- POST /api/admin/paquetes/recibir ---
-router.post(
-  '/recibir',
-  [body('numero_tracking').trim().notEmpty().withMessage('Escanea o escribe un número de tracking')],
-  async (req, res) => {
-    const errores = validationResult(req);
-    if (!errores.isEmpty()) {
-      return res.status(400).json({ errores: errores.array() });
-    }
-    const tracking = req.body.numero_tracking.trim();
-    try {
-      const candidatos = await pool.query(
-        `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
-                u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero
-         FROM paquetes p
-         JOIN usuarios u ON u.id = p.usuario_id
-         WHERE p.numero_tracking ILIKE $1 AND p.estado = 'prealertado'
-         ORDER BY p.fecha_prealerta ASC`,
-        [tracking]
-      );
-      if (candidatos.rows.length === 0) {
-        return res.status(404).json({
-          mensaje: `No encontramos ninguna prealerta pendiente con el tracking "${tracking}". Verifica el número, o puede que el cliente no lo haya prealertado todavía.`,
-        });
-      }
-      if (candidatos.rows.length > 1) {
-        return res.json({
-          multiples: true,
-          candidatos: candidatos.rows.map((p) => ({
-            id: p.id,
-            tienda: p.tienda,
-            cliente_nombre: `${p.cliente_nombre} ${p.cliente_apellido}`,
-            numero_casillero: p.numero_casillero,
-          })),
-        });
-      }
-      const paqueteEncontrado = candidatos.rows[0];
-      const actualizado = await pool.query(
-        `UPDATE paquetes SET estado = 'en_bodega_miami', fecha_actualizacion = NOW()
-         WHERE id = $1 RETURNING *`,
-        [paqueteEncontrado.id]
-      );
-      const paquete = actualizado.rows[0];
-      const envios = { correo_enviado: false, whatsapp_enviado: false };
-      try {
-        await enviarCorreoCambioEstado(paqueteEncontrado.cliente_email, paqueteEncontrado.cliente_nombre, paquete);
-        envios.correo_enviado = true;
-      } catch (errorCorreo) {
-        console.error('Error notificando recepción por correo:', errorCorreo);
-      }
-      if (paqueteEncontrado.cliente_telefono) {
-        try {
-          await enviarWhatsappCambioEstado(paqueteEncontrado.cliente_telefono, paquete);
-          envios.whatsapp_enviado = true;
-        } catch (errorWhatsapp) {
-          console.error('Error notificando recepción por WhatsApp:', errorWhatsapp);
-        }
-      }
-      return res.json({
-        multiples: false,
-        mensaje: 'Paquete recibido en bodega Miami',
-        paquete,
-        cliente: {
-          nombre: `${paqueteEncontrado.cliente_nombre} ${paqueteEncontrado.cliente_apellido}`,
-          numero_casillero: paqueteEncontrado.numero_casillero,
-        },
-        notificaciones: envios,
-      });
-    } catch (error) {
-      console.error('Error en POST /admin/paquetes/recibir:', error);
-      return res.status(500).json({ mensaje: 'Error interno al recibir el paquete' });
-    }
-  }
-);
-
-// --- POST /api/admin/paquetes/recibir/:id/confirmar ---
-router.post('/recibir/:id/confirmar', async (req, res) => {
-  try {
-    const paqueteRes = await pool.query(
-      `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
-              u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero
-       FROM paquetes p
-       JOIN usuarios u ON u.id = p.usuario_id
-       WHERE p.id = $1 AND p.estado = 'prealertado'`,
-      [req.params.id]
-    );
-    if (paqueteRes.rows.length === 0) {
-      return res.status(404).json({ mensaje: 'Paquete no encontrado o ya no está prealertado' });
-    }
-    const info = paqueteRes.rows[0];
-    const actualizado = await pool.query(
-      `UPDATE paquetes SET estado = 'en_bodega_miami', fecha_actualizacion = NOW()
-       WHERE id = $1 RETURNING *`,
-      [req.params.id]
-    );
-    const paquete = actualizado.rows[0];
-    const envios = { correo_enviado: false, whatsapp_enviado: false };
-    try {
-      await enviarCorreoCambioEstado(info.cliente_email, info.cliente_nombre, paquete);
-      envios.correo_enviado = true;
-    } catch (err) { console.error('Error notificando por correo:', err); }
-    if (info.cliente_telefono) {
-      try {
-        await enviarWhatsappCambioEstado(info.cliente_telefono, paquete);
-        envios.whatsapp_enviado = true;
-      } catch (err) { console.error('Error notificando por WhatsApp:', err); }
-    }
-    return res.json({ mensaje: 'Paquete recibido en bodega Miami', paquete, notificaciones: envios });
-  } catch (error) {
-    console.error('Error en POST /admin/paquetes/recibir/:id/confirmar:', error);
-    return res.status(500).json({ mensaje: 'Error interno al recibir el paquete' });
-  }
-});
 
 // --- GET /api/admin/paquetes ---
 router.get(
@@ -230,10 +114,10 @@ router.patch(
         return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       }
       const paquete = resultado.rows[0];
-      const envios = { correo_enviado: false, whatsapp_enviado: false };
+      const envios = { correo_enviado: false };
       try {
         const clienteRes = await pool.query(
-          'SELECT nombre, email, telefono FROM usuarios WHERE id = $1',
+          'SELECT nombre, email FROM usuarios WHERE id = $1',
           [paquete.usuario_id]
         );
         const cliente = clienteRes.rows[0];
@@ -243,14 +127,6 @@ router.patch(
             envios.correo_enviado = true;
           } catch (errorCorreo) {
             console.error('Error notificando cambio de estado por correo:', errorCorreo);
-          }
-          if (cliente.telefono) {
-            try {
-              await enviarWhatsappCambioEstado(cliente.telefono, paquete);
-              envios.whatsapp_enviado = true;
-            } catch (errorWhatsapp) {
-              console.error('Error notificando cambio de estado por WhatsApp:', errorWhatsapp);
-            }
           }
         }
       } catch (errorNotificacion) {
@@ -265,8 +141,7 @@ router.patch(
 );
 
 // --- PATCH /api/admin/paquetes/:id/peso ---
-// El staff confirma el peso real al recibir el paquete en bodega.
-// Al confirmarse (queda bloqueado con peso_confirmado = true), automáticamente:
+// Al confirmar el peso:
 //   1. Genera la factura (con la tarifa activa) en estado PENDIENTE de pago.
 //   2. Cambia el paquete a "listo_para_retiro".
 //   3. Envía al cliente: el PDF de la factura + el aviso de que puede pasar a recogerlo.
@@ -278,7 +153,6 @@ router.patch(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
-
     const client = await pool.connect();
     try {
       const actual = await client.query('SELECT * FROM paquetes WHERE id = $1', [req.params.id]);
@@ -291,41 +165,30 @@ router.patch(
           peso_bloqueado: true,
         });
       }
-
       const paquete = actual.rows[0];
       const pesoConfirmado = req.body.peso_real_lb;
-
-      // ¿Ya tiene una factura activa? (evita duplicar si alguien confirma dos veces)
       const facturaExistente = await client.query(
         `SELECT id FROM facturas WHERE paquete_id = $1 AND estado <> 'anulada'`,
         [req.params.id]
       );
-
       await client.query('BEGIN');
-
-      // 1. Bloquea el peso
       await client.query(
         `UPDATE paquetes SET peso_real_lb = $1, peso_confirmado = TRUE, fecha_actualizacion = NOW()
          WHERE id = $2`,
         [pesoConfirmado, req.params.id]
       );
-
       let facturaGenerada = null;
-
       if (facturaExistente.rows.length === 0) {
-        // Tarifa activa (la más reciente configurada — misma lógica que usa el Facturador)
         const tarifaRes = await client.query('SELECT * FROM tarifas ORDER BY id ASC LIMIT 1');
         if (tarifaRes.rows.length === 0) {
           await client.query('ROLLBACK');
           return res.status(400).json({ mensaje: 'No hay ninguna tarifa configurada. Ve a la pestaña Tarifas y crea una antes de confirmar pesos.' });
         }
         const tarifa = tarifaRes.rows[0];
-
         const costoEnvio = Math.max(Number(pesoConfirmado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
         const seguro = paquete.valor_declarado ? (Number(paquete.valor_declarado) * Number(tarifa.pct_seguro)) / 100 : 0;
         const cargoManejo = Number(tarifa.cargo_manejo);
         const total = costoEnvio + cargoManejo + seguro;
-
         const insercion = await client.query(
           `INSERT INTO facturas
              (paquete_id, usuario_id, tarifa_id, peso_facturado_lb, precio_libra,
@@ -344,19 +207,13 @@ router.patch(
         await client.query('UPDATE facturas SET numero_factura = $1 WHERE id = $2', [numeroFactura, facturaGenerada.id]);
         facturaGenerada.numero_factura = numeroFactura;
       }
-
-      // 2. El paquete pasa a listo_para_retiro
       await client.query(
         `UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW()
          WHERE id = $1 AND estado NOT IN ('entregado', 'listo_para_retiro')`,
         [req.params.id]
       );
-
       await client.query('COMMIT');
-
       const paqueteActualizado = (await pool.query('SELECT * FROM paquetes WHERE id = $1', [req.params.id])).rows[0];
-
-      // 3. Notificación: UN SOLO correo combinado (factura + listo para retiro)
       const envios = { correo_enviado: false };
       if (facturaGenerada) {
         try {
@@ -384,7 +241,6 @@ router.patch(
           console.error('Error obteniendo datos para notificar tras confirmar peso:', errDatos);
         }
       }
-
       return res.json({
         mensaje: 'Peso confirmado y bloqueado',
         paquete: paqueteActualizado,
