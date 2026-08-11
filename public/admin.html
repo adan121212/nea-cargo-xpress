@@ -1849,10 +1849,10 @@
         const clave = (m.metodo_pago||'').toLowerCase();
         const color = METODO_COLOR[clave] || 'navy';
         const icono = METODO_ICONO[clave] || '💳';
-        return `<div class="dash-card ${color}" style="flex-direction:column;align-items:flex-start;gap:6px;transition:transform .2s,box-shadow .2s;">
+        return `<div class="dash-card ${color}" style="flex-direction:column;align-items:flex-start;gap:4px;padding:16px 14px;">
           <div style="font-size:22px;">${icono}</div>
           <div class="dash-label">${escapeHtml(m.etiqueta||clave)}</div>
-          <div class="dash-num">$${Number(m.total).toFixed(2)}</div>
+          <div class="dash-num" style="font-size:20px;">$${Number(m.total).toFixed(2)}</div>
           <div class="dash-sub">${m.cantidad} factura${m.cantidad==1?'':'s'}</div>
         </div>`;
       }).join('');
