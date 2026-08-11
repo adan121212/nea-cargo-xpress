@@ -674,6 +674,44 @@
         </div>
       </div>
 
+      <!-- Pasos automáticos post-recepción: foto + dimensiones -->
+      <div id="pasoFoto" style="display:none;">
+        <div class="card" style="border:2px dashed #2563eb;margin-top:12px;">
+          <h3 style="margin:0 0 4px;color:#2563eb;">📷 Paso 1 de 2 — Foto del paquete</h3>
+          <p class="card-sub" style="margin:0 0 14px;" id="pasoFotoSub">Toma una foto de cómo llegó el paquete.</p>
+          <input type="file" id="pasoFotoInput" accept="image/*" capture="environment" style="display:none;">
+          <button class="btn-primary" id="btnAbrirCamaraFoto" style="width:auto;">📷 Tomar foto</button>
+          <button type="button" onclick="saltarPasoFoto()" class="btn-secondary" style="margin-left:8px;">Saltar este paso</button>
+          <div class="banner" id="bannerPasoFoto"></div>
+        </div>
+      </div>
+
+      <div id="pasoDimensiones" style="display:none;">
+        <div class="card" style="border:2px dashed #7c3aed;margin-top:12px;">
+          <h3 style="margin:0 0 4px;color:#7c3aed;">📐 Paso 2 de 2 — Dimensiones</h3>
+          <p class="card-sub" style="margin:0 0 14px;">Mide el paquete en pulgadas — se calcula el peso volumétrico automáticamente.</p>
+          <div class="form-grid" style="margin-bottom:12px;">
+            <div>
+              <label for="dimLargo">Largo (in)</label>
+              <input id="dimLargo" type="number" step="0.1" min="0" placeholder="12">
+            </div>
+            <div>
+              <label for="dimAncho">Ancho (in)</label>
+              <input id="dimAncho" type="number" step="0.1" min="0" placeholder="8">
+            </div>
+            <div>
+              <label for="dimAlto">Alto (in)</label>
+              <input id="dimAlto" type="number" step="0.1" min="0" placeholder="6">
+            </div>
+          </div>
+          <button class="btn-primary" id="btnGuardarDimensiones" style="width:auto;">
+            <span class="spinner"></span><span>Guardar y continuar</span>
+          </button>
+          <button type="button" onclick="saltarPasoDimensiones()" class="btn-secondary" style="margin-left:8px;">Saltar este paso</button>
+          <div class="banner" id="bannerPasoDimensiones"></div>
+        </div>
+      </div>
+
       <!-- Historial de la sesión -->
       <h3 style="margin:20px 0 8px;font-size:14px;">Historial de esta sesión</h3>
       <div id="recepcionLog"><div class="empty">Aún no has recibido ningún paquete en esta sesión.</div></div>
@@ -2380,18 +2418,17 @@
       const paqueteId = pkg.dataset.paqueteId;
       const tarifaId = pkg.dataset.tarifaId;
       try {
-        const res = await apiAdmin('/admin/facturas', {
+        // Una sola llamada: genera, cobra y cambia el paquete a listo_para_retiro
+        const res = await apiAdmin('/admin/facturas/generar-y-cobrar', {
           method: 'POST',
-          body: JSON.stringify({ paquete_id: parseInt(paqueteId), tarifa_id: parseInt(tarifaId) }),
+          body: JSON.stringify({
+            paquete_id: parseInt(paqueteId),
+            tarifa_id: parseInt(tarifaId),
+            metodo_pago: facturadorMetodoPago,
+          }),
         });
         const data = await res.json().catch(() => ({}));
         if (res.ok){
-          if (facturadorMetodoPago && data.factura?.id){
-            await apiAdmin('/admin/facturas/' + data.factura.id + '/estado', {
-              method: 'PATCH',
-              body: JSON.stringify({ estado: 'pagada' }),
-            });
-          }
           resultados.push(data.factura);
           pkg.style.display = 'none';
         } else {
@@ -2674,9 +2711,9 @@
               $('#recepcionContador').textContent = recepcionContador;
               agregarAlLogRecepcion({ tipo:'ok', tracking: btn2.dataset.tracking, detalle: `${btn2.dataset.cliente} — marcado En bodega Miami`, hora: horaActual() });
               $('#recepcionResultado').style.display = 'none';
-              mostrarBanner('#bannerRecepcion', 'success', `✓ Paquete ${btn2.dataset.tracking} recibido. Cliente notificado.`);
+              mostrarBanner('#bannerRecepcion', 'success', `✓ Paquete ${btn2.dataset.tracking} recibido.`);
               input.value = '';
-              input.focus();
+              iniciarFlujoFotoDimensiones(parseInt(btn2.dataset.id), btn2.dataset.tracking);
             } else {
               mostrarBanner('#bannerRecepcion', 'error', d.mensaje || 'No se pudo confirmar.');
               setCargando(btn2, false);
@@ -2750,9 +2787,9 @@
         agregarAlLogRecepcion({ tipo:'ok', tracking, detalle: `Creado sin prealerta — En bodega Miami`, hora: horaActual() });
         $('#recepcionFormNuevo').style.display = 'none';
         $('#bannerRecepcion').innerHTML = '';
-        mostrarBanner('#bannerRecepcion', 'success', `✓ Paquete ${tracking} creado y marcado en bodega. Cliente notificado.`);
+        mostrarBanner('#bannerRecepcion', 'success', `✓ Paquete ${tracking} creado y marcado en bodega.`);
         $('#recepcionTracking').value = '';
-        $('#recepcionTracking').focus();
+        iniciarFlujoFotoDimensiones(data.paquete.id, tracking);
       } else {
         mostrarBanner('#bannerRecepcionNuevo', 'error', data.mensaje || 'No se pudo crear el paquete.');
       }
@@ -2789,6 +2826,102 @@
     if (camaraStream){ camaraStream.getTracks().forEach(t => t.stop()); camaraStream = null; }
     $('#camaraRecepcion').style.display = 'none';
   };
+
+  // ---------- Flujo automático: foto + dimensiones tras recibir ----------
+  let flujoFotoDimPaqueteId = null;
+  let flujoFotoDimTracking = '';
+
+  function iniciarFlujoFotoDimensiones(paqueteId, tracking){
+    flujoFotoDimPaqueteId = paqueteId;
+    flujoFotoDimTracking = tracking;
+    $('#recepcionFormNuevo').style.display = 'none';
+    $('#recepcionResultado').style.display = 'none';
+    $('#pasoFotoSub').textContent = `Toma una foto de "${tracking}" recién recibido.`;
+    $('#pasoFoto').style.display = 'block';
+    $('#pasoDimensiones').style.display = 'none';
+    $('#bannerPasoFoto').innerHTML = '';
+  }
+
+  $('#btnAbrirCamaraFoto').addEventListener('click', () => {
+    $('#pasoFotoInput').value = '';
+    $('#pasoFotoInput').click();
+  });
+
+  $('#pasoFotoInput').addEventListener('change', async () => {
+    const input = $('#pasoFotoInput');
+    if (!input.files || input.files.length === 0) return;
+
+    const formData = new FormData();
+    formData.append('fotos', input.files[0]);
+
+    mostrarBanner('#bannerPasoFoto', '', 'Subiendo foto…');
+    try {
+      const res = await apiAdminFormData(`/admin/paquetes/${flujoFotoDimPaqueteId}/fotos`, formData);
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 201){
+        mostrarBanner('#bannerPasoFoto', 'success', '✓ Foto guardada.');
+      } else {
+        mostrarBanner('#bannerPasoFoto', 'error', data.mensaje || 'No se pudo subir la foto.');
+      }
+    } catch(e){
+      mostrarBanner('#bannerPasoFoto', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setTimeout(pasarADimensiones, 600);
+    }
+  });
+
+  function saltarPasoFoto(){ pasarADimensiones(); }
+
+  function pasarADimensiones(){
+    $('#pasoFoto').style.display = 'none';
+    $('#dimLargo').value = '';
+    $('#dimAncho').value = '';
+    $('#dimAlto').value = '';
+    $('#bannerPasoDimensiones').innerHTML = '';
+    $('#pasoDimensiones').style.display = 'block';
+  }
+
+  $('#btnGuardarDimensiones').addEventListener('click', async () => {
+    const largo = $('#dimLargo').value;
+    const ancho = $('#dimAncho').value;
+    const alto = $('#dimAlto').value;
+
+    if (!largo || !ancho || !alto){
+      mostrarBanner('#bannerPasoDimensiones', 'error', 'Completa largo, ancho y alto.');
+      return;
+    }
+
+    const btn = $('#btnGuardarDimensiones');
+    setCargando(btn, true);
+    try {
+      const res = await apiAdmin(`/admin/recepcion/${flujoFotoDimPaqueteId}/dimensiones`, {
+        method: 'PATCH',
+        body: JSON.stringify({ largo_in: parseFloat(largo), ancho_in: parseFloat(ancho), alto_in: parseFloat(alto) }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok){
+        mostrarBanner('#bannerPasoDimensiones', 'success', `✓ Guardado — peso volumétrico: ${data.peso_volumetrico} lb`);
+        setTimeout(terminarFlujoRecepcion, 900);
+      } else {
+        mostrarBanner('#bannerPasoDimensiones', 'error', data.mensaje || 'No se pudieron guardar las dimensiones.');
+        setCargando(btn, false);
+      }
+    } catch(e){
+      mostrarBanner('#bannerPasoDimensiones', 'error', 'No pudimos conectar con el servidor.');
+      setCargando(btn, false);
+    }
+  });
+
+  function saltarPasoDimensiones(){ terminarFlujoRecepcion(); }
+
+  function terminarFlujoRecepcion(){
+    $('#pasoFoto').style.display = 'none';
+    $('#pasoDimensiones').style.display = 'none';
+    $('#btnGuardarDimensiones').disabled = false;
+    setCargando($('#btnGuardarDimensiones'), false);
+    flujoFotoDimPaqueteId = null;
+    $('#recepcionTracking').focus();
+  }
 
   // ---------- Cierre de caja ----------
   function fechaISOCaja(d){ return d.toISOString().slice(0, 10); }
