@@ -49,9 +49,8 @@ router.get('/buscar', [
 });
 
 // --- POST /api/admin/recepcion/confirmar ---
-// Confirma la llegada de un paquete prealertado → lo pasa a en_bodega_miami.
-// NOTA: no se envía correo aquí. El único correo de este flujo sale cuando
-// el paquete llega a listo_para_retiro (ver routes/admin/paquetes.js).
+// Confirma la llegada de un paquete prealertado → lo pasa directo a listo_para_retiro.
+// NOTA: no se envía correo aquí.
 router.post('/confirmar', [
   body('paquete_id').isInt().withMessage('paquete_id es obligatorio'),
 ], async (req, res) => {
@@ -60,7 +59,7 @@ router.post('/confirmar', [
   try {
     const resultado = await pool.query(
       `UPDATE paquetes
-       SET estado = 'en_bodega_miami', fecha_actualizacion = NOW()
+       SET estado = 'listo_para_retiro', fecha_actualizacion = NOW()
        WHERE id = $1 AND estado = 'prealertado'
        RETURNING *`,
       [req.body.paquete_id]
@@ -69,7 +68,7 @@ router.post('/confirmar', [
       return res.status(400).json({ mensaje: 'El paquete no existe o ya fue recibido.' });
     }
     const paquete = resultado.rows[0];
-    return res.json({ mensaje: 'Paquete recibido en bodega Miami', paquete });
+    return res.json({ mensaje: 'Paquete recibido y listo para retiro', paquete });
   } catch (error) {
     console.error('Error en POST /admin/recepcion/confirmar:', error);
     return res.status(500).json({ mensaje: 'Error interno al confirmar la recepción' });
@@ -77,8 +76,8 @@ router.post('/confirmar', [
 });
 
 // --- POST /api/admin/recepcion/crear ---
-// Crea un paquete sin prealerta y lo pasa directo a en_bodega_miami.
-// NOTA: no se envía correo aquí, igual que en /confirmar.
+// Crea un paquete sin prealerta y lo pasa directo a listo_para_retiro.
+// NOTA: no se envía correo aquí.
 router.post('/crear', [
   body('usuario_id').isInt().withMessage('usuario_id es obligatorio'),
   body('numero_tracking').trim().notEmpty().withMessage('El tracking es obligatorio'),
@@ -93,12 +92,12 @@ router.post('/crear', [
     const resultado = await pool.query(
       `INSERT INTO paquetes
          (usuario_id, numero_tracking, tienda, valor_declarado, peso_lb, descripcion, estado, fecha_actualizacion)
-       VALUES ($1, $2, $3, $4, $5, $6, 'en_bodega_miami', NOW())
+       VALUES ($1, $2, $3, $4, $5, $6, 'listo_para_retiro', NOW())
        RETURNING *`,
       [usuario_id, numero_tracking, tienda, valor_declarado, peso_lb || null, descripcion || null]
     );
     const paquete = resultado.rows[0];
-    return res.status(201).json({ mensaje: 'Paquete creado y marcado en bodega Miami', paquete });
+    return res.status(201).json({ mensaje: 'Paquete creado y listo para retiro', paquete });
   } catch (error) {
     console.error('Error en POST /admin/recepcion/crear:', error);
     return res.status(500).json({ mensaje: 'Error interno al crear el paquete' });
