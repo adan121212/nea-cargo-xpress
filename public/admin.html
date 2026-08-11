@@ -443,8 +443,14 @@
     tbody td{ border-bottom:none; display:flex; justify-content:space-between; gap:10px; }
     tbody td::before{ content: attr(data-label); font-weight:600; color: var(--ink-soft); font-size:11px; }
   }
+  @media (max-width:760px){
+    #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; }
+    #cajaMetodosCards{ grid-template-columns:repeat(2,1fr) !important; }
+  }
   @media (max-width:520px){
     .dash-cards{ grid-template-columns:1fr; }
+    #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; }
+    #cajaMetodosCards{ grid-template-columns:1fr 1fr !important; }
   }
 </style>
 </head>
