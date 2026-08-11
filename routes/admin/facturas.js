@@ -113,6 +113,15 @@ router.post(
         numeroFactura,
         factura.id,
       ]);
+
+      // Al generar la factura el paquete pasa a listo_para_retiro — ya está
+      // pesado y facturado, solo falta que el cliente venga a pagar y retirarlo.
+      await client.query(
+        `UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW()
+         WHERE id = $1 AND estado NOT IN ('entregado', 'listo_para_retiro')`,
+        [paquete_id]
+      );
+
       await client.query('COMMIT');
 
       const facturaCompleta = { ...factura, numero_factura: numeroFactura };
@@ -336,5 +345,141 @@ router.post('/:id/reenviar', async (req, res) => {
     return res.status(500).json({ mensaje: 'Error interno al reenviar la factura' });
   }
 });
+
+// --- POST /api/admin/facturas/generar-y-cobrar ---
+// Genera la factura, la cobra y cambia el paquete a listo_para_retiro en un solo paso.
+// Usado por el Facturador al apretar "Generar y cobrar".
+router.post(
+  '/generar-y-cobrar',
+  [
+    body('paquete_id').isInt().withMessage('paquete_id es obligatorio'),
+    body('tarifa_id').isInt().withMessage('tarifa_id es obligatorio'),
+    body('metodo_pago').isIn(['efectivo', 'tarjeta', 'transferencia', 'yappy']).withMessage('Método de pago inválido'),
+  ],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      return res.status(400).json({ errores: errores.array() });
+    }
+
+    const { paquete_id, tarifa_id, metodo_pago } = req.body;
+
+    // Verificar caja cerrada
+    const hoy = new Date().toISOString().slice(0, 10);
+    const cajaHoy = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [hoy]);
+    if (cajaHoy.rows.length > 0) {
+      return res.status(409).json({
+        mensaje: `La caja del ${hoy} ya fue cerrada. No se pueden generar facturas hoy.`,
+        caja_cerrada: true,
+      });
+    }
+
+    const client = await pool.connect();
+    try {
+      const paqueteRes = await client.query('SELECT * FROM paquetes WHERE id = $1', [paquete_id]);
+      if (paqueteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+      const paquete = paqueteRes.rows[0];
+
+      const pesoFacturado = paquete.peso_real_lb ?? paquete.peso_lb;
+      if (!pesoFacturado || Number(pesoFacturado) === 0) {
+        return res.status(400).json({ mensaje: 'El paquete no tiene peso registrado. Ve a Paquetes e ingrésalo primero.' });
+      }
+
+      const tarifaRes = await client.query('SELECT * FROM tarifas WHERE id = $1', [tarifa_id]);
+      if (tarifaRes.rows.length === 0) return res.status(404).json({ mensaje: 'Tarifa no encontrada' });
+      const tarifa = tarifaRes.rows[0];
+
+      const yaFacturado = await client.query(
+        `SELECT id FROM facturas WHERE paquete_id = $1 AND estado <> 'anulada'`,
+        [paquete_id]
+      );
+      if (yaFacturado.rows.length > 0) {
+        return res.status(409).json({ mensaje: 'Este paquete ya tiene una factura activa.' });
+      }
+
+      const costoEnvio = Math.max(Number(pesoFacturado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
+      const seguro = paquete.valor_declarado ? (Number(paquete.valor_declarado) * Number(tarifa.pct_seguro)) / 100 : 0;
+      const cargoManejo = Number(tarifa.cargo_manejo);
+      const total = costoEnvio + cargoManejo + seguro;
+
+      await client.query('BEGIN');
+
+      // 1. Insertar factura
+      const insercion = await client.query(
+        `INSERT INTO facturas
+           (paquete_id, usuario_id, tarifa_id, peso_facturado_lb, precio_libra,
+            costo_envio, cargo_manejo, seguro, total, token_pdf,
+            estado, fecha_pago, metodo_pago)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'pagada',NOW(),$11)
+         RETURNING *`,
+        [
+          paquete_id, paquete.usuario_id, tarifa_id,
+          pesoFacturado, tarifa.precio_libra,
+          costoEnvio.toFixed(2), cargoManejo.toFixed(2), seguro.toFixed(2), total.toFixed(2),
+          require('crypto').randomBytes(24).toString('hex'),
+          metodo_pago,
+        ]
+      );
+      const factura = insercion.rows[0];
+      const { generarNumeroFactura } = require('../../utils/factura');
+      const numeroFactura = generarNumeroFactura(factura.id);
+      await client.query('UPDATE facturas SET numero_factura = $1 WHERE id = $2', [numeroFactura, factura.id]);
+
+      // 2. Cambiar paquete a listo_para_retiro
+      await client.query(
+        `UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW()
+         WHERE id = $1 AND estado NOT IN ('entregado','listo_para_retiro')`,
+        [paquete_id]
+      );
+
+      await client.query('COMMIT');
+
+      const facturaCompleta = { ...factura, numero_factura: numeroFactura };
+
+      // 3. Enviar correo con PDF (best-effort)
+      const envios = { correo_enviado: false };
+      try {
+        const datosCompletos = await pool.query(
+          `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
+                  u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero,
+                  p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega
+           FROM facturas f
+           JOIN usuarios u ON u.id = f.usuario_id
+           JOIN paquetes p ON p.id = f.paquete_id
+           WHERE f.id = $1`,
+          [factura.id]
+        );
+        const { generarPdfFactura } = require('../../utils/facturaPdf');
+        const { enviarFacturaPorCorreo, enviarCorreoCambioEstado } = require('../../utils/mailer');
+        const fd = datosCompletos.rows[0];
+        if (fd) {
+          const pdfBuffer = await generarPdfFactura(fd);
+          await enviarFacturaPorCorreo(fd.cliente_email, fd.cliente_nombre, fd, pdfBuffer);
+          envios.correo_enviado = true;
+          // Correo de "listo para retiro"
+          await enviarCorreoCambioEstado(fd.cliente_email, fd.cliente_nombre, {
+            estado: 'listo_para_retiro',
+            tienda: fd.tienda,
+            numero_tracking: fd.numero_tracking,
+          });
+        }
+      } catch (errorCorreo) {
+        console.error('Error enviando correo generar-y-cobrar:', errorCorreo);
+      }
+
+      return res.status(201).json({
+        mensaje: 'Factura generada y cobrada. Paquete listo para retiro.',
+        factura: facturaCompleta,
+        envios,
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Error en POST /admin/facturas/generar-y-cobrar:', error);
+      return res.status(500).json({ mensaje: 'Error interno al generar y cobrar la factura' });
+    } finally {
+      client.release();
+    }
+  }
+);
 
 module.exports = router;
