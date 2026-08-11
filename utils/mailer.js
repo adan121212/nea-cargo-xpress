@@ -256,10 +256,64 @@ async function enviarCorreoNuevoRegistroAdmin(usuario) {
   return respuesta.json();
 }
 
+/**
+ * Correo combinado: avisa que el paquete ya llegó/está listo para retiro
+ * Y adjunta la factura pendiente de pago — todo en un solo correo.
+ * Se usa cuando se confirma el peso y se genera la factura automáticamente.
+ */
+async function enviarFacturaListaParaRetiro(destinatario, nombre, factura, pdfBuffer) {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
+      <h2>¡Hola, ${nombre}!</h2>
+      <p>¡Tu paquete ya está listo para que lo retires en tu sucursal más cercana! 🎉</p>
+      <div style="background:#f5f6f8;border-radius:8px;padding:16px;margin:20px 0;">
+        <p style="margin:0 0 6px;"><strong>${factura.tienda}</strong></p>
+        <p style="margin:0 0 6px;color:#6b7280;">Tracking: ${factura.numero_tracking}</p>
+        <p style="margin:0;">
+          <span style="background:#ff6a1a;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;">
+            Listo para retiro
+          </span>
+        </p>
+      </div>
+      <p>Adjunto encontrarás la factura <strong>${factura.numero_factura}</strong> — está <strong>pendiente de pago</strong>, la puedes cancelar directamente al momento de retirar tu paquete.</p>
+      <p><strong>Total a pagar: $${Number(factura.total).toFixed(2)}</strong></p>
+      <p>Te esperamos. Si tienes alguna duda, contáctanos respondiendo este correo.</p>
+    </div>
+  `;
+
+  const respuesta = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM || 'NEA Cargo Xpress <onboarding@resend.dev>',
+      to: destinatario,
+      subject: `Tu paquete está listo para retiro — Factura ${factura.numero_factura} — NEA Cargo Xpress`,
+      html,
+      attachments: [
+        {
+          filename: `${factura.numero_factura}.pdf`,
+          content: pdfBuffer.toString('base64'),
+        },
+      ],
+    }),
+  });
+
+  if (!respuesta.ok) {
+    const detalle = await respuesta.text();
+    throw new Error(`Resend respondió ${respuesta.status}: ${detalle}`);
+  }
+
+  return respuesta.json();
+}
+
 module.exports = {
   enviarCorreoConfirmacion,
   enviarFacturaPorCorreo,
   enviarCorreoCambioEstado,
   enviarCorreoRecuperacion,
   enviarCorreoNuevoRegistroAdmin,
+  enviarFacturaListaParaRetiro,
 };
