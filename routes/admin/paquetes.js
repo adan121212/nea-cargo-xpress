@@ -7,10 +7,9 @@ const { requiereAdmin } = require('../../middleware/admin');
 const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudinary');
 const { enviarCorreoCambioEstado } = require('../../utils/mailer');
 const { enviarWhatsappCambioEstado } = require('../../utils/whatsapp');
-
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024, files: 5 }, // 5MB por foto, hasta 5 fotos a la vez
+  limits: { fileSize: 5 * 1024 * 1024, files: 5 },
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.startsWith('image/')) {
       return cb(new Error('Solo se permiten imágenes'));
@@ -18,7 +17,6 @@ const upload = multer({
     cb(null, true);
   },
 });
-
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
@@ -32,9 +30,6 @@ const ESTADOS_VALIDOS = [
 ];
 
 // --- POST /api/admin/paquetes/recibir ---
-// Recepción rápida en bodega: el staff escanea/escribe el número de tracking
-// según van llegando las cajas, y el sistema busca la prealerta y la pasa
-// automáticamente a "en_bodega_miami" — sin tener que buscarla a mano en la lista.
 router.post(
   '/recibir',
   [body('numero_tracking').trim().notEmpty().withMessage('Escanea o escribe un número de tracking')],
@@ -43,9 +38,7 @@ router.post(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
-
     const tracking = req.body.numero_tracking.trim();
-
     try {
       const candidatos = await pool.query(
         `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
@@ -56,15 +49,11 @@ router.post(
          ORDER BY p.fecha_prealerta ASC`,
         [tracking]
       );
-
       if (candidatos.rows.length === 0) {
         return res.status(404).json({
           mensaje: `No encontramos ninguna prealerta pendiente con el tracking "${tracking}". Verifica el número, o puede que el cliente no lo haya prealertado todavía.`,
         });
       }
-
-      // Si por error dos clientes distintos prealertaron el mismo número de
-      // tracking (raro, pero posible), dejamos que el staff elija cuál es.
       if (candidatos.rows.length > 1) {
         return res.json({
           multiples: true,
@@ -76,16 +65,13 @@ router.post(
           })),
         });
       }
-
       const paqueteEncontrado = candidatos.rows[0];
-
       const actualizado = await pool.query(
         `UPDATE paquetes SET estado = 'en_bodega_miami', fecha_actualizacion = NOW()
          WHERE id = $1 RETURNING *`,
         [paqueteEncontrado.id]
       );
       const paquete = actualizado.rows[0];
-
       const envios = { correo_enviado: false, whatsapp_enviado: false };
       try {
         await enviarCorreoCambioEstado(paqueteEncontrado.cliente_email, paqueteEncontrado.cliente_nombre, paquete);
@@ -101,7 +87,6 @@ router.post(
           console.error('Error notificando recepción por WhatsApp:', errorWhatsapp);
         }
       }
-
       return res.json({
         multiples: false,
         mensaje: 'Paquete recibido en bodega Miami',
@@ -120,7 +105,6 @@ router.post(
 );
 
 // --- POST /api/admin/paquetes/recibir/:id/confirmar ---
-// Confirma cuál de los candidatos (cuando hay varios con el mismo tracking) es el correcto.
 router.post('/recibir/:id/confirmar', async (req, res) => {
   try {
     const paqueteRes = await pool.query(
@@ -131,20 +115,16 @@ router.post('/recibir/:id/confirmar', async (req, res) => {
        WHERE p.id = $1 AND p.estado = 'prealertado'`,
       [req.params.id]
     );
-
     if (paqueteRes.rows.length === 0) {
       return res.status(404).json({ mensaje: 'Paquete no encontrado o ya no está prealertado' });
     }
-
     const info = paqueteRes.rows[0];
-
     const actualizado = await pool.query(
       `UPDATE paquetes SET estado = 'en_bodega_miami', fecha_actualizacion = NOW()
        WHERE id = $1 RETURNING *`,
       [req.params.id]
     );
     const paquete = actualizado.rows[0];
-
     const envios = { correo_enviado: false, whatsapp_enviado: false };
     try {
       await enviarCorreoCambioEstado(info.cliente_email, info.cliente_nombre, paquete);
@@ -156,7 +136,6 @@ router.post('/recibir/:id/confirmar', async (req, res) => {
         envios.whatsapp_enviado = true;
       } catch (err) { console.error('Error notificando por WhatsApp:', err); }
     }
-
     return res.json({ mensaje: 'Paquete recibido en bodega Miami', paquete, notificaciones: envios });
   } catch (error) {
     console.error('Error en POST /admin/paquetes/recibir/:id/confirmar:', error);
@@ -164,8 +143,7 @@ router.post('/recibir/:id/confirmar', async (req, res) => {
   }
 });
 
-
-// Query params: ?estado=en_transito&email=ana@ejemplo.com&tracking=1Z999
+// --- GET /api/admin/paquetes ---
 router.get(
   '/',
   [
@@ -178,11 +156,9 @@ router.get(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
-
     const { estado, email, tracking } = req.query;
     const condiciones = [];
     const valores = [];
-
     if (estado) {
       valores.push(estado);
       condiciones.push(`p.estado = $${valores.length}`);
@@ -195,9 +171,7 @@ router.get(
       valores.push(`%${tracking}%`);
       condiciones.push(`p.numero_tracking ILIKE $${valores.length}`);
     }
-
     const where = condiciones.length ? `WHERE ${condiciones.join(' AND ')}` : '';
-
     try {
       const resultado = await pool.query(
         `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
@@ -224,7 +198,6 @@ router.get(
 );
 
 // --- PATCH /api/admin/paquetes/:id/estado ---
-// Actualiza el estado de un paquete (ej. cuando llega a bodega, sale a tránsito, etc.)
 router.patch(
   '/:id/estado',
   [body('estado').isIn(ESTADOS_VALIDOS).withMessage('Estado inválido')],
@@ -233,20 +206,16 @@ router.patch(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
-
     try {
       const actual = await pool.query('SELECT estado FROM paquetes WHERE id = $1', [req.params.id]);
-
       if (actual.rows.length === 0) {
         return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       }
-
       if (actual.rows[0].estado === 'entregado') {
         return res.status(400).json({
           mensaje: 'Este paquete ya fue entregado y su estado no se puede modificar.',
         });
       }
-
       const resultado = await pool.query(
         `UPDATE paquetes
          SET estado = $1, fecha_actualizacion = NOW()
@@ -254,15 +223,10 @@ router.patch(
          RETURNING *`,
         [req.body.estado, req.params.id]
       );
-
       if (resultado.rows.length === 0) {
         return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       }
-
       const paquete = resultado.rows[0];
-
-      // Notifica al cliente (best-effort: si falla el envío, no revertimos
-      // el cambio de estado, solo lo dejamos registrado en el log).
       const envios = { correo_enviado: false, whatsapp_enviado: false };
       try {
         const clienteRes = await pool.query(
@@ -270,7 +234,6 @@ router.patch(
           [paquete.usuario_id]
         );
         const cliente = clienteRes.rows[0];
-
         if (cliente) {
           try {
             await enviarCorreoCambioEstado(cliente.email, cliente.nombre, paquete);
@@ -278,7 +241,6 @@ router.patch(
           } catch (errorCorreo) {
             console.error('Error notificando cambio de estado por correo:', errorCorreo);
           }
-
           if (cliente.telefono) {
             try {
               await enviarWhatsappCambioEstado(cliente.telefono, paquete);
@@ -291,7 +253,6 @@ router.patch(
       } catch (errorNotificacion) {
         console.error('Error obteniendo datos del cliente para notificar:', errorNotificacion);
       }
-
       return res.json({ mensaje: 'Estado actualizado', paquete, notificaciones: envios });
     } catch (error) {
       console.error('Error en PATCH /admin/paquetes/:id/estado:', error);
@@ -301,7 +262,11 @@ router.patch(
 );
 
 // --- PATCH /api/admin/paquetes/:id/peso ---
-// El staff confirma el peso real al recibir el paquete en bodega (para facturar con precisión).
+// El staff confirma el peso real al recibir el paquete en bodega.
+// Una vez confirmado (peso_confirmado = true), el peso queda BLOQUEADO —
+// esta ruta rechaza cualquier intento posterior de cambiarlo, para que el
+// número que se usó para facturar quede protegido de errores o cambios
+// accidentales después del hecho.
 router.patch(
   '/:id/peso',
   [body('peso_real_lb').isFloat({ min: 0.01 }).withMessage('Ingresa un peso válido en libras')],
@@ -310,19 +275,23 @@ router.patch(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
-
     try {
+      const actual = await pool.query('SELECT peso_confirmado FROM paquetes WHERE id = $1', [req.params.id]);
+      if (actual.rows.length === 0) {
+        return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+      }
+      if (actual.rows[0].peso_confirmado) {
+        return res.status(409).json({
+          mensaje: 'El peso de este paquete ya fue confirmado y no se puede modificar. Si fue un error, contacta a un administrador.',
+          peso_bloqueado: true,
+        });
+      }
       const resultado = await pool.query(
-        `UPDATE paquetes SET peso_real_lb = $1, fecha_actualizacion = NOW()
+        `UPDATE paquetes SET peso_real_lb = $1, peso_confirmado = TRUE, fecha_actualizacion = NOW()
          WHERE id = $2 RETURNING *`,
         [req.body.peso_real_lb, req.params.id]
       );
-
-      if (resultado.rows.length === 0) {
-        return res.status(404).json({ mensaje: 'Paquete no encontrado' });
-      }
-
-      return res.json({ mensaje: 'Peso actualizado', paquete: resultado.rows[0] });
+      return res.json({ mensaje: 'Peso confirmado y bloqueado', paquete: resultado.rows[0] });
     } catch (error) {
       console.error('Error en PATCH /admin/paquetes/:id/peso:', error);
       return res.status(500).json({ mensaje: 'Error interno al actualizar el peso' });
@@ -331,8 +300,6 @@ router.patch(
 );
 
 // --- PATCH /api/admin/paquetes/:id/dimensiones ---
-// Guarda largo/ancho/alto (en pulgadas) y calcula el peso volumétrico,
-// para poder facturar por el mayor entre peso real y peso volumétrico.
 router.patch(
   '/:id/dimensiones',
   [
@@ -345,12 +312,9 @@ router.patch(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
-
     const { largo_in, ancho_in, alto_in } = req.body;
-    // Divisor estándar de carga aérea (in³ por libra). Ajusta si tu tarifa usa otro.
     const DIVISOR_VOLUMETRICO = 166;
     const pesoVolumetrico = (largo_in * ancho_in * alto_in) / DIVISOR_VOLUMETRICO;
-
     try {
       const resultado = await pool.query(
         `UPDATE paquetes
@@ -360,11 +324,9 @@ router.patch(
          RETURNING *`,
         [largo_in, ancho_in, alto_in, pesoVolumetrico.toFixed(2), req.params.id]
       );
-
       if (resultado.rows.length === 0) {
         return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       }
-
       return res.json({ mensaje: 'Dimensiones guardadas', paquete: resultado.rows[0] });
     } catch (error) {
       console.error('Error en PATCH /admin/paquetes/:id/dimensiones:', error);
@@ -374,18 +336,15 @@ router.patch(
 );
 
 // --- POST /api/admin/paquetes/:id/fotos ---
-// Sube hasta 5 fotos del paquete (ej. al recibirlo en bodega). Campo: "fotos".
 router.post('/:id/fotos', upload.array('fotos', 5), async (req, res) => {
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ mensaje: 'Sube al menos una foto (campo "fotos").' });
   }
-
   try {
     const paqueteExiste = await pool.query('SELECT id FROM paquetes WHERE id = $1', [req.params.id]);
     if (paqueteExiste.rows.length === 0) {
       return res.status(404).json({ mensaje: 'Paquete no encontrado' });
     }
-
     const subidas = [];
     for (const archivo of req.files) {
       const { url, public_id } = await subirFotoPaquete(archivo.buffer, archivo.mimetype, req.params.id);
@@ -395,7 +354,6 @@ router.post('/:id/fotos', upload.array('fotos', 5), async (req, res) => {
       );
       subidas.push(resultado.rows[0]);
     }
-
     return res.status(201).json({ mensaje: 'Fotos subidas', fotos: subidas });
   } catch (error) {
     console.error('Error en POST /admin/paquetes/:id/fotos:', error);
@@ -427,10 +385,8 @@ router.delete('/:id/fotos/:fotoId', async (req, res) => {
     if (foto.rows.length === 0) {
       return res.status(404).json({ mensaje: 'Foto no encontrada' });
     }
-
     await eliminarFotoCloudinary(foto.rows[0].public_id);
     await pool.query('DELETE FROM paquete_fotos WHERE id = $1', [req.params.fotoId]);
-
     return res.json({ mensaje: 'Foto eliminada' });
   } catch (error) {
     console.error('Error en DELETE /admin/paquetes/:id/fotos/:fotoId:', error);
