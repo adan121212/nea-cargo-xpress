@@ -1821,18 +1821,24 @@
     const total = Number(data.total_general);
     const facturas = data.cantidad_facturas;
     const metodos = data.detalle_por_metodo || [];
-    $('#cajaResumenCards').innerHTML = `
-      <div class="dash-card green" style="transition:transform .2s,box-shadow .2s;">
-        <div class="dash-icon">💰</div>
-        <div><div class="dash-label">Total cobrado</div><div class="dash-num">$${total.toFixed(2)}</div><div class="dash-sub">${facturas} factura${facturas==1?'':'s'}</div></div>
+   $('#cajaResumenCards').innerHTML = `
+      <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
+        <div style="font-size:20px;">💰</div>
+        <div class="dash-label">Total cobrado</div>
+        <div class="dash-num" style="font-size:18px;">$${total.toFixed(2)}</div>
+        <div class="dash-sub">${facturas} fact.</div>
       </div>
-      <div class="dash-card blue" style="transition:transform .2s,box-shadow .2s;">
-        <div class="dash-icon">📋</div>
-        <div><div class="dash-label">Métodos usados</div><div class="dash-num">${metodos.length}</div><div class="dash-sub">${metodos.length>0?metodos.map(m=>m.etiqueta).join(', '):'—'}</div></div>
+      <div class="dash-card blue" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
+        <div style="font-size:20px;">📋</div>
+        <div class="dash-label">Métodos</div>
+        <div class="dash-num" style="font-size:18px;">${metodos.length}</div>
+        <div class="dash-sub">usados</div>
       </div>
-      <div class="dash-card ${data.cerrado?'navy':'amber'}" style="transition:transform .2s,box-shadow .2s;">
-        <div class="dash-icon">${data.cerrado?'🔒':'⏳'}</div>
-        <div><div class="dash-label">Estado</div><div class="dash-num" style="font-size:16px;">${data.cerrado?'Cerrado':'Abierto'}</div><div class="dash-sub">${data.cerrado?'Caja cerrada':'Pendiente de cierre'}</div></div>
+      <div class="dash-card ${data.cerrado?'navy':'amber'}" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
+        <div style="font-size:20px;">${data.cerrado?'🔒':'⏳'}</div>
+        <div class="dash-label">Estado</div>
+        <div class="dash-num" style="font-size:15px;">${data.cerrado?'Cerrado':'Abierto'}</div>
+        <div class="dash-sub">${data.cerrado?'cerrada':'pendiente'}</div>
       </div>
     `;
     // Cards por método de pago
