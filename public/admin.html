@@ -1438,11 +1438,18 @@
         <td data-label="Tienda / Tracking">${escapeHtml(p.tienda)}<br><span class="mono muted">${escapeHtml(p.numero_tracking)}</span></td>
         <td data-label="Valor" class="mono">$${Number(p.valor_declarado).toFixed(2)}</td>
         <td data-label="Peso real (lb)">
-          <div style="display:flex; gap:5px;">
-            <input type="number" step="0.01" min="0" class="peso-input" data-id="${p.id}"
-                   value="${p.peso_real_lb ?? ''}" placeholder="${p.peso_lb ?? '—'}" style="width:70px; padding:6px 8px; font-size:12px;">
-            <button class="btn-secondary btn-guardar-peso" data-id="${p.id}" style="padding:6px 9px; font-size:11px;">OK</button>
-          </div>
+          ${p.peso_confirmado ? `
+            <div style="display:flex; align-items:center; gap:5px;">
+              <span class="mono" style="font-weight:700;">${Number(p.peso_real_lb).toFixed(2)} lb</span>
+              <span title="Peso confirmado — bloqueado" style="font-size:12px;">🔒</span>
+            </div>
+          ` : `
+            <div style="display:flex; gap:5px;">
+              <input type="number" step="0.01" min="0" class="peso-input" data-id="${p.id}"
+                     value="${p.peso_real_lb ?? ''}" placeholder="${p.peso_lb ?? '—'}" style="width:70px; padding:6px 8px; font-size:12px;">
+              <button class="btn-secondary btn-guardar-peso" data-id="${p.id}" style="padding:6px 9px; font-size:11px;">OK</button>
+            </div>
+          `}
         </td>
         <td data-label="Estado"><span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span></td>
         <td data-label="Actualizar">
@@ -1476,23 +1483,48 @@
         const id = btn.dataset.id;
         const input = tbody.querySelector(`.peso-input[data-id="${id}"]`);
         const peso = parseFloat(input.value);
-        if (isNaN(peso) || peso <= 0){
-          mostrarBanner('#bannerPaquetes', 'error', 'Ingresa un peso válido antes de guardar.');
+
+        if (!input.value.trim() || isNaN(peso) || peso <= 0){
+          mostrarBanner('#bannerPaquetes', 'error', 'El peso no puede quedar en blanco — ingresa un valor válido antes de guardar.');
           return;
         }
+
+        const confirmado = window.confirm(
+          `¿Estás seguro que el peso correcto de este paquete es ${peso} lb?\n\nUna vez confirmado, NO se podrá cambiar.`
+        );
+
+        if (!confirmado){
+          mostrarBanner('#bannerPaquetes', 'error', '⚠ Revisa el peso bien y vuelve pronto cuando estés seguro.');
+          return;
+        }
+
         btn.disabled = true;
         try {
           const res = await apiAdmin(`/admin/paquetes/${id}/peso`, {
             method: 'PATCH',
             body: JSON.stringify({ peso_real_lb: peso }),
           });
+          const data = await res.json().catch(() => ({}));
+
           if (res.ok){
-            mostrarBanner('#bannerPaquetes', 'success', 'Peso actualizado. Ya puedes generar la factura en la pestaña Facturas.');
+            mostrarBanner('#bannerPaquetes', 'success', '✓ Peso confirmado y bloqueado. Ya puedes generar la factura.');
+            // Bloquea la celda visualmente al instante, sin esperar a recargar la tabla.
+            const celda = btn.closest('td');
+            celda.innerHTML = `
+              <div style="display:flex; align-items:center; gap:5px;">
+                <span class="mono" style="font-weight:700;">${peso.toFixed(2)} lb</span>
+                <span title="Peso confirmado — bloqueado" style="font-size:12px;">🔒</span>
+              </div>
+            `;
+          } else if (res.status === 409){
+            mostrarBanner('#bannerPaquetes', 'error', data.mensaje || 'Este peso ya fue confirmado antes.');
+            cargarPaquetes();
           } else {
-            mostrarBanner('#bannerPaquetes', 'error', 'No se pudo guardar el peso.');
+            mostrarBanner('#bannerPaquetes', 'error', data.mensaje || 'No se pudo guardar el peso.');
+            btn.disabled = false;
           }
         } catch (err) {
-        } finally {
+          mostrarBanner('#bannerPaquetes', 'error', 'No pudimos conectar con el servidor.');
           btn.disabled = false;
         }
       });
@@ -2894,13 +2926,13 @@
     const btn = $('#btnGuardarDimensiones');
     setCargando(btn, true);
     try {
-      const res = await apiAdmin(`/admin/recepcion/${flujoFotoDimPaqueteId}/dimensiones`, {
+      const res = await apiAdmin(`/admin/paquetes/${flujoFotoDimPaqueteId}/dimensiones`, {
         method: 'PATCH',
         body: JSON.stringify({ largo_in: parseFloat(largo), ancho_in: parseFloat(ancho), alto_in: parseFloat(alto) }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok){
-        mostrarBanner('#bannerPasoDimensiones', 'success', `✓ Guardado — peso volumétrico: ${data.peso_volumetrico} lb`);
+        mostrarBanner('#bannerPasoDimensiones', 'success', `✓ Guardado — peso volumétrico: ${data.paquete.peso_volumetrico_lb} lb`);
         setTimeout(terminarFlujoRecepcion, 900);
       } else {
         mostrarBanner('#bannerPasoDimensiones', 'error', data.mensaje || 'No se pudieron guardar las dimensiones.');
