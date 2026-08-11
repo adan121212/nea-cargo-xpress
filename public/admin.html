@@ -1814,13 +1814,66 @@
   function fechaISOCaja(d){ return d.toISOString().slice(0,10); }
   function inicializarFechaCaja(){ if($('#cajaFecha').value) return; $('#cajaFecha').value=fechaISOCaja(new Date()); }
   async function cargarCaja(){ inicializarFechaCaja(); const fecha=$('#cajaFecha').value; try { const res=await apiAdmin(`/admin/caja/dia?fecha=${fecha}`); const data=await res.json(); renderCaja(data); } catch(err){} }
+  const METODO_ICONO = { efectivo:'💵', tarjeta:'💳', transferencia:'🏦', yappy:'📱' };
+  const METODO_COLOR = { efectivo:'green', tarjeta:'blue', transferencia:'navy', yappy:'amber' };
   function renderCaja(data){
-    $('#cajaStats').innerHTML=`<div class="rep-stat"><div class="rep-stat-l">Total del día</div><div class="rep-stat-n">$${Number(data.total_general).toFixed(2)}</div><div class="rep-stat-sub">${data.cantidad_facturas} factura${data.cantidad_facturas==1?'':'s'}</div></div>`;
-    $('#emptyCajaDetalle').style.display=data.detalle_por_metodo.length?'none':'block';
-    $('#tbodyCajaDetalle').innerHTML=data.detalle_por_metodo.map(d=>`<tr><td data-label="Método">${escapeHtml(d.etiqueta)}</td><td data-label="Facturas" class="mono">${d.cantidad}</td><td data-label="Total" class="mono">$${Number(d.total).toFixed(2)}</td></tr>`).join('');
+    // Tarjetas de resumen
+    const total = Number(data.total_general);
+    const facturas = data.cantidad_facturas;
+    const metodos = data.detalle_por_metodo || [];
+    $('#cajaResumenCards').innerHTML = `
+      <div class="dash-card green" style="transition:transform .2s,box-shadow .2s;">
+        <div class="dash-icon">💰</div>
+        <div><div class="dash-label">Total cobrado</div><div class="dash-num">$${total.toFixed(2)}</div><div class="dash-sub">${facturas} factura${facturas==1?'':'s'}</div></div>
+      </div>
+      <div class="dash-card blue" style="transition:transform .2s,box-shadow .2s;">
+        <div class="dash-icon">📋</div>
+        <div><div class="dash-label">Métodos usados</div><div class="dash-num">${metodos.length}</div><div class="dash-sub">${metodos.length>0?metodos.map(m=>m.etiqueta).join(', '):'—'}</div></div>
+      </div>
+      <div class="dash-card ${data.cerrado?'navy':'amber'}" style="transition:transform .2s,box-shadow .2s;">
+        <div class="dash-icon">${data.cerrado?'🔒':'⏳'}</div>
+        <div><div class="dash-label">Estado</div><div class="dash-num" style="font-size:16px;">${data.cerrado?'Cerrado':'Abierto'}</div><div class="dash-sub">${data.cerrado?'Caja cerrada':'Pendiente de cierre'}</div></div>
+      </div>
+    `;
+    // Cards por método de pago
+    const metodosGrid = $('#cajaMétodosGrid');
+    if(metodos.length > 0){
+      metodosGrid.style.display = 'block';
+      $('#cajaMetodosCards').innerHTML = metodos.map(m => {
+        const clave = (m.metodo_pago||'').toLowerCase();
+        const color = METODO_COLOR[clave] || 'navy';
+        const icono = METODO_ICONO[clave] || '💳';
+        return `<div class="dash-card ${color}" style="flex-direction:column;align-items:flex-start;gap:6px;transition:transform .2s,box-shadow .2s;">
+          <div style="font-size:22px;">${icono}</div>
+          <div class="dash-label">${escapeHtml(m.etiqueta||clave)}</div>
+          <div class="dash-num">$${Number(m.total).toFixed(2)}</div>
+          <div class="dash-sub">${m.cantidad} factura${m.cantidad==1?'':'s'}</div>
+        </div>`;
+      }).join('');
+    } else {
+      metodosGrid.style.display = 'none';
+    }
+    $('#emptyCajaDetalle').style.display = metodos.length ? 'none' : 'block';
+    // Estado y cierre
     const estadoDiv=$('#cajaEstadoDia'), cierreBox=$('#cajaCierreBox');
-    if(data.cerrado){ const c=data.cierre; const hora=new Date(c.fecha_cierre).toLocaleString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); estadoDiv.innerHTML=`<div class="banner show success">🔒 Cerrado el ${hora} por ${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}.</div>`; cierreBox.innerHTML=''; }
-    else { estadoDiv.innerHTML=''; cierreBox.innerHTML=`<label for="cajaNotas">Notas (opcional)</label><input id="cajaNotas" type="text" placeholder="Ej. Faltaron $2 en efectivo"><button class="btn-primary" id="btnCerrarCaja" style="margin-top:14px;"><span class="spinner"></span><span>Cerrar caja de este día</span></button>`; $('#btnCerrarCaja').addEventListener('click',()=>cerrarCaja(data.fecha)); }
+    if(data.cerrado){
+      const c=data.cierre;
+      const hora=new Date(c.fecha_cierre).toLocaleString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      estadoDiv.innerHTML=`<div class="banner show success" style="margin-bottom:16px;">🔒 Caja cerrada el ${hora} por ${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}.</div>`;
+      cierreBox.innerHTML='';
+    } else {
+      estadoDiv.innerHTML='';
+      cierreBox.innerHTML=`
+        <div style="background:var(--paper);border-radius:12px;padding:18px;border:1px solid var(--line);margin-top:4px;">
+          <div style="font-family:var(--font-display);font-size:14px;font-weight:600;margin-bottom:12px;">Cerrar caja del día</div>
+          <label for="cajaNotas">Notas (opcional)</label>
+          <input id="cajaNotas" type="text" placeholder="Ej. Faltaron $2 en efectivo, cuadrado con cliente X">
+          <button class="btn-primary" id="btnCerrarCaja" style="margin-top:14px;max-width:280px;">
+            <span class="spinner"></span><span>Cerrar caja de este día</span>
+          </button>
+        </div>`;
+      $('#btnCerrarCaja').addEventListener('click',()=>cerrarCaja(data.fecha));
+    }
   }
   async function cerrarCaja(fecha){ if(!confirm(`¿Confirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','✓ Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
   async function cargarHistorialCaja(){ try { const res=await apiAdmin('/admin/caja/historial'); const data=await res.json(); const cierres=data.cierres||[]; $('#emptyCajaHistorial').style.display=cierres.length?'none':'block'; $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{ const fecha=new Date(c.fecha).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'}); const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}); return `<tr><td data-label="Fecha">${fecha}</td><td data-label="Total" class="mono">$${Number(c.total_general).toFixed(2)}</td><td data-label="Facturas" class="mono">${c.cantidad_facturas}</td><td data-label="Cerrado por">${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</td><td data-label="Hora" class="muted">${hora}</td></tr>`; }).join(''); } catch(err){} }
