@@ -702,7 +702,7 @@
             <div><label for="dimAncho">Ancho (in)</label><input id="dimAncho" type="number" step="0.1" min="0" placeholder="8"></div>
             <div><label for="dimAlto">Alto (in)</label><input id="dimAlto" type="number" step="0.1" min="0" placeholder="6"></div>
           </div>
-          <button class="btn-primary" id="btnGuardarDimensiones" style="width:auto;">
+          <button class="btn-primary" id="btnGuardarDimensionesRecepcion" style="width:auto;">
             <span class="spinner"></span><span>Guardar y continuar</span>
           </button>
           <button type="button" onclick="saltarPasoDimensiones()" class="btn-secondary" style="margin-left:8px;">Saltar este paso</button>
@@ -1804,6 +1804,19 @@
   let flujoFotoDimPaqueteId=null, flujoFotoDimTracking='';
   function iniciarFlujoFotoDimensiones(paqueteId,tracking){ flujoFotoDimPaqueteId=paqueteId; flujoFotoDimTracking=tracking; $('#recepcionFormNuevo').style.display='none'; $('#recepcionResultado').style.display='none'; $('#pasoFotoSub').textContent=`Toma una foto de "${tracking}" recién recibido.`; $('#pasoFoto').style.display='block'; $('#pasoDimensiones').style.display='none'; $('#bannerPasoFoto').innerHTML=''; }
   $('#btnAbrirCamaraFoto').addEventListener('click',()=>{ $('#pasoFotoInput').value=''; $('#pasoFotoInput').click(); });
+  $('#btnGuardarDimensionesRecepcion').addEventListener('click', async () => {
+    const largo=$('#dimLargo').value, ancho=$('#dimAncho').value, alto=$('#dimAlto').value;
+    if(!largo||!ancho||!alto){ mostrarBanner('#bannerPasoDimensiones','error','Completa largo, ancho y alto.'); return; }
+    const btn=$('#btnGuardarDimensionesRecepcion'); setCargando(btn,true);
+    try {
+      const res=await apiAdmin(`/admin/paquetes/${flujoFotoDimPaqueteId}/dimensiones`,{
+        method:'PATCH', body:JSON.stringify({largo_in:parseFloat(largo),ancho_in:parseFloat(ancho),alto_in:parseFloat(alto)})
+      });
+      const data=await res.json().catch(()=>({}));
+      if(res.ok){ mostrarBanner('#bannerPasoDimensiones','success',`✓ Guardado — peso volumétrico: ${data.paquete.peso_volumetrico_lb} lb`); setTimeout(terminarFlujoRecepcion,900); }
+      else { mostrarBanner('#bannerPasoDimensiones','error',data.mensaje||'No se pudieron guardar.'); setCargando(btn,false); }
+    } catch(e){ mostrarBanner('#bannerPasoDimensiones','error','No pudimos conectar.'); setCargando(btn,false); }
+  });
   $('#pasoFotoInput').addEventListener('change', async ()=>{
     const input=$('#pasoFotoInput'); if(!input.files||input.files.length===0) return;
     const formData=new FormData(); formData.append('fotos',input.files[0]);
@@ -1815,7 +1828,7 @@
   function saltarPasoFoto(){ pasarADimensiones(); }
   function pasarADimensiones(){ $('#pasoFoto').style.display='none'; $('#dimLargo').value=''; $('#dimAncho').value=''; $('#dimAlto').value=''; $('#bannerPasoDimensiones').innerHTML=''; $('#pasoDimensiones').style.display='block'; }
   function saltarPasoDimensiones(){ terminarFlujoRecepcion(); }
-  function terminarFlujoRecepcion(){ $('#pasoFoto').style.display='none'; $('#pasoDimensiones').style.display='none'; $('#btnGuardarDimensiones').disabled=false; setCargando($('#btnGuardarDimensiones'),false); flujoFotoDimPaqueteId=null; $('#recepcionTracking').focus(); }
+  function terminarFlujoRecepcion(){ $('#pasoFoto').style.display='none'; $('#pasoDimensiones').style.display='none'; $('#btnGuardarDimensionesRecepcion').disabled=false; setCargando($('#btnGuardarDimensionesRecepcion'),false); flujoFotoDimPaqueteId=null; $('#recepcionTracking').focus(); }
 
   function fechaISOCaja(d){ return d.toISOString().slice(0,10); }
   function inicializarFechaCaja(){ if($('#cajaFecha').value) return; $('#cajaFecha').value=fechaISOCaja(new Date()); }
