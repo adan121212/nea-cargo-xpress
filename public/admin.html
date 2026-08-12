@@ -776,27 +776,54 @@
         </div>
       </form>
       <div class="banner" id="bannerFactura"></div>
-      <h2 style="margin-top:24px;">Todas las facturas</h2>
-      <div class="filtros">
-        <div>
-          <label for="filtroFacturaEstado">Estado</label>
-          <select id="filtroFacturaEstado">
-            <option value="">Todos</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="pagada">Pagada</option>
-            <option value="anulada">Anulada</option>
-          </select>
+
+      <!-- Sección: Pendientes -->
+      <div style="margin-top:28px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:#ff6a1a;"></div>
+          <h3 style="margin:0;font-family:var(--font-display);font-size:15px;">Facturas pendientes</h3>
+          <span id="badgeFactPendiente" style="background:#ff6a1a;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">0</span>
         </div>
-        <div><label for="filtroFacturaEmail">Correo del cliente</label><input id="filtroFacturaEmail" type="text" placeholder="ana@ejemplo.com"></div>
-        <div style="flex:0;"><label>&nbsp;</label><button class="btn-secondary" id="btnFiltrarFacturas">Filtrar</button></div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Total</th><th>Acción</th></tr></thead>
+            <tbody id="tbodyFactPendiente"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="emptyFactPendiente" style="display:none;">No hay facturas pendientes. 🎉</div>
       </div>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Total</th><th>Estado</th><th></th></tr></thead>
-          <tbody id="tbodyFacturas"></tbody>
-        </table>
+
+      <!-- Sección: Pagadas -->
+      <div style="margin-top:28px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:#177a63;"></div>
+          <h3 style="margin:0;font-family:var(--font-display);font-size:15px;">Facturas pagadas</h3>
+          <span id="badgeFactPagada" style="background:#177a63;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">0</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Total</th><th>Acción</th></tr></thead>
+            <tbody id="tbodyFactPagada"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="emptyFactPagada" style="display:none;">No hay facturas pagadas aún.</div>
       </div>
-      <div class="empty" id="emptyFacturas" style="display:none;">No hay facturas con estos filtros.</div>
+
+      <!-- Sección: Anuladas -->
+      <div style="margin-top:28px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:#6b7280;"></div>
+          <h3 style="margin:0;font-family:var(--font-display);font-size:15px;">Facturas anuladas</h3>
+          <span id="badgeFactAnulada" style="background:#6b7280;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">0</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Total</th><th>Acción</th></tr></thead>
+            <tbody id="tbodyFactAnulada"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="emptyFactAnulada" style="display:none;">No hay facturas anuladas.</div>
+      </div>
     </div>
 
     <!-- ---- TAB: Tarifas ---- -->
@@ -1444,36 +1471,57 @@
     } catch (err) { mostrarBanner('#bannerFactura', 'error', 'No pudimos conectar.'); }
     finally { setCargando(btn, false); }
   });
+  function renderFilasFactura(facturas, tbodyId, esAnulada) {
+    const tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = facturas.map(f => {
+      const fecha = f.fecha_creacion ? new Date(f.fecha_creacion).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'}) : '';
+      const acciones = esAnulada
+        ? `<div class="row-actions"><button class="btn-secondary btn-ver-pdf" data-id="${f.id}">Ver PDF</button></div>`
+        : `<div class="row-actions"><button class="btn-secondary btn-ver-pdf" data-id="${f.id}">Ver PDF</button><button class="btn-secondary btn-reenviar-factura" data-id="${f.id}">Reenviar</button>${!esAnulada && f.estado!=='pagada' ? '' : ''}${f.estado==='pendiente'?`<button class="btn-secondary btn-anular-factura btn-danger" data-id="${f.id}">Anular</button>`:''}${f.estado==='pagada'?`<button class="btn-secondary btn-anular-factura btn-danger" data-id="${f.id}">Anular</button>`:''}</div>`;
+      return `<tr>
+        <td data-label="Factura" class="mono">${escapeHtml(f.numero_factura)}</td>
+        <td data-label="Cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}<br><span class="muted">${escapeHtml(f.cliente_email)}</span></td>
+        <td data-label="Paquete">${escapeHtml(f.tienda)}<br><span class="mono muted">${escapeHtml(f.numero_tracking)}</span></td>
+        <td data-label="Total" class="mono">$${Number(f.total).toFixed(2)}</td>
+        <td data-label="">${acciones}</td>
+      </tr>`;
+    }).join('');
+    tbody.querySelectorAll('.btn-ver-pdf').forEach(btn => {
+      btn.addEventListener('click', async () => { btn.textContent='...'; btn.disabled=true; try { const res=await apiAdmin(`/admin/facturas/${btn.dataset.id}/pdf`); const blob=await res.blob(); window.open(window.URL.createObjectURL(blob),'_blank'); } catch(e){ alert('No se pudo abrir el PDF.'); } finally { btn.textContent='Ver PDF'; btn.disabled=false; } });
+    });
+    tbody.querySelectorAll('.btn-reenviar-factura').forEach(btn => {
+      btn.addEventListener('click', async () => { btn.textContent='Enviando…'; btn.disabled=true; try { const res=await apiAdmin(`/admin/facturas/${btn.dataset.id}/reenviar`,{method:'POST'}); const data=await res.json().catch(()=>({})); if(res.ok){ const e=data.envios||{}; mostrarBanner('#bannerFactura',e.correo_enviado?'success':'error',`Reenvío: ${e.correo_enviado?'Correo ✓':'Correo ✗'}`); } else { mostrarBanner('#bannerFactura','error',data.mensaje||'No se pudo reenviar.'); } } catch(e){ mostrarBanner('#bannerFactura','error','No pudimos conectar.'); } finally { btn.textContent='Reenviar'; btn.disabled=false; } });
+    });
+    tbody.querySelectorAll('.btn-anular-factura').forEach(btn => {
+      btn.addEventListener('click', () => {
+        abrirModalAnulacion(btn.dataset.id, null, null, () => cargarFacturas());
+      });
+    });
+  }
+
   async function cargarFacturas(){
-    const params = new URLSearchParams();
-    if ($('#filtroFacturaEstado').value) params.set('estado', $('#filtroFacturaEstado').value);
-    if ($('#filtroFacturaEmail').value.trim()) params.set('email', $('#filtroFacturaEmail').value.trim());
     try {
-      const res = await apiAdmin(`/admin/facturas?${params.toString()}`);
+      const res = await apiAdmin('/admin/facturas');
       const data = await res.json();
-      const facturas = data.facturas || [];
-      $('#emptyFacturas').style.display = facturas.length ? 'none' : 'block';
-      $('#tbodyFacturas').innerHTML = facturas.map(f => `
-        <tr>
-          <td data-label="Factura" class="mono">${escapeHtml(f.numero_factura)}</td>
-          <td data-label="Cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}<br><span class="muted">${escapeHtml(f.cliente_email)}</span></td>
-          <td data-label="Paquete">${escapeHtml(f.tienda)}<br><span class="mono muted">${escapeHtml(f.numero_tracking)}</span></td>
-          <td data-label="Total" class="mono">$${Number(f.total).toFixed(2)}</td>
-          <td data-label="Estado"><select class="estado-select factura-estado-select" data-id="${f.id}"><option value="pendiente" ${f.estado==='pendiente'?'selected':''}>Pendiente</option><option value="pagada" ${f.estado==='pagada'?'selected':''}>Pagada</option><option value="anulada" ${f.estado==='anulada'?'selected':''}>Anulada</option></select></td>
-          <td data-label=""><div class="row-actions"><button class="btn-secondary btn-ver-pdf" data-id="${f.id}">Ver PDF</button><button class="btn-secondary btn-reenviar-factura" data-id="${f.id}">Reenviar</button></div></td>
-        </tr>`).join('');
-      $('#tbodyFacturas').querySelectorAll('.factura-estado-select').forEach(sel => {
-        sel.addEventListener('change', async () => { sel.disabled = true; try { await apiAdmin(`/admin/facturas/${sel.dataset.id}/estado`, { method: 'PATCH', body: JSON.stringify({ estado: sel.value }) }); } catch(err){} finally { sel.disabled = false; } });
-      });
-      $('#tbodyFacturas').querySelectorAll('.btn-ver-pdf').forEach(btn => {
-        btn.addEventListener('click', async () => { btn.textContent = '...'; btn.disabled = true; try { const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/pdf`); const blob = await res.blob(); window.open(window.URL.createObjectURL(blob), '_blank'); } catch(err){ alert('No se pudo abrir el PDF.'); } finally { btn.textContent = 'Ver PDF'; btn.disabled = false; } });
-      });
-      $('#tbodyFacturas').querySelectorAll('.btn-reenviar-factura').forEach(btn => {
-        btn.addEventListener('click', async () => { btn.textContent = 'Enviando…'; btn.disabled = true; try { const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/reenviar`, { method: 'POST' }); const data = await res.json().catch(()=>({})); if(res.ok){ const e=data.envios||{}; mostrarBanner('#bannerFactura', e.correo_enviado||e.whatsapp_enviado?'success':'error', `Reenvío: ${e.correo_enviado?'Correo ✓':'Correo ✗'}`); } else { mostrarBanner('#bannerFactura','error',data.mensaje||'No se pudo reenviar.'); } } catch(err){ mostrarBanner('#bannerFactura','error','No pudimos conectar.'); } finally { btn.textContent='Reenviar'; btn.disabled=false; } });
-      });
+      const todas = data.facturas || [];
+      const pendientes = todas.filter(f=>f.estado==='pendiente');
+      const pagadas = todas.filter(f=>f.estado==='pagada');
+      const anuladas = todas.filter(f=>f.estado==='anulada');
+      // Badges
+      document.getElementById('badgeFactPendiente').textContent = pendientes.length;
+      document.getElementById('badgeFactPagada').textContent = pagadas.length;
+      document.getElementById('badgeFactAnulada').textContent = anuladas.length;
+      // Pendientes
+      document.getElementById('emptyFactPendiente').style.display = pendientes.length ? 'none' : 'block';
+      renderFilasFactura(pendientes, 'tbodyFactPendiente', false);
+      // Pagadas
+      document.getElementById('emptyFactPagada').style.display = pagadas.length ? 'none' : 'block';
+      renderFilasFactura(pagadas, 'tbodyFactPagada', false);
+      // Anuladas
+      document.getElementById('emptyFactAnulada').style.display = anuladas.length ? 'none' : 'block';
+      renderFilasFactura(anuladas, 'tbodyFactAnulada', true);
     } catch (err) {}
   }
-  $('#btnFiltrarFacturas').addEventListener('click', (e) => { e.preventDefault(); cargarFacturas(); });
 
   let paqueteFotosActual = null;
   async function abrirModalFotos(paqueteId){
@@ -1625,14 +1673,14 @@
     facturadorCliente=cliente; facturadorMetodoPago='';
     let html=`<div class="cliente-card" style="display:flex;justify-content:space-between;align-items:center;"><div><div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div><div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono?' · '+escapeHtml(cliente.telefono):''}</div></div><div class="stats">${paquetes.length}<small>paquetes</small></div></div>`;
     const sinFacturaTodos=paquetes.filter(p=>!p.factura_id||p.factura_estado==='anulada');
-    const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||0)>0&&p.peso_confirmado&&Number(p.valor_declarado||0)>0);
+    const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||p.peso_lb||0)>0&&Number(p.valor_declarado||0)>0);
     const noListos=sinFacturaTodos.length-sinFactura.length;
     if(sinFacturaTodos.length===0){ html+='<div class="empty">Este cliente no tiene paquetes pendientes de facturar.</div>'; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
     if(sinFactura.length===0){ html+=`<div class="empty">⚠ Este cliente tiene ${noListos} paquete(s) sin peso o valor declarado.</div>`; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
     html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-weight:600;font-size:13px;">Paquetes listos para facturar</div><button class="ft-select-all" id="btnSelectAll">Seleccionar todos</button></div>`;
     if(noListos>0) html+=`<div class="empty" style="margin-bottom:10px;padding:10px 14px;">⚠ ${noListos} paquete(s) más sin peso o valor declarado.</div>`;
     html+=sinFactura.map((p,i)=>{
-      const peso=Number(p.peso_real_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
+      const peso=Number(p.peso_real_lb||p.peso_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
       const statusClass=p.estado==='listo_para_retiro'?'listo':p.estado==='en_transito'?'transito':'bodega';
       return `<div class="ft-pkg" data-idx="${i}" data-paquete-id="${p.id}" data-peso="${peso}" data-valor="${valor}" data-envio="0" data-manejo="0" data-seguro="0" data-calc-total="0" data-tarifa-id=""><input type="checkbox"><div class="ft-pkg-info"><div class="ft-pkg-store">${escapeHtml(p.tienda)}</div><div class="ft-pkg-track">#${escapeHtml(p.numero_tracking)}</div><div class="ft-pkg-details">${peso} lb · Declarado $${valor}</div></div><div class="ft-pkg-right"><span class="ft-status ${statusClass}">${ESTADO_LABEL_MOSTRADOR[p.estado]||p.estado}</span><div class="ft-pkg-price">…</div></div></div>`;
     }).join('');
@@ -1971,6 +2019,65 @@
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'&&$('#modalF1Clientes').style.display==='flex') f1Cerrar(); });
   $('#mostradorQ').addEventListener('keydown',(e)=>{ if(e.key==='1'){ e.preventDefault(); f1Abrir('facturador'); } });
   document.addEventListener('keydown',(e)=>{ if(e.key==='1'&&document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); } });
+
+  function abrirModalAnulacion(facturaId, selectEl, estadoAnterior, callback){
+    if(selectEl) selectEl.value = estadoAnterior;
+    const popup = document.createElement('div');
+    popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;';
+    popup.innerHTML = `
+      <div style="background:#fff;border-radius:14px;padding:24px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px;">Anular factura</div>
+        <p style="font-size:13px;color:var(--ink-soft);margin:0 0 16px;">Esta acción no se puede deshacer. Ingresa el código de autorización para continuar.</p>
+        <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">Motivo (opcional)</label>
+        <input id="anulacionMotivo" type="text" placeholder="Ej. Error en precio, cliente solicitó cambio…" style="margin-bottom:12px;">
+        <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">Código de autorización</label>
+        <input id="anulacionCodigo" type="password" placeholder="••••" style="margin-bottom:16px;letter-spacing:4px;font-size:18px;text-align:center;">
+        <div id="anulacionError" style="display:none;color:#c0392b;font-size:12.5px;margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;">
+          <button id="btnAnulacionCancelar" class="btn-secondary" style="flex:1;">Cancelar</button>
+          <button id="btnAnulacionConfirmar" class="btn-primary" style="flex:1;margin-top:0;background:#c0392b;box-shadow:none;">
+            <span class="spinner"></span><span>Anular factura</span>
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(popup);
+    setTimeout(() => popup.querySelector('#anulacionCodigo').focus(), 50);
+    popup.querySelector('#btnAnulacionCancelar').addEventListener('click', () => popup.remove());
+    popup.querySelector('#btnAnulacionConfirmar').addEventListener('click', async () => {
+      const codigo = popup.querySelector('#anulacionCodigo').value;
+      const motivo = popup.querySelector('#anulacionMotivo').value.trim();
+      const errorDiv = popup.querySelector('#anulacionError');
+      const btn = popup.querySelector('#btnAnulacionConfirmar');
+      if (!codigo) { errorDiv.textContent = 'Ingresa el código.'; errorDiv.style.display='block'; return; }
+      setCargando(btn, true);
+      try {
+        const res = await apiAdmin(`/admin/facturas/${facturaId}/estado`, {
+          method: 'PATCH',
+          body: JSON.stringify({ estado: 'anulada', codigo_anulacion: codigo, motivo }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          popup.remove();
+          let msg = '✓ Factura anulada.';
+          if (data.nota_ajuste) msg += ` Nota de ajuste creada en el cierre del ${data.nota_ajuste.fecha}.`;
+          mostrarBanner('#bannerFactura', 'success', msg);
+          if (callback) callback();
+          else cargarFacturas();
+        } else {
+          errorDiv.textContent = data.mensaje || 'Código incorrecto o error al anular.';
+          errorDiv.style.display = 'block';
+          setCargando(btn, false);
+        }
+      } catch(e) {
+        errorDiv.textContent = 'No pudimos conectar con el servidor.';
+        errorDiv.style.display = 'block';
+        setCargando(btn, false);
+      }
+    });
+    popup.querySelector('#anulacionCodigo').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') popup.querySelector('#btnAnulacionConfirmar').click();
+    });
+  }
 
   async function iniciarAdmin(){
     try { await cargarPaquetes(); cargarPendientesMostrador(); mostrarAdmin(true); } catch(err){ mostrarAdmin(false); }
