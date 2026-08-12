@@ -1463,21 +1463,7 @@
           <td data-label=""><div class="row-actions"><button class="btn-secondary btn-ver-pdf" data-id="${f.id}">Ver PDF</button><button class="btn-secondary btn-reenviar-factura" data-id="${f.id}">Reenviar</button></div></td>
         </tr>`).join('');
       $('#tbodyFacturas').querySelectorAll('.factura-estado-select').forEach(sel => {
-        sel.addEventListener('change', async () => {
-          if (sel.value === 'anulada') {
-            // Interceptar anulación — pedir código
-            const estadoAnterior = sel.dataset.estadoAnterior || sel.options[sel.selectedIndex === 0 ? 0 : sel.selectedIndex - 1]?.value || 'pendiente';
-            abrirModalAnulacion(sel.dataset.id, sel, estadoAnterior);
-            return;
-          }
-          sel.disabled = true;
-          try {
-            await apiAdmin(`/admin/facturas/${sel.dataset.id}/estado`, { method: 'PATCH', body: JSON.stringify({ estado: sel.value }) });
-          } catch(err){}
-          finally { sel.disabled = false; }
-        });
-        // Guardar estado original para poder revertir si cancela
-        sel.dataset.estadoAnterior = sel.value;
+        sel.addEventListener('change', async () => { sel.disabled = true; try { await apiAdmin(`/admin/facturas/${sel.dataset.id}/estado`, { method: 'PATCH', body: JSON.stringify({ estado: sel.value }) }); } catch(err){} finally { sel.disabled = false; } });
       });
       $('#tbodyFacturas').querySelectorAll('.btn-ver-pdf').forEach(btn => {
         btn.addEventListener('click', async () => { btn.textContent = '...'; btn.disabled = true; try { const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/pdf`); const blob = await res.blob(); window.open(window.URL.createObjectURL(blob), '_blank'); } catch(err){ alert('No se pudo abrir el PDF.'); } finally { btn.textContent = 'Ver PDF'; btn.disabled = false; } });
@@ -1639,14 +1625,14 @@
     facturadorCliente=cliente; facturadorMetodoPago='';
     let html=`<div class="cliente-card" style="display:flex;justify-content:space-between;align-items:center;"><div><div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div><div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono?' · '+escapeHtml(cliente.telefono):''}</div></div><div class="stats">${paquetes.length}<small>paquetes</small></div></div>`;
     const sinFacturaTodos=paquetes.filter(p=>!p.factura_id||p.factura_estado==='anulada');
-    const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||p.peso_lb||0)>0&&Number(p.valor_declarado||0)>0);
+    const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||0)>0&&p.peso_confirmado&&Number(p.valor_declarado||0)>0);
     const noListos=sinFacturaTodos.length-sinFactura.length;
     if(sinFacturaTodos.length===0){ html+='<div class="empty">Este cliente no tiene paquetes pendientes de facturar.</div>'; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
     if(sinFactura.length===0){ html+=`<div class="empty">⚠ Este cliente tiene ${noListos} paquete(s) sin peso o valor declarado.</div>`; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
     html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-weight:600;font-size:13px;">Paquetes listos para facturar</div><button class="ft-select-all" id="btnSelectAll">Seleccionar todos</button></div>`;
     if(noListos>0) html+=`<div class="empty" style="margin-bottom:10px;padding:10px 14px;">⚠ ${noListos} paquete(s) más sin peso o valor declarado.</div>`;
     html+=sinFactura.map((p,i)=>{
-      const peso=Number(p.peso_real_lb||p.peso_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
+      const peso=Number(p.peso_real_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
       const statusClass=p.estado==='listo_para_retiro'?'listo':p.estado==='en_transito'?'transito':'bodega';
       return `<div class="ft-pkg" data-idx="${i}" data-paquete-id="${p.id}" data-peso="${peso}" data-valor="${valor}" data-envio="0" data-manejo="0" data-seguro="0" data-calc-total="0" data-tarifa-id=""><input type="checkbox"><div class="ft-pkg-info"><div class="ft-pkg-store">${escapeHtml(p.tienda)}</div><div class="ft-pkg-track">#${escapeHtml(p.numero_tracking)}</div><div class="ft-pkg-details">${peso} lb · Declarado $${valor}</div></div><div class="ft-pkg-right"><span class="ft-status ${statusClass}">${ESTADO_LABEL_MOSTRADOR[p.estado]||p.estado}</span><div class="ft-pkg-price">…</div></div></div>`;
     }).join('');
@@ -1985,74 +1971,6 @@
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'&&$('#modalF1Clientes').style.display==='flex') f1Cerrar(); });
   $('#mostradorQ').addEventListener('keydown',(e)=>{ if(e.key==='1'){ e.preventDefault(); f1Abrir('facturador'); } });
   document.addEventListener('keydown',(e)=>{ if(e.key==='1'&&document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); } });
-
-  function abrirModalAnulacion(facturaId, selectEl, estadoAnterior){
-    // Revertir el select visualmente mientras se decide
-    selectEl.value = estadoAnterior;
-
-    const popup = document.createElement('div');
-    popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;';
-    popup.innerHTML = `
-      <div style="background:#fff;border-radius:14px;padding:24px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
-        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px;">Anular factura</div>
-        <p style="font-size:13px;color:var(--ink-soft);margin:0 0 16px;">Esta acción no se puede deshacer. Ingresa el código de autorización para continuar.</p>
-        <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">Motivo (opcional)</label>
-        <input id="anulacionMotivo" type="text" placeholder="Ej. Error en precio, cliente solicitó cambio…" style="margin-bottom:12px;">
-        <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">Código de autorización</label>
-        <input id="anulacionCodigo" type="password" placeholder="••••" style="margin-bottom:16px;letter-spacing:4px;font-size:18px;text-align:center;">
-        <div id="anulacionError" style="display:none;color:#c0392b;font-size:12.5px;margin-bottom:12px;"></div>
-        <div style="display:flex;gap:8px;">
-          <button id="btnAnulacionCancelar" class="btn-secondary" style="flex:1;">Cancelar</button>
-          <button id="btnAnulacionConfirmar" class="btn-primary" style="flex:1;margin-top:0;background:#c0392b;box-shadow:none;">
-            <span class="spinner"></span><span>Anular factura</span>
-          </button>
-        </div>
-      </div>`;
-    document.body.appendChild(popup);
-    setTimeout(() => popup.querySelector('#anulacionCodigo').focus(), 50);
-
-    popup.querySelector('#btnAnulacionCancelar').addEventListener('click', () => popup.remove());
-    popup.querySelector('#btnAnulacionConfirmar').addEventListener('click', async () => {
-      const codigo = popup.querySelector('#anulacionCodigo').value;
-      const motivo = popup.querySelector('#anulacionMotivo').value.trim();
-      const errorDiv = popup.querySelector('#anulacionError');
-      const btn = popup.querySelector('#btnAnulacionConfirmar');
-      if (!codigo) { errorDiv.textContent = 'Ingresa el código.'; errorDiv.style.display='block'; return; }
-      setCargando(btn, true);
-      try {
-        const res = await apiAdmin(`/admin/facturas/${facturaId}/estado`, {
-          method: 'PATCH',
-          body: JSON.stringify({ estado: 'anulada', codigo_anulacion: codigo, motivo }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok) {
-          popup.remove();
-          selectEl.value = 'anulada';
-          selectEl.dataset.estadoAnterior = 'anulada';
-          // Deshabilitar el select para que no se pueda cambiar desde anulada
-          selectEl.disabled = true;
-          let msg = '✓ Factura anulada.';
-          if (data.nota_ajuste) {
-            msg += ` Nota de ajuste creada en el cierre del ${data.nota_ajuste.fecha}.`;
-          }
-          mostrarBanner('#bannerFactura', 'success', msg);
-        } else {
-          errorDiv.textContent = data.mensaje || 'Código incorrecto o error al anular.';
-          errorDiv.style.display = 'block';
-          setCargando(btn, false);
-        }
-      } catch(e) {
-        errorDiv.textContent = 'No pudimos conectar con el servidor.';
-        errorDiv.style.display = 'block';
-        setCargando(btn, false);
-      }
-    });
-
-    // Enter en el campo de código dispara confirmar
-    popup.querySelector('#anulacionCodigo').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') popup.querySelector('#btnAnulacionConfirmar').click();
-    });
-  }
 
   async function iniciarAdmin(){
     try { await cargarPaquetes(); cargarPendientesMostrador(); mostrarAdmin(true); } catch(err){ mostrarAdmin(false); }
