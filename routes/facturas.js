@@ -1,13 +1,13 @@
 const express = require('express');
 const crypto = require('crypto');
 const { body, query, validationResult } = require('express-validator');
-const pool = require('../../db');
-const { requiereAutenticacion } = require('../../middleware/auth');
-const { requiereAdmin } = require('../../middleware/admin');
-const { generarNumeroFactura } = require('../../utils/factura');
-const { generarPdfFactura } = require('../../utils/facturaPdf');
-const { enviarFacturaPorCorreo } = require('../../utils/mailer');
-const { enviarFacturaPorWhatsapp } = require('../../utils/whatsapp');
+const pool = require('../db');
+const { requiereAutenticacion } = require('../middleware/auth');
+const { requiereAdmin } = require('../middleware/admin');
+const { generarNumeroFactura } = require('../utils/factura');
+const { generarPdfFactura } = require('../utils/facturaPdf');
+const { enviarFacturaPorCorreo } = require('../utils/mailer');
+const { enviarFacturaPorWhatsapp } = require('../utils/whatsapp');
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
@@ -230,8 +230,6 @@ router.get(
 
 // --- PATCH /api/admin/facturas/:id/estado ---
 // Marca una factura como pagada o anulada.
-// Si se anula, requiere codigo_anulacion = '1234'.
-// Si la factura pagada pertenece a un cierre ya cerrado, crea nota de ajuste.
 router.patch(
   '/:id/estado',
   [body('estado').isIn(['pendiente', 'pagada', 'anulada']).withMessage('Estado inválido')],
@@ -241,69 +239,19 @@ router.patch(
       return res.status(400).json({ errores: errores.array() });
     }
 
-    // Validar código de anulación
-    if (req.body.estado === 'anulada') {
-      if (req.body.codigo_anulacion !== '1234') {
-        return res.status(403).json({ mensaje: 'Código de anulación incorrecto.' });
-      }
-    }
-
     const fechaPago = req.body.estado === 'pagada' ? 'NOW()' : 'NULL';
 
     try {
-      // Traer la factura actual antes de cambiarla
-      const facturaActual = await pool.query(
-        `SELECT f.*, p.fecha_actualizacion AS fecha_pago_real
-         FROM facturas f
-         JOIN paquetes p ON p.id = f.paquete_id
-         WHERE f.id = $1`,
-        [req.params.id]
-      );
-      if (facturaActual.rows.length === 0) {
-        return res.status(404).json({ mensaje: 'Factura no encontrada' });
-      }
-      const facturaAntes = facturaActual.rows[0];
-
       const resultado = await pool.query(
         `UPDATE facturas SET estado = $1, fecha_pago = ${fechaPago} WHERE id = $2 RETURNING *`,
         [req.body.estado, req.params.id]
       );
 
-      let nota_ajuste = null;
-
-      // Al anular: liberar el paquete para que pueda refacturarse
-      if (req.body.estado === 'anulada') {
-        await pool.query(
-          `UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW()
-           WHERE id = (SELECT paquete_id FROM facturas WHERE id = $1)
-           AND estado NOT IN ('entregado')`,
-          [req.params.id]
-        );
+      if (resultado.rows.length === 0) {
+        return res.status(404).json({ mensaje: 'Factura no encontrada' });
       }
 
-      // Si se está anulando una factura que estaba pagada, verificar si su caja ya está cerrada
-      if (req.body.estado === 'anulada' && facturaAntes.estado === 'pagada' && facturaAntes.fecha_pago) {
-        const fechaPagoStr = new Date(facturaAntes.fecha_pago).toISOString().slice(0, 10);
-        const cierreDia = await pool.query(
-          'SELECT id FROM cierres_caja WHERE fecha = $1',
-          [fechaPagoStr]
-        );
-        if (cierreDia.rows.length > 0) {
-          // Crear nota de ajuste en el cierre
-          const textoNota = `AJUSTE: Factura ${facturaAntes.numero_factura} anulada (−$${Number(facturaAntes.total).toFixed(2)}) — ${req.body.motivo || 'sin motivo especificado'}`;
-          await pool.query(
-            `UPDATE cierres_caja SET notas = COALESCE(notas || E'\\n', '') || $1 WHERE fecha = $2`,
-            [textoNota, fechaPagoStr]
-          );
-          nota_ajuste = { fecha: fechaPagoStr, texto: textoNota };
-        }
-      }
-
-      return res.json({
-        mensaje: 'Estado de factura actualizado',
-        factura: resultado.rows[0],
-        nota_ajuste,
-      });
+      return res.json({ mensaje: 'Estado de factura actualizado', factura: resultado.rows[0] });
     } catch (error) {
       console.error('Error en PATCH /admin/facturas/:id/estado:', error);
       return res.status(500).json({ mensaje: 'Error interno al actualizar la factura' });
@@ -473,7 +421,7 @@ router.post(
         ]
       );
       const factura = insercion.rows[0];
-      const { generarNumeroFactura } = require('../../utils/factura');
+      const { generarNumeroFactura } = require('../utils/factura');
       const numeroFactura = generarNumeroFactura(factura.id);
       await client.query('UPDATE facturas SET numero_factura = $1 WHERE id = $2', [numeroFactura, factura.id]);
 
@@ -501,8 +449,8 @@ router.post(
            WHERE f.id = $1`,
           [factura.id]
         );
-        const { generarPdfFactura } = require('../../utils/facturaPdf');
-        const { enviarFacturaPorCorreo, enviarCorreoCambioEstado } = require('../../utils/mailer');
+        const { generarPdfFactura } = require('../utils/facturaPdf');
+        const { enviarFacturaPorCorreo, enviarCorreoCambioEstado } = require('../utils/mailer');
         const fd = datosCompletos.rows[0];
         if (fd) {
           const pdfBuffer = await generarPdfFactura(fd);
