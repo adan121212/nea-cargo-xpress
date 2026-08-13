@@ -1625,14 +1625,14 @@
     facturadorCliente=cliente; facturadorMetodoPago='';
     let html=`<div class="cliente-card" style="display:flex;justify-content:space-between;align-items:center;"><div><div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div><div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono?' · '+escapeHtml(cliente.telefono):''}</div></div><div class="stats">${paquetes.length}<small>paquetes</small></div></div>`;
     const sinFacturaTodos=paquetes.filter(p=>!p.factura_id||p.factura_estado==='anulada');
-    const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||p.peso_lb||0)>0&&Number(p.valor_declarado||0)>0);
+    const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||0)>0&&p.peso_confirmado&&Number(p.valor_declarado||0)>0);
     const noListos=sinFacturaTodos.length-sinFactura.length;
     if(sinFacturaTodos.length===0){ html+='<div class="empty">Este cliente no tiene paquetes pendientes de facturar.</div>'; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
     if(sinFactura.length===0){ html+=`<div class="empty">⚠ Este cliente tiene ${noListos} paquete(s) sin peso o valor declarado.</div>`; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
     html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-weight:600;font-size:13px;">Paquetes listos para facturar</div><button class="ft-select-all" id="btnSelectAll">Seleccionar todos</button></div>`;
     if(noListos>0) html+=`<div class="empty" style="margin-bottom:10px;padding:10px 14px;">⚠ ${noListos} paquete(s) más sin peso o valor declarado.</div>`;
     html+=sinFactura.map((p,i)=>{
-      const peso=Number(p.peso_real_lb||p.peso_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
+      const peso=Number(p.peso_real_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
       const statusClass=p.estado==='listo_para_retiro'?'listo':p.estado==='en_transito'?'transito':'bodega';
       return `<div class="ft-pkg" data-idx="${i}" data-paquete-id="${p.id}" data-peso="${peso}" data-valor="${valor}" data-envio="0" data-manejo="0" data-seguro="0" data-calc-total="0" data-tarifa-id=""><input type="checkbox"><div class="ft-pkg-info"><div class="ft-pkg-store">${escapeHtml(p.tienda)}</div><div class="ft-pkg-track">#${escapeHtml(p.numero_tracking)}</div><div class="ft-pkg-details">${peso} lb · Declarado $${valor}</div></div><div class="ft-pkg-right"><span class="ft-status ${statusClass}">${ESTADO_LABEL_MOSTRADOR[p.estado]||p.estado}</span><div class="ft-pkg-price">…</div></div></div>`;
     }).join('');
@@ -1885,13 +1885,7 @@
       const c=data.cierre;
       const hora=new Date(c.fecha_cierre).toLocaleString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
       estadoDiv.innerHTML=`<div class="banner show success" style="margin-bottom:16px;">🔒 Caja cerrada el ${hora} por ${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}.</div>`;
-      cierreBox.innerHTML=`
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
-          <button id="btnImprimirCaja" class="btn-secondary" style="display:flex;align-items:center;gap:6px;">🖨️ Imprimir cierre</button>
-          <button id="btnEnviarCaja" class="btn-secondary" style="display:flex;align-items:center;gap:6px;">📧 Enviar por correo</button>
-        </div>`;
-      document.getElementById('btnImprimirCaja').addEventListener('click', ()=>imprimirCaja(data));
-      document.getElementById('btnEnviarCaja').addEventListener('click', ()=>enviarCajaPorCorreo(data));
+      cierreBox.innerHTML='';
     } else {
       estadoDiv.innerHTML='';
       cierreBox.innerHTML=`
@@ -1907,7 +1901,25 @@
     }
   }
   async function cerrarCaja(fecha){ if(!confirm(`¿Confirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','✓ Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
-  async function cargarHistorialCaja(){ try { const res=await apiAdmin('/admin/caja/historial'); const data=await res.json(); const cierres=data.cierres||[]; $('#emptyCajaHistorial').style.display=cierres.length?'none':'block'; $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{ const fecha=new Date(c.fecha).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'}); const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}); return `<tr><td data-label="Fecha">${fecha}</td><td data-label="Total" class="mono">$${Number(c.total_general).toFixed(2)}</td><td data-label="Facturas" class="mono">${c.cantidad_facturas}</td><td data-label="Cerrado por">${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</td><td data-label="Hora" class="muted">${hora}</td></tr>`; }).join(''); } catch(err){} }
+  async function cargarHistorialCaja(){
+    try {
+      const res=await apiAdmin('/admin/caja/historial');
+      const data=await res.json();
+      const cierres=data.cierres||[];
+      $('#emptyCajaHistorial').style.display=cierres.length?'none':'block';
+      $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{
+        const fecha=new Date(c.fecha).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});
+        const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'});
+        return `<div style="display:grid;grid-template-columns:1fr 110px 80px 1fr 90px;padding:12px 16px;gap:10px;border-bottom:1px solid var(--line);font-size:13px;align-items:center;transition:background .1s;" onmouseover="this.style.background='rgba(255,106,26,0.035)'" onmouseout="this.style.background=''">
+          <div style="font-weight:500;">${fecha}</div>
+          <div style="font-family:var(--font-mono);font-weight:700;color:var(--cargo-green);">$${Number(c.total_general).toFixed(2)}</div>
+          <div style="font-family:var(--font-mono);color:var(--ink-soft);">${c.cantidad_facturas}</div>
+          <div>${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</div>
+          <div style="color:var(--ink-soft);font-size:12px;">${hora}</div>
+        </div>`;
+      }).join('');
+    } catch(err){}
+  }
   $('#btnVerCaja').addEventListener('click',(e)=>{ e.preventDefault(); cargarCaja(); });
 
   const ESTADO_LABEL_REPORTE={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
@@ -1977,98 +1989,6 @@
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'&&$('#modalF1Clientes').style.display==='flex') f1Cerrar(); });
   $('#mostradorQ').addEventListener('keydown',(e)=>{ if(e.key==='1'){ e.preventDefault(); f1Abrir('facturador'); } });
   document.addEventListener('keydown',(e)=>{ if(e.key==='1'&&document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); } });
-
-  function imprimirCaja(data){
-    const metodos = data.detalle_por_metodo || [];
-    const fecha = new Date(data.fecha||data.cierre?.fecha).toLocaleDateString('es-PA',{day:'2-digit',month:'long',year:'numeric'});
-    const hora = data.cierre ? new Date(data.cierre.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}) : '';
-    const cerradoPor = data.cierre ? `${escapeHtml(data.cierre.cerrado_por_nombre||'')} ${escapeHtml(data.cierre.cerrado_por_apellido||'')}` : '';
-    const filas = metodos.map(m=>`
-      <tr>
-        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;">${escapeHtml(m.etiqueta||m.metodo_pago)}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center;">${m.cantidad}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:700;">$${Number(m.total).toFixed(2)}</td>
-      </tr>`).join('');
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-      <title>Cierre de Caja — ${fecha}</title>
-      <style>
-        body{font-family:Arial,sans-serif;max-width:400px;margin:0 auto;padding:20px;color:#0c1b33;}
-        .logo{text-align:center;margin-bottom:16px;}
-        .logo h1{font-size:18px;margin:0;color:#0c1b33;}
-        .logo p{font-size:12px;color:#666;margin:4px 0 0;}
-        h2{text-align:center;font-size:15px;border-top:2px solid #0c1b33;border-bottom:2px solid #0c1b33;padding:8px 0;margin:16px 0;}
-        .info{font-size:12px;color:#444;margin-bottom:16px;}
-        .info div{display:flex;justify-content:space-between;padding:3px 0;}
-        table{width:100%;border-collapse:collapse;font-size:13px;}
-        th{background:#0c1b33;color:#fff;padding:8px 12px;text-align:left;}
-        th:last-child,td:last-child{text-align:right;}
-        .total-row td{font-weight:700;font-size:15px;border-top:2px solid #0c1b33;padding:10px 12px;}
-        .footer{margin-top:24px;text-align:center;font-size:11px;color:#999;border-top:1px dashed #ccc;padding-top:12px;}
-        @media print{body{max-width:100%;}}
-      </style>
-    </head><body>
-      <div class="logo">
-        <h1>NEA CARGO XPRESS</h1>
-        <p>Miami → Panamá</p>
-      </div>
-      <h2>CIERRE DE CAJA</h2>
-      <div class="info">
-        <div><span>Fecha:</span><span>${fecha}</span></div>
-        <div><span>Hora de cierre:</span><span>${hora}</span></div>
-        <div><span>Cerrado por:</span><span>${cerradoPor}</span></div>
-        <div><span>Total facturas:</span><span>${data.cantidad_facturas}</span></div>
-      </div>
-      <table>
-        <thead><tr><th>Método</th><th>Facturas</th><th>Total</th></tr></thead>
-        <tbody>${filas}</tbody>
-        <tfoot><tr class="total-row"><td colspan="2">TOTAL COBRADO</td><td>$${Number(data.total_general).toFixed(2)}</td></tr></tfoot>
-      </table>
-      ${data.cierre?.notas?`<div style="margin-top:16px;padding:10px;background:#f9fafb;border-radius:6px;font-size:12px;"><strong>Notas:</strong><br>${escapeHtml(data.cierre.notas)}</div>`:''}
-      <div class="footer">NEA Cargo Xpress — Sistema de casillero<br>Generado el ${new Date().toLocaleString('es-PA')}</div>
-    </body></html>`;
-    const ventana = window.open('','_blank','width=500,height=700');
-    ventana.document.write(html);
-    ventana.document.close();
-    ventana.focus();
-    setTimeout(()=>ventana.print(), 400);
-  }
-
-  async function enviarCajaPorCorreo(data){
-    const popup = document.createElement('div');
-    popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;';
-    popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:24px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
-      <div style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:12px;">Enviar cierre por correo</div>
-      <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">Correo destinatario</label>
-      <input id="cajaCorreoDestino" type="email" placeholder="admin@neacargo.com" style="margin-bottom:16px;">
-      <div id="cajaCorreoError" style="display:none;color:#c0392b;font-size:12px;margin-bottom:10px;"></div>
-      <div style="display:flex;gap:8px;">
-        <button id="btnCajaCorreoCancelar" class="btn-secondary" style="flex:1;">Cancelar</button>
-        <button id="btnCajaCorreoEnviar" class="btn-primary" style="flex:1;margin-top:0;">
-          <span class="spinner"></span><span>Enviar</span>
-        </button>
-      </div>
-    </div>`;
-    document.body.appendChild(popup);
-    setTimeout(()=>popup.querySelector('#cajaCorreoDestino').focus(),50);
-    popup.querySelector('#btnCajaCorreoCancelar').addEventListener('click',()=>popup.remove());
-    popup.querySelector('#btnCajaCorreoEnviar').addEventListener('click', async()=>{
-      const correo = popup.querySelector('#cajaCorreoDestino').value.trim();
-      const errorDiv = popup.querySelector('#cajaCorreoError');
-      if(!correo||!correo.includes('@')){ errorDiv.textContent='Ingresa un correo válido.'; errorDiv.style.display='block'; return; }
-      const btn = popup.querySelector('#btnCajaCorreoEnviar');
-      setCargando(btn,true);
-      try {
-        const res = await apiAdmin('/admin/caja/enviar-reporte', {
-          method:'POST',
-          body: JSON.stringify({ fecha: data.fecha||data.cierre?.fecha, correo })
-        });
-        const d = await res.json().catch(()=>({}));
-        if(res.ok){ popup.remove(); mostrarBanner('#bannerCaja','success',`✓ Cierre enviado a ${correo}.`); }
-        else { errorDiv.textContent = d.mensaje||'No se pudo enviar.'; errorDiv.style.display='block'; setCargando(btn,false); }
-      } catch(e){ errorDiv.textContent='No pudimos conectar.'; errorDiv.style.display='block'; setCargando(btn,false); }
-    });
-    popup.querySelector('#cajaCorreoDestino').addEventListener('keydown',(e)=>{ if(e.key==='Enter') popup.querySelector('#btnCajaCorreoEnviar').click(); });
-  }
 
   async function iniciarAdmin(){
     try { await cargarPaquetes(); cargarPendientesMostrador(); mostrarAdmin(true); } catch(err){ mostrarAdmin(false); }
