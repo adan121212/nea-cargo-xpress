@@ -1625,14 +1625,14 @@
     facturadorCliente=cliente; facturadorMetodoPago='';
     let html=`<div class="cliente-card" style="display:flex;justify-content:space-between;align-items:center;"><div><div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div><div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono?' · '+escapeHtml(cliente.telefono):''}</div></div><div class="stats">${paquetes.length}<small>paquetes</small></div></div>`;
     const sinFacturaTodos=paquetes.filter(p=>!p.factura_id||p.factura_estado==='anulada');
-    const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||0)>0&&p.peso_confirmado&&Number(p.valor_declarado||0)>0);
+    const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||p.peso_lb||0)>0&&Number(p.valor_declarado||0)>0);
     const noListos=sinFacturaTodos.length-sinFactura.length;
     if(sinFacturaTodos.length===0){ html+='<div class="empty">Este cliente no tiene paquetes pendientes de facturar.</div>'; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
     if(sinFactura.length===0){ html+=`<div class="empty">⚠ Este cliente tiene ${noListos} paquete(s) sin peso o valor declarado.</div>`; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
     html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-weight:600;font-size:13px;">Paquetes listos para facturar</div><button class="ft-select-all" id="btnSelectAll">Seleccionar todos</button></div>`;
     if(noListos>0) html+=`<div class="empty" style="margin-bottom:10px;padding:10px 14px;">⚠ ${noListos} paquete(s) más sin peso o valor declarado.</div>`;
     html+=sinFactura.map((p,i)=>{
-      const peso=Number(p.peso_real_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
+      const peso=Number(p.peso_real_lb||p.peso_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
       const statusClass=p.estado==='listo_para_retiro'?'listo':p.estado==='en_transito'?'transito':'bodega';
       return `<div class="ft-pkg" data-idx="${i}" data-paquete-id="${p.id}" data-peso="${peso}" data-valor="${valor}" data-envio="0" data-manejo="0" data-seguro="0" data-calc-total="0" data-tarifa-id=""><input type="checkbox"><div class="ft-pkg-info"><div class="ft-pkg-store">${escapeHtml(p.tienda)}</div><div class="ft-pkg-track">#${escapeHtml(p.numero_tracking)}</div><div class="ft-pkg-details">${peso} lb · Declarado $${valor}</div></div><div class="ft-pkg-right"><span class="ft-status ${statusClass}">${ESTADO_LABEL_MOSTRADOR[p.estado]||p.estado}</span><div class="ft-pkg-price">…</div></div></div>`;
     }).join('');
@@ -1830,7 +1830,16 @@
   function saltarPasoDimensiones(){ terminarFlujoRecepcion(); }
   function terminarFlujoRecepcion(){ $('#pasoFoto').style.display='none'; $('#pasoDimensiones').style.display='none'; $('#btnGuardarDimensionesRecepcion').disabled=false; setCargando($('#btnGuardarDimensionesRecepcion'),false); flujoFotoDimPaqueteId=null; $('#recepcionTracking').focus(); }
 
-  function fechaISOCaja(d){ return d.toISOString().slice(0,10); }
+  // Convierte una fecha a "YYYY-MM-DD" usando la hora LOCAL del navegador,
+  // no UTC. toISOString() convertía a UTC primero, y como Panamá es UTC-5,
+  // cerrar caja después de las 7:00 PM local ya caía en el día siguiente
+  // en UTC — por eso la caja se cerraba con la fecha equivocada.
+  function fechaISOCaja(d){
+    const anio = d.getFullYear();
+    const mes = String(d.getMonth()+1).padStart(2,'0');
+    const dia = String(d.getDate()).padStart(2,'0');
+    return `${anio}-${mes}-${dia}`;
+  }
   function inicializarFechaCaja(){ if($('#cajaFecha').value) return; $('#cajaFecha').value=fechaISOCaja(new Date()); }
   async function cargarCaja(){ inicializarFechaCaja(); const fecha=$('#cajaFecha').value; try { const res=await apiAdmin(`/admin/caja/dia?fecha=${fecha}`); const data=await res.json(); renderCaja(data); } catch(err){} }
   const METODO_ICONO = { efectivo:'💵', tarjeta:'💳', transferencia:'🏦', yappy:'📱' };
@@ -1901,30 +1910,17 @@
     }
   }
   async function cerrarCaja(fecha){ if(!confirm(`¿Confirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','✓ Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
-  async function cargarHistorialCaja(){
-    try {
-      const res=await apiAdmin('/admin/caja/historial');
-      const data=await res.json();
-      const cierres=data.cierres||[];
-      $('#emptyCajaHistorial').style.display=cierres.length?'none':'block';
-      $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{
-        const fecha=new Date(c.fecha).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});
-        const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'});
-        return `<div style="display:grid;grid-template-columns:1fr 110px 80px 1fr 90px;padding:12px 16px;gap:10px;border-bottom:1px solid var(--line);font-size:13px;align-items:center;transition:background .1s;" onmouseover="this.style.background='rgba(255,106,26,0.035)'" onmouseout="this.style.background=''">
-          <div style="font-weight:500;">${fecha}</div>
-          <div style="font-family:var(--font-mono);font-weight:700;color:var(--cargo-green);">$${Number(c.total_general).toFixed(2)}</div>
-          <div style="font-family:var(--font-mono);color:var(--ink-soft);">${c.cantidad_facturas}</div>
-          <div>${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</div>
-          <div style="color:var(--ink-soft);font-size:12px;">${hora}</div>
-        </div>`;
-      }).join('');
-    } catch(err){}
-  }
+  async function cargarHistorialCaja(){ try { const res=await apiAdmin('/admin/caja/historial'); const data=await res.json(); const cierres=data.cierres||[]; $('#emptyCajaHistorial').style.display=cierres.length?'none':'block'; $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{ const fecha=new Date(c.fecha).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'}); const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}); return `<tr><td data-label="Fecha">${fecha}</td><td data-label="Total" class="mono">$${Number(c.total_general).toFixed(2)}</td><td data-label="Facturas" class="mono">${c.cantidad_facturas}</td><td data-label="Cerrado por">${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</td><td data-label="Hora" class="muted">${hora}</td></tr>`; }).join(''); } catch(err){} }
   $('#btnVerCaja').addEventListener('click',(e)=>{ e.preventDefault(); cargarCaja(); });
 
   const ESTADO_LABEL_REPORTE={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
   let ultimoReporte=null;
-  function fechaISO(d){ return d.toISOString().slice(0,10); }
+  function fechaISO(d){
+    const anio = d.getFullYear();
+    const mes = String(d.getMonth()+1).padStart(2,'0');
+    const dia = String(d.getDate()).padStart(2,'0');
+    return `${anio}-${mes}-${dia}`;
+  }
   function inicializarFechasReporte(){ if($('#repDesde').value&&$('#repHasta').value) return; const hoy=new Date(), hace30=new Date(hoy.getTime()-29*24*60*60*1000); $('#repHasta').value=fechaISO(hoy); $('#repDesde').value=fechaISO(hace30); }
   async function cargarReporte(){ inicializarFechasReporte(); const params=new URLSearchParams({desde:$('#repDesde').value,hasta:$('#repHasta').value}); try { const res=await apiAdmin(`/admin/reportes?${params.toString()}`); const data=await res.json(); ultimoReporte=data; renderReporte(data); } catch(err){} }
   let chartIngresos=null, chartEstados=null, chartTopClientes=null;
