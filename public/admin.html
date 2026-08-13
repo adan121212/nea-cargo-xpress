@@ -477,24 +477,14 @@
       <span class="sb-icon">📦</span> Recepción
     </button>
     <button class="tab-nav-btn" data-tab="paquetes">
-      <span class="sb-icon">📋</span> Paquetes <span style="margin-left:auto;font-size:10px;opacity:.5;">▾</span>
+      <span class="sb-icon">📋</span> Paquetes
     </button>
-    <div id="submenuPaquetes" style="display:none;padding-left:8px;">
-      <button class="tab-nav-btn" data-tab="paq-prealertados" style="font-size:12px;padding:7px 10px;">🟠 Prealertados</button>
-      <button class="tab-nav-btn" data-tab="paq-nuevos" style="font-size:12px;padding:7px 10px;">🟢 Nuevos</button>
-      <button class="tab-nav-btn" data-tab="paq-entregados" style="font-size:12px;padding:7px 10px;">⚫ Entregados</button>
-    </div>
     <button class="tab-nav-btn" data-tab="clientes">
       <span class="sb-icon">👥</span> Clientes
     </button>
     <button class="tab-nav-btn" data-tab="facturas">
-      <span class="sb-icon">🗂</span> Facturas <span style="margin-left:auto;font-size:10px;opacity:.5;">▾</span>
+      <span class="sb-icon">🗂</span> Facturas
     </button>
-    <div id="submenuFacturas" style="display:none;padding-left:8px;">
-      <button class="tab-nav-btn" data-tab="fact-pendientes" style="font-size:12px;padding:7px 10px;">🟠 Pendientes</button>
-      <button class="tab-nav-btn" data-tab="fact-pagadas" style="font-size:12px;padding:7px 10px;">🟢 Pagadas</button>
-      <button class="tab-nav-btn" data-tab="fact-anuladas" style="font-size:12px;padding:7px 10px;">⚫ Anuladas</button>
-    </div>
     <button class="tab-nav-btn" data-tab="tarifas">
       <span class="sb-icon">💲</span> Tarifas
     </button>
@@ -723,42 +713,40 @@
       <div id="recepcionLog"><div class="empty">Aún no has recibido ningún paquete en esta sesión.</div></div>
     </div>
 
-    <!-- ---- TAB: Paquetes Prealertados ---- -->
-    <div class="card tab-panel" id="tabPaqPrealertados" style="display:none;">
-      <h2>🟠 Prealertados</h2>
-      <p class="card-sub">Paquetes que el cliente registró pero aún no han llegado a bodega.</p>
-      <div id="bannerPaquetes" class="banner"></div>
-      <div style="overflow-x:auto;"><table>
-        <thead><tr><th>Cliente</th><th>Casillero</th><th>Tienda / Tracking</th><th>Valor</th><th>Estado</th><th></th></tr></thead>
-        <tbody id="tbodyPrealertados"></tbody>
-      </table></div>
-      <div class="empty" id="emptyPrealertados" style="display:none;">No hay paquetes prealertados.</div>
-    </div>
-
-    <!-- ---- TAB: Paquetes Nuevos ---- -->
-    <div class="card tab-panel" id="tabPaqNuevos" style="display:none;">
-      <h2>🟢 Paquetes nuevos</h2>
-      <p class="card-sub">Recibidos en bodega, en tránsito o listos para retiro.</p>
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <input id="filtroPaqueteQ" type="text" placeholder="Buscar tracking o cliente…" style="flex:1;padding:7px 11px;">
-        <button class="btn-secondary" id="btnFiltrarPaquetes">Buscar</button>
+    <!-- ---- TAB: Paquetes ---- -->
+    <div class="card tab-panel" id="tabPaquetes" style="display:none;">
+      <h2>Todos los paquetes</h2>
+      <p class="card-sub">Actualiza el estado a medida que avanzan en la ruta Miami → Panamá.</p>
+      <div class="filtros">
+        <div>
+          <label for="filtroEstado">Estado</label>
+          <select id="filtroEstado">
+            <option value="">Todos</option>
+            <option value="prealertado">Prealertado</option>
+            <option value="en_bodega_miami">En bodega Miami</option>
+            <option value="en_transito">En tránsito</option>
+            <option value="en_panama">En Panamá</option>
+            <option value="listo_para_retiro">Listo para retiro</option>
+            <option value="entregado">Entregado</option>
+          </select>
+        </div>
+        <div><label for="filtroEmail">Correo del cliente</label><input id="filtroEmail" type="text" placeholder="ana@ejemplo.com"></div>
+        <div><label for="filtroTracking"># de tracking</label><input id="filtroTracking" type="text" placeholder="1Z999..."></div>
+        <div style="flex:0;"><label>&nbsp;</label><button class="btn-secondary" id="btnFiltrar">Filtrar</button></div>
       </div>
-      <div style="overflow-x:auto;"><table>
-        <thead><tr><th>Cliente</th><th>Casillero</th><th>Tienda / Tracking</th><th>Valor</th><th>Peso real (lb)</th><th>Estado</th><th>Actualizar</th><th></th></tr></thead>
-        <tbody id="tbodyNuevos"></tbody>
-      </table></div>
-      <div class="empty" id="emptyNuevos" style="display:none;">No hay paquetes nuevos.</div>
-    </div>
-
-    <!-- ---- TAB: Paquetes Entregados ---- -->
-    <div class="card tab-panel" id="tabPaqEntregados" style="display:none;">
-      <h2>⚫ Entregados</h2>
-      <p class="card-sub">Historial de paquetes ya entregados al cliente.</p>
-      <div style="overflow-x:auto;"><table>
-        <thead><tr><th>Cliente</th><th>Casillero</th><th>Tienda / Tracking</th><th>Valor</th><th>Peso real (lb)</th><th>Estado</th><th></th></tr></thead>
-        <tbody id="tbodyEntregados"></tbody>
-      </table></div>
-      <div class="empty" id="emptyEntregados" style="display:none;">No hay paquetes entregados aún.</div>
+      <div id="bannerPaquetes" class="banner"></div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th><th>Casillero</th><th>Tienda / Tracking</th>
+              <th>Valor</th><th>Peso real (lb)</th><th>Estado</th><th>Actualizar</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="tbodyPaquetes"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyPaquetes" style="display:none;">No hay paquetes con estos filtros.</div>
     </div>
 
     <!-- ---- TAB: Clientes ---- -->
@@ -774,38 +762,41 @@
       <div class="empty" id="emptyClientes" style="display:none;">Aún no hay clientes registrados.</div>
     </div>
 
-    <!-- ---- TAB: Facturas Pendientes ---- -->
-    <div class="card tab-panel" id="tabFactPendientes" style="display:none;">
-      <h2>🟠 Facturas pendientes</h2>
-      <p class="card-sub">Facturas generadas que aún no han sido cobradas.</p>
+    <!-- ---- TAB: Facturas ---- -->
+    <div class="card tab-panel" id="tabFacturas" style="display:none;">
+      <h2>Generar factura</h2>
+      <p class="card-sub">Elige un paquete con peso real confirmado y la tarifa a aplicar.</p>
+      <form id="formFactura" class="form-inline" style="grid-template-columns: 2fr 1.5fr auto;">
+        <div><label for="facturaPaquete">Paquete</label><select id="facturaPaquete"></select></div>
+        <div><label for="facturaTarifa">Tarifa</label><select id="facturaTarifa"></select></div>
+        <div>
+          <button class="btn-primary" type="submit" id="btnFactura" style="margin-top:0;">
+            <span class="spinner"></span><span>Generar y enviar</span>
+          </button>
+        </div>
+      </form>
       <div class="banner" id="bannerFactura"></div>
-      <div style="overflow-x:auto;"><table>
-        <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Total</th><th>Acción</th></tr></thead>
-        <tbody id="tbodyFactPendiente"></tbody>
-      </table></div>
-      <div class="empty" id="emptyFactPendiente" style="display:none;">No hay facturas pendientes. 🎉</div>
-    </div>
-
-    <!-- ---- TAB: Facturas Pagadas ---- -->
-    <div class="card tab-panel" id="tabFactPagadas" style="display:none;">
-      <h2>🟢 Facturas pagadas</h2>
-      <p class="card-sub">Historial de facturas cobradas.</p>
-      <div style="overflow-x:auto;"><table>
-        <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Total</th><th>Acción</th></tr></thead>
-        <tbody id="tbodyFactPagada"></tbody>
-      </table></div>
-      <div class="empty" id="emptyFactPagada" style="display:none;">No hay facturas pagadas aún.</div>
-    </div>
-
-    <!-- ---- TAB: Facturas Anuladas ---- -->
-    <div class="card tab-panel" id="tabFactAnuladas" style="display:none;">
-      <h2>⚫ Facturas anuladas</h2>
-      <p class="card-sub">Facturas que fueron canceladas.</p>
-      <div style="overflow-x:auto;"><table>
-        <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Total</th><th>Acción</th></tr></thead>
-        <tbody id="tbodyFactAnulada"></tbody>
-      </table></div>
-      <div class="empty" id="emptyFactAnulada" style="display:none;">No hay facturas anuladas.</div>
+      <h2 style="margin-top:24px;">Todas las facturas</h2>
+      <div class="filtros">
+        <div>
+          <label for="filtroFacturaEstado">Estado</label>
+          <select id="filtroFacturaEstado">
+            <option value="">Todos</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="pagada">Pagada</option>
+            <option value="anulada">Anulada</option>
+          </select>
+        </div>
+        <div><label for="filtroFacturaEmail">Correo del cliente</label><input id="filtroFacturaEmail" type="text" placeholder="ana@ejemplo.com"></div>
+        <div style="flex:0;"><label>&nbsp;</label><button class="btn-secondary" id="btnFiltrarFacturas">Filtrar</button></div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="tbodyFacturas"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyFacturas" style="display:none;">No hay facturas con estos filtros.</div>
     </div>
 
     <!-- ---- TAB: Tarifas ---- -->
@@ -1181,39 +1172,26 @@
   }
 
   // ---- Navegación por tabs (sidebar) ----
-  function cerrarSidebarMovil(){ if(window.innerWidth<=760){ $('#sidebar').classList.remove('open'); $('#sidebarOverlay').classList.remove('show'); } }
   document.querySelectorAll('.tab-nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const tab = btn.dataset.tab;
-      // Padres que solo abren/cierran submenú
-      if(tab === 'paquetes'){
-        const sub = document.getElementById('submenuPaquetes');
-        sub.style.display = sub.style.display === 'none' ? 'block' : 'none';
-        return;
-      }
-      if(tab === 'facturas'){
-        const sub = document.getElementById('submenuFacturas');
-        sub.style.display = sub.style.display === 'none' ? 'block' : 'none';
-        return;
-      }
-      // Todos los demás: activar tab
       document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
-      if(tab === 'mostrador'){ $('#tabMostrador').style.display='block'; cargarPendientesMostrador(); }
-      if(tab === 'recepcion'){ $('#tabRecepcion').style.display='block'; setTimeout(()=>$('#recepcionTracking').focus(),50); }
-      if(tab === 'paq-prealertados'){ document.getElementById('tabPaqPrealertados').style.display='block'; cargarPaquetes(); }
-      if(tab === 'paq-nuevos'){ document.getElementById('tabPaqNuevos').style.display='block'; cargarPaquetes(); }
-      if(tab === 'paq-entregados'){ document.getElementById('tabPaqEntregados').style.display='block'; cargarPaquetes(); }
-      if(tab === 'clientes'){ $('#tabClientes').style.display='block'; cargarClientes(); }
-      if(tab === 'fact-pendientes'){ document.getElementById('tabFactPendientes').style.display='block'; cargarFacturas(); }
-      if(tab === 'fact-pagadas'){ document.getElementById('tabFactPagadas').style.display='block'; cargarFacturas(); }
-      if(tab === 'fact-anuladas'){ document.getElementById('tabFactAnuladas').style.display='block'; cargarFacturas(); }
-      if(tab === 'tarifas'){ $('#tabTarifas').style.display='block'; cargarTarifas(); }
-      if(tab === 'sucursales'){ $('#tabSucursales').style.display='block'; cargarSucursales(); }
-      if(tab === 'reportes'){ $('#tabReportes').style.display='block'; cargarReporte(); }
-      if(tab === 'caja'){ $('#tabCaja').style.display='block'; cargarCaja(); cargarHistorialCaja(); }
-      cerrarSidebarMovil();
+      const tab = btn.dataset.tab;
+      if (tab === 'paquetes'){ $('#tabPaquetes').style.display = 'block'; cargarPaquetes(); }
+      if (tab === 'mostrador'){ $('#tabMostrador').style.display = 'block'; cargarPendientesMostrador(); }
+      if (tab === 'recepcion'){ $('#tabRecepcion').style.display = 'block'; setTimeout(() => $('#recepcionTracking').focus(), 50); }
+      if (tab === 'clientes'){ $('#tabClientes').style.display = 'block'; cargarClientes(); }
+      if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
+      if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); cargarOpcionesFactura(); }
+      if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
+      if (tab === 'caja'){ $('#tabCaja').style.display = 'block'; cargarCaja(); cargarHistorialCaja(); }
+      if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
+      // Cierra sidebar en móvil al elegir pestaña
+      if (window.innerWidth <= 760){
+        $('#sidebar').classList.remove('open');
+        $('#sidebarOverlay').classList.remove('show');
+      }
     });
   });
 </script>
@@ -1222,78 +1200,90 @@
   // (idéntico al original, sin cambios)
 
   async function cargarPaquetes(){
-    const q = document.getElementById('filtroPaqueteQ')?.value.trim() || '';
     const params = new URLSearchParams();
-    if(q) params.set('tracking', q);
+    if ($('#filtroEstado').value) params.set('estado', $('#filtroEstado').value);
+    if ($('#filtroEmail').value.trim()) params.set('email', $('#filtroEmail').value.trim());
+    if ($('#filtroTracking').value.trim()) params.set('tracking', $('#filtroTracking').value.trim());
     try {
       const res = await apiAdmin(`/admin/paquetes?${params.toString()}`);
       const data = await res.json();
-      const todos = data.paquetes || [];
-      const prealertados = todos.filter(p=>p.estado==='prealertado');
-      const nuevos = todos.filter(p=>['en_bodega_miami','en_transito','en_panama','listo_para_retiro'].includes(p.estado));
-      const entregados = todos.filter(p=>p.estado==='entregado');
-      // Prealertados
-      const tbPre = document.getElementById('tbodyPrealertados');
-      if(tbPre){ document.getElementById('emptyPrealertados').style.display=prealertados.length?'none':'block'; tbPre.innerHTML=prealertados.map(p=>crearFilaPaquete(p,false,false)).join(''); activarFilasPaquetes(tbPre); }
-      // Nuevos
-      const tbNuevos = document.getElementById('tbodyNuevos');
-      if(tbNuevos){ document.getElementById('emptyNuevos').style.display=nuevos.length?'none':'block'; tbNuevos.innerHTML=nuevos.map(p=>crearFilaPaquete(p,true,true)).join(''); activarFilasPaquetes(tbNuevos); }
-      // Entregados
-      const tbEnt = document.getElementById('tbodyEntregados');
-      if(tbEnt){ document.getElementById('emptyEntregados').style.display=entregados.length?'none':'block'; tbEnt.innerHTML=entregados.map(p=>crearFilaPaquete(p,false,false)).join(''); activarFilasPaquetes(tbEnt); }
-    } catch (err) { console.error(err); }
+      renderPaquetes(data.paquetes || []);
+    } catch (err) { mostrarBanner('#bannerPaquetes', 'error', 'No se pudieron cargar los paquetes.'); }
   }
-  function crearFilaPaquete(p, mostrarActualizar, mostrarPeso){
-    const pesoCell = mostrarPeso ? (p.peso_confirmado
-      ? `<div style="display:flex;align-items:center;gap:5px;"><span class="mono" style="font-weight:700;">${Number(p.peso_real_lb).toFixed(2)} lb</span><span style="font-size:12px;">🔒</span></div>`
-      : `<div style="display:flex;gap:5px;"><input type="number" step="0.01" min="0" class="peso-input" data-id="${p.id}" value="${p.peso_real_lb??''}" placeholder="${p.peso_lb??'—'}" style="width:70px;padding:6px 8px;font-size:12px;"><button class="btn-secondary btn-guardar-peso" data-id="${p.id}" style="padding:6px 9px;font-size:11px;">OK</button></div>`)
-      : `<span class="muted">${p.peso_lb?Number(p.peso_lb).toFixed(2)+' lb':'—'}</span>`;
-    const actualizarCell = mostrarActualizar
-      ? `<td data-label="Actualizar"><select class="estado-select" data-id="${p.id}">${ESTADOS.map(e=>`<option value="${e}" ${e===p.estado?'selected':''}>${ESTADO_LABEL[e]}</option>`).join('')}</select></td>`
-      : '';
-    return `<tr data-id="${p.id}">
-      <td data-label="Cliente">${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}<br><span class="muted">${escapeHtml(p.cliente_email)}</span></td>
-      <td data-label="Casillero" class="mono">${escapeHtml(p.numero_casillero)}</td>
-      <td data-label="Tienda">${escapeHtml(p.tienda)}<br><span class="mono muted">${escapeHtml(p.numero_tracking)}</span></td>
-      <td data-label="Valor" class="mono">$${Number(p.valor_declarado||0).toFixed(2)}</td>
-      <td data-label="Peso">${pesoCell}</td>
-      <td data-label="Estado"><span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado]||p.estado}</span></td>
-      ${actualizarCell}
-      <td data-label=""><div class="row-actions"><button class="btn-secondary btn-fotos" data-id="${p.id}">📷</button><button class="btn-secondary btn-dimensiones" data-id="${p.id}" data-largo="${p.largo_in||''}" data-ancho="${p.ancho_in||''}" data-alto="${p.alto_in||''}">📐</button></div></td>
-    </tr>`;
-  }
-  function activarFilasPaquetes(tbody){
-    tbody.querySelectorAll('.btn-fotos').forEach(btn=>btn.addEventListener('click',()=>abrirModalFotos(btn.dataset.id)));
-    tbody.querySelectorAll('.btn-dimensiones').forEach(btn=>btn.addEventListener('click',()=>abrirModalDimensiones(btn.dataset.id,btn.dataset.largo,btn.dataset.ancho,btn.dataset.alto)));
-    tbody.querySelectorAll('.btn-guardar-peso').forEach(btn=>{
-      btn.addEventListener('click', async()=>{
-        const id=btn.dataset.id, input=tbody.querySelector(`.peso-input[data-id="${id}"]`);
-        const peso=parseFloat(input.value);
-        if(!input.value.trim()||isNaN(peso)||peso<=0){ mostrarBanner('#bannerPaquetes','error','Ingresa un peso válido.'); return; }
-        if(!window.confirm(`¿El peso correcto es ${peso} lb? Una vez confirmado NO se puede cambiar.`)) return;
-        btn.disabled=true;
+  function renderPaquetes(paquetes){
+    const tbody = $('#tbodyPaquetes');
+    $('#emptyPaquetes').style.display = paquetes.length ? 'none' : 'block';
+    tbody.innerHTML = paquetes.map(p => `
+      <tr data-id="${p.id}">
+        <td data-label="Cliente">${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}<br><span class="muted">${escapeHtml(p.cliente_email)}</span></td>
+        <td data-label="Casillero" class="mono">${escapeHtml(p.numero_casillero)}</td>
+        <td data-label="Tienda / Tracking">${escapeHtml(p.tienda)}<br><span class="mono muted">${escapeHtml(p.numero_tracking)}</span></td>
+        <td data-label="Valor" class="mono">$${Number(p.valor_declarado).toFixed(2)}</td>
+        <td data-label="Peso real (lb)">
+          ${p.peso_confirmado ? `
+            <div style="display:flex;align-items:center;gap:5px;">
+              <span class="mono" style="font-weight:700;">${Number(p.peso_real_lb).toFixed(2)} lb</span>
+              <span title="Peso confirmado — bloqueado" style="font-size:12px;">🔒</span>
+            </div>
+          ` : `
+            <div style="display:flex;gap:5px;">
+              <input type="number" step="0.01" min="0" class="peso-input" data-id="${p.id}"
+                     value="${p.peso_real_lb ?? ''}" placeholder="${p.peso_lb ?? '—'}" style="width:70px;padding:6px 8px;font-size:12px;">
+              <button class="btn-secondary btn-guardar-peso" data-id="${p.id}" style="padding:6px 9px;font-size:11px;">OK</button>
+            </div>
+          `}
+        </td>
+        <td data-label="Estado"><span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span></td>
+        <td data-label="Actualizar">
+          ${p.estado === 'entregado' ? `<span class="estado-bloqueado" title="Ya entregado">🔒 Entregado</span>` : `
+            <select class="estado-select" data-id="${p.id}">
+              ${ESTADOS.map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${ESTADO_LABEL[e]}</option>`).join('')}
+            </select>
+          `}
+        </td>
+        <td data-label="">
+          <div class="row-actions">
+            <button class="btn-secondary btn-fotos" data-id="${p.id}">📷 Fotos</button>
+            <button class="btn-secondary btn-dimensiones" data-id="${p.id}" data-largo="${p.largo_in || ''}" data-ancho="${p.ancho_in || ''}" data-alto="${p.alto_in || ''}">📐 Medidas</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    tbody.querySelectorAll('.btn-fotos').forEach(btn => btn.addEventListener('click', () => abrirModalFotos(btn.dataset.id)));
+    tbody.querySelectorAll('.btn-dimensiones').forEach(btn => btn.addEventListener('click', () => abrirModalDimensiones(btn.dataset.id, btn.dataset.largo, btn.dataset.ancho, btn.dataset.alto)));
+    tbody.querySelectorAll('.btn-guardar-peso').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const input = tbody.querySelector(`.peso-input[data-id="${id}"]`);
+        const peso = parseFloat(input.value);
+        if (!input.value.trim() || isNaN(peso) || peso <= 0){ mostrarBanner('#bannerPaquetes', 'error', 'El peso no puede quedar en blanco — ingresa un valor válido antes de guardar.'); return; }
+        const confirmado = window.confirm(`¿Estás seguro que el peso correcto de este paquete es ${peso} lb?\n\nUna vez confirmado, NO se podrá cambiar.`);
+        if (!confirmado){ mostrarBanner('#bannerPaquetes', 'error', '⚠ Revisa el peso bien y vuelve pronto cuando estés seguro.'); return; }
+        btn.disabled = true;
         try {
-          const res=await apiAdmin(`/admin/paquetes/${id}/peso`,{method:'PATCH',body:JSON.stringify({peso_real_lb:peso})});
-          const data=await res.json().catch(()=>({}));
-          if(res.ok){ mostrarBanner('#bannerPaquetes','success','✓ Peso confirmado.'); await cargarPaquetes(); }
-          else if(res.status===409){ mostrarBanner('#bannerPaquetes','error',data.mensaje||'Ya confirmado.'); cargarPaquetes(); }
-          else { mostrarBanner('#bannerPaquetes','error',data.mensaje||'No se pudo guardar.'); btn.disabled=false; }
-        } catch(err){ mostrarBanner('#bannerPaquetes','error','No pudimos conectar.'); btn.disabled=false; }
+          const res = await apiAdmin(`/admin/paquetes/${id}/peso`, { method: 'PATCH', body: JSON.stringify({ peso_real_lb: peso }) });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok){
+            mostrarBanner('#bannerPaquetes', 'success', '✓ Peso confirmado y bloqueado.');
+            const celda = btn.closest('td');
+            celda.innerHTML = `<div style="display:flex;align-items:center;gap:5px;"><span class="mono" style="font-weight:700;">${peso.toFixed(2)} lb</span><span style="font-size:12px;">🔒</span></div>`;
+          } else if (res.status === 409){ mostrarBanner('#bannerPaquetes', 'error', data.mensaje || 'Este peso ya fue confirmado.'); cargarPaquetes();
+          } else { mostrarBanner('#bannerPaquetes', 'error', data.mensaje || 'No se pudo guardar el peso.'); btn.disabled = false; }
+        } catch (err) { mostrarBanner('#bannerPaquetes', 'error', 'No pudimos conectar con el servidor.'); btn.disabled = false; }
       });
     });
-    tbody.querySelectorAll('.estado-select').forEach(sel=>{
-      sel.addEventListener('change', async()=>{
-        sel.disabled=true;
+    tbody.querySelectorAll('.estado-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        sel.disabled = true;
         try {
-          const res=await apiAdmin(`/admin/paquetes/${sel.dataset.id}/estado`,{method:'PATCH',body:JSON.stringify({estado:sel.value})});
-          if(res.ok){ mostrarBanner('#bannerPaquetes','success','Estado actualizado.'); await cargarPaquetes(); }
-          else { mostrarBanner('#bannerPaquetes','error','No se pudo actualizar.'); }
-        } catch(err){} finally { sel.disabled=false; }
+          const res = await apiAdmin(`/admin/paquetes/${sel.dataset.id}/estado`, { method: 'PATCH', body: JSON.stringify({ estado: sel.value }) });
+          if (res.ok){ mostrarBanner('#bannerPaquetes', 'success', 'Estado actualizado.'); await cargarPaquetes(); }
+          else { mostrarBanner('#bannerPaquetes', 'error', 'No se pudo actualizar el estado.'); }
+        } catch (err) {} finally { sel.disabled = false; }
       });
     });
   }
-  document.getElementById('btnFiltrarPaquetes')?.addEventListener('click',(e)=>{e.preventDefault();cargarPaquetes();});
-  document.getElementById('filtroPaqueteQ')?.addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();cargarPaquetes();}});
+  $('#btnFiltrar').addEventListener('click', (e) => { e.preventDefault(); cargarPaquetes(); });
 
   async function cargarClientes(){
     try {
@@ -1454,42 +1444,36 @@
     } catch (err) { mostrarBanner('#bannerFactura', 'error', 'No pudimos conectar.'); }
     finally { setCargando(btn, false); }
   });
-  function renderFilasFactura(facturas, tbodyId, soloVer){
-    const tbody = document.getElementById(tbodyId);
-    if(!tbody) return;
-    tbody.innerHTML = facturas.map(f=>`<tr>
-      <td data-label="Factura" class="mono">${escapeHtml(f.numero_factura)}</td>
-      <td data-label="Cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}<br><span class="muted">${escapeHtml(f.cliente_email)}</span></td>
-      <td data-label="Paquete">${escapeHtml(f.tienda)}<br><span class="mono muted">${escapeHtml(f.numero_tracking)}</span></td>
-      <td data-label="Total" class="mono">$${Number(f.total).toFixed(2)}</td>
-      <td data-label=""><div class="row-actions">
-        <button class="btn-secondary btn-ver-pdf" data-id="${f.id}">Ver PDF</button>
-        ${!soloVer?`<button class="btn-secondary btn-reenviar-factura" data-id="${f.id}">Reenviar</button><button class="btn-secondary btn-danger btn-anular-factura" data-id="${f.id}">Anular</button>`:''}
-      </div></td>
-    </tr>`).join('');
-    tbody.querySelectorAll('.btn-ver-pdf').forEach(btn=>{
-      btn.addEventListener('click', async()=>{ btn.textContent='...'; btn.disabled=true; try{ const res=await apiAdmin(`/admin/facturas/${btn.dataset.id}/pdf`); const blob=await res.blob(); window.open(window.URL.createObjectURL(blob),'_blank'); }catch(e){ alert('No se pudo abrir el PDF.'); } finally{ btn.textContent='Ver PDF'; btn.disabled=false; } });
-    });
-    tbody.querySelectorAll('.btn-reenviar-factura').forEach(btn=>{
-      btn.addEventListener('click', async()=>{ btn.textContent='Enviando…'; btn.disabled=true; try{ const res=await apiAdmin(`/admin/facturas/${btn.dataset.id}/reenviar`,{method:'POST'}); const data=await res.json().catch(()=>({})); if(res.ok){ const e=data.envios||{}; mostrarBanner('#bannerFactura',e.correo_enviado?'success':'error',`Reenvío: ${e.correo_enviado?'Correo ✓':'Correo ✗'}`); } else{ mostrarBanner('#bannerFactura','error',data.mensaje||'No se pudo reenviar.'); } }catch(e){ mostrarBanner('#bannerFactura','error','No pudimos conectar.'); } finally{ btn.textContent='Reenviar'; btn.disabled=false; } });
-    });
-    tbody.querySelectorAll('.btn-anular-factura').forEach(btn=>{
-      btn.addEventListener('click',()=>abrirModalAnulacion(btn.dataset.id, null, null, ()=>cargarFacturas()));
-    });
-  }
   async function cargarFacturas(){
+    const params = new URLSearchParams();
+    if ($('#filtroFacturaEstado').value) params.set('estado', $('#filtroFacturaEstado').value);
+    if ($('#filtroFacturaEmail').value.trim()) params.set('email', $('#filtroFacturaEmail').value.trim());
     try {
-      const res = await apiAdmin('/admin/facturas');
+      const res = await apiAdmin(`/admin/facturas?${params.toString()}`);
       const data = await res.json();
-      const todas = data.facturas || [];
-      const pendientes = todas.filter(f=>f.estado==='pendiente');
-      const pagadas = todas.filter(f=>f.estado==='pagada');
-      const anuladas = todas.filter(f=>f.estado==='anulada');
-      if(document.getElementById('emptyFactPendiente')){ document.getElementById('emptyFactPendiente').style.display=pendientes.length?'none':'block'; renderFilasFactura(pendientes,'tbodyFactPendiente',false); }
-      if(document.getElementById('emptyFactPagada')){ document.getElementById('emptyFactPagada').style.display=pagadas.length?'none':'block'; renderFilasFactura(pagadas,'tbodyFactPagada',false); }
-      if(document.getElementById('emptyFactAnulada')){ document.getElementById('emptyFactAnulada').style.display=anuladas.length?'none':'block'; renderFilasFactura(anuladas,'tbodyFactAnulada',true); }
+      const facturas = data.facturas || [];
+      $('#emptyFacturas').style.display = facturas.length ? 'none' : 'block';
+      $('#tbodyFacturas').innerHTML = facturas.map(f => `
+        <tr>
+          <td data-label="Factura" class="mono">${escapeHtml(f.numero_factura)}</td>
+          <td data-label="Cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}<br><span class="muted">${escapeHtml(f.cliente_email)}</span></td>
+          <td data-label="Paquete">${escapeHtml(f.tienda)}<br><span class="mono muted">${escapeHtml(f.numero_tracking)}</span></td>
+          <td data-label="Total" class="mono">$${Number(f.total).toFixed(2)}</td>
+          <td data-label="Estado"><select class="estado-select factura-estado-select" data-id="${f.id}"><option value="pendiente" ${f.estado==='pendiente'?'selected':''}>Pendiente</option><option value="pagada" ${f.estado==='pagada'?'selected':''}>Pagada</option><option value="anulada" ${f.estado==='anulada'?'selected':''}>Anulada</option></select></td>
+          <td data-label=""><div class="row-actions"><button class="btn-secondary btn-ver-pdf" data-id="${f.id}">Ver PDF</button><button class="btn-secondary btn-reenviar-factura" data-id="${f.id}">Reenviar</button></div></td>
+        </tr>`).join('');
+      $('#tbodyFacturas').querySelectorAll('.factura-estado-select').forEach(sel => {
+        sel.addEventListener('change', async () => { sel.disabled = true; try { await apiAdmin(`/admin/facturas/${sel.dataset.id}/estado`, { method: 'PATCH', body: JSON.stringify({ estado: sel.value }) }); } catch(err){} finally { sel.disabled = false; } });
+      });
+      $('#tbodyFacturas').querySelectorAll('.btn-ver-pdf').forEach(btn => {
+        btn.addEventListener('click', async () => { btn.textContent = '...'; btn.disabled = true; try { const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/pdf`); const blob = await res.blob(); window.open(window.URL.createObjectURL(blob), '_blank'); } catch(err){ alert('No se pudo abrir el PDF.'); } finally { btn.textContent = 'Ver PDF'; btn.disabled = false; } });
+      });
+      $('#tbodyFacturas').querySelectorAll('.btn-reenviar-factura').forEach(btn => {
+        btn.addEventListener('click', async () => { btn.textContent = 'Enviando…'; btn.disabled = true; try { const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/reenviar`, { method: 'POST' }); const data = await res.json().catch(()=>({})); if(res.ok){ const e=data.envios||{}; mostrarBanner('#bannerFactura', e.correo_enviado||e.whatsapp_enviado?'success':'error', `Reenvío: ${e.correo_enviado?'Correo ✓':'Correo ✗'}`); } else { mostrarBanner('#bannerFactura','error',data.mensaje||'No se pudo reenviar.'); } } catch(err){ mostrarBanner('#bannerFactura','error','No pudimos conectar.'); } finally { btn.textContent='Reenviar'; btn.disabled=false; } });
+      });
     } catch (err) {}
   }
+  $('#btnFiltrarFacturas').addEventListener('click', (e) => { e.preventDefault(); cargarFacturas(); });
 
   let paqueteFotosActual = null;
   async function abrirModalFotos(paqueteId){
@@ -1985,8 +1969,12 @@
   $('#f1SearchInput').addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ f1Cerrar(); return; } if(e.key==='ArrowDown'){ f1Activo=Math.min(f1Activo+1,f1Filtrados.length-1); f1Render(); } if(e.key==='ArrowUp'){ f1Activo=Math.max(f1Activo-1,0); f1Render(); } if(e.key==='Enter') f1Seleccionar(f1Activo); });
   $('#modalF1Clientes').addEventListener('click',(e)=>{ if(e.target===$('#modalF1Clientes')) f1Cerrar(); });
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'&&$('#modalF1Clientes').style.display==='flex') f1Cerrar(); });
-  $('#mostradorQ').addEventListener('keydown',(e)=>{ if(e.key==='1'){ e.preventDefault(); f1Abrir('facturador'); } });
-  document.addEventListener('keydown',(e)=>{ if(e.key==='1'&&document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); } });
+  // Tecla 1 en facturador y recepcion
+  document.addEventListener('keydown',(e)=>{
+    if(e.key!=='1') return;
+    if(document.activeElement?.id==='mostradorQ'){ e.preventDefault(); f1Abrir('facturador'); }
+    if(document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); }
+  });
 
   async function iniciarAdmin(){
     try { await cargarPaquetes(); cargarPendientesMostrador(); mostrarAdmin(true); } catch(err){ mostrarAdmin(false); }
