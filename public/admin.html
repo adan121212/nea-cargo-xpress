@@ -443,9 +443,42 @@
     tbody td{ border-bottom:none; display:flex; justify-content:space-between; gap:10px; }
     tbody td::before{ content: attr(data-label); font-weight:600; color: var(--ink-soft); font-size:11px; }
   }
+  /* ===================== HISTORIAL DE CIERRES ===================== */
+  .caja-historial-box{ border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .caja-historial-head{
+    display:grid; grid-template-columns:1fr 110px 80px 1fr 90px 80px;
+    background:var(--ink); color:#f1f3f2; font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.04em; padding:10px 16px; gap:10px;
+  }
+  .caja-historial-row{
+    display:grid; grid-template-columns:1fr 110px 80px 1fr 90px 80px;
+    padding:12px 16px; gap:10px; border-bottom:1px solid var(--line);
+    font-size:13px; align-items:center; transition:background .1s ease;
+  }
+  .chr-acciones{ display:flex; gap:4px; }
+  .chr-acciones button{ padding:5px 8px; font-size:13px; }
+  .caja-historial-row:last-child{ border-bottom:none; }
+  .caja-historial-row:hover{ background:var(--paper); }
+  .chr-fecha{ font-weight:500; }
+  .chr-total{ font-weight:700; color:var(--cargo-green); }
+  .chr-facturas{ color:var(--ink-soft); }
+  .chr-hora{ font-size:12px; }
   @media (max-width:760px){
     #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; }
     #cajaMetodosCards{ grid-template-columns:repeat(2,1fr) !important; }
+    .caja-historial-head{ display:none; }
+    .caja-historial-row{
+      grid-template-columns:1fr 1fr; grid-template-rows:auto auto auto;
+      row-gap:6px; padding:14px 16px;
+    }
+    .chr-fecha{ grid-column:1/2; grid-row:1; font-weight:700; font-size:14px; }
+    .chr-hora{ grid-column:2/3; grid-row:1; text-align:right; }
+    .chr-total{ grid-column:1/2; grid-row:2; font-size:16px; }
+    .chr-facturas{ grid-column:2/3; grid-row:2; text-align:right; }
+    .chr-facturas::before{ content:'Facturas: '; color:var(--ink-soft); font-weight:400; }
+    .chr-cerrado{ grid-column:1/3; grid-row:3; font-size:12px; color:var(--ink-soft); }
+    .chr-cerrado::before{ content:'Cerrado por: '; }
+    .chr-acciones{ grid-column:1/3; grid-row:4; justify-content:flex-end; margin-top:6px; }
   }
   @media (max-width:520px){
     .dash-cards{ grid-template-columns:1fr; }
@@ -873,9 +906,9 @@
       <div class="banner" id="bannerCaja"></div>
       <div style="margin-top:28px;">
         <h3 class="dash-section-title">Historial de cierres</h3>
-        <div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;">
-          <div style="display:grid;grid-template-columns:1fr 110px 80px 1fr 90px;background:var(--ink);color:#f1f3f2;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:10px 16px;gap:10px;">
-            <div>Fecha</div><div>Total</div><div>Facturas</div><div>Cerrado por</div><div>Hora</div>
+        <div class="caja-historial-box">
+          <div class="caja-historial-head">
+            <div>Fecha</div><div>Total</div><div>Facturas</div><div>Cerrado por</div><div>Hora</div><div></div>
           </div>
           <div id="tbodyCajaHistorial"></div>
           <div class="empty" id="emptyCajaHistorial" style="display:none;">Aún no hay cierres registrados.</div>
@@ -970,6 +1003,15 @@
   </div>
 </div>
 
+<div id="modalFacturasDia" class="modal-overlay">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-header">
+      <h2 id="tituloFacturasDia">Facturas del día</h2>
+      <button class="modal-close" id="btnCerrarFacturasDia">✕</button>
+    </div>
+    <div id="contenidoFacturasDia"></div>
+  </div>
+</div>
 <div id="modalFirma" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-header">
@@ -1016,6 +1058,14 @@
     const div = document.createElement('div');
     div.textContent = str || '';
     return div.innerHTML;
+  }
+  const MESES_CORTOS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  function formatearFechaSolo(fechaStr){
+    if(!fechaStr) return '—';
+    const soloFecha = String(fechaStr).slice(0,10);
+    const [anio, mes, dia] = soloFecha.split('-').map(Number);
+    if(!anio||!mes||!dia) return fechaStr;
+    return `${String(dia).padStart(2,'0')} ${MESES_CORTOS[mes-1]} ${anio}`;
   }
   function mostrarBanner(id, tipo, mensaje){
     const el = $(id);
@@ -1910,7 +1960,126 @@
     }
   }
   async function cerrarCaja(fecha){ if(!confirm(`¿Confirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','✓ Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
-  async function cargarHistorialCaja(){ try { const res=await apiAdmin('/admin/caja/historial'); const data=await res.json(); const cierres=data.cierres||[]; $('#emptyCajaHistorial').style.display=cierres.length?'none':'block'; $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{ const fecha=new Date(c.fecha).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'}); const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}); return `<tr><td data-label="Fecha">${fecha}</td><td data-label="Total" class="mono">$${Number(c.total_general).toFixed(2)}</td><td data-label="Facturas" class="mono">${c.cantidad_facturas}</td><td data-label="Cerrado por">${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</td><td data-label="Hora" class="muted">${hora}</td></tr>`; }).join(''); } catch(err){} }
+  async function cargarHistorialCaja(){
+    try {
+      const res=await apiAdmin('/admin/caja/historial');
+      const data=await res.json();
+      const cierres=data.cierres||[];
+      $('#emptyCajaHistorial').style.display=cierres.length?'none':'block';
+      const fechaCruda = (c) => (typeof c.fecha === 'string' ? c.fecha.slice(0,10) : new Date(c.fecha).toISOString().slice(0,10));
+      $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{
+        const fecha=formatearFechaSolo(c.fecha);
+        const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'});
+        return `<div class="caja-historial-row">
+          <div data-label="Fecha" class="chr-fecha">${fecha}</div>
+          <div data-label="Total" class="chr-total mono">$${Number(c.total_general).toFixed(2)}</div>
+          <div data-label="Facturas" class="chr-facturas mono">${c.cantidad_facturas}</div>
+          <div data-label="Cerrado por" class="chr-cerrado">${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</div>
+          <div data-label="Hora" class="chr-hora muted">${hora}</div>
+          <div class="chr-acciones">
+            <button class="btn-secondary btn-ver-facturas-dia" data-fecha="${fechaCruda(c)}" title="Ver facturas del día">🧾</button>
+            <button class="btn-secondary btn-reenviar-cierre" data-fecha="${fechaCruda(c)}" title="Reenviar cierre por correo">📧</button>
+          </div>
+        </div>`;
+      }).join('');
+      $('#tbodyCajaHistorial').querySelectorAll('.btn-ver-facturas-dia').forEach(btn=>{
+        btn.addEventListener('click',()=>abrirFacturasDelDia(btn.dataset.fecha));
+      });
+      $('#tbodyCajaHistorial').querySelectorAll('.btn-reenviar-cierre').forEach(btn=>{
+        btn.addEventListener('click',()=>reenviarCierreHistorial(btn.dataset.fecha));
+      });
+    } catch(err){}
+  }
+
+  async function abrirFacturasDelDia(fecha){
+    $('#tituloFacturasDia').textContent = `Facturas del ${formatearFechaSolo(fecha)}`;
+    $('#contenidoFacturasDia').innerHTML = '<div class="empty">Cargando…</div>';
+    $('#modalFacturasDia').classList.add('show');
+    try {
+      const res = await apiAdmin(`/admin/caja/dia?fecha=${fecha}`);
+      const data = await res.json();
+      const facturasRes = await apiAdmin(`/admin/facturas?estado=pagada`);
+      const todas = (await facturasRes.json()).facturas || [];
+      const delDia = todas.filter(f => {
+        if(!f.fecha_pago) return false;
+        return String(f.fecha_pago).slice(0,10) === fecha;
+      });
+      if(delDia.length === 0){
+        $('#contenidoFacturasDia').innerHTML = '<div class="empty">No hay facturas registradas ese día.</div>';
+        return;
+      }
+      $('#contenidoFacturasDia').innerHTML = `
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Método</th><th>Total</th></tr></thead>
+            <tbody>
+              ${delDia.map(f => `<tr>
+                <td class="mono">${escapeHtml(f.numero_factura)}</td>
+                <td>${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</td>
+                <td>${escapeHtml(f.tienda)}<br><span class="mono muted">${escapeHtml(f.numero_tracking)}</span></td>
+                <td>${escapeHtml(f.metodo_pago || '—')}</td>
+                <td class="mono" style="font-weight:700;">$${Number(f.total).toFixed(2)}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:14px;padding:10px 14px;background:var(--paper);border-radius:8px;font-size:13px;font-weight:700;text-align:right;">
+          Total: $${Number(data.total_general).toFixed(2)} — ${delDia.length} factura${delDia.length===1?'':'s'}
+        </div>`;
+    } catch(err){
+      $('#contenidoFacturasDia').innerHTML = '<div class="empty">No se pudieron cargar las facturas.</div>';
+    }
+  }
+  $('#btnCerrarFacturasDia').addEventListener('click', ()=>$('#modalFacturasDia').classList.remove('show'));
+  $('#modalFacturasDia').addEventListener('click', (e)=>{ if(e.target.id==='modalFacturasDia') $('#modalFacturasDia').classList.remove('show'); });
+
+  async function enviarCajaPorCorreo(data){
+    const popup = document.createElement('div');
+    popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;';
+    popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:24px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+      <div style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:12px;">Enviar cierre por correo</div>
+      <label style="font-size:12px;font-weight:600;margin-bottom:6px;display:block;">Correo destinatario</label>
+      <input id="cajaCorreoDestino" type="email" placeholder="admin@neacargo.com" style="margin-bottom:16px;">
+      <div id="cajaCorreoError" style="display:none;color:#c0392b;font-size:12px;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button id="btnCajaCorreoCancelar" class="btn-secondary" style="flex:1;">Cancelar</button>
+        <button id="btnCajaCorreoEnviar" class="btn-primary" style="flex:1;margin-top:0;">
+          <span class="spinner"></span><span>Enviar</span>
+        </button>
+      </div>
+    </div>`;
+    document.body.appendChild(popup);
+    setTimeout(()=>popup.querySelector('#cajaCorreoDestino').focus(),50);
+    popup.querySelector('#btnCajaCorreoCancelar').addEventListener('click',()=>popup.remove());
+    popup.querySelector('#btnCajaCorreoEnviar').addEventListener('click', async()=>{
+      const correo = popup.querySelector('#cajaCorreoDestino').value.trim();
+      const errorDiv = popup.querySelector('#cajaCorreoError');
+      if(!correo||!correo.includes('@')){ errorDiv.textContent='Ingresa un correo válido.'; errorDiv.style.display='block'; return; }
+      const btn = popup.querySelector('#btnCajaCorreoEnviar');
+      setCargando(btn,true);
+      try {
+        const res = await apiAdmin('/admin/caja/enviar-reporte', {
+          method:'POST',
+          body: JSON.stringify({ fecha: data.fecha||data.cierre?.fecha, correo })
+        });
+        const d = await res.json().catch(()=>({}));
+        if(res.ok){ popup.remove(); mostrarBanner('#bannerCaja','success',`✓ Cierre enviado a ${correo}.`); }
+        else { errorDiv.textContent = d.mensaje||'No se pudo enviar.'; errorDiv.style.display='block'; setCargando(btn,false); }
+      } catch(e){ errorDiv.textContent='No pudimos conectar.'; errorDiv.style.display='block'; setCargando(btn,false); }
+    });
+    popup.querySelector('#cajaCorreoDestino').addEventListener('keydown',(e)=>{ if(e.key==='Enter') popup.querySelector('#btnCajaCorreoEnviar').click(); });
+  }
+
+  async function reenviarCierreHistorial(fecha){
+    try {
+      const res = await apiAdmin(`/admin/caja/dia?fecha=${fecha}`);
+      const data = await res.json();
+      data.fecha = fecha;
+      await enviarCajaPorCorreo(data);
+    } catch(err){
+      alert('No se pudo cargar el cierre para reenviar.');
+    }
+  }
   $('#btnVerCaja').addEventListener('click',(e)=>{ e.preventDefault(); cargarCaja(); });
 
   const ESTADO_LABEL_REPORTE={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
