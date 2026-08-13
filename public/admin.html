@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[source: 2]<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1195,9 +1195,6 @@
   });
 </script>
 <script>
-  // ---- Todo el JavaScript original a partir de "Paquetes" en adelante ----
-  // (idéntico al original, sin cambios)
-
   async function cargarPaquetes(){
     const q = document.getElementById('filtroPaqueteQ')?.value.trim() || '';
     const params = new URLSearchParams();
@@ -1547,428 +1544,114 @@
   });
 
   const ESTADO_LABEL_MOSTRADOR = { prealertado:'Prealertado', en_bodega_miami:'En bodega Miami', en_transito:'En tránsito', en_panama:'En Panamá', listo_para_retiro:'Listo para retiro', entregado:'Entregado' };
+  
+  // ===================== BUSCADOR DE MOSTRADOR Y COBROS =====================
   $('#formBuscarMostrador').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const q=$('#mostradorQ').value.trim();
-    if(!q){ mostrarBanner('#bannerMostrador','error','Escribe algo para buscar.'); return; }
-    const btn=$('#btnBuscarMostrador'); setCargando(btn,true);
-    mostrarBanner('#bannerMostrador','',''); $('#resultadoMostrador').innerHTML='';
+    const q = $('#mostradorQ').value.trim();
+    if (!q) { 
+      mostrarBanner('#bannerMostrador', 'error', 'Escribe algo para buscar.'); 
+      return; 
+    }
+    const btn = $('#btnBuscarMostrador'); 
+    setCargando(btn, true);
+    mostrarBanner('#bannerMostrador', '', '');
+    
     try {
-      const res=await apiAdmin(`/admin/mostrador/buscar?q=${encodeURIComponent(q)}`);
-      const data=await res.json().catch(()=>({}));
-      if(!res.ok){ mostrarBanner('#bannerMostrador','error',data.mensaje||'No se encontró nada.'); return; }
-      if(data.multiples){
-        $('#resultadoMostrador').innerHTML=`<p class="card-sub">Encontramos varios clientes, elige uno:</p><div class="cliente-multiples">${data.clientes.map(c=>`<button data-casillero="${escapeHtml(c.numero_casillero)}">${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)} — ${escapeHtml(c.email)} (${escapeHtml(c.numero_casillero)})</button>`).join('')}</div>`;
-        document.querySelectorAll('.cliente-multiples button').forEach(b => { b.addEventListener('click', () => { $('#mostradorQ').value=b.dataset.casillero; $('#formBuscarMostrador').dispatchEvent(new Event('submit')); }); });
-        return;
+      const res = await apiAdmin(`/admin/facturas/pendientes?q=${encodeURIComponent(q)}`);
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        renderPendientesMostrador(data.pendientes || []);
+      } else {
+        mostrarBanner('#bannerMostrador', 'error', data.mensaje || 'Error al buscar facturas.');
       }
-      renderResultadoMostrador(data.cliente, data.paquetes, data.facturas_pendientes||[], data.autorizados||[]);
-    } catch(err){ mostrarBanner('#bannerMostrador','error','No pudimos conectar.'); }
-    finally { setCargando(btn,false); }
+    } catch (err) {
+      mostrarBanner('#bannerMostrador', 'error', 'Error al conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
   });
 
-  async function cargarPendientesMostrador(){
-    const cont=$('#pendientesMostrador');
+  async function cargarPendientesMostrador() {
     try {
-      const res=await apiAdmin('/admin/facturas?estado=pendiente');
-      const data=await res.json();
-      const facturas=data.facturas||[];
-      $('#emptyPendientesMostrador').style.display=facturas.length?'none':'block';
-      const totalGlobal=facturas.reduce((s,f)=>s+Number(f.total),0);
-      $('#facBadgeCount').textContent=facturas.length;
-      $('#facTotalGlobal').textContent='$'+totalGlobal.toFixed(2);
-      // Actualizar badge del sidebar
-      const sbBadge=$('#sbBadgeMostrador');
-      if(sbBadge){ sbBadge.textContent=facturas.length; sbBadge.style.display=facturas.length>0?'inline':'none'; }
-      cont.innerHTML=facturas.map(f => {
-        const fecha=new Date(f.fecha_creacion).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});
-        const yaEntregado=f.paquete_estado==='entregado';
-        return `<div class="fac-grid-row" data-factura-pendiente="${f.id}" data-paquete-id="${f.paquete_id}" data-ya-entregado="${yaEntregado}">
-          <div class="fac-num">${escapeHtml(f.numero_factura)}</div>
-          <div><div class="fac-cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</div><div class="fac-casillero">${escapeHtml(f.cliente_email)}</div></div>
-          <div><div style="font-weight:500;font-size:13px;">${escapeHtml(f.tienda)}</div><div class="fac-tracking">#${escapeHtml(f.numero_tracking)}</div>${!yaEntregado?'<div style="font-size:11px;color:#d97706;margin-top:2px;">📦 pendiente entrega</div>':''}</div>
-          <div class="fac-fecha">${fecha}</div>
-          <div class="fac-monto">$${Number(f.total).toFixed(2)}</div>
-          <div><button class="${yaEntregado?'btn-cobrar':'btn-cobrar-entrega'}">${yaEntregado?'Cobrar':'Cobrar y entregar'}</button></div>
-        </div>`;
-      }).join('');
-      cont.querySelectorAll('.fac-grid-row').forEach(item => {
-        const btn=item.querySelector('button');
-        const yaEntregado=item.dataset.yaEntregado==='true';
-        btn.addEventListener('click', async () => {
-          const facturaId=item.dataset.facturaPendiente, paqueteId=item.dataset.paqueteId;
-          const metodoPago=await pedirMetodoPago(btn);
-          if(!metodoPago) return;
-          if(!yaEntregado){ abrirModalFirma({paqueteId,facturaId,metodoPago,item,btnOriginal:btn,textoOriginal:'Cobrar y entregar'}); return; }
-          btn.disabled=true; btn.textContent='Procesando…';
-          try {
-            const res=await apiAdmin('/admin/mostrador/cobrar',{method:'POST',body:JSON.stringify({factura_id:facturaId,metodo_pago:metodoPago})});
-            const data=await res.json().catch(()=>({}));
-            if(res.ok){ mostrarBanner('#bannerMostrador','success','✓ Factura cobrada.'); item.remove(); if($('#pendientesMostrador').children.length===0) $('#emptyPendientesMostrador').style.display='block'; }
-            else { mostrarBanner('#bannerMostrador','error',data.mensaje||'No se pudo cobrar.'); btn.disabled=false; btn.textContent='Cobrar'; }
-          } catch(err){ mostrarBanner('#bannerMostrador','error','No pudimos conectar.'); btn.disabled=false; }
-        });
-      });
-    } catch(err){ cont.innerHTML=''; }
+      const res = await apiAdmin('/admin/facturas/pendientes');
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        renderPendientesMostrador(data.pendientes || []);
+      }
+    } catch (err) {}
   }
 
-  let facturadorMetodoPago='', facturadorCliente=null, facturadorTarifas=[];
-  function renderResultadoMostrador(cliente, paquetes, facturasPendientes, autorizados){
-    const cont=$('#resultadoMostrador');
-    facturadorCliente=cliente; facturadorMetodoPago='';
-    let html=`<div class="cliente-card" style="display:flex;justify-content:space-between;align-items:center;"><div><div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div><div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono?' · '+escapeHtml(cliente.telefono):''}</div></div><div class="stats">${paquetes.length}<small>paquetes</small></div></div>`;
-    const sinFacturaTodos=paquetes.filter(p=>!p.factura_id||p.factura_estado==='anulada');
-    const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||p.peso_lb||0)>0&&Number(p.valor_declarado||0)>0);
-    const noListos=sinFacturaTodos.length-sinFactura.length;
-    if(sinFacturaTodos.length===0){ html+='<div class="empty">Este cliente no tiene paquetes pendientes de facturar.</div>'; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
-    if(sinFactura.length===0){ html+=`<div class="empty">⚠ Este cliente tiene ${noListos} paquete(s) sin peso o valor declarado.</div>`; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
-    html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-weight:600;font-size:13px;">Paquetes listos para facturar</div><button class="ft-select-all" id="btnSelectAll">Seleccionar todos</button></div>`;
-    if(noListos>0) html+=`<div class="empty" style="margin-bottom:10px;padding:10px 14px;">⚠ ${noListos} paquete(s) más sin peso o valor declarado.</div>`;
-    html+=sinFactura.map((p,i)=>{
-      const peso=Number(p.peso_real_lb||p.peso_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
-      const statusClass=p.estado==='listo_para_retiro'?'listo':p.estado==='en_transito'?'transito':'bodega';
-      return `<div class="ft-pkg" data-idx="${i}" data-paquete-id="${p.id}" data-peso="${peso}" data-valor="${valor}" data-envio="0" data-manejo="0" data-seguro="0" data-calc-total="0" data-tarifa-id=""><input type="checkbox"><div class="ft-pkg-info"><div class="ft-pkg-store">${escapeHtml(p.tienda)}</div><div class="ft-pkg-track">#${escapeHtml(p.numero_tracking)}</div><div class="ft-pkg-details">${peso} lb · Declarado $${valor}</div></div><div class="ft-pkg-right"><span class="ft-status ${statusClass}">${ESTADO_LABEL_MOSTRADOR[p.estado]||p.estado}</span><div class="ft-pkg-price">…</div></div></div>`;
+  function renderPendientesMostrador(pendientes) {
+    const contenedor = $('#pendientesMostrador');
+    const empty = $('#emptyPendientesMostrador');
+    const badgeCount = $('#facBadgeCount');
+    const totalGlobal = $('#facTotalGlobal');
+
+    badgeCount.textContent = pendientes.length;
+    let suma = 0;
+
+    if (pendientes.length === 0) {
+      contenedor.innerHTML = '';
+      empty.style.display = 'block';
+      totalGlobal.textContent = '$0.00';
+      return;
+    }
+
+    empty.style.display = 'none';
+    contenedor.innerHTML = pendientes.map(f => {
+      suma += parseFloat(f.total || 0);
+      return `<div class="fac-grid-row">
+        <div class="fac-num">${escapeHtml(f.numero_factura)}</div>
+        <div>
+          <div class="fac-cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</div>
+          <div class="fac-casillero">${escapeHtml(f.numero_casillero || '')}</div>
+        </div>
+        <div>
+          <div>${escapeHtml(f.tienda)}</div>
+          <div class="fac-tracking">${escapeHtml(f.numero_tracking)}</div>
+        </div>
+        <div class="fac-fecha">${new Date(f.fecha_emision).toLocaleDateString()}</div>
+        <div class="fac-monto">$${Number(f.total).toFixed(2)}</div>
+        <div>
+          <button class="btn-cobrar" data-id="${f.id}">Cobrar</button>
+        </div>
+      </div>`;
     }).join('');
-    cont.innerHTML=html;
-    cargarTarifasParaFacturador();
-    cont.querySelectorAll('.ft-pkg').forEach(pkg=>{
-      pkg.addEventListener('click',(e)=>{ if(e.target.tagName==='INPUT') return; const cb=pkg.querySelector('input[type=checkbox]'); cb.checked=!cb.checked; pkg.classList.toggle('selected',cb.checked); recalcularTotales(); });
-      pkg.querySelector('input').addEventListener('change',()=>{ pkg.classList.toggle('selected',pkg.querySelector('input').checked); recalcularTotales(); });
-    });
-    $('#btnSelectAll').addEventListener('click',()=>{ const pkgs=cont.querySelectorAll('.ft-pkg'); const allChecked=[...pkgs].every(p=>p.querySelector('input').checked); pkgs.forEach(p=>{ p.querySelector('input').checked=!allChecked; p.classList.toggle('selected',!allChecked); }); recalcularTotales(); });
-    document.querySelectorAll('.ft-pago-btn').forEach(btn=>{ btn.addEventListener('click',()=>{ document.querySelectorAll('.ft-pago-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); facturadorMetodoPago=btn.dataset.metodo; actualizarBotonGenerar(); }); });
-    $('#btnGenerarFacturas').onclick=generarFacturasLote;
-    $('#facturadorResumen').style.display='block'; $('#facturadorResultado').style.display='none';
-    recalcularTotales();
-  }
-  async function cargarTarifasParaFacturador(){
-    try {
-      const res=await apiAdmin('/admin/tarifas'); const data=await res.json(); facturadorTarifas=data.tarifas||[];
-      const tarifa=facturadorTarifas[0]; if(!tarifa) return;
-      document.querySelectorAll('.ft-pkg').forEach(pkg=>{
-        const peso=parseFloat(pkg.dataset.peso)||0, valor=parseFloat(pkg.dataset.valor)||0;
-        const envio=Math.max(peso*Number(tarifa.precio_libra),Number(tarifa.cargo_minimo));
-        const seguro=valor*Number(tarifa.pct_seguro)/100, manejo=Number(tarifa.cargo_manejo), total=envio+manejo+seguro;
-        pkg.dataset.envio=envio.toFixed(2); pkg.dataset.manejo=manejo.toFixed(2); pkg.dataset.seguro=seguro.toFixed(2); pkg.dataset.calcTotal=total.toFixed(2); pkg.dataset.tarifaId=tarifa.id;
-        pkg.querySelector('.ft-pkg-price').textContent='$'+total.toFixed(2);
-        pkg.querySelector('.ft-pkg-details').textContent=`${peso} lb · Declarado $${valor.toFixed(2)} · $${Number(tarifa.precio_libra).toFixed(2)}/lb`;
-      });
-      recalcularTotales();
-    } catch(e){}
-  }
-  function recalcularTotales(){
-    let envio=0,manejo=0,seguro=0,cant=0;
-    document.querySelectorAll('.ft-pkg').forEach(p=>{ if(p.querySelector('input').checked){ envio+=parseFloat(p.dataset.envio||0); manejo+=parseFloat(p.dataset.manejo||0); seguro+=parseFloat(p.dataset.seguro||0); cant++; } });
-    $('#ftFlete').textContent='$'+envio.toFixed(2); $('#ftManejo').textContent='$'+manejo.toFixed(2); $('#ftSeguro').textContent='$'+seguro.toFixed(2); $('#ftCant').textContent=cant; $('#ftTotal').textContent='$'+(envio+manejo+seguro).toFixed(2);
-    actualizarBotonGenerar();
-  }
-  function actualizarBotonGenerar(){ const cant=parseInt($('#ftCant').textContent)||0; $('#btnGenerarFacturas').disabled=cant===0||!facturadorMetodoPago; }
-  async function generarFacturasLote(){
-    const btn=$('#btnGenerarFacturas');
-    const seleccionados=[...document.querySelectorAll('.ft-pkg')].filter(p=>p.querySelector('input').checked);
-    if(seleccionados.length===0) return;
-    setCargando(btn,true);
-    const resultados=[]; let errores=0;
-    for(const pkg of seleccionados){
-      try {
-        const res=await apiAdmin('/admin/facturas/generar-y-cobrar',{method:'POST',body:JSON.stringify({paquete_id:parseInt(pkg.dataset.paqueteId),tarifa_id:parseInt(pkg.dataset.tarifaId),metodo_pago:facturadorMetodoPago})});
-        const data=await res.json().catch(()=>({}));
-        if(res.ok){ resultados.push(data.factura); pkg.style.display='none'; } else errores++;
-      } catch(e){ errores++; }
-    }
-    setCargando(btn,false);
-    if(resultados.length>0){
-      const totalCobrado=$('#ftTotal').textContent;
-      mostrarBanner('#bannerMostrador','success',`✓ ${resultados.map(f=>f.numero_factura).join(', ')} · ${totalCobrado} · ${facturadorMetodoPago}`);
-      setTimeout(()=>{ $('#resultadoMostrador').innerHTML=''; $('#facturadorResumen').style.display='none'; $('#facturadorResultado').style.display='none'; $('#bannerMostrador').innerHTML=''; $('#mostradorQ').value=''; facturadorMetodoPago=''; document.querySelectorAll('.ft-pago-btn').forEach(b=>b.classList.remove('selected')); $('#mostradorQ').focus(); }, 3000);
-      cargarPendientesMostrador();
-    }
-    if(errores>0) mostrarBanner('#bannerMostrador','error',errores+' factura(s) no se pudieron generar.');
-  }
-  function pedirMetodoPago(btnOrigen){
-    return new Promise(resolve=>{
-      const popup=document.createElement('div');
-      popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;';
-      popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px 24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,.25);"><div style="font-weight:700;font-size:15px;margin-bottom:14px;">Método de pago</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;"><button class="pop-pay" data-m="efectivo" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">💵 Efectivo</button><button class="pop-pay" data-m="tarjeta" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">💳 Tarjeta</button><button class="pop-pay" data-m="transferencia" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">🏦 Transferencia</button><button class="pop-pay" data-m="yappy" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">📱 Yappy</button></div><button id="popCancelar" style="width:100%;padding:9px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:13px;color:#6b7280;">Cancelar</button></div>`;
-      document.body.appendChild(popup);
-      popup.querySelectorAll('.pop-pay').forEach(b=>{ b.addEventListener('click',()=>{ popup.remove(); resolve(b.dataset.m); }); });
-      popup.querySelector('#popCancelar').addEventListener('click',()=>{ popup.remove(); resolve(null); });
-    });
-  }
 
-  let entregaPendiente=null, dibujando=false, firmaTieneTrazo=false;
-  const canvasFirma=document.getElementById('canvasFirma');
-  const ctxFirma=canvasFirma.getContext('2d');
-  function ajustarTamanoCanvas(){ const rect=canvasFirma.getBoundingClientRect(), ratio=window.devicePixelRatio||1; canvasFirma.width=rect.width*ratio; canvasFirma.height=rect.height*ratio; ctxFirma.scale(ratio,ratio); ctxFirma.lineWidth=2.2; ctxFirma.lineCap='round'; ctxFirma.strokeStyle='#0c1b33'; }
-  function posicionDesdeEvento(e){ const rect=canvasFirma.getBoundingClientRect(), punto=e.touches?e.touches[0]:e; return {x:punto.clientX-rect.left,y:punto.clientY-rect.top}; }
-  function iniciarTrazo(e){ e.preventDefault(); dibujando=true; firmaTieneTrazo=true; $('#firmaPlaceholder').classList.add('oculto'); const {x,y}=posicionDesdeEvento(e); ctxFirma.beginPath(); ctxFirma.moveTo(x,y); }
-  function continuarTrazo(e){ if(!dibujando) return; e.preventDefault(); const {x,y}=posicionDesdeEvento(e); ctxFirma.lineTo(x,y); ctxFirma.stroke(); }
-  function terminarTrazo(){ dibujando=false; }
-  canvasFirma.addEventListener('mousedown',iniciarTrazo); canvasFirma.addEventListener('mousemove',continuarTrazo); window.addEventListener('mouseup',terminarTrazo);
-  canvasFirma.addEventListener('touchstart',iniciarTrazo,{passive:false}); canvasFirma.addEventListener('touchmove',continuarTrazo,{passive:false}); canvasFirma.addEventListener('touchend',terminarTrazo);
-  function limpiarCanvasFirma(){ ajustarTamanoCanvas(); ctxFirma.clearRect(0,0,canvasFirma.width,canvasFirma.height); firmaTieneTrazo=false; $('#firmaPlaceholder').classList.remove('oculto'); }
-  function abrirModalFirma(contexto){ entregaPendiente=contexto; $('#firmaResumen').textContent='El cliente firma aquí para confirmar que recibió su paquete.'; mostrarBanner('#bannerFirma','',''); $('#modalFirma').classList.add('show'); setTimeout(limpiarCanvasFirma,50); }
-  function cerrarModalFirma(){ $('#modalFirma').classList.remove('show'); entregaPendiente=null; }
-  $('#btnCerrarModalFirma').addEventListener('click',cerrarModalFirma);
-  $('#modalFirma').addEventListener('click',(e)=>{ if(e.target.id==='modalFirma') cerrarModalFirma(); });
-  $('#btnLimpiarFirma').addEventListener('click',limpiarCanvasFirma);
-  $('#btnConfirmarFirma').addEventListener('click', async ()=>{
-    if(!entregaPendiente) return;
-    if(!firmaTieneTrazo){ mostrarBanner('#bannerFirma','error','El cliente debe firmar antes de confirmar.'); return; }
-    const btnConfirmar=$('#btnConfirmarFirma'); setCargando(btnConfirmar,true);
-    const firmaDataUrl=canvasFirma.toDataURL('image/png');
-    const {paqueteId,facturaId,metodoPago,item,btnOriginal,textoOriginal}=entregaPendiente;
-    try {
-      const res=await apiAdmin('/admin/mostrador/entregar',{method:'POST',body:JSON.stringify({paquete_id:paqueteId,factura_id:facturaId||undefined,metodo_pago:metodoPago||undefined,firma:firmaDataUrl})});
-      const data=await res.json().catch(()=>({}));
-      if(res.ok){ cerrarModalFirma(); mostrarBanner('#bannerMostrador','success','✓ Paquete entregado y factura cobrada. Firma guardada.'); item.remove(); if(metodoPago) cargarPendientesMostrador(); }
-      else { mostrarBanner('#bannerFirma','error',data.mensaje||'No se pudo procesar.'); if(btnOriginal){ btnOriginal.disabled=false; btnOriginal.textContent=textoOriginal; } }
-    } catch(err){ mostrarBanner('#bannerFirma','error','No pudimos conectar.'); }
-    finally { setCargando(btnConfirmar,false); }
-  });
+    totalGlobal.textContent = `$${suma.toFixed(2)}`;
 
-  let recepcionContador=0, recepcionHistorial=[], camaraStream=null, clienteRecepcionId=null;
-  function agregarAlLogRecepcion(entrada){ recepcionHistorial.unshift(entrada); $('#recepcionLog').innerHTML=recepcionHistorial.map(e=>`<div class="recepcion-item ${e.tipo}"><div class="ri-info"><span class="ri-tracking">${escapeHtml(e.tracking)}</span><span class="ri-detalle">${escapeHtml(e.detalle)}</span></div><span class="ri-hora">${e.hora}</span></div>`).join(''); }
-  function horaActual(){ return new Date().toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
-  $('#formRecepcion').addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const input=$('#recepcionTracking'), tracking=input.value.trim();
-    if(!tracking) return;
-    const btn=$('#btnRecepcion'); setCargando(btn,true);
-    $('#recepcionResultado').style.display='none'; $('#recepcionFormNuevo').style.display='none'; $('#bannerRecepcion').innerHTML='';
-    try {
-      const res=await apiAdmin(`/admin/recepcion/buscar?tracking=${encodeURIComponent(tracking)}`);
-      const data=await res.json().catch(()=>({}));
-      if(res.status===404){
-        $('#recepcionFormNuevo').style.display='block';
-        $('#recNuevoTienda').value=''; $('#recNuevoValor').value=''; $('#recNuevoPeso').value=''; $('#recNuevoDesc').value=''; $('#recNuevoCasillero').value=''; $('#recClienteEncontrado').style.display='none'; clienteRecepcionId=null; $('#btnCrearPaquete').disabled=true;
-        mostrarBanner('#bannerRecepcion','error',`⚠ "${tracking}" no tiene prealerta — completa los datos para crearlo manualmente.`);
-      } else if(res.ok&&data.ya_recibido){ mostrarBanner('#bannerRecepcion','error',`Este paquete ya fue recibido (estado: ${data.paquete.estado}).`);
-      } else if(res.ok){
-        const p=data.paquete;
-        $('#recepcionResultado').style.display='block';
-        $('#recepcionResultado').innerHTML=`<div style="background:var(--paper);border-radius:10px;padding:16px 18px;border:1.5px solid #b8e3d1;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;"><div><div style="font-weight:700;font-size:15px;">✓ Prealerta encontrada</div><div style="font-size:13px;color:var(--ink-soft);">${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)} · ${escapeHtml(p.numero_casillero)}</div><div style="font-size:12.5px;color:var(--ink-soft);">${escapeHtml(p.tienda)} · #${escapeHtml(p.numero_tracking)}</div>${p.valor_declarado?`<div style="font-size:12px;color:var(--ink-soft);">Valor declarado: $${Number(p.valor_declarado).toFixed(2)}</div>`:''}</div><button class="btn-primary" id="btnConfirmarRecepcion" data-id="${p.id}" data-tracking="${escapeHtml(p.numero_tracking)}" data-cliente="${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}"><span class="spinner"></span><span>Confirmar recepción</span></button></div></div>`;
-        $('#btnConfirmarRecepcion').addEventListener('click', async ()=>{
-          const btn2=$('#btnConfirmarRecepcion'); setCargando(btn2,true);
+    contenedor.querySelectorAll('.btn-cobrar').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (confirm('¿Confirmar cobro de esta factura?')) {
+          btn.disabled = true;
           try {
-            const r=await apiAdmin('/admin/recepcion/confirmar',{method:'POST',body:JSON.stringify({paquete_id:parseInt(btn2.dataset.id)})});
-            const d=await r.json().catch(()=>({}));
-            if(r.ok){ recepcionContador++; $('#recepcionContador').textContent=recepcionContador; agregarAlLogRecepcion({tipo:'ok',tracking:btn2.dataset.tracking,detalle:`${btn2.dataset.cliente} — listo para retiro`,hora:horaActual()}); $('#recepcionResultado').style.display='none'; mostrarBanner('#bannerRecepcion','success',`✓ Paquete ${btn2.dataset.tracking} recibido.`); input.value=''; iniciarFlujoFotoDimensiones(parseInt(btn2.dataset.id),btn2.dataset.tracking); }
-            else { mostrarBanner('#bannerRecepcion','error',d.mensaje||'No se pudo confirmar.'); setCargando(btn2,false); }
-          } catch(err){ mostrarBanner('#bannerRecepcion','error','No pudimos conectar.'); setCargando(btn2,false); }
-        });
-      }
-    } catch(err){ mostrarBanner('#bannerRecepcion','error','No pudimos conectar.'); }
-    finally { setCargando(btn,false); }
-  });
-  $('#btnBuscarClienteRec').addEventListener('click', async ()=>{
-    const casillero=$('#recNuevoCasillero').value.trim(); if(!casillero) return;
-    try {
-      const res=await apiAdmin(`/admin/usuarios?q=${encodeURIComponent(casillero)}`);
-      const data=await res.json().catch(()=>({}));
-      const usuarios=data.usuarios||[];
-      const cliente=usuarios.find(u=>u.numero_casillero.toLowerCase()===casillero.toLowerCase());
-      if(cliente){ clienteRecepcionId=cliente.id; $('#recClienteEncontrado').style.display='block'; $('#recClienteEncontrado').innerHTML=`✓ <strong>${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</strong> · ${escapeHtml(cliente.email)}`; $('#btnCrearPaquete').disabled=false; }
-      else { clienteRecepcionId=null; $('#recClienteEncontrado').style.display='block'; $('#recClienteEncontrado').innerHTML='<span style="color:#dc2626;">No se encontró ningún cliente con ese casillero.</span>'; $('#btnCrearPaquete').disabled=true; }
-    } catch(e){}
-  });
-  $('#btnCrearPaquete').addEventListener('click', async ()=>{
-    if(!clienteRecepcionId) return;
-    const tracking=$('#recepcionTracking').value.trim(), tienda=$('#recNuevoTienda').value.trim(), valor=$('#recNuevoValor').value, peso=$('#recNuevoPeso').value, desc=$('#recNuevoDesc').value.trim();
-    if(!tienda||!valor){ mostrarBanner('#bannerRecepcionNuevo','error','Completa tienda y valor declarado.'); return; }
-    const btn=$('#btnCrearPaquete'); setCargando(btn,true);
-    try {
-      const res=await apiAdmin('/admin/recepcion/crear',{method:'POST',body:JSON.stringify({usuario_id:clienteRecepcionId,numero_tracking:tracking,tienda,valor_declarado:parseFloat(valor),peso_lb:peso?parseFloat(peso):null,descripcion:desc||null})});
-      const data=await res.json().catch(()=>({}));
-      if(res.ok){ recepcionContador++; $('#recepcionContador').textContent=recepcionContador; agregarAlLogRecepcion({tipo:'ok',tracking,detalle:'Creado sin prealerta — listo para retiro',hora:horaActual()}); $('#recepcionFormNuevo').style.display='none'; $('#bannerRecepcion').innerHTML=''; mostrarBanner('#bannerRecepcion','success',`✓ Paquete ${tracking} creado.`); $('#recepcionTracking').value=''; iniciarFlujoFotoDimensiones(data.paquete.id,tracking); }
-      else { mostrarBanner('#bannerRecepcionNuevo','error',data.mensaje||'No se pudo crear el paquete.'); }
-    } catch(e){ mostrarBanner('#bannerRecepcionNuevo','error','No pudimos conectar.'); }
-    finally { setCargando(btn,false); }
-  });
-  function cancelarNuevo(){ $('#recepcionFormNuevo').style.display='none'; $('#bannerRecepcion').innerHTML=''; $('#recepcionTracking').value=''; $('#recepcionTracking').focus(); clienteRecepcionId=null; }
-  $('#btnCamara').addEventListener('click', async ()=>{
-    const camaraBox=$('#camaraRecepcion');
-    if(camaraBox.style.display==='block'){ cerrarCamara(); return; }
-    try { camaraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); $('#camaraVideo').srcObject=camaraStream; camaraBox.style.display='block'; }
-    catch(e){ mostrarBanner('#bannerRecepcion','error','No se pudo acceder a la cámara.'); }
-  });
-  window.cerrarCamara=function(){ if(camaraStream){ camaraStream.getTracks().forEach(t=>t.stop()); camaraStream=null; } $('#camaraRecepcion').style.display='none'; };
-
-  let flujoFotoDimPaqueteId=null, flujoFotoDimTracking='';
-  function iniciarFlujoFotoDimensiones(paqueteId,tracking){ flujoFotoDimPaqueteId=paqueteId; flujoFotoDimTracking=tracking; $('#recepcionFormNuevo').style.display='none'; $('#recepcionResultado').style.display='none'; $('#pasoFotoSub').textContent=`Toma una foto de "${tracking}" recién recibido.`; $('#pasoFoto').style.display='block'; $('#pasoDimensiones').style.display='none'; $('#bannerPasoFoto').innerHTML=''; }
-  $('#btnAbrirCamaraFoto').addEventListener('click',()=>{ $('#pasoFotoInput').value=''; $('#pasoFotoInput').click(); });
-  $('#btnGuardarDimensionesRecepcion').addEventListener('click', async () => {
-    const largo=$('#dimLargo').value, ancho=$('#dimAncho').value, alto=$('#dimAlto').value;
-    if(!largo||!ancho||!alto){ mostrarBanner('#bannerPasoDimensiones','error','Completa largo, ancho y alto.'); return; }
-    const btn=$('#btnGuardarDimensionesRecepcion'); setCargando(btn,true);
-    try {
-      const res=await apiAdmin(`/admin/paquetes/${flujoFotoDimPaqueteId}/dimensiones`,{
-        method:'PATCH', body:JSON.stringify({largo_in:parseFloat(largo),ancho_in:parseFloat(ancho),alto_in:parseFloat(alto)})
+            const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/cobrar`, { method: 'POST' });
+            if (res.ok) {
+              await cargarPendientesMostrador();
+            } else {
+              alert('No se pudo procesar el cobro.');
+              btn.disabled = false;
+            }
+          } catch (err) {
+            btn.disabled = false;
+          }
+        }
       });
-      const data=await res.json().catch(()=>({}));
-      if(res.ok){ mostrarBanner('#bannerPasoDimensiones','success',`✓ Guardado — peso volumétrico: ${data.paquete.peso_volumetrico_lb} lb`); setTimeout(terminarFlujoRecepcion,900); }
-      else { mostrarBanner('#bannerPasoDimensiones','error',data.mensaje||'No se pudieron guardar.'); setCargando(btn,false); }
-    } catch(e){ mostrarBanner('#bannerPasoDimensiones','error','No pudimos conectar.'); setCargando(btn,false); }
-  });
-  $('#pasoFotoInput').addEventListener('change', async ()=>{
-    const input=$('#pasoFotoInput'); if(!input.files||input.files.length===0) return;
-    const formData=new FormData(); formData.append('fotos',input.files[0]);
-    mostrarBanner('#bannerPasoFoto','','Subiendo foto…');
-    try { const res=await apiAdminFormData(`/admin/paquetes/${flujoFotoDimPaqueteId}/fotos`,formData); const data=await res.json().catch(()=>({})); if(res.status===201) mostrarBanner('#bannerPasoFoto','success','✓ Foto guardada.'); else mostrarBanner('#bannerPasoFoto','error',data.mensaje||'No se pudo subir la foto.'); }
-    catch(e){ mostrarBanner('#bannerPasoFoto','error','No pudimos conectar.'); }
-    finally { setTimeout(pasarADimensiones,600); }
-  });
-  function saltarPasoFoto(){ pasarADimensiones(); }
-  function pasarADimensiones(){ $('#pasoFoto').style.display='none'; $('#dimLargo').value=''; $('#dimAncho').value=''; $('#dimAlto').value=''; $('#bannerPasoDimensiones').innerHTML=''; $('#pasoDimensiones').style.display='block'; }
-  function saltarPasoDimensiones(){ terminarFlujoRecepcion(); }
-  function terminarFlujoRecepcion(){ $('#pasoFoto').style.display='none'; $('#pasoDimensiones').style.display='none'; $('#btnGuardarDimensionesRecepcion').disabled=false; setCargando($('#btnGuardarDimensionesRecepcion'),false); flujoFotoDimPaqueteId=null; $('#recepcionTracking').focus(); }
+    });
+  }
 
-  function fechaISOCaja(d){ return d.toISOString().slice(0,10); }
-  function inicializarFechaCaja(){ if($('#cajaFecha').value) return; $('#cajaFecha').value=fechaISOCaja(new Date()); }
-  async function cargarCaja(){ inicializarFechaCaja(); const fecha=$('#cajaFecha').value; try { const res=await apiAdmin(`/admin/caja/dia?fecha=${fecha}`); const data=await res.json(); renderCaja(data); } catch(err){} }
-  const METODO_ICONO = { efectivo:'💵', tarjeta:'💳', transferencia:'🏦', yappy:'📱' };
-  const METODO_COLOR = { efectivo:'green', tarjeta:'blue', transferencia:'navy', yappy:'amber' };
-  function renderCaja(data){
-    // Tarjetas de resumen
-    const total = Number(data.total_general);
-    const facturas = data.cantidad_facturas;
-    const metodos = data.detalle_por_metodo || [];
-   $('#cajaResumenCards').innerHTML = `
-      <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;">💰</div>
-        <div class="dash-label">Total cobrado</div>
-        <div class="dash-num" style="font-size:18px;">$${total.toFixed(2)}</div>
-        <div class="dash-sub">${facturas} fact.</div>
-      </div>
-      <div class="dash-card blue" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;">📋</div>
-        <div class="dash-label">Métodos</div>
-        <div class="dash-num" style="font-size:18px;">${metodos.length}</div>
-        <div class="dash-sub">usados</div>
-      </div>
-      <div class="dash-card ${data.cerrado?'navy':'amber'}" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;">${data.cerrado?'🔒':'⏳'}</div>
-        <div class="dash-label">Estado</div>
-        <div class="dash-num" style="font-size:15px;">${data.cerrado?'Cerrado':'Abierto'}</div>
-        <div class="dash-sub">${data.cerrado?'cerrada':'pendiente'}</div>
-      </div>
-    `;
-    // Cards por método de pago
-    const metodosGrid = $('#cajaMétodosGrid');
-    if(metodos.length > 0){
-      metodosGrid.style.display = 'block';
-      $('#cajaMetodosCards').innerHTML = metodos.map(m => {
-        const clave = (m.metodo_pago||'').toLowerCase();
-        const color = METODO_COLOR[clave] || 'navy';
-        const icono = METODO_ICONO[clave] || '💳';
-        return `<div class="dash-card ${color}" style="flex-direction:column;align-items:flex-start;gap:4px;padding:16px 14px;">
-          <div style="font-size:22px;">${icono}</div>
-          <div class="dash-label">${escapeHtml(m.etiqueta||clave)}</div>
-          <div class="dash-num" style="font-size:20px;">$${Number(m.total).toFixed(2)}</div>
-          <div class="dash-sub">${m.cantidad} factura${m.cantidad==1?'':'s'}</div>
-        </div>`;
-      }).join('');
-    } else {
-      metodosGrid.style.display = 'none';
+  async function iniciarAdmin() {
+    mostrarAdmin(true);
+    await cargarPendientesMostrador();
+  }
+
+  // Inicialización por token guardado
+  window.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem(TOKEN_KEY)) {
+      iniciarAdmin();
     }
-    $('#emptyCajaDetalle').style.display = metodos.length ? 'none' : 'block';
-    // Estado y cierre
-    const estadoDiv=$('#cajaEstadoDia'), cierreBox=$('#cajaCierreBox');
-    if(data.cerrado){
-      const c=data.cierre;
-      const hora=new Date(c.fecha_cierre).toLocaleString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      estadoDiv.innerHTML=`<div class="banner show success" style="margin-bottom:16px;">🔒 Caja cerrada el ${hora} por ${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}.</div>`;
-      cierreBox.innerHTML='';
-    } else {
-      estadoDiv.innerHTML='';
-      cierreBox.innerHTML=`
-        <div style="background:var(--paper);border-radius:12px;padding:18px;border:1px solid var(--line);margin-top:4px;">
-          <div style="font-family:var(--font-display);font-size:14px;font-weight:600;margin-bottom:12px;">Cerrar caja del día</div>
-          <label for="cajaNotas">Notas (opcional)</label>
-          <input id="cajaNotas" type="text" placeholder="Ej. Faltaron $2 en efectivo, cuadrado con cliente X">
-          <button class="btn-primary" id="btnCerrarCaja" style="margin-top:14px;max-width:280px;">
-            <span class="spinner"></span><span>Cerrar caja de este día</span>
-          </button>
-        </div>`;
-      $('#btnCerrarCaja').addEventListener('click',()=>cerrarCaja(data.fecha));
-    }
-  }
-  async function cerrarCaja(fecha){ if(!confirm(`¿Confirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','✓ Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
-  async function cargarHistorialCaja(){ try { const res=await apiAdmin('/admin/caja/historial'); const data=await res.json(); const cierres=data.cierres||[]; $('#emptyCajaHistorial').style.display=cierres.length?'none':'block'; $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{ const fecha=new Date(c.fecha).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'}); const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}); return `<tr><td data-label="Fecha">${fecha}</td><td data-label="Total" class="mono">$${Number(c.total_general).toFixed(2)}</td><td data-label="Facturas" class="mono">${c.cantidad_facturas}</td><td data-label="Cerrado por">${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</td><td data-label="Hora" class="muted">${hora}</td></tr>`; }).join(''); } catch(err){} }
-  $('#btnVerCaja').addEventListener('click',(e)=>{ e.preventDefault(); cargarCaja(); });
-
-  const ESTADO_LABEL_REPORTE={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
-  let ultimoReporte=null;
-  function fechaISO(d){ return d.toISOString().slice(0,10); }
-  function inicializarFechasReporte(){ if($('#repDesde').value&&$('#repHasta').value) return; const hoy=new Date(), hace30=new Date(hoy.getTime()-29*24*60*60*1000); $('#repHasta').value=fechaISO(hoy); $('#repDesde').value=fechaISO(hace30); }
-  async function cargarReporte(){ inicializarFechasReporte(); const params=new URLSearchParams({desde:$('#repDesde').value,hasta:$('#repHasta').value}); try { const res=await apiAdmin(`/admin/reportes?${params.toString()}`); const data=await res.json(); ultimoReporte=data; renderReporte(data); } catch(err){} }
-  let chartIngresos=null, chartEstados=null, chartTopClientes=null;
-  const ESTADO_COLORES={prealertado:'#ff6a1a',en_bodega_miami:'#2563eb',en_transito:'#7c3aed',en_panama:'#0891b2',listo_para_retiro:'#177a63',entregado:'#6b7280'};
-  function animarNum(el,meta,prefijo='',sufijo=''){ const duracion=900,inicio=performance.now(),desde=0; function tick(ahora){ const t=Math.min((ahora-inicio)/duracion,1), ease=1-Math.pow(1-t,3), valor=desde+(meta-desde)*ease; el.textContent=prefijo+valor.toFixed(meta%1!==0?2:0)+sufijo; if(t<1) requestAnimationFrame(tick); } requestAnimationFrame(tick); }
-  function renderReporte(data){
-    animarNum($('#repIngresos'),Number(data.ingresos.total),'$'); $('#repIngresosCant').textContent=`${data.ingresos.cantidad} factura${data.ingresos.cantidad==1?'':'s'}`;
-    animarNum($('#repPendiente'),Number(data.pendientes.total),'$'); $('#repPendienteCant').textContent=`${data.pendientes.cantidad} factura${data.pendientes.cantidad==1?'':'s'}`;
-    animarNum($('#repPaquetesNuevos'),Number(data.paquetes_nuevos)); animarNum($('#repClientesNuevos'),Number(data.clientes_nuevos));
-    const dias=data.ingresos_por_dia||[], estados=data.paquetes_por_estado||[], top=data.top_clientes||[];
-    if(chartIngresos){ chartIngresos.destroy(); chartIngresos=null; }
-    chartIngresos=new Chart(document.getElementById('chartIngresos').getContext('2d'),{type:'line',data:{labels:dias.map(d=>new Date(d.dia).toLocaleDateString('es-PA',{day:'2-digit',month:'short'})),datasets:[{label:'Ingresos ($)',data:dias.map(d=>Number(d.total)),borderColor:'#ff6a1a',backgroundColor:'rgba(255,106,26,0.1)',borderWidth:2.5,pointBackgroundColor:'#ff6a1a',pointRadius:4,tension:0.35,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(12,27,51,0.06)'},ticks:{color:'#6b7280',font:{size:11}}},y:{grid:{color:'rgba(12,27,51,0.06)'},ticks:{color:'#6b7280',font:{size:11},callback:v=>'$'+v}}}}});
-    if(chartEstados){ chartEstados.destroy(); chartEstados=null; }
-    chartEstados=new Chart(document.getElementById('chartEstados').getContext('2d'),{type:'doughnut',data:{labels:estados.map(e=>ESTADO_LABEL_REPORTE[e.estado]||e.estado),datasets:[{data:estados.map(e=>Number(e.cantidad)),backgroundColor:estados.map(e=>ESTADO_COLORES[e.estado]||'#94a3b8'),borderWidth:2,borderColor:'#ffffff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#0c1b33',font:{size:11},padding:10,boxWidth:12}}},cutout:'65%'}});
-    if(chartTopClientes){ chartTopClientes.destroy(); chartTopClientes=null; }
-    chartTopClientes=new Chart(document.getElementById('chartTopClientes').getContext('2d'),{type:'bar',data:{labels:top.map(c=>`${c.nombre} ${c.apellido}`),datasets:[{label:'Paquetes',data:top.map(c=>Number(c.total_paquetes)),backgroundColor:'rgba(255,106,26,0.75)',borderRadius:6,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(12,27,51,0.06)'},ticks:{color:'#6b7280',font:{size:11}}},y:{grid:{display:false},ticks:{color:'#0c1b33',font:{size:11}}}}}});
-  }
-  $('#btnActualizarReporte').addEventListener('click',cargarReporte);
-  $('#btnExportarCsv').addEventListener('click',()=>{
-    if(!ultimoReporte){ alert('Primero carga un reporte.'); return; }
-    const desde=$('#repDesde').value, hasta=$('#repHasta').value;
-    const fmtFecha=(d)=>d?new Date(d).toLocaleDateString('es-PA',{day:'2-digit',month:'2-digit',year:'numeric'}):'—';
-    const fmtNum=(n)=>`$${Number(n||0).toFixed(2)}`;
-    const esc=(v)=>{ const s=String(v??''); return s.includes(',')||s.includes('"')||s.includes('\n')?`"${s.replace(/"/g,'""')}"`:`${s}`; };
-    const seccion=(titulo)=>['',`=== ${titulo} ===`];
-    const filas=[
-      [`NEA CARGO XPRESS — REPORTE DE OPERACIONES`],[`Período: ${fmtFecha(desde)} al ${fmtFecha(hasta)}`],[`Generado: ${fmtFecha(new Date().toISOString())}`],[],
-      ...seccion('RESUMEN GENERAL'),['Concepto','Cantidad','Monto'],
-      ['Ingresos cobrados',ultimoReporte.ingresos?.cantidad??'0',fmtNum(ultimoReporte.ingresos?.total)],
-      ['Facturas pendientes',ultimoReporte.pendientes?.cantidad??'0',fmtNum(ultimoReporte.pendientes?.total)],
-      ['Paquetes nuevos',ultimoReporte.paquetes_nuevos??'0',''],['Clientes nuevos',ultimoReporte.clientes_nuevos??'0',''],
-      [],...seccion('INGRESOS POR DÍA'),['Fecha','Total cobrado'],
-      ...(ultimoReporte.ingresos_por_dia||[]).map(d=>[fmtFecha(d.dia),fmtNum(d.total)]),
-      [],...seccion('PAQUETES POR ESTADO'),['Estado','Cantidad'],
-      ...(ultimoReporte.paquetes_por_estado||[]).map(e=>[e.estado?.replace(/_/g,' ')||'—',e.cantidad]),
-      [],...seccion('TOP 5 CLIENTES'),['Cliente','Correo','Total paquetes'],
-      ...(ultimoReporte.top_clientes||[]).map(c=>[`${c.nombre} ${c.apellido}`,c.email,c.total_paquetes]),
-    ];
-    const csv='\uFEFF'+filas.map(f=>f.map(esc).join(',')).join('\r\n');
-    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}), url=window.URL.createObjectURL(blob), a=document.createElement('a');
-    a.href=url; a.download=`NEA-Reporte-${desde}-a-${hasta}.csv`; a.click(); window.URL.revokeObjectURL(url);
   });
-
-  let f1ClientesCache=[], f1Filtrados=[], f1Activo=0, f1Destino='facturador';
-  function iniciales(nombre){ return nombre.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(); }
-  function f1Render(){
-    const list=$('#f1ClientesList');
-    if(f1Filtrados.length===0){ list.innerHTML='<div style="padding:24px;text-align:center;color:var(--ink-soft);font-size:13px;">No se encontraron clientes</div>'; return; }
-    list.innerHTML=f1Filtrados.map((c,i)=>`<div class="f1-row${i===f1Activo?' f1-row-active':''}" data-idx="${i}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--line);transition:background .1s;${i===f1Activo?'background:var(--paper);':''}"><div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#1e40af;flex-shrink:0;">${iniciales(c.nombre)}</div><div><div style="font-size:13px;font-weight:600;">${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)}</div><div style="font-size:12px;color:var(--ink-soft);">${escapeHtml(c.email)}</div></div></div><span style="font-family:var(--font-mono);font-size:11.5px;background:var(--paper);padding:2px 8px;border-radius:4px;color:var(--ink-soft);">${escapeHtml(c.numero_casillero)}</span></div>`).join('');
-    list.querySelectorAll('.f1-row').forEach(row=>{ row.addEventListener('click',()=>{ f1Activo=parseInt(row.dataset.idx); f1Render(); }); row.addEventListener('dblclick',()=>f1Seleccionar(parseInt(row.dataset.idx))); });
-  }
-  async function f1Abrir(destino='facturador'){
-    f1Destino=destino; const overlay=$('#modalF1Clientes'); overlay.style.display='flex'; $('#f1SearchInput').value=''; f1Activo=0;
-    if(f1ClientesCache.length===0){ try { const res=await apiAdmin('/admin/usuarios'); const data=await res.json(); f1ClientesCache=data.usuarios||[]; } catch(e){ f1ClientesCache=[]; } }
-    f1Filtrados=[...f1ClientesCache]; f1Render(); setTimeout(()=>$('#f1SearchInput').focus(),50);
-  }
-  function f1Cerrar(){ $('#modalF1Clientes').style.display='none'; }
-  function f1Seleccionar(idx){ const c=f1Filtrados[idx]; if(!c) return; if(f1Destino==='recepcion'){ $('#recNuevoCasillero').value=c.numero_casillero; f1Cerrar(); $('#btnBuscarClienteRec').click(); } else { $('#mostradorQ').value=c.numero_casillero; f1Cerrar(); $('#formBuscarMostrador').dispatchEvent(new Event('submit')); } }
-  $('#f1SearchInput').addEventListener('input',(e)=>{ const q=e.target.value.toLowerCase(); f1Activo=0; f1Filtrados=q?f1ClientesCache.filter(c=>`${c.nombre} ${c.apellido}`.toLowerCase().includes(q)||c.email.toLowerCase().includes(q)||c.numero_casillero.toLowerCase().includes(q)):[...f1ClientesCache]; f1Render(); });
-  $('#f1SearchInput').addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ f1Cerrar(); return; } if(e.key==='ArrowDown'){ f1Activo=Math.min(f1Activo+1,f1Filtrados.length-1); f1Render(); } if(e.key==='ArrowUp'){ f1Activo=Math.max(f1Activo-1,0); f1Render(); } if(e.key==='Enter') f1Seleccionar(f1Activo); });
-  $('#modalF1Clientes').addEventListener('click',(e)=>{ if(e.target===$('#modalF1Clientes')) f1Cerrar(); });
-  document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'&&$('#modalF1Clientes').style.display==='flex') f1Cerrar(); });
-  $('#mostradorQ').addEventListener('keydown',(e)=>{ if(e.key==='1'){ e.preventDefault(); f1Abrir('facturador'); } });
-  document.addEventListener('keydown',(e)=>{ if(e.key==='1'&&document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); } });
-
-  async function iniciarAdmin(){
-    try { await cargarPaquetes(); cargarPendientesMostrador(); mostrarAdmin(true); } catch(err){ mostrarAdmin(false); }
-  }
-  if(localStorage.getItem(TOKEN_KEY)){ iniciarAdmin(); }
 </script>
 </body>
 </html>
