@@ -1901,7 +1901,25 @@
     }
   }
   async function cerrarCaja(fecha){ if(!confirm(`¿Confirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','✓ Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
-  async function cargarHistorialCaja(){ try { const res=await apiAdmin('/admin/caja/historial'); const data=await res.json(); const cierres=data.cierres||[]; $('#emptyCajaHistorial').style.display=cierres.length?'none':'block'; $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{ const fecha=new Date(c.fecha).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'}); const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}); return `<tr><td data-label="Fecha">${fecha}</td><td data-label="Total" class="mono">$${Number(c.total_general).toFixed(2)}</td><td data-label="Facturas" class="mono">${c.cantidad_facturas}</td><td data-label="Cerrado por">${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</td><td data-label="Hora" class="muted">${hora}</td></tr>`; }).join(''); } catch(err){} }
+  async function cargarHistorialCaja(){
+    try {
+      const res=await apiAdmin('/admin/caja/historial');
+      const data=await res.json();
+      const cierres=data.cierres||[];
+      $('#emptyCajaHistorial').style.display=cierres.length?'none':'block';
+      $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{
+        const fecha=new Date(c.fecha).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});
+        const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'});
+        return `<div style="display:grid;grid-template-columns:1fr 110px 80px 1fr 90px;padding:12px 16px;gap:10px;border-bottom:1px solid var(--line);font-size:13px;align-items:center;">
+          <div style="font-weight:500;">${fecha}</div>
+          <div style="font-family:var(--font-mono);font-weight:700;color:var(--cargo-green);">$${Number(c.total_general).toFixed(2)}</div>
+          <div style="font-family:var(--font-mono);color:var(--ink-soft);">${c.cantidad_facturas}</div>
+          <div>${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</div>
+          <div style="color:var(--ink-soft);font-size:12px;">${hora}</div>
+        </div>`;
+      }).join('');
+    } catch(err){}
+  }
   $('#btnVerCaja').addEventListener('click',(e)=>{ e.preventDefault(); cargarCaja(); });
 
   const ESTADO_LABEL_REPORTE={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
@@ -1969,12 +1987,8 @@
   $('#f1SearchInput').addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ f1Cerrar(); return; } if(e.key==='ArrowDown'){ f1Activo=Math.min(f1Activo+1,f1Filtrados.length-1); f1Render(); } if(e.key==='ArrowUp'){ f1Activo=Math.max(f1Activo-1,0); f1Render(); } if(e.key==='Enter') f1Seleccionar(f1Activo); });
   $('#modalF1Clientes').addEventListener('click',(e)=>{ if(e.target===$('#modalF1Clientes')) f1Cerrar(); });
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'&&$('#modalF1Clientes').style.display==='flex') f1Cerrar(); });
-  // Tecla 1 en facturador y recepcion
-  document.addEventListener('keydown',(e)=>{
-    if(e.key!=='1') return;
-    if(document.activeElement?.id==='mostradorQ'){ e.preventDefault(); f1Abrir('facturador'); }
-    if(document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); }
-  });
+  $('#mostradorQ').addEventListener('keydown',(e)=>{ if(e.key==='1'){ e.preventDefault(); f1Abrir('facturador'); } });
+  document.addEventListener('keydown',(e)=>{ if(e.key==='1'&&document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); } });
 
   async function iniciarAdmin(){
     try { await cargarPaquetes(); cargarPendientesMostrador(); mostrarAdmin(true); } catch(err){ mostrarAdmin(false); }
