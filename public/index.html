@@ -38,14 +38,11 @@
   img{ max-width:100%; }
   section{ scroll-margin-top: 90px; }
   ::selection{ background: var(--accent); color:#fff; }
-
   @media (prefers-reduced-motion: reduce){
     *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
   }
-
   .reveal{ opacity:0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.in-view{ opacity:1; transform:none; }
-
   /* ============ NAV ============ */
   .nav{
     position: sticky; top:0; z-index: 40;
@@ -64,7 +61,6 @@
     box-shadow: 0 0 0 1px rgba(255,106,26,0.3), 0 2px 16px var(--accent-glow);
   }
   .brand small{ display:block; font-weight:400; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color: rgba(241,243,242,0.5); font-family: var(--font-body); }
-
   .nav-menu{ display:flex; align-items:center; gap:2px; }
   .nav-item{ position:relative; }
   .nav-btn{
@@ -81,7 +77,6 @@
     box-shadow: 0 2px 20px var(--accent-glow);
   }
   .nav-btn.cta:hover{ background: var(--accent-dark); }
-
   .dropdown{
     position:absolute; top: calc(100% + 10px); left:0;
     background: rgba(20,34,58,0.96); backdrop-filter: blur(16px);
@@ -101,13 +96,11 @@
   }
   .dropdown a:hover, .dropdown button:hover{ background: rgba(241,243,242,0.08); }
   .dropdown .item-sub{ font-size:11px; color: rgba(241,243,242,0.55); }
-
   .nav-toggle{
     display:none; background:none; border:none; color:#f1f3f2; font-size:22px; cursor:pointer;
     position: relative; z-index: 50; padding: 8px 10px; -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
-
   @media (max-width: 860px){
     .nav-menu{
       position:absolute; top:100%; left:0; right:0;
@@ -122,8 +115,7 @@
     .dropdown{ position:static; box-shadow:none; margin: 0 0 8px 12px; width: calc(100% - 12px); background: rgba(241,243,242,0.06); border-color: rgba(241,243,242,0.12); }
     .nav-btn.cta{ margin-top:6px; justify-content:center; }
   }
-
-  /* ============ HERO con fondo de red de partículas ============ */
+  /* ============ HERO ============ */
   .hero-shell{ position: relative; overflow: hidden; background: var(--ink); }
   .hero-shell::before{
     content:''; position:absolute; inset:0;
@@ -170,7 +162,6 @@
     transition: border-color .15s ease, background .15s ease;
   }
   .btn-outline:hover{ border-color: rgba(241,243,242,0.6); background: rgba(241,243,242,0.06); }
-
   .route-strip{
     margin-top: 34px; display:flex; align-items:center; gap:10px;
     font-family: var(--font-mono); font-size:11px; color: rgba(241,243,242,0.55);
@@ -181,14 +172,11 @@
   .route-strip .route-dot{ fill: var(--accent); filter: drop-shadow(0 0 4px var(--accent-glow)); }
   .route-strip .route-plane{ fill: var(--accent); offset-path: path('M2,7 L138,7'); animation: fly-route 4.5s ease-in-out infinite; filter: drop-shadow(0 0 5px var(--accent-glow)); }
   @keyframes fly-route{ 0%{ offset-distance:0%; opacity:0; } 8%{ opacity:1; } 92%{ opacity:1; } 100%{ offset-distance:100%; opacity:0; } }
-
-  /* Tarjeta 3D con tilt al mouse + borde con glow animado */
   .tilt-wrap{ perspective: 1200px; }
   .hero-card{
     background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
     border: 1px solid rgba(241,243,242,0.14);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     color: #f1f3f2; border-radius: var(--radius-lg); padding: 32px;
     position: relative; overflow:hidden;
     box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6);
@@ -217,9 +205,7 @@
   .stat-mini{ flex:1; background: rgba(0,0,0,0.2); border-radius:10px; padding: 13px; border: 1px solid rgba(241,243,242,0.1); }
   .stat-mini .n{ font-family: var(--font-display); font-size:21px; color: var(--accent); text-shadow: 0 0 18px var(--accent-glow); }
   .stat-mini .l{ font-size:10.5px; color: rgba(241,243,242,0.5); text-transform:uppercase; letter-spacing:.04em; }
-
   @media (max-width: 860px){ .hero{ grid-template-columns: 1fr; padding-top: 48px; gap: 40px; } }
-
   /* ============ BANDA DE FOTOS ============ */
   .foto-banda{ display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; max-width: 1180px; margin: 0 auto; padding: 0 26px; }
   .foto-item{ position:relative; overflow:hidden; border-radius: var(--radius-md); aspect-ratio: 4/3; }
@@ -227,36 +213,22 @@
   .foto-item:hover img{ transform: scale(1.07); }
   .foto-item::after{ content:''; position:absolute; inset:0; box-shadow: inset 0 0 0 1px rgba(255,106,26,0); transition: box-shadow .3s ease; border-radius: inherit; pointer-events:none; }
   .foto-item:hover::after{ box-shadow: inset 0 0 0 2px rgba(255,106,26,0.7); }
-  .foto-caption{
-    position:absolute; inset:auto 0 0 0;
-    background: linear-gradient(to top, rgba(12,27,51,0.92), transparent);
-    color:#fff; font-size:12.5px; font-weight:600; padding: 34px 16px 14px;
-    display:flex; align-items:baseline; gap:9px;
-  }
+  .foto-caption{ position:absolute; inset:auto 0 0 0; background: linear-gradient(to top, rgba(12,27,51,0.92), transparent); color:#fff; font-size:12.5px; font-weight:600; padding: 34px 16px 14px; display:flex; align-items:baseline; gap:9px; }
   .foto-caption .foto-num{ font-family: var(--font-mono); color: var(--accent); font-size:11px; font-weight:700; }
   @media (max-width: 700px){ .foto-banda{ grid-template-columns: 1fr; gap:8px; } .foto-item{ aspect-ratio: 16/9; } }
-
   /* ============ RASTREO ============ */
   .rastreo-tabs{ display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
-  .rastreo-tab-btn{
-    padding: 9px 17px; border-radius:20px; border:1px solid var(--line); background:#fff;
-    font-size:13px; font-weight:600; color: var(--ink-soft); cursor:pointer; transition: all .15s ease;
-  }
+  .rastreo-tab-btn{ padding: 9px 17px; border-radius:20px; border:1px solid var(--line); background:#fff; font-size:13px; font-weight:600; color: var(--ink-soft); cursor:pointer; transition: all .15s ease; }
   .rastreo-tab-btn.active{ background: var(--ink); color:#fff; border-color: var(--ink); box-shadow: 0 4px 16px rgba(12,27,51,0.25); }
   .rastreo-hint{ font-size:12.5px; color: var(--ink-soft); margin: 0 0 16px; }
   .rastreo-box{ max-width: 640px; }
   .rastreo-form{ display:flex; gap:10px; flex-wrap:wrap; }
-  .rastreo-form input{
-    flex:1; min-width:220px; padding: 14px 17px; border-radius: var(--radius-sm);
-    border: 1.5px solid var(--line); font-family: var(--font-mono); font-size:14px; color: var(--ink);
-    transition: border-color .15s ease, box-shadow .15s ease;
-  }
+  .rastreo-form input{ flex:1; min-width:220px; padding: 14px 17px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); font-family: var(--font-mono); font-size:14px; color: var(--ink); transition: border-color .15s ease, box-shadow .15s ease; }
   .rastreo-form input:focus-visible{ outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,106,26,0.14); }
   .rastreo-form .btn-solid{ border:none; cursor:pointer; display:flex; align-items:center; gap:8px; color:#fff; }
   .spinner-rastreo{ width:13px; height:13px; border-radius:50%; border:2px solid rgba(255,255,255,0.45); border-top-color:#fff; animation: spin-rastreo .7s linear infinite; display:none; }
   .loading-rastreo .spinner-rastreo{ display:inline-block; }
   @keyframes spin-rastreo{ to{ transform: rotate(360deg); } }
-
   #resultadoRastreo{ margin-top: 24px; }
   .rastreo-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:24px; box-shadow: var(--shadow-card); animation: cardIn .35s ease; }
   @keyframes cardIn{ from{ opacity:0; transform: translateY(8px); } to{ opacity:1; transform:none; } }
@@ -275,33 +247,22 @@
   .rt-fotos{ display:grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap:8px; margin-top:20px; }
   .rt-fotos img{ width:100%; height:90px; object-fit:cover; border-radius: var(--radius-sm); border:1px solid var(--line); cursor:pointer; }
   .rt-error{ background: var(--amber-bg); border:1px solid rgba(255,106,26,0.3); color: var(--accent-dark); border-radius: var(--radius-md); padding:17px; font-size:13.5px; }
-
-  /* ============ SECCIONES GENERALES ============ */
+  /* ============ SECCIONES ============ */
   .section{ max-width: 1180px; margin: 0 auto; padding: 78px 26px; }
   .section-head{ max-width: 580px; margin: 0 0 38px; }
   .section-head .eyebrow{ color: var(--accent-dark); margin-bottom:12px; }
   .section-head .eyebrow::before{ box-shadow:none; animation:none; }
   .section-head h2{ font-family: var(--font-display); font-size: clamp(23px, 3.1vw, 32px); letter-spacing:-0.01em; margin:0 0 11px; }
   .section-head p{ color: var(--ink-soft); font-size:14.5px; line-height:1.6; margin:0; }
-
   .steps-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; perspective: 1000px; }
-  .step-card{
-    background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:22px;
-    box-shadow: var(--shadow-card); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-    position: relative; transform-style: preserve-3d;
-  }
+  .step-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:22px; box-shadow: var(--shadow-card); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; position: relative; transform-style: preserve-3d; }
   .step-card:hover{ transform: translateY(-4px) rotateX(4deg); box-shadow: var(--shadow-card-hover); border-color: rgba(255,106,26,0.35); }
-  .step-card:not(:last-child)::after{
-    content:''; position:absolute; top:50%; right:-9px; width:8px; height:1px;
-    background-image: linear-gradient(to right, rgba(12,27,51,0.25) 50%, transparent 0%);
-    background-size: 4px 1px; background-repeat: repeat-x;
-  }
+  .step-card:not(:last-child)::after{ content:''; position:absolute; top:50%; right:-9px; width:8px; height:1px; background-image: linear-gradient(to right, rgba(12,27,51,0.25) 50%, transparent 0%); background-size: 4px 1px; background-repeat: repeat-x; }
   .step-card .num{ font-family: var(--font-display); font-size:23px; color: var(--accent); }
   .step-card h3{ font-family: var(--font-display); font-size:14.5px; margin: 11px 0 6px; }
   .step-card p{ font-size:12.5px; color: var(--ink-soft); line-height:1.55; margin:0; }
   @media (max-width: 860px){ .steps-grid{ grid-template-columns: 1fr 1fr; } .step-card::after{ display:none; } }
   @media (max-width: 520px){ .steps-grid{ grid-template-columns: 1fr; } }
-
   .tarifas-band{ background: var(--ink); color:#f1f3f2; position: relative; overflow:hidden; }
   .tarifas-band::before{ content:''; position:absolute; top:-20%; left:-10%; width:50%; height:80%; background: radial-gradient(circle, rgba(255,106,26,0.12), transparent 70%); pointer-events:none; }
   .tarifas-band::after{ content:''; position:absolute; bottom:-30%; right:-15%; width:55%; height:80%; background: radial-gradient(circle, rgba(23,122,99,0.14), transparent 70%); pointer-events:none; }
@@ -316,7 +277,6 @@
   .tarifa-card h3{ font-family: var(--font-display); font-size:14px; margin: 9px 0 7px; }
   .tarifa-card p{ font-size:12px; color: rgba(241,243,242,0.6); line-height:1.6; margin:0; }
   @media (max-width: 760px){ .tarifas-grid{ grid-template-columns: 1fr; } }
-
   .calculadora-box{ margin-top: 38px; background: rgba(241,243,242,0.05); border:1px solid rgba(241,243,242,0.15); border-radius: var(--radius-lg); padding: 28px; backdrop-filter: blur(6px); }
   .calculadora-box h3{ font-family: var(--font-display); font-size:16px; margin: 0 0 18px; color:#f1f3f2; }
   .calc-row{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px; }
@@ -329,8 +289,6 @@
   .calc-total .linea{ display:flex; justify-content:space-between; font-size:12.5px; color: rgba(241,243,242,0.7); margin-bottom:5px; }
   .calc-total .total-final{ display:flex; justify-content:space-between; font-family: var(--font-display); font-size:20px; color: var(--accent); margin-top:11px; padding-top:11px; border-top:1px solid rgba(241,243,242,0.15); text-shadow: 0 0 20px var(--accent-glow); }
   @media (max-width: 760px){ .calc-row{ grid-template-columns: 1fr; } }
-
-  /* ============ SUCURSALES ============ */
   .sucursales-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
   .sucursal-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:20px; box-shadow: var(--shadow-card); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
   .sucursal-card:hover{ transform: translateY(-3px); box-shadow: var(--shadow-card-hover); border-color: rgba(255,106,26,0.3); }
@@ -338,8 +296,6 @@
   .sucursal-card .linea{ font-size:12.5px; color: var(--ink-soft); margin-bottom:5px; }
   @media (max-width: 860px){ .sucursales-grid{ grid-template-columns: 1fr 1fr; } }
   @media (max-width: 560px){ .sucursales-grid{ grid-template-columns: 1fr; } }
-
-  /* FAQ */
   .faq-item{ border-bottom:1px solid var(--line); padding: 18px 0; }
   .faq-q{ display:flex; justify-content:space-between; align-items:center; gap:12px; cursor:pointer; font-family: var(--font-display); font-size:15.5px; }
   .faq-q .plus{ font-size:19px; color: var(--accent); transition: transform .2s ease; flex-shrink:0; }
@@ -347,8 +303,6 @@
   .faq-a{ display:none; font-size:13.5px; color: var(--ink-soft); line-height:1.65; margin-top:11px; max-width: 68ch; }
   .faq-item.open .faq-a{ display:block; animation: faqIn .25s ease; }
   @keyframes faqIn{ from{ opacity:0; transform: translateY(-4px); } to{ opacity:1; transform:none; } }
-
-  /* Contacto */
   .contacto-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
   .contacto-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:24px; display:flex; flex-direction:column; gap:7px; box-shadow: var(--shadow-card); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
   .contacto-card:hover{ transform: translateY(-3px); box-shadow: var(--shadow-card-hover); border-color: rgba(255,106,26,0.3); }
@@ -357,13 +311,9 @@
   .contacto-card p{ font-size:12.5px; color: var(--ink-soft); margin:0; }
   .contacto-card a.link{ font-size:12.5px; color: var(--accent-dark); font-weight:600; margin-top:7px; }
   @media (max-width: 760px){ .contacto-grid{ grid-template-columns: 1fr; } }
-
-  /* Footer */
   footer{ background: var(--ink); color: rgba(241,243,242,0.6); padding: 38px 26px; position:relative; overflow:hidden; }
   .footer-inner{ max-width: 1180px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; font-size:12.5px; position:relative; }
   .footer-inner .brand{ color:#f1f3f2; }
-
-  /* WhatsApp flotante */
   .whatsapp-float{
     position: fixed; bottom: 22px; right: 22px; z-index: 60;
     width: 58px; height:58px; border-radius:50%;
@@ -373,13 +323,10 @@
   }
   .whatsapp-float:hover{ transform: scale(1.08); }
   @keyframes pulse-wsp{ 0%,100%{ box-shadow: 0 8px 24px rgba(37,211,102,0.4); } 50%{ box-shadow: 0 8px 24px rgba(37,211,102,0.7), 0 0 0 8px rgba(37,211,102,0.12); } }
-
   a:focus-visible, button:focus-visible{ outline: 2px solid var(--accent); outline-offset:2px; border-radius:4px; }
 </style>
 </head>
 <body>
-
-<!-- ============ NAV ============ -->
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="brand">
@@ -418,8 +365,6 @@
     </div>
   </div>
 </nav>
-
-<!-- ============ HERO ============ -->
 <div class="hero-shell">
   <canvas id="networkCanvas"></canvas>
   <section class="hero">
@@ -446,17 +391,16 @@
         <span class="city">PANAMÁ</span>
       </div>
     </div>
-
     <div class="tilt-wrap">
       <div class="hero-card reveal" id="heroCard">
         <h3>Tu casillero se ve así</h3>
         <p class="small">Lo usas como tu dirección de envío en cualquier tienda de EE.UU.</p>
         <div class="casillero-mock">
-          Tu Nombre - <span class="suite">PN-00042</span><br>
-          8548 NW 66th St<br>
-          <span class="suite">Suite PN-00042</span><br>
-          Miami, FL 33166<br>
-          USA
+          <span class="suite">PTY-14981</span> &nbsp;&nbsp; TU NOMBRE &nbsp;&nbsp; NEA CARGO XPRESS<br>
+          8610 NW 72 STREET<br>
+          MIAMI, FLORIDA 33195<br>
+          ESTADOS UNIDOS<br>
+          1-305-406-3654
         </div>
         <div class="stat-mini-row">
           <div class="stat-mini"><div class="n" data-count-to="4">0</div><div class="l">Días Miami–PTY (min)</div></div>
@@ -466,20 +410,16 @@
     </div>
   </section>
 </div>
-
-<!-- ============ RASTREO PÚBLICO ============ -->
 <section class="section reveal" id="rastreo">
   <div class="section-head">
     <div class="eyebrow">Rastreo</div>
     <h2>¿Dónde está mi paquete?</h2>
     <p>No necesitas iniciar sesión para rastrear.</p>
   </div>
-
   <div class="rastreo-tabs">
     <button class="rastreo-tab-btn active" data-rtab="nea">Mi paquete NEA Cargo Xpress</button>
     <button class="rastreo-tab-btn" data-rtab="mundial">Rastreo mundial (cualquier courier)</button>
   </div>
-
   <div class="rastreo-box" id="panelRastreoNea">
     <p class="rastreo-hint">Para paquetes que ya prealertaste con nosotros.</p>
     <form id="formRastreo" class="rastreo-form">
@@ -490,7 +430,6 @@
     </form>
     <div id="resultadoRastreo"></div>
   </div>
-
   <div class="rastreo-box" id="panelRastreoMundial" style="display:none;">
     <p class="rastreo-hint">Para cualquier número de tracking (USPS, UPS, DHL, FedEx, UniUni, y +3,400 transportistas más), aunque no sea de NEA Cargo Xpress. Te abrimos el resultado en 17TRACK, el rastreador universal más usado.</p>
     <form id="formMundial" class="rastreo-form">
@@ -499,8 +438,6 @@
     </form>
   </div>
 </section>
-
-<!-- ============ FOTOS DEL PROCESO ============ -->
 <section class="foto-banda reveal">
   <div class="foto-item">
     <img src="https://images.unsplash.com/photo-1633174524827-db00a6b7bc74?auto=format&fit=crop&w=800&q=75" alt="Cajas de compras en línea listas para envío" loading="lazy">
@@ -515,8 +452,6 @@
     <div class="foto-caption"><span class="foto-num">03</span>Lo recibes en tu sucursal más cercana</div>
   </div>
 </section>
-
-<!-- ============ CÓMO FUNCIONA ============ -->
 <section class="section reveal" id="como-funciona">
   <div class="section-head">
     <div class="eyebrow">Proceso</div>
@@ -524,41 +459,19 @@
     <p>Desde que compras hasta que retiras tu paquete, siempre sabes en qué punto va.</p>
   </div>
   <div class="steps-grid">
-    <div class="step-card">
-      <div class="num">01</div>
-      <h3>Crea tu casillero</h3>
-      <p>Regístrate gratis y te asignamos una dirección personal en Miami al instante.</p>
-    </div>
-    <div class="step-card">
-      <div class="num">02</div>
-      <h3>Compra y prealerta</h3>
-      <p>Compra en la tienda que quieras usando tu dirección, y avísanos qué compraste en la app.</p>
-    </div>
-    <div class="step-card">
-      <div class="num">03</div>
-      <h3>Lo recibimos y pesamos</h3>
-      <p>Tu paquete llega a nuestra bodega, lo fotografiamos, pesamos y actualizamos su estado.</p>
-    </div>
-    <div class="step-card">
-      <div class="num">04</div>
-      <h3>Retira en Panamá</h3>
-      <p>Te avisamos por correo y WhatsApp cuando esté listo en tu sucursal más cercana.</p>
-    </div>
+    <div class="step-card"><div class="num">01</div><h3>Crea tu casillero</h3><p>Regístrate gratis y te asignamos una dirección personal en Miami al instante.</p></div>
+    <div class="step-card"><div class="num">02</div><h3>Compra y prealerta</h3><p>Compra en la tienda que quieras usando tu dirección, y avísanos qué compraste en la app.</p></div>
+    <div class="step-card"><div class="num">03</div><h3>Lo recibimos y pesamos</h3><p>Tu paquete llega a nuestra bodega, lo fotografiamos, pesamos y actualizamos su estado.</p></div>
+    <div class="step-card"><div class="num">04</div><h3>Retira en Panamá</h3><p>Te avisamos por correo y WhatsApp cuando esté listo en tu sucursal más cercana.</p></div>
   </div>
 </section>
-
-<!-- ============ TARIFAS ============ -->
 <section class="section tarifas-band reveal" id="tarifas">
   <div class="section-head">
     <div class="eyebrow">Tarifas</div>
     <h2>Precios claros, sin sorpresas</h2>
     <p>Pagas por lo que pesa tu paquete. Sin cargos escondidos.</p>
   </div>
-
-  <div class="tarifas-grid" id="tarifasGrid">
-    <div class="tarifa-card"><p>Cargando tarifas…</p></div>
-  </div>
-
+  <div class="tarifas-grid" id="tarifasGrid"><div class="tarifa-card"><p>Cargando tarifas…</p></div></div>
   <div class="calculadora-box">
     <h3>Calcula el costo estimado de tu envío</h3>
     <div class="calc-row">
@@ -570,20 +483,14 @@
     <div id="calcResultado"></div>
   </div>
 </section>
-
-<!-- ============ SUCURSALES ============ -->
 <section class="section reveal" id="sucursales">
   <div class="section-head">
     <div class="eyebrow">Puntos de retiro</div>
     <h2>Nuestras sucursales</h2>
     <p>Retira tu paquete en el punto más cercano a ti.</p>
   </div>
-  <div class="sucursales-grid" id="sucursalesGrid">
-    <div class="sucursal-card"><p class="linea">Cargando sucursales…</p></div>
-  </div>
+  <div class="sucursales-grid" id="sucursalesGrid"><div class="sucursal-card"><p class="linea">Cargando sucursales…</p></div></div>
 </section>
-
-<!-- ============ PREGUNTAS ============ -->
 <section class="section reveal" id="preguntas">
   <div class="section-head">
     <div class="eyebrow">Preguntas frecuentes</div>
@@ -617,8 +524,6 @@
     </div>
   </div>
 </section>
-
-<!-- ============ CONTACTO ============ -->
 <section class="section reveal" id="contacto">
   <div class="section-head">
     <div class="eyebrow">Contáctanos</div>
@@ -640,16 +545,12 @@
     </div>
   </div>
 </section>
-
-<!-- ============ FOOTER ============ -->
 <footer>
   <div class="footer-inner">
     <div class="brand" style="font-family: var(--font-display); font-weight:700;">NEA CARGO XPRESS</div>
     <div>© <span id="anioActual"></span> NEA Cargo Xpress. Miami → Panamá.</div>
   </div>
 </footer>
-
-<!-- ============ WHATSAPP FLOTANTE ============ -->
 <a class="whatsapp-float" href="https://wa.me/50762937497?text=Hola%2C%20necesito%20ayuda%20con%20mi%20env%C3%ADo" target="_blank" rel="noopener" aria-label="Chatear por WhatsApp">
   <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M16 2.5C8.5 2.5 2.5 8.5 2.5 16c0 2.6.7 5 2 7.1L2.5 29.5l6.6-1.9c2 1.1 4.4 1.8 6.9 1.8 7.5 0 13.5-6 13.5-13.4C29.5 8.5 23.5 2.5 16 2.5z" fill="white"/>
@@ -657,417 +558,55 @@
     <path d="M22.1 18.9c-.4-.2-2.1-1-2.4-1.2-.3-.1-.5-.2-.8.2-.2.3-.9 1.2-1.1 1.4-.2.2-.4.3-.7.1-.4-.2-1.5-.5-2.8-1.7-1-.9-1.7-2.1-1.9-2.4-.2-.4 0-.5.1-.7.1-.2.4-.5.5-.6.2-.2.2-.4.3-.6.1-.2.1-.4 0-.6-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.3 3.6 5.7 5 .8.3 1.4.5 1.9.7.8.2 1.5.2 2 .1.6-.1 2.1-.8 2.3-1.7.3-.8.3-1.5.2-1.7-.1-.1-.3-.2-.7-.4z" fill="#25d366"/>
   </svg>
 </a>
-
 <script>
   const $ = (sel) => document.querySelector(sel);
   $('#anioActual').textContent = new Date().getFullYear();
-
-  // ---------- Fondo: red de partículas conectadas (hero) ----------
   (function redParticulas(){
     const canvas = document.getElementById('networkCanvas');
     const ctx = canvas.getContext('2d');
     const heroShell = canvas.parentElement;
     const prefiereReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let puntos = [];
-    let ancho, alto;
-
-    function medir(){
-      ancho = heroShell.offsetWidth;
-      alto = heroShell.offsetHeight;
-      canvas.width = ancho * devicePixelRatio;
-      canvas.height = alto * devicePixelRatio;
-      canvas.style.width = ancho + 'px';
-      canvas.style.height = alto + 'px';
-      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-    }
-
-    function crearPuntos(){
-      const cantidad = Math.min(70, Math.floor((ancho * alto) / 16000));
-      puntos = Array.from({ length: cantidad }, () => ({
-        x: Math.random() * ancho,
-        y: Math.random() * alto,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
-        r: Math.random() * 1.4 + 0.6,
-      }));
-    }
-
-    function paso(){
-      ctx.clearRect(0, 0, ancho, alto);
-      const distMax = 130;
-
-      puntos.forEach(p => {
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0 || p.x > ancho) p.vx *= -1;
-        if (p.y < 0 || p.y > alto) p.vy *= -1;
-      });
-
-      for (let i = 0; i < puntos.length; i++){
-        for (let j = i + 1; j < puntos.length; j++){
-          const a = puntos[i], b = puntos[j];
-          const dx = a.x - b.x, dy = a.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < distMax){
-            ctx.strokeStyle = `rgba(255,106,26,${(1 - dist / distMax) * 0.16})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      puntos.forEach(p => {
-        ctx.beginPath();
-        ctx.fillStyle = 'rgba(241,243,242,0.5)';
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      if (!prefiereReducido) requestAnimationFrame(paso);
-    }
-
-    medir();
-    crearPuntos();
-    paso();
-    if (prefiereReducido) paso(); // dibuja una vez, estático
-
-    window.addEventListener('resize', () => { medir(); crearPuntos(); });
+    let puntos = [], ancho, alto;
+    function medir(){ ancho=heroShell.offsetWidth; alto=heroShell.offsetHeight; canvas.width=ancho*devicePixelRatio; canvas.height=alto*devicePixelRatio; canvas.style.width=ancho+'px'; canvas.style.height=alto+'px'; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+    function crearPuntos(){ const cantidad=Math.min(70,Math.floor((ancho*alto)/16000)); puntos=Array.from({length:cantidad},()=>({x:Math.random()*ancho,y:Math.random()*alto,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.4+.6})); }
+    function paso(){ ctx.clearRect(0,0,ancho,alto); const distMax=130; puntos.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>ancho)p.vx*=-1;if(p.y<0||p.y>alto)p.vy*=-1;}); for(let i=0;i<puntos.length;i++){for(let j=i+1;j<puntos.length;j++){const a=puntos[i],b=puntos[j],dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<distMax){ctx.strokeStyle=`rgba(255,106,26,${(1-dist/distMax)*.16})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}} puntos.forEach(p=>{ctx.beginPath();ctx.fillStyle='rgba(241,243,242,0.5)';ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}); if(!prefiereReducido)requestAnimationFrame(paso); }
+    medir(); crearPuntos(); paso(); if(prefiereReducido)paso();
+    window.addEventListener('resize',()=>{medir();crearPuntos();});
   })();
-
-  // ---------- Tilt 3D de la tarjeta del hero (sigue el mouse) ----------
   (function tiltHeroCard(){
-    const wrap = document.querySelector('.tilt-wrap');
-    const card = document.getElementById('heroCard');
-    if (!wrap || !card) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (window.matchMedia('(pointer: coarse)').matches) return; // sin tilt en touch
-
-    wrap.addEventListener('mousemove', (e) => {
-      const rect = wrap.getBoundingClientRect();
-      const px = (e.clientX - rect.left) / rect.width - 0.5;
-      const py = (e.clientY - rect.top) / rect.height - 0.5;
-      card.style.transform = `rotateY(${px * 10}deg) rotateX(${-py * 10}deg) translateZ(10px)`;
-    });
-    wrap.addEventListener('mouseleave', () => {
-      card.style.transform = 'rotateY(0deg) rotateX(0deg) translateZ(0)';
-    });
+    const wrap=document.querySelector('.tilt-wrap'), card=document.getElementById('heroCard');
+    if(!wrap||!card)return;
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    if(window.matchMedia('(pointer: coarse)').matches)return;
+    wrap.addEventListener('mousemove',(e)=>{const rect=wrap.getBoundingClientRect(),px=(e.clientX-rect.left)/rect.width-.5,py=(e.clientY-rect.top)/rect.height-.5;card.style.transform=`rotateY(${px*10}deg) rotateX(${-py*10}deg) translateZ(10px)`;});
+    wrap.addEventListener('mouseleave',()=>{card.style.transform='rotateY(0deg) rotateX(0deg) translateZ(0)';});
   })();
-
-  // ---------- Contadores animados (stats del hero-card) ----------
-  function animarContador(el){
-    const meta = Number(el.dataset.countTo);
-    const suf = el.dataset.suffix || '';
-    const duracion = 1100;
-    const inicio = performance.now();
-    function tick(ahora){
-      const t = Math.min((ahora - inicio) / duracion, 1);
-      const valor = Math.floor(t * meta);
-      el.textContent = valor + suf;
-      if (t < 1) requestAnimationFrame(tick);
-      else el.textContent = meta + suf;
-    }
-    requestAnimationFrame(tick);
-  }
-
-  // ---------- Reveal on scroll ----------
-  if ('IntersectionObserver' in window){
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting){
-          entry.target.classList.add('in-view');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-  } else {
-    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
-  }
-
-  // Los contadores del hero arrancan solos apenas carga (siempre visibles al inicio)
+  function animarContador(el){const meta=Number(el.dataset.countTo),suf=el.dataset.suffix||'',duracion=1100,inicio=performance.now();function tick(ahora){const t=Math.min((ahora-inicio)/duracion,1),valor=Math.floor(t*meta);el.textContent=valor+suf;if(t<1)requestAnimationFrame(tick);else el.textContent=meta+suf;}requestAnimationFrame(tick);}
+  if('IntersectionObserver' in window){const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('in-view');observer.unobserve(entry.target);}});},{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));}else{document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in-view'));}
   document.querySelectorAll('[data-count-to]').forEach(animarContador);
-
-  // ---------- Dropdowns del nav ----------
-  function cerrarTodosLosDropdowns(){
-    document.querySelectorAll('.nav-item.open').forEach(item => {
-      item.classList.remove('open');
-      const menu = item.querySelector('.dropdown');
-      if (menu) menu.style.display = ''; // por si quedó algo forzado, lo limpia
-    });
-  }
-
-  document.querySelectorAll('.nav-btn[data-dropdown]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const item = btn.closest('.nav-item');
-      const yaAbierto = item.classList.contains('open');
-      cerrarTodosLosDropdowns();
-      if (!yaAbierto) item.classList.add('open');
-    });
-  });
-  document.addEventListener('click', cerrarTodosLosDropdowns);
-
-  // ---------- Menú móvil ----------
-  // Calculamos la altura exacta que le falta a la pantalla (en vez de un
-  // número fijo), porque el "blur" del nav crea un contexto que afecta
-  // cómo se posiciona el menú — así siempre cubre justo hasta el fondo,
-  // sin importar el celular ni si la barra de direcciones del navegador
-  // aparece u oculta.
-  function ajustarAlturaMenuMovil(){
-    const nav = document.querySelector('.nav');
-    const menu = $('#navMenu');
-    menu.style.height = (window.innerHeight - nav.getBoundingClientRect().bottom) + 'px';
-  }
-  function cerrarMenuMovilPrincipal(){
-    $('#navMenu').classList.remove('open');
-  }
-  $('#navToggle').addEventListener('click', (e) => {
-    e.stopPropagation();
-    const abriendo = !$('#navMenu').classList.contains('open');
-    if (abriendo) ajustarAlturaMenuMovil();
-    $('#navMenu').classList.toggle('open');
-  });
-  window.addEventListener('resize', () => {
-    if ($('#navMenu').classList.contains('open')) ajustarAlturaMenuMovil();
-  });
-
-  // ---------- FAQ acordeón ----------
-  document.querySelectorAll('.faq-q').forEach(q => {
-    q.addEventListener('click', () => {
-      q.closest('.faq-item').classList.toggle('open');
-    });
-  });
-
-  // ---------- TODOS los enlaces del menú (sueltos y dentro de dropdowns) ----------
-  // Cubre las tres listas desplegables (Iniciar sesión, Preguntas,
-  // Contáctanos) Y los enlaces sueltos de la barra ("Rastrear paquete",
-  // "Crear casillero gratis"). Sea que el enlace vaya a otra página, a un
-  // correo/WhatsApp, o a una sección de esta misma página, el menú se
-  // cierra SIEMPRE al hacer clic, de inmediato.
-  const enlacesDelMenu = document.querySelectorAll('.dropdown-link, .nav-menu > a.nav-btn');
-  enlacesDelMenu.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const href = link.getAttribute('href') || '';
-      const esPreguntaEspecifica = link.classList.contains('faq-link');
-      const esAnclaEnEstaPagina = href.startsWith('#');
-
-      // Cierra el/los menú(s) de inmediato, siempre, sin excepción.
-      cerrarTodosLosDropdowns();
-      cerrarMenuMovilPrincipal();
-
-      if (esAnclaEnEstaPagina){
-        e.preventDefault();
-        const destino = document.querySelector(href);
-        if (!destino) return;
-
-        if (esPreguntaEspecifica){
-          document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('open'));
-          destino.classList.add('open');
-        }
-        // Pequeña espera para que el menú termine de cerrarse antes de
-        // empezar el scroll — así no se ve el salto con el menú todavía encima.
-        setTimeout(() => {
-          destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 80);
-      }
-      // Si no es un ancla (ej. app.html, admin.html, mailto:, wa.me/...),
-      // no hacemos preventDefault — el navegador navega normal.
-    });
-  });
-
-  // ---------- Sucursales (dato real desde la API) ----------
-  async function cargarSucursales(){
-    const grid = $('#sucursalesGrid');
-    try {
-      const res = await fetch('/api/sucursales');
-      const data = await res.json();
-      const sucursales = data.sucursales || [];
-
-      if (sucursales.length === 0){
-        grid.innerHTML = '<div class="sucursal-card"><p class="linea">Muy pronto anunciaremos nuestras sucursales.</p></div>';
-        return;
-      }
-
-      grid.innerHTML = sucursales.map(s => `
-        <div class="sucursal-card">
-          <h3>${escapeHtml(s.nombre)}</h3>
-          <div class="linea">📍 ${escapeHtml(s.direccion)}</div>
-          ${s.telefono ? `<div class="linea">📞 ${escapeHtml(s.telefono)}</div>` : ''}
-          ${s.horario ? `<div class="linea">🕐 ${escapeHtml(s.horario)}</div>` : ''}
-        </div>
-      `).join('');
-    } catch (err) {
-      grid.innerHTML = '<div class="sucursal-card"><p class="linea">No se pudieron cargar las sucursales.</p></div>';
-    }
-  }
-
-  function escapeHtml(str){
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-  }
-
+  function cerrarTodosLosDropdowns(){document.querySelectorAll('.nav-item.open').forEach(item=>{item.classList.remove('open');const menu=item.querySelector('.dropdown');if(menu)menu.style.display='';});}
+  document.querySelectorAll('.nav-btn[data-dropdown]').forEach(btn=>{btn.addEventListener('click',(e)=>{e.stopPropagation();const item=btn.closest('.nav-item'),yaAbierto=item.classList.contains('open');cerrarTodosLosDropdowns();if(!yaAbierto)item.classList.add('open');});});
+  document.addEventListener('click',cerrarTodosLosDropdowns);
+  function ajustarAlturaMenuMovil(){const nav=document.querySelector('.nav'),menu=$('#navMenu');menu.style.height=(window.innerHeight-nav.getBoundingClientRect().bottom)+'px';}
+  function cerrarMenuMovilPrincipal(){$('#navMenu').classList.remove('open');}
+  $('#navToggle').addEventListener('click',(e)=>{e.stopPropagation();const abriendo=!$('#navMenu').classList.contains('open');if(abriendo)ajustarAlturaMenuMovil();$('#navMenu').classList.toggle('open');});
+  window.addEventListener('resize',()=>{if($('#navMenu').classList.contains('open'))ajustarAlturaMenuMovil();});
+  document.querySelectorAll('.faq-q').forEach(q=>{q.addEventListener('click',()=>{q.closest('.faq-item').classList.toggle('open');});});
+  const enlacesDelMenu=document.querySelectorAll('.dropdown-link, .nav-menu > a.nav-btn');
+  enlacesDelMenu.forEach(link=>{link.addEventListener('click',(e)=>{e.stopPropagation();const href=link.getAttribute('href')||'',esPreguntaEspecifica=link.classList.contains('faq-link'),esAnclaEnEstaPagina=href.startsWith('#');cerrarTodosLosDropdowns();cerrarMenuMovilPrincipal();if(esAnclaEnEstaPagina){e.preventDefault();const destino=document.querySelector(href);if(!destino)return;if(esPreguntaEspecifica){document.querySelectorAll('.faq-item').forEach(item=>item.classList.remove('open'));destino.classList.add('open');}setTimeout(()=>{destino.scrollIntoView({behavior:'smooth',block:'start'});},80);}});});
+  function escapeHtml(str){const div=document.createElement('div');div.textContent=str||'';return div.innerHTML;}
+  async function cargarSucursales(){const grid=$('#sucursalesGrid');try{const res=await fetch('/api/sucursales'),data=await res.json(),sucursales=data.sucursales||[];if(sucursales.length===0){grid.innerHTML='<div class="sucursal-card"><p class="linea">Muy pronto anunciaremos nuestras sucursales.</p></div>';return;}grid.innerHTML=sucursales.map(s=>`<div class="sucursal-card"><h3>${escapeHtml(s.nombre)}</h3><div class="linea">📍 ${escapeHtml(s.direccion)}</div>${s.telefono?`<div class="linea">📞 ${escapeHtml(s.telefono)}</div>`:''} ${s.horario?`<div class="linea">🕐 ${escapeHtml(s.horario)}</div>`:''}</div>`).join('');}catch(err){grid.innerHTML='<div class="sucursal-card"><p class="linea">No se pudieron cargar las sucursales.</p></div>';}}
   cargarSucursales();
-
-  // ---------- Tarifas reales + calculadora ----------
-  let tarifasCache = [];
-
-  async function cargarTarifas(){
-    const grid = $('#tarifasGrid');
-    const select = $('#calcTarifa');
-    try {
-      const res = await fetch('/api/public/tarifas');
-      const data = await res.json();
-      tarifasCache = data.tarifas || [];
-
-      if (tarifasCache.length === 0){
-        grid.innerHTML = '<div class="tarifa-card"><p>Muy pronto publicaremos nuestras tarifas.</p></div>';
-        select.innerHTML = '<option value="">No hay tarifas disponibles</option>';
-        return;
-      }
-
-      grid.innerHTML = tarifasCache.map(t => `
-        <div class="tarifa-card">
-          <div class="precio">$${Number(t.precio_libra).toFixed(2)}<span>/lb</span></div>
-          <h3>${escapeHtml(t.nombre)}</h3>
-          <p>Cargo mínimo $${Number(t.cargo_minimo).toFixed(2)} · Manejo $${Number(t.cargo_manejo).toFixed(2)}${Number(t.pct_seguro) > 0 ? ` · Seguro opcional ${Number(t.pct_seguro)}%` : ''}</p>
-        </div>
-      `).join('');
-
-      select.innerHTML = tarifasCache.map(t =>
-        `<option value="${t.id}">${escapeHtml(t.nombre)} — $${Number(t.precio_libra).toFixed(2)}/lb</option>`
-      ).join('');
-
-      calcularEstimado();
-    } catch (err) {
-      grid.innerHTML = '<div class="tarifa-card"><p>No se pudieron cargar las tarifas.</p></div>';
-    }
-  }
-
-  function calcularEstimado(){
-    const cont = $('#calcResultado');
-    const tarifa = tarifasCache.find(t => t.id == $('#calcTarifa').value);
-    const peso = parseFloat($('#calcPeso').value);
-    const valor = parseFloat($('#calcValor').value);
-    const conSeguro = $('#calcSeguro').checked;
-
-    if (!tarifa || isNaN(peso) || peso <= 0){
-      cont.innerHTML = '';
-      return;
-    }
-
-    const costoEnvio = Math.max(peso * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
-    const cargoManejo = Number(tarifa.cargo_manejo);
-    const seguro = conSeguro && !isNaN(valor) ? (valor * Number(tarifa.pct_seguro)) / 100 : 0;
-    const total = costoEnvio + cargoManejo + seguro;
-
-    cont.innerHTML = `
-      <div class="calc-total">
-        <div class="linea"><span>Costo de envío (${peso} lb × $${tarifa.precio_libra}/lb, mín. $${Number(tarifa.cargo_minimo).toFixed(2)})</span><span>$${costoEnvio.toFixed(2)}</span></div>
-        <div class="linea"><span>Cargo de manejo</span><span>$${cargoManejo.toFixed(2)}</span></div>
-        ${conSeguro ? `<div class="linea"><span>Seguro (${tarifa.pct_seguro}% del valor declarado)</span><span>$${seguro.toFixed(2)}</span></div>` : ''}
-        <div class="total-final"><span>Estimado total</span><span>$${total.toFixed(2)}</span></div>
-      </div>
-    `;
-  }
-
-  ['calcTarifa','calcPeso','calcValor','calcSeguro'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', calcularEstimado);
-  });
-
+  let tarifasCache=[];
+  async function cargarTarifas(){const grid=$('#tarifasGrid'),select=$('#calcTarifa');try{const res=await fetch('/api/public/tarifas'),data=await res.json();tarifasCache=data.tarifas||[];if(tarifasCache.length===0){grid.innerHTML='<div class="tarifa-card"><p>Muy pronto publicaremos nuestras tarifas.</p></div>';select.innerHTML='<option value="">No hay tarifas disponibles</option>';return;}grid.innerHTML=tarifasCache.map(t=>`<div class="tarifa-card"><div class="precio">$${Number(t.precio_libra).toFixed(2)}<span>/lb</span></div><h3>${escapeHtml(t.nombre)}</h3><p>Cargo mínimo $${Number(t.cargo_minimo).toFixed(2)} · Manejo $${Number(t.cargo_manejo).toFixed(2)}${Number(t.pct_seguro)>0?` · Seguro opcional ${Number(t.pct_seguro)}%`:''}</p></div>`).join('');select.innerHTML=tarifasCache.map(t=>`<option value="${t.id}">${escapeHtml(t.nombre)} — $${Number(t.precio_libra).toFixed(2)}/lb</option>`).join('');calcularEstimado();}catch(err){grid.innerHTML='<div class="tarifa-card"><p>No se pudieron cargar las tarifas.</p></div>';}}
+  function calcularEstimado(){const cont=$('#calcResultado'),tarifa=tarifasCache.find(t=>t.id==$('#calcTarifa').value),peso=parseFloat($('#calcPeso').value),valor=parseFloat($('#calcValor').value),conSeguro=$('#calcSeguro').checked;if(!tarifa||isNaN(peso)||peso<=0){cont.innerHTML='';return;}const costoEnvio=Math.max(peso*Number(tarifa.precio_libra),Number(tarifa.cargo_minimo)),cargoManejo=Number(tarifa.cargo_manejo),seguro=conSeguro&&!isNaN(valor)?(valor*Number(tarifa.pct_seguro))/100:0,total=costoEnvio+cargoManejo+seguro;cont.innerHTML=`<div class="calc-total"><div class="linea"><span>Costo de envío (${peso} lb × $${tarifa.precio_libra}/lb, mín. $${Number(tarifa.cargo_minimo).toFixed(2)})</span><span>$${costoEnvio.toFixed(2)}</span></div><div class="linea"><span>Cargo de manejo</span><span>$${cargoManejo.toFixed(2)}</span></div>${conSeguro?`<div class="linea"><span>Seguro (${tarifa.pct_seguro}% del valor declarado)</span><span>$${seguro.toFixed(2)}</span></div>`:''}<div class="total-final"><span>Estimado total</span><span>$${total.toFixed(2)}</span></div></div>`;}
+  ['calcTarifa','calcPeso','calcValor','calcSeguro'].forEach(id=>{document.getElementById(id)?.addEventListener('input',calcularEstimado);});
   cargarTarifas();
-
-  // ---------- Rastreo público ----------
-  const ESTADOS_RASTREO = ['prealertado','en_bodega_miami','en_transito','en_panama','listo_para_retiro','entregado'];
-  const ESTADO_RASTREO_LABEL = {
-    prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
-    en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
-  };
-
-  $('#formRastreo').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const tracking = $('#inputTracking').value.trim();
-    const cont = $('#resultadoRastreo');
-    const btn = $('#btnRastreo');
-
-    if (!tracking){
-      cont.innerHTML = '<div class="rt-error">Ingresa un número de tracking.</div>';
-      return;
-    }
-
-    btn.classList.add('loading-rastreo');
-    btn.disabled = true;
-    cont.innerHTML = '';
-
-    try {
-      const res = await fetch(`/api/public/rastreo/${encodeURIComponent(tracking)}`);
-      const data = await res.json();
-
-      if (!res.ok){
-        cont.innerHTML = `<div class="rt-error">${escapeHtml(data.mensaje || 'No encontramos ese paquete.')}</div>`;
-        return;
-      }
-
-      const idx = ESTADOS_RASTREO.indexOf(data.estado);
-      const rail = ESTADOS_RASTREO.map((_, i) => `<div class="seg ${i <= idx ? 'done' : ''}"></div>`).join('');
-      const fecha = new Date(data.fecha_actualizacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
-
-      cont.innerHTML = `
-        <div class="rastreo-card">
-          <div class="rt-top">
-            <div>
-              <div class="rt-tienda">${escapeHtml(data.tienda)}</div>
-              <div class="rt-tracking">#${escapeHtml(data.numero_tracking)} · Actualizado ${fecha}</div>
-            </div>
-            <span class="rt-badge ${data.estado}">${ESTADO_RASTREO_LABEL[data.estado] || data.estado}</span>
-          </div>
-          <div class="rt-rail">${rail}</div>
-          <div class="rt-steps-label"><span>Prealertado</span><span>Entregado</span></div>
-          ${data.fotos && data.fotos.length ? `
-            <div class="rt-fotos">
-              ${data.fotos.map(url => `<img src="${url}" alt="Foto del paquete">`).join('')}
-            </div>
-          ` : ''}
-        </div>
-      `;
-
-      cont.querySelectorAll('.rt-fotos img').forEach(img => {
-        img.addEventListener('click', () => window.open(img.src, '_blank'));
-      });
-    } catch (err) {
-      cont.innerHTML = '<div class="rt-error">No pudimos conectar con el servidor. Intenta de nuevo.</div>';
-    } finally {
-      btn.classList.remove('loading-rastreo');
-      btn.disabled = false;
-    }
-  });
-
-  // ---------- Pestañas: rastreo interno vs rastreo mundial ----------
-  document.querySelectorAll('.rastreo-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.rastreo-tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const esMundial = btn.dataset.rtab === 'mundial';
-      $('#panelRastreoNea').style.display = esMundial ? 'none' : 'block';
-      $('#panelRastreoMundial').style.display = esMundial ? 'block' : 'none';
-    });
-  });
-
-  // Rastreo mundial: abre la página oficial de 17TRACK con el número precargado.
-  $('#formMundial').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const num = $('#inputMundial').value.trim();
-    if (!num){
-      alert('Escribe un número de tracking.');
-      return;
-    }
-    window.open(`https://t.17track.net/es#nums=${encodeURIComponent(num)}`, '_blank');
-  });
+  const ESTADOS_RASTREO=['prealertado','en_bodega_miami','en_transito','en_panama','listo_para_retiro','entregado'];
+  const ESTADO_RASTREO_LABEL={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
+  $('#formRastreo').addEventListener('submit',async(e)=>{e.preventDefault();const tracking=$('#inputTracking').value.trim(),cont=$('#resultadoRastreo'),btn=$('#btnRastreo');if(!tracking){cont.innerHTML='<div class="rt-error">Ingresa un número de tracking.</div>';return;}btn.classList.add('loading-rastreo');btn.disabled=true;cont.innerHTML='';try{const res=await fetch(`/api/public/rastreo/${encodeURIComponent(tracking)}`),data=await res.json();if(!res.ok){cont.innerHTML=`<div class="rt-error">${escapeHtml(data.mensaje||'No encontramos ese paquete.')}</div>`;return;}const idx=ESTADOS_RASTREO.indexOf(data.estado),rail=ESTADOS_RASTREO.map((_,i)=>`<div class="seg ${i<=idx?'done':''}"></div>`).join(''),fecha=new Date(data.fecha_actualizacion).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});cont.innerHTML=`<div class="rastreo-card"><div class="rt-top"><div><div class="rt-tienda">${escapeHtml(data.tienda)}</div><div class="rt-tracking">#${escapeHtml(data.numero_tracking)} · Actualizado ${fecha}</div></div><span class="rt-badge ${data.estado}">${ESTADO_RASTREO_LABEL[data.estado]||data.estado}</span></div><div class="rt-rail">${rail}</div><div class="rt-steps-label"><span>Prealertado</span><span>Entregado</span></div>${data.fotos&&data.fotos.length?`<div class="rt-fotos">${data.fotos.map(url=>`<img src="${url}" alt="Foto del paquete">`).join('')}</div>`:''}</div>`;cont.querySelectorAll('.rt-fotos img').forEach(img=>{img.addEventListener('click',()=>window.open(img.src,'_blank'));});}catch(err){cont.innerHTML='<div class="rt-error">No pudimos conectar con el servidor. Intenta de nuevo.</div>';}finally{btn.classList.remove('loading-rastreo');btn.disabled=false;}});
+  document.querySelectorAll('.rastreo-tab-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.rastreo-tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const esMundial=btn.dataset.rtab==='mundial';$('#panelRastreoNea').style.display=esMundial?'none':'block';$('#panelRastreoMundial').style.display=esMundial?'block':'none';});});
+  $('#formMundial').addEventListener('submit',(e)=>{e.preventDefault();const num=$('#inputMundial').value.trim();if(!num){alert('Escribe un número de tracking.');return;}window.open(`https://t.17track.net/es#nums=${encodeURIComponent(num)}`,'_blank');});
 </script>
-
 </body>
 </html>
