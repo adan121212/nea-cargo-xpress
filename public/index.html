@@ -3,610 +3,1768 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEA Cargo Xpress — Compra en EE.UU., recibe en Panamá</title>
+<title>NEA Cargo Xpress — Mi Casillero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#0c1b33;
     --ink-soft: rgba(12,27,51,0.62);
-    --ink-faint: rgba(12,27,51,0.42);
     --paper:#f1f3f2;
     --panel:#ffffff;
     --line: rgba(12,27,51,0.12);
-    --line-soft: rgba(12,27,51,0.07);
     --accent:#ff6a1a;
     --accent-dark:#e2570e;
-    --accent-glow: rgba(255,106,26,0.55);
+    --accent-glow: rgba(255,106,26,0.5);
     --cargo-green:#177a63;
     --cargo-green-bg: rgba(23,122,99,0.1);
     --amber-bg: rgba(255,106,26,0.1);
-    --whatsapp:#25d366;
     --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --radius-sm: 8px;
     --radius-md: 12px;
-    --radius-lg: 20px;
+    --radius-lg: 18px;
     --shadow-card: 0 1px 2px rgba(12,27,51,0.04), 0 10px 30px -12px rgba(12,27,51,0.10);
-    --shadow-card-hover: 0 4px 10px rgba(12,27,51,0.06), 0 24px 50px -16px rgba(12,27,51,0.18);
+    --shadow-card-hover: 0 4px 10px rgba(12,27,51,0.06), 0 20px 44px -16px rgba(12,27,51,0.16);
   }
   *{ box-sizing:border-box; }
-  html{ scroll-behavior:smooth; }
-  body{ margin:0; background: var(--paper); color: var(--ink); font-family: var(--font-body); overflow-x:hidden; }
-  a{ color:inherit; text-decoration:none; }
-  img{ max-width:100%; }
-  section{ scroll-margin-top: 90px; }
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+  a{ color:inherit; }
   ::selection{ background: var(--accent); color:#fff; }
   @media (prefers-reduced-motion: reduce){
-    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
-  .reveal{ opacity:0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
-  .reveal.in-view{ opacity:1; transform:none; }
-  /* ============ NAV ============ */
-  .nav{
-    position: sticky; top:0; z-index: 40;
-    background: rgba(12,27,51,0.85);
+  /* ---------- Topbar ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 16px 28px;
+    background: rgba(12,27,51,0.92);
     backdrop-filter: blur(14px) saturate(160%);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
-    color:#f1f3f2;
-    padding: 14px 26px;
+    color: #f1f3f2;
+    position: sticky; top:0; z-index: 40;
     border-bottom: 1px solid rgba(241,243,242,0.08);
   }
-  .nav-inner{ max-width: 1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; }
-  .brand{ display:flex; align-items:center; gap:10px; font-family: var(--font-display); font-weight:700; font-size:16px; }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:inherit;
+    cursor:pointer;
+    font-family: var(--font-display);
+    font-weight:700;
+    font-size:17px;
+    letter-spacing:.01em;
+  }
   .brand .mark{
-    width:30px; height:30px; border-radius:8px; background: var(--accent);
-    display:flex; align-items:center; justify-content:center; color: var(--ink); font-weight:700; font-size:14px;
+    width:30px; height:30px;
+    border-radius:8px;
+    background: var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--font-display);
+    font-weight:700;
+    font-size:14px;
+    color: var(--ink);
     box-shadow: 0 0 0 1px rgba(255,106,26,0.3), 0 2px 16px var(--accent-glow);
   }
-  .brand small{ display:block; font-weight:400; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color: rgba(241,243,242,0.5); font-family: var(--font-body); }
-  .nav-menu{ display:flex; align-items:center; gap:2px; }
-  .nav-item{ position:relative; }
-  .nav-btn{
-    background:none; border:none; color:#f1f3f2; font-family: var(--font-body);
-    font-size:13.5px; font-weight:500; padding: 9px 14px; border-radius:7px;
-    cursor:pointer; display:flex; align-items:center; gap:5px;
-    transition: background .15s ease, opacity .15s ease; opacity: .88;
+  .brand small{
+    display:block;
+    font-family: var(--font-body);
+    font-weight:400;
+    font-size:10px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color: rgba(241,243,242,0.55);
   }
-  .nav-btn:hover{ background: rgba(241,243,242,0.08); opacity:1; }
-  .nav-btn .caret{ font-size:9px; transition: transform .15s ease; opacity:.6; }
-  .nav-item.open .caret{ transform: rotate(180deg); }
-  .nav-btn.cta{
-    background: var(--accent); color:#fff; font-weight:700; padding: 9px 18px; opacity:1;
-    box-shadow: 0 2px 20px var(--accent-glow);
-  }
-  .nav-btn.cta:hover{ background: var(--accent-dark); }
-  .dropdown{
-    position:absolute; top: calc(100% + 10px); left:0;
-    background: rgba(20,34,58,0.96); backdrop-filter: blur(16px);
-    color: #f1f3f2; border-radius:12px; border:1px solid rgba(241,243,242,0.12);
-    min-width: 240px; padding: 8px;
-    box-shadow: 0 24px 60px -12px rgba(0,0,0,0.5);
+  .topbar-right{ display:flex; align-items:center; gap:16px; font-size:13px; }
+  .casillero-pill{
+    font-family: var(--font-mono);
+    font-size:12px;
+    letter-spacing:.03em;
+    background: rgba(255,106,26,0.16);
+    color: #ffb27f;
+    padding:5px 10px;
+    border-radius:6px;
     display:none;
+    box-shadow: 0 0 0 1px rgba(255,106,26,0.2);
   }
-  .nav-item.right .dropdown{ left:auto; right:0; }
-  .nav-item.open .dropdown{ display:block; animation: dropIn .15s ease; }
-  @keyframes dropIn{ from{ opacity:0; transform: translateY(-4px); } to{ opacity:1; transform:none; } }
-  .dropdown a, .dropdown button{
-    display:flex; flex-direction:column; align-items:flex-start; gap:2px;
-    width:100%; text-align:left; background:none; border:none;
-    padding: 10px 11px; border-radius:8px; cursor:pointer;
-    font-family: var(--font-body); font-size:13px; color: #f1f3f2;
-  }
-  .dropdown a:hover, .dropdown button:hover{ background: rgba(241,243,242,0.08); }
-  .dropdown .item-sub{ font-size:11px; color: rgba(241,243,242,0.55); }
-  .nav-toggle{
-    display:none; background:none; border:none; color:#f1f3f2; font-size:22px; cursor:pointer;
-    position: relative; z-index: 50; padding: 8px 10px; -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-  @media (max-width: 860px){
-    .nav-menu{
-      position:absolute; top:100%; left:0; right:0;
-      background: var(--ink); backdrop-filter: none; -webkit-backdrop-filter: none;
-      isolation: isolate;
-      flex-direction:column; align-items:stretch;
-      padding: 10px 16px; display:none; overflow-y:auto; z-index: 45;
-    }
-    .nav-menu.open{ display:flex; }
-    .nav-toggle{ display:block; }
-    .nav-btn{ width:100%; justify-content:space-between; }
-    .dropdown{ position:static; box-shadow:none; margin: 0 0 8px 12px; width: calc(100% - 12px); background: rgba(241,243,242,0.06); border-color: rgba(241,243,242,0.12); }
-    .nav-btn.cta{ margin-top:6px; justify-content:center; }
-  }
-  /* ============ HERO ============ */
-  .hero-shell{ position: relative; overflow: hidden; background: var(--ink); }
-  .hero-shell::before{
-    content:''; position:absolute; inset:0;
-    background:
-      radial-gradient(ellipse 60% 50% at 15% 10%, rgba(255,106,26,0.16), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 90% 80%, rgba(23,122,99,0.14), transparent 60%);
-    pointer-events:none; z-index:0;
-  }
-  #networkCanvas{ position:absolute; inset:0; z-index:0; opacity:.85; }
-  .hero{
-    max-width: 1180px; margin: 0 auto; padding: 88px 26px 74px;
-    display:grid; grid-template-columns: 1.15fr .85fr; gap: 56px; align-items:center;
-    position: relative; z-index: 2; color:#f1f3f2;
-  }
-  .eyebrow{
-    font-family: var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
-    color: var(--accent); display:inline-flex; align-items:center; gap:8px;
-  }
-  .eyebrow::before{ content:''; width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; box-shadow: 0 0 10px var(--accent-glow); animation: pulseDot 1.8s ease-in-out infinite; }
-  @keyframes pulseDot{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
-  .hero h1{
-    font-family: var(--font-display); font-size: clamp(32px, 4.6vw, 52px);
-    line-height:1.06; letter-spacing:-0.015em; margin: 16px 0 18px;
-  }
-  .hero h1 .glow-word{ color: var(--accent); text-shadow: 0 0 34px var(--accent-glow); }
-  .hero p.lead{ font-size:16px; line-height:1.65; color: rgba(241,243,242,0.68); max-width: 46ch; margin: 0 0 28px; }
-  .hero-ctas{ display:flex; gap:12px; flex-wrap:wrap; }
-  .btn-solid{
-    position:relative; background: var(--accent); color:#fff; font-weight:700; font-size:14px;
-    padding: 14px 24px; border-radius: var(--radius-sm); display:inline-block; overflow:hidden;
-    box-shadow: 0 4px 24px var(--accent-glow);
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .btn-solid::after{
-    content:''; position:absolute; inset:0; translate: -120% 0;
-    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%);
-    transition: translate .5s ease;
-  }
-  .btn-solid:hover{ transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
-  .btn-solid:hover::after{ translate: 120% 0; }
-  .btn-outline{
-    border: 1.5px solid rgba(241,243,242,0.25); color:#f1f3f2; font-weight:600; font-size:14px;
-    padding: 13px 24px; border-radius: var(--radius-sm); display:inline-block;
+  .btn-logout{
+    background:none;
+    border:1px solid rgba(241,243,242,0.25);
+    color:#f1f3f2;
+    padding:7px 14px;
+    border-radius:7px;
+    font-size:13px;
+    cursor:pointer;
+    display:none;
     transition: border-color .15s ease, background .15s ease;
   }
-  .btn-outline:hover{ border-color: rgba(241,243,242,0.6); background: rgba(241,243,242,0.06); }
-  .route-strip{
-    margin-top: 34px; display:flex; align-items:center; gap:10px;
-    font-family: var(--font-mono); font-size:11px; color: rgba(241,243,242,0.55);
+  .btn-logout:hover{ border-color: rgba(241,243,242,0.5); background: rgba(241,243,242,0.06); }
+  .wrap{ max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
+  /* ---------- Vista de autenticación ---------- */
+  #vistaAuth{ display:flex; justify-content:center; padding-top: 20px; position:relative; }
+  .auth-shell{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 900px;
+    width:100%;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow:hidden;
+    box-shadow: 0 30px 80px -24px rgba(12,27,51,0.28);
   }
-  .route-strip .city{ flex-shrink:0; font-weight:500; }
-  .route-strip svg{ flex:1; height:14px; overflow:visible; }
-  .route-strip .route-line{ stroke: rgba(241,243,242,0.25); stroke-width:1.5; stroke-dasharray: 1 7; stroke-linecap:round; fill:none; }
-  .route-strip .route-dot{ fill: var(--accent); filter: drop-shadow(0 0 4px var(--accent-glow)); }
-  .route-strip .route-plane{ fill: var(--accent); offset-path: path('M2,7 L138,7'); animation: fly-route 4.5s ease-in-out infinite; filter: drop-shadow(0 0 5px var(--accent-glow)); }
-  @keyframes fly-route{ 0%{ offset-distance:0%; opacity:0; } 8%{ opacity:1; } 92%{ opacity:1; } 100%{ offset-distance:100%; opacity:0; } }
-  .tilt-wrap{ perspective: 1200px; }
-  .hero-card{
-    background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
-    border: 1px solid rgba(241,243,242,0.14);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    color: #f1f3f2; border-radius: var(--radius-lg); padding: 32px;
-    position: relative; overflow:hidden;
-    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6);
-    transform-style: preserve-3d;
-    transition: transform .12s ease-out, box-shadow .3s ease;
-    will-change: transform;
-  }
-  .hero-card::before{
-    content:''; position:absolute; inset:-1px; border-radius: inherit; padding:1px;
-    background: conic-gradient(from var(--angle,0deg), transparent 0%, var(--accent) 12%, transparent 26%);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-    animation: rotateBorder 5s linear infinite; pointer-events:none;
-  }
-  @keyframes rotateBorder{ to{ --angle: 360deg; } }
-  @property --angle{ syntax: '<angle>'; inherits:false; initial-value:0deg; }
-  .hero-card .casillero-mock{
-    background: rgba(0,0,0,0.22); border:1px dashed rgba(241,243,242,0.22);
-    border-radius:12px; padding: 18px; font-family: var(--font-mono); font-size:12.5px; line-height:1.95;
+  .auth-side{
+    background: var(--ink);
+    color:#f1f3f2;
+    padding: 42px 36px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
     position: relative;
+    overflow:hidden;
   }
-  .hero-card .casillero-mock .suite{ color: var(--accent); font-weight:600; }
-  .hero-card h3{ font-family: var(--font-display); font-size:15px; margin: 0 0 4px; position:relative; }
-  .hero-card p.small{ font-size:12.5px; color: rgba(241,243,242,0.55); margin: 0 0 18px; position:relative; }
-  .stat-mini-row{ display:flex; gap:10px; margin-top:20px; position:relative; }
-  .stat-mini{ flex:1; background: rgba(0,0,0,0.2); border-radius:10px; padding: 13px; border: 1px solid rgba(241,243,242,0.1); }
-  .stat-mini .n{ font-family: var(--font-display); font-size:21px; color: var(--accent); text-shadow: 0 0 18px var(--accent-glow); }
-  .stat-mini .l{ font-size:10.5px; color: rgba(241,243,242,0.5); text-transform:uppercase; letter-spacing:.04em; }
-  @media (max-width: 860px){ .hero{ grid-template-columns: 1fr; padding-top: 48px; gap: 40px; } }
-  /* ============ BANDA DE FOTOS ============ */
-  .foto-banda{ display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; max-width: 1180px; margin: 0 auto; padding: 0 26px; }
-  .foto-item{ position:relative; overflow:hidden; border-radius: var(--radius-md); aspect-ratio: 4/3; }
-  .foto-item img{ width:100%; height:100%; object-fit:cover; display:block; transition: transform .5s cubic-bezier(.2,.8,.2,1); filter: saturate(1.05); }
-  .foto-item:hover img{ transform: scale(1.07); }
-  .foto-item::after{ content:''; position:absolute; inset:0; box-shadow: inset 0 0 0 1px rgba(255,106,26,0); transition: box-shadow .3s ease; border-radius: inherit; pointer-events:none; }
-  .foto-item:hover::after{ box-shadow: inset 0 0 0 2px rgba(255,106,26,0.7); }
-  .foto-caption{ position:absolute; inset:auto 0 0 0; background: linear-gradient(to top, rgba(12,27,51,0.92), transparent); color:#fff; font-size:12.5px; font-weight:600; padding: 34px 16px 14px; display:flex; align-items:baseline; gap:9px; }
-  .foto-caption .foto-num{ font-family: var(--font-mono); color: var(--accent); font-size:11px; font-weight:700; }
-  @media (max-width: 700px){ .foto-banda{ grid-template-columns: 1fr; gap:8px; } .foto-item{ aspect-ratio: 16/9; } }
-  /* ============ RASTREO ============ */
-  .rastreo-tabs{ display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
-  .rastreo-tab-btn{ padding: 9px 17px; border-radius:20px; border:1px solid var(--line); background:#fff; font-size:13px; font-weight:600; color: var(--ink-soft); cursor:pointer; transition: all .15s ease; }
-  .rastreo-tab-btn.active{ background: var(--ink); color:#fff; border-color: var(--ink); box-shadow: 0 4px 16px rgba(12,27,51,0.25); }
-  .rastreo-hint{ font-size:12.5px; color: var(--ink-soft); margin: 0 0 16px; }
-  .rastreo-box{ max-width: 640px; }
-  .rastreo-form{ display:flex; gap:10px; flex-wrap:wrap; }
-  .rastreo-form input{ flex:1; min-width:220px; padding: 14px 17px; border-radius: var(--radius-sm); border: 1.5px solid var(--line); font-family: var(--font-mono); font-size:14px; color: var(--ink); transition: border-color .15s ease, box-shadow .15s ease; }
-  .rastreo-form input:focus-visible{ outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,106,26,0.14); }
-  .rastreo-form .btn-solid{ border:none; cursor:pointer; display:flex; align-items:center; gap:8px; color:#fff; }
-  .spinner-rastreo{ width:13px; height:13px; border-radius:50%; border:2px solid rgba(255,255,255,0.45); border-top-color:#fff; animation: spin-rastreo .7s linear infinite; display:none; }
-  .loading-rastreo .spinner-rastreo{ display:inline-block; }
-  @keyframes spin-rastreo{ to{ transform: rotate(360deg); } }
-  #resultadoRastreo{ margin-top: 24px; }
-  .rastreo-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:24px; box-shadow: var(--shadow-card); animation: cardIn .35s ease; }
-  @keyframes cardIn{ from{ opacity:0; transform: translateY(8px); } to{ opacity:1; transform:none; } }
-  .rastreo-card .rt-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
-  .rastreo-card .rt-tienda{ font-family: var(--font-display); font-size:16.5px; }
-  .rastreo-card .rt-tracking{ font-family: var(--font-mono); font-size:12px; color: var(--ink-soft); margin-top:2px; }
-  .rt-badge{ display:inline-block; padding: 5px 13px; border-radius:20px; font-size:12px; font-weight:600; }
-  .rt-badge.prealertado{ background: var(--amber-bg); color: var(--accent-dark); }
-  .rt-badge.en_bodega_miami, .rt-badge.en_transito, .rt-badge.en_panama{ background: rgba(58,110,165,0.12); color:#3a6ea5; }
-  .rt-badge.listo_para_retiro{ background: var(--cargo-green-bg); color: var(--cargo-green); }
-  .rt-badge.entregado{ background: rgba(12,27,51,0.08); color: var(--ink-soft); }
-  .rt-rail{ display:flex; gap:3px; margin-top:20px; }
-  .rt-rail .seg{ flex:1; height:5px; border-radius:3px; background: rgba(12,27,51,0.09); transition: background .3s ease, box-shadow .3s ease; }
-  .rt-rail .seg.done{ background: var(--accent); box-shadow: 0 0 8px rgba(255,106,26,0.5); }
-  .rt-steps-label{ display:flex; justify-content:space-between; margin-top:8px; font-size:10px; color: var(--ink-soft); }
-  .rt-fotos{ display:grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap:8px; margin-top:20px; }
-  .rt-fotos img{ width:100%; height:90px; object-fit:cover; border-radius: var(--radius-sm); border:1px solid var(--line); cursor:pointer; }
-  .rt-error{ background: var(--amber-bg); border:1px solid rgba(255,106,26,0.3); color: var(--accent-dark); border-radius: var(--radius-md); padding:17px; font-size:13.5px; }
-  /* ============ SECCIONES ============ */
-  .section{ max-width: 1180px; margin: 0 auto; padding: 78px 26px; }
-  .section-head{ max-width: 580px; margin: 0 0 38px; }
-  .section-head .eyebrow{ color: var(--accent-dark); margin-bottom:12px; }
-  .section-head .eyebrow::before{ box-shadow:none; animation:none; }
-  .section-head h2{ font-family: var(--font-display); font-size: clamp(23px, 3.1vw, 32px); letter-spacing:-0.01em; margin:0 0 11px; }
-  .section-head p{ color: var(--ink-soft); font-size:14.5px; line-height:1.6; margin:0; }
-  .steps-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; perspective: 1000px; }
-  .step-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:22px; box-shadow: var(--shadow-card); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; position: relative; transform-style: preserve-3d; }
-  .step-card:hover{ transform: translateY(-4px) rotateX(4deg); box-shadow: var(--shadow-card-hover); border-color: rgba(255,106,26,0.35); }
-  .step-card:not(:last-child)::after{ content:''; position:absolute; top:50%; right:-9px; width:8px; height:1px; background-image: linear-gradient(to right, rgba(12,27,51,0.25) 50%, transparent 0%); background-size: 4px 1px; background-repeat: repeat-x; }
-  .step-card .num{ font-family: var(--font-display); font-size:23px; color: var(--accent); }
-  .step-card h3{ font-family: var(--font-display); font-size:14.5px; margin: 11px 0 6px; }
-  .step-card p{ font-size:12.5px; color: var(--ink-soft); line-height:1.55; margin:0; }
-  @media (max-width: 860px){ .steps-grid{ grid-template-columns: 1fr 1fr; } .step-card::after{ display:none; } }
-  @media (max-width: 520px){ .steps-grid{ grid-template-columns: 1fr; } }
-  .tarifas-band{ background: var(--ink); color:#f1f3f2; position: relative; overflow:hidden; }
-  .tarifas-band::before{ content:''; position:absolute; top:-20%; left:-10%; width:50%; height:80%; background: radial-gradient(circle, rgba(255,106,26,0.12), transparent 70%); pointer-events:none; }
-  .tarifas-band::after{ content:''; position:absolute; bottom:-30%; right:-15%; width:55%; height:80%; background: radial-gradient(circle, rgba(23,122,99,0.14), transparent 70%); pointer-events:none; }
-  .tarifas-band .section-head p{ color: rgba(241,243,242,0.6); }
-  .tarifas-band .section-head .eyebrow{ color: var(--accent); }
-  .tarifas-band > *{ position: relative; }
-  .tarifas-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
-  .tarifa-card{ background: rgba(241,243,242,0.05); border:1px solid rgba(241,243,242,0.14); border-radius: var(--radius-md); padding:24px; transition: border-color .2s ease, background .2s ease, transform .2s ease; backdrop-filter: blur(6px); }
-  .tarifa-card:hover{ border-color: rgba(255,106,26,0.45); background: rgba(241,243,242,0.08); transform: translateY(-3px); }
-  .tarifa-card .precio{ font-family: var(--font-display); font-size:29px; color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
-  .tarifa-card .precio span{ font-size:13px; color: rgba(241,243,242,0.6); font-family: var(--font-body); text-shadow:none; }
-  .tarifa-card h3{ font-family: var(--font-display); font-size:14px; margin: 9px 0 7px; }
-  .tarifa-card p{ font-size:12px; color: rgba(241,243,242,0.6); line-height:1.6; margin:0; }
-  @media (max-width: 760px){ .tarifas-grid{ grid-template-columns: 1fr; } }
-  .calculadora-box{ margin-top: 38px; background: rgba(241,243,242,0.05); border:1px solid rgba(241,243,242,0.15); border-radius: var(--radius-lg); padding: 28px; backdrop-filter: blur(6px); }
-  .calculadora-box h3{ font-family: var(--font-display); font-size:16px; margin: 0 0 18px; color:#f1f3f2; }
-  .calc-row{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px; }
-  .calc-row label{ display:block; font-size:12px; color: rgba(241,243,242,0.6); margin-bottom:6px; }
-  .calc-row input, .calc-row select{ width:100%; padding: 11px 13px; border-radius: var(--radius-sm); border:1px solid rgba(241,243,242,0.2); background: rgba(0,0,0,0.2); color:#f1f3f2; font-family: var(--font-body); font-size:13.5px; }
-  .calc-row select option{ color: var(--ink); }
-  .calc-check{ display:flex; align-items:center; gap:8px; margin-top:16px; font-size:13px; color: rgba(241,243,242,0.75); cursor:pointer; }
-  #calcResultado{ margin-top:18px; }
-  .calc-total{ background: rgba(255,106,26,0.12); border:1px solid rgba(255,106,26,0.35); border-radius: var(--radius-md); padding: 18px 20px; animation: cardIn .3s ease; }
-  .calc-total .linea{ display:flex; justify-content:space-between; font-size:12.5px; color: rgba(241,243,242,0.7); margin-bottom:5px; }
-  .calc-total .total-final{ display:flex; justify-content:space-between; font-family: var(--font-display); font-size:20px; color: var(--accent); margin-top:11px; padding-top:11px; border-top:1px solid rgba(241,243,242,0.15); text-shadow: 0 0 20px var(--accent-glow); }
-  @media (max-width: 760px){ .calc-row{ grid-template-columns: 1fr; } }
-  .sucursales-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
-  .sucursal-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:20px; box-shadow: var(--shadow-card); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
-  .sucursal-card:hover{ transform: translateY(-3px); box-shadow: var(--shadow-card-hover); border-color: rgba(255,106,26,0.3); }
-  .sucursal-card h3{ font-family: var(--font-display); font-size:14.5px; margin:0 0 10px; }
-  .sucursal-card .linea{ font-size:12.5px; color: var(--ink-soft); margin-bottom:5px; }
-  @media (max-width: 860px){ .sucursales-grid{ grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 560px){ .sucursales-grid{ grid-template-columns: 1fr; } }
-  .faq-item{ border-bottom:1px solid var(--line); padding: 18px 0; }
-  .faq-q{ display:flex; justify-content:space-between; align-items:center; gap:12px; cursor:pointer; font-family: var(--font-display); font-size:15.5px; }
-  .faq-q .plus{ font-size:19px; color: var(--accent); transition: transform .2s ease; flex-shrink:0; }
-  .faq-item.open .faq-q .plus{ transform: rotate(45deg); }
-  .faq-a{ display:none; font-size:13.5px; color: var(--ink-soft); line-height:1.65; margin-top:11px; max-width: 68ch; }
-  .faq-item.open .faq-a{ display:block; animation: faqIn .25s ease; }
-  @keyframes faqIn{ from{ opacity:0; transform: translateY(-4px); } to{ opacity:1; transform:none; } }
-  .contacto-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-  .contacto-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:24px; display:flex; flex-direction:column; gap:7px; box-shadow: var(--shadow-card); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
-  .contacto-card:hover{ transform: translateY(-3px); box-shadow: var(--shadow-card-hover); border-color: rgba(255,106,26,0.3); }
-  .contacto-card .ico{ font-size:21px; }
-  .contacto-card h3{ font-family: var(--font-display); font-size:14.5px; margin: 7px 0 2px; }
-  .contacto-card p{ font-size:12.5px; color: var(--ink-soft); margin:0; }
-  .contacto-card a.link{ font-size:12.5px; color: var(--accent-dark); font-weight:600; margin-top:7px; }
-  @media (max-width: 760px){ .contacto-grid{ grid-template-columns: 1fr; } }
-  footer{ background: var(--ink); color: rgba(241,243,242,0.6); padding: 38px 26px; position:relative; overflow:hidden; }
-  .footer-inner{ max-width: 1180px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; font-size:12.5px; position:relative; }
-  .footer-inner .brand{ color:#f1f3f2; }
-  .whatsapp-float{
-    position: fixed; bottom: 22px; right: 22px; z-index: 60;
-    width: 58px; height:58px; border-radius:50%;
-    background: var(--whatsapp); display:flex; align-items:center; justify-content:center;
-    box-shadow: 0 8px 24px rgba(37,211,102,0.4);
-    animation: pulse-wsp 2.4s ease-in-out infinite; transition: transform .15s ease;
+  #authNetworkCanvas{ position:absolute; inset:0; opacity:.7; z-index:0; }
+  .auth-side::before{
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse 70% 60% at 20% 15%, rgba(255,106,26,0.18), transparent 60%);
+    pointer-events:none; z-index:0;
   }
-  .whatsapp-float:hover{ transform: scale(1.08); }
-  @keyframes pulse-wsp{ 0%,100%{ box-shadow: 0 8px 24px rgba(37,211,102,0.4); } 50%{ box-shadow: 0 8px 24px rgba(37,211,102,0.7), 0 0 0 8px rgba(37,211,102,0.12); } }
+  .auth-side > *{ position:relative; z-index:1; }
+  .auth-side h1{
+    font-family: var(--font-display);
+    font-size: 27px;
+    line-height:1.16;
+    font-weight:600;
+    margin: 18px 0 12px;
+  }
+  .auth-side p{
+    font-size:14px;
+    line-height:1.6;
+    color: rgba(241,243,242,0.65);
+    max-width: 30ch;
+  }
+  .route{
+    margin-top: 30px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family: var(--font-mono);
+    font-size:11px;
+    letter-spacing:.05em;
+    color: rgba(241,243,242,0.55);
+  }
+  .route .dot{ width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; box-shadow: 0 0 8px var(--accent-glow); animation: routeDotPulse 1.8s ease-in-out infinite; }
+  .route .dot:nth-child(3){ animation-delay: .3s; }
+  .route .dot:nth-child(5){ animation-delay: .6s; }
+  @keyframes routeDotPulse{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
+  .route .track{
+    flex:1;
+    height:1px;
+    background-image: linear-gradient(to right, rgba(241,243,242,0.35) 40%, transparent 0%);
+    background-size: 6px 1px;
+    background-repeat: repeat-x;
+  }
+  .auth-form-side{ padding: 42px 36px; }
+  .tabs{ display:flex; gap:4px; margin-bottom: 26px; background: var(--paper); border-radius:9px; padding:3px; }
+  .tab-btn{
+    flex:1;
+    padding: 9px 0;
+    border:none;
+    background:transparent;
+    border-radius:7px;
+    font-family: var(--font-body);
+    font-weight:600;
+    font-size:13px;
+    color: var(--ink-soft);
+    cursor:pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .tab-btn.active{ background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(12,27,51,0.08); }
+  label{ display:block; font-size:12.5px; font-weight:600; margin: 14px 0 6px; }
+  label:first-of-type{ margin-top:0; }
+  input{
+    width:100%;
+    padding: 11px 13px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    font-family: var(--font-body);
+    font-size:13.5px;
+    color: var(--ink);
+    background:#fff;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  input:focus-visible{ outline:none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,106,26,0.14); }
+  .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  .hint{ font-size:11.5px; color: var(--accent-dark); min-height:14px; margin-top:4px; }
+  .btn-primary{
+    position:relative;
+    width:100%;
+    margin-top:20px;
+    padding: 12px 14px;
+    border:none;
+    border-radius:8px;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    overflow:hidden;
+    box-shadow: 0 4px 18px var(--accent-glow);
+    transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary::after{
+    content:''; position:absolute; inset:0; translate: -120% 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%);
+    transition: translate .5s ease;
+  }
+  .btn-primary:hover:not(:disabled){ background: var(--accent-dark); transform: translateY(-1px); }
+  .btn-primary:hover:not(:disabled)::after{ translate: 120% 0; }
+  .btn-primary:disabled{ opacity:.6; cursor:default; }
+  .spinner{
+    width:13px; height:13px; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.45);
+    border-top-color:#fff;
+    animation: spin .7s linear infinite;
+    display:none;
+  }
+  .loading .spinner{ display:inline-block; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .banner{
+    margin-top:16px; padding:11px 13px; border-radius:9px;
+    font-size:13px; line-height:1.5; display:none;
+  }
+  .banner.show{ display:block; animation: bannerIn .25s ease; }
+  @keyframes bannerIn{ from{ opacity:0; transform: translateY(-4px); } to{ opacity:1; transform:none; } }
+  .banner.error{ background: rgba(255,106,26,0.1); color: var(--accent-dark); border:1px solid rgba(255,106,26,0.3); }
+  .link-olvide{
+    display:block; width:100%; text-align:center; background:none; border:none;
+    color: var(--ink-soft); font-size:12.5px; margin-top:12px; cursor:pointer;
+    text-decoration:underline; text-underline-offset:2px;
+  }
+  .link-olvide:hover{ color: var(--accent-dark); }
+  .banner.success{ background: var(--cargo-green-bg); color: var(--cargo-green); border:1px solid rgba(23,122,99,0.3); }
+  .reg-tipo-tabs{ display:flex; gap:6px; margin-bottom:18px; }
+  .reg-tipo-btn{
+    flex:1; padding:10px; border-radius:8px; border:1.5px solid var(--line);
+    background:#fff; font-family: var(--font-body); font-size:13px; font-weight:600;
+    color: var(--ink-soft); cursor:pointer; transition: all .15s ease;
+  }
+  .reg-tipo-btn.active{ background: var(--ink); color:#fff; border-color: var(--ink); }
+  /* ---------- App / Dashboard con menú lateral ---------- */
+  #vistaApp{ display:none; }
+  .app-shell{ display:flex; align-items:stretch; min-height: calc(100vh - 63px); }
+  .sidebar{
+    width: 230px; flex-shrink:0;
+    background: var(--ink); color:#f1f3f2;
+    padding: 22px 14px;
+    position: sticky; top:63px; align-self:flex-start; height: calc(100vh - 63px);
+    transition: width .2s ease;
+    overflow-x:hidden;
+  }
+  .sidebar-toggle{
+    background: rgba(241,243,242,0.08); border:none; color:#f1f3f2;
+    width:26px; height:26px; border-radius:50%; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 0 18px auto; font-size:13px; transition: transform .2s ease;
+  }
+  .sidebar-toggle:hover{ background: rgba(241,243,242,0.16); }
+  .sidebar.collapsed{ width: 66px; }
+  .sidebar.collapsed .sidebar-toggle{ transform: rotate(180deg); margin: 0 auto 18px; }
+  .sidebar.collapsed .side-label, .sidebar.collapsed .side-caret{ display:none; }
+  .sidebar.collapsed .side-submenu{ display:none !important; }
+  .sidebar-nav{ display:flex; flex-direction:column; gap:3px; }
+  .side-item, .side-subitem{
+    display:flex; align-items:center; gap:11px;
+    width:100%; text-align:left; background:none; border:none; cursor:pointer;
+    color: rgba(241,243,242,0.72); font-family: var(--font-body); font-size:13.5px; font-weight:500;
+    padding: 10px 12px; border-radius:9px; white-space:nowrap;
+    transition: background .15s ease, color .15s ease;
+    border-left: 3px solid transparent;
+  }
+  .side-item:hover, .side-subitem:hover{ background: rgba(241,243,242,0.06); color:#fff; }
+  .side-item.active, .side-subitem.active{
+    background: rgba(255,106,26,0.14); color: var(--accent);
+    border-left-color: var(--accent);
+  }
+  .side-ico{ font-size:15px; flex-shrink:0; width:18px; text-align:center; }
+  .side-caret{ margin-left:auto; font-size:10px; opacity:.6; transition: transform .15s ease; }
+  .side-parent.open .side-caret{ transform: rotate(180deg); }
+  .side-submenu{ display:none; flex-direction:column; gap:2px; margin: 2px 0 6px 14px; padding-left:14px; border-left:1px solid rgba(241,243,242,0.12); }
+  .side-submenu.open{ display:flex; }
+  .side-subitem{ font-size:12.5px; padding: 8px 12px; }
+  .app-main{ flex:1; min-width:0; overflow-x:hidden; }
+  .app-main-inner{ max-width: 900px; margin:0 auto; padding: 34px 26px 70px; box-sizing:border-box; }
+  @media (max-width: 860px){
+    .app-shell{ position:relative; }
+    .sidebar{
+      position: fixed; top:63px; left:0; bottom:0; z-index:35;
+      transform: translateX(-100%); transition: transform .2s ease; width: min(280px, 82vw);
+      box-shadow: 20px 0 40px rgba(0,0,0,0.25);
+    }
+    .sidebar.mobile-open{ transform: translateX(0); }
+    .sidebar-toggle{ display:none; }
+    .nav-toggle-app{
+      display:block !important; background:none; border:none; color:#f1f3f2; font-size:20px; cursor:pointer;
+      padding: 8px 10px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    .app-main-inner{ padding: 24px 18px 60px; }
+    .sidebar-scrim{
+      display:none; position:fixed; top:63px; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.45); z-index:34;
+    }
+    .sidebar-scrim.show{ display:block; }
+  }
+  .hero{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap: 24px;
+    flex-wrap:wrap;
+    margin-bottom: 30px;
+  }
+  .hero h1{
+    font-family: var(--font-display);
+    font-size: 25px;
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .hero p{ margin:0; color: var(--ink-soft); font-size:13.5px; }
+  .grid2{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:20px; align-items:start; }
+  .rep-stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
+  .rep-stat{ background: var(--paper); border-radius:10px; padding: 16px 18px; }
+  .rep-stat-l{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color: var(--ink-soft); margin-bottom:6px; }
+  .rep-stat-n{ font-family: var(--font-display); font-size:22px; color: var(--ink); }
+  .rep-stat-n.amber{ color: var(--accent-dark); }
+  .rep-stat-n.green{ color: var(--cargo-green); }
+  @media (max-width: 620px){ .rep-stats{ grid-template-columns: 1fr; } }
+  .reveal{ opacity:0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+  .reveal.in-view{ opacity:1; transform:none; }
+  .card{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 22px;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow .2s ease, border-color .2s ease;
+  }
+  .card:hover{ box-shadow: var(--shadow-card-hover); }
+  .card h2{ font-family: var(--font-display); font-size:15px; margin: 0 0 4px; }
+  .card .card-sub{ font-size:12.5px; color: var(--ink-soft); margin: 0 0 16px; }
+  .address-block{
+    background: linear-gradient(160deg, var(--ink), #16294a);
+    color: #f1f3f2;
+    border-radius:10px;
+    padding: 16px 18px;
+    font-family: var(--font-mono);
+    font-size:13px;
+    line-height:1.85;
+    position: relative;
+    overflow:hidden;
+  }
+  .address-block::before{
+    content:''; position:absolute; top:-40%; right:-20%; width:60%; height:120%;
+    background: radial-gradient(circle, rgba(255,106,26,0.14), transparent 70%); pointer-events:none;
+  }
+  .address-block .suite{ color: var(--accent); font-weight:600; text-shadow: 0 0 14px var(--accent-glow); position:relative; }
+  .copy-btn{
+    margin-top:12px;
+    width:100%;
+    padding: 9px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-family: var(--font-body);
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .copy-btn:hover{ border-color: var(--accent); color: var(--accent-dark); }
+  .stat-row{ display:flex; gap:10px; margin-top:16px; }
+  .stat{
+    flex:1;
+    background: var(--paper);
+    border-radius:10px;
+    padding: 13px 14px;
+    transition: background .2s ease;
+  }
+  .stat .n{ font-family: var(--font-display); font-size:21px; }
+  .stat .l{ font-size:11px; color: var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
+  /* Prealertar form */
+  .form-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  .form-grid .full{ grid-column: 1 / -1; }
+  /* Tabs de la sección de paquetes */
+  .panel-tabs{ display:flex; gap:6px; margin-bottom:18px; }
+  .panel-tab{
+    padding: 8px 16px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:12.5px;
+    font-weight:600;
+    color: var(--ink-soft);
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .panel-tab.active{ background: var(--ink); color:#fff; border-color: var(--ink); box-shadow: 0 4px 14px rgba(12,27,51,0.2); }
+  .paquete-card{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding: 14px 16px;
+    margin-bottom:10px;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .paquete-card:hover{ border-color: rgba(255,106,26,0.35); transform: translateX(2px); }
+  .paquete-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .paquete-tienda{ font-family: var(--font-display); font-weight:600; font-size:14.5px; }
+  .paquete-tracking{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
+  .paquete-valor{ font-family: var(--font-mono); font-size:13px; white-space:nowrap; }
+  .badge{
+    display:inline-block;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.02em;
+  }
+  .badge-prealertado{ background: var(--amber-bg); color: var(--accent-dark); }
+  .badge-en_bodega_miami{ background: rgba(58,110,165,0.12); color:#3a6ea5; }
+  .badge-en_transito{ background: rgba(58,110,165,0.12); color:#3a6ea5; }
+  .badge-en_panama{ background: rgba(58,110,165,0.12); color:#3a6ea5; }
+  .badge-listo_para_retiro{ background: var(--cargo-green-bg); color: var(--cargo-green); }
+  .badge-entregado{ background: rgba(12,27,51,0.08); color: var(--ink-soft); }
+  .badge-pendiente{ background: var(--amber-bg); color: var(--accent-dark); }
+  .badge-pagada{ background: var(--cargo-green-bg); color: var(--cargo-green); }
+  .badge-anulada{ background: rgba(12,27,51,0.08); color: var(--ink-soft); }
+  .factura-card{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding: 14px 16px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    transition: border-color .15s ease;
+  }
+  .factura-card:hover{ border-color: rgba(255,106,26,0.3); }
+  .factura-info .num{ font-family: var(--font-display); font-weight:600; font-size:14.5px; }
+  .factura-info .sub{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
+  .factura-right{ display:flex; align-items:center; gap:12px; }
+  .factura-total{ font-family: var(--font-mono); font-size:14px; font-weight:600; }
+  .btn-pdf{
+    padding: 7px 13px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .btn-pdf:hover{ border-color: var(--accent); color: var(--accent-dark); }
+  .btn-pagar{
+    padding: 7px 13px;
+    border-radius:8px;
+    border:none;
+    background: var(--accent);
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow: 0 2px 12px var(--accent-glow);
+    transition: background .15s ease, transform .15s ease;
+  }
+  .btn-pagar:hover{ background: var(--accent-dark); transform: translateY(-1px); }
+  .btn-yappy{ background: #4b2a8a; box-shadow: 0 2px 12px rgba(75,42,138,0.4); }
+  .btn-yappy:hover{ background: #3a2069; }
+  .banner-pago{
+    max-width: 1040px; margin: 0 auto 18px; padding: 13px 16px; border-radius:10px;
+    font-size:13.5px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .banner-pago.exito{ background: var(--cargo-green-bg); color: var(--cargo-green); border:1px solid rgba(23,122,99,0.3); }
+  .banner-pago.error{ background: var(--amber-bg); color: var(--accent-dark); border:1px solid rgba(255,106,26,0.3); }
+  .banner-pago button{ background:none; border:none; cursor:pointer; font-size:14px; color:inherit; }
+  .btn-ver-fotos{
+    margin-top:12px;
+    width:100%;
+    padding: 8px 10px;
+    border-radius:8px;
+    border:1px dashed var(--line);
+    background:#fff;
+    font-size:12px;
+    font-weight:600;
+    color: var(--ink-soft);
+    cursor:pointer;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .btn-ver-fotos:hover{ border-color: var(--accent); color: var(--accent-dark); }
+  .mini-galeria{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap:8px;
+    margin-top:10px;
+  }
+  .mini-foto{
+    width:100%; height:90px; object-fit:cover;
+    border-radius:8px; border:1px solid var(--line); cursor:pointer;
+    transition: transform .15s ease;
+  }
+  .mini-foto:hover{ transform: scale(1.03); }
+  /* Rail de estados */
+  .rail{ display:flex; align-items:center; margin-top:12px; gap:2px; }
+  .rail .seg{ flex:1; height:4px; border-radius:2px; background: rgba(12,27,51,0.09); transition: background .3s ease, box-shadow .3s ease; }
+  .rail .seg.done{ background: var(--accent); box-shadow: 0 0 6px rgba(255,106,26,0.5); }
+  .empty{
+    text-align:center;
+    padding: 34px 20px;
+    color: var(--ink-soft);
+    font-size:13.5px;
+  }
+  @media (max-width: 760px){
+    .auth-shell{ grid-template-columns: 1fr; }
+    .auth-side{ display:none; }
+    .grid2{ grid-template-columns: 1fr; }
+    .form-grid{ grid-template-columns: 1fr; }
+    .hero h1{ font-size: 20px; }
+    .hero p{ font-size: 12.5px; }
+    .app-main-inner{ padding: 20px 16px 60px; }
+    .address-block{ font-size: 13px; padding: 16px; }
+    .stat-row{ flex-wrap: wrap; }
+  }
   a:focus-visible, button:focus-visible{ outline: 2px solid var(--accent); outline-offset:2px; border-radius:4px; }
 </style>
 </head>
 <body>
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="index.html" class="brand">
-      <div class="mark">N</div>
-      <div>NEA CARGO XPRESS<small>Miami → Panamá</small></div>
-    </a>
-    <button class="nav-toggle" id="navToggle">☰</button>
-    <div class="nav-menu" id="navMenu">
-      <div class="nav-item">
-        <button class="nav-btn" data-dropdown="ddSesion">Iniciar sesión <span class="caret">▾</span></button>
-        <div class="dropdown" id="ddSesion">
-          <a href="app.html" class="dropdown-link">Iniciar sesión<span class="item-sub">Ya tengo un casillero</span></a>
-          <a href="app.html?registro" class="dropdown-link">Crear casillero<span class="item-sub">Es gratis, toma 2 minutos</span></a>
-          <a href="admin.html" class="dropdown-link">Acceso staff<span class="item-sub">Panel de operaciones</span></a>
-        </div>
-      </div>
-      <div class="nav-item">
-        <button class="nav-btn" data-dropdown="ddPreguntas">Preguntas <span class="caret">▾</span></button>
-        <div class="dropdown" id="ddPreguntas">
-          <a href="#faq-prealertar" class="dropdown-link faq-link">¿Cómo prealerto un paquete?</a>
-          <a href="#faq-tiempo" class="dropdown-link faq-link">¿Cuánto tarda en llegar?</a>
-          <a href="#faq-costo" class="dropdown-link faq-link">¿Cómo se calcula el costo?</a>
-          <a href="#preguntas" class="dropdown-link">Ver todas las preguntas</a>
-        </div>
-      </div>
-      <a href="#rastreo" class="nav-btn">Rastrear paquete</a>
-      <div class="nav-item right">
-        <button class="nav-btn" data-dropdown="ddContacto">Contáctanos <span class="caret">▾</span></button>
-        <div class="dropdown" id="ddContacto">
-          <a href="https://wa.me/50762937497" target="_blank" rel="noopener" class="dropdown-link">WhatsApp<span class="item-sub">+507 6293-7497</span></a>
-          <a href="mailto:info@neacargoxpress.com" class="dropdown-link">Correo<span class="item-sub">info@neacargoxpress.com</span></a>
-          <a href="#sucursales" class="dropdown-link">Nuestras sucursales<span class="item-sub">Puntos de retiro en Panamá</span></a>
-        </div>
-      </div>
-      <a href="app.html?registro" class="nav-btn cta">Crear casillero gratis</a>
-    </div>
-  </div>
-</nav>
-<div class="hero-shell">
-  <canvas id="networkCanvas"></canvas>
-  <section class="hero">
+<div class="topbar">
+  <a href="#" id="btnBrand" class="brand">
+    <div class="mark">N</div>
     <div>
-      <div class="eyebrow">Casillero virtual · Estados Unidos y China → Panamá</div>
-      <h1>Compra en EE.UU. y China.<br>Recíbelo en <span class="glow-word">Panamá</span>.</h1>
-      <p class="lead">
-        Te damos una dirección en Miami, tú compras en Amazon, eBay, Shein, Alibaba o donde quieras
-        — también traemos mercancía directo desde China. Nosotros lo recibimos, te avisamos, y lo
-        traemos hasta tus manos — con seguimiento en cada paso.
-      </p>
-      <div class="hero-ctas">
-        <a href="app.html?registro" class="btn-solid">Crear mi casillero gratis</a>
-        <a href="#rastreo" class="btn-outline">Rastrear mi paquete</a>
-      </div>
-      <div class="route-strip">
-        <span class="city">MIAMI / CHINA</span>
-        <svg viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
-          <line class="route-line" x1="2" y1="7" x2="138" y2="7"/>
-          <circle class="route-dot" cx="2" cy="7" r="2.5"/>
-          <circle class="route-dot" cx="138" cy="7" r="2.5"/>
-          <path class="route-plane" d="M0,-3 L4,0 L0,3 L1,0 Z"/>
-        </svg>
-        <span class="city">PANAMÁ</span>
-      </div>
+      NEA CARGO XPRESS
+      <small>Miami → Panamá</small>
     </div>
-    <div class="tilt-wrap">
-      <div class="hero-card reveal" id="heroCard">
-        <h3>Tu casillero se ve así</h3>
-        <p class="small">Lo usas como tu dirección de envío en cualquier tienda de EE.UU.</p>
-        <div class="casillero-mock">
-          <span class="suite">PTY-14981</span> &nbsp;TU NOMBRE &nbsp;NEA CARGO XPRESS<br>
-          8610 NW 72 STREET<br>
-          MIAMI, FLORIDA 33195<br>
-          ESTADOS UNIDOS<br>
-          1-305-406-3654
-        </div>
-        <div class="stat-mini-row">
-          <div class="stat-mini"><div class="n" data-count-to="4">0</div><div class="l">Días Miami–PTY (min)</div></div>
-          <div class="stat-mini"><div class="n" data-count-to="100" data-suffix="%">0%</div><div class="l">Con seguimiento</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
+  </a>
+  <div class="topbar-right">
+    <span class="casillero-pill" id="pillCasillero"></span>
+    <button class="nav-toggle-app" id="btnMenuMovilApp" aria-label="Abrir menú" style="display:none;">☰</button>
+    <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
+  </div>
 </div>
-<section class="section reveal" id="rastreo">
-  <div class="section-head">
-    <div class="eyebrow">Rastreo</div>
-    <h2>¿Dónde está mi paquete?</h2>
-    <p>No necesitas iniciar sesión para rastrear.</p>
-  </div>
-  <div class="rastreo-tabs">
-    <button class="rastreo-tab-btn active" data-rtab="nea">Mi paquete NEA Cargo Xpress</button>
-    <button class="rastreo-tab-btn" data-rtab="mundial">Rastreo mundial (cualquier courier)</button>
-  </div>
-  <div class="rastreo-box" id="panelRastreoNea">
-    <p class="rastreo-hint">Para paquetes que ya prealertaste con nosotros.</p>
-    <form id="formRastreo" class="rastreo-form">
-      <input type="text" id="inputTracking" placeholder="Ej. 1Z999AA10123456784" autocomplete="off">
-      <button class="btn-solid" type="submit" id="btnRastreo">
-        <span class="spinner-rastreo"></span><span>Rastrear</span>
-      </button>
-    </form>
-    <div id="resultadoRastreo"></div>
-  </div>
-  <div class="rastreo-box" id="panelRastreoMundial" style="display:none;">
-    <p class="rastreo-hint">Para cualquier número de tracking (USPS, UPS, DHL, FedEx, UniUni, y +3,400 transportistas más), aunque no sea de NEA Cargo Xpress. Te abrimos el resultado en 17TRACK, el rastreador universal más usado.</p>
-    <form id="formMundial" class="rastreo-form">
-      <input type="text" id="inputMundial" maxlength="50" placeholder="Ej. RR123456789CN o UUS6467670502776182" autocomplete="off">
-      <button class="btn-solid" type="submit" style="color:#fff;">Rastrear en el mundo ↗</button>
-    </form>
-  </div>
-</section>
-<section class="foto-banda reveal">
-  <div class="foto-item">
-    <img src="https://images.unsplash.com/photo-1633174524827-db00a6b7bc74?auto=format&fit=crop&w=800&q=75" alt="Cajas de compras en línea listas para envío" loading="lazy">
-    <div class="foto-caption"><span class="foto-num">01</span>Compras en Amazon, eBay y más</div>
-  </div>
-  <div class="foto-item">
-    <img src="https://images.unsplash.com/photo-1635851801927-44c4d1c555af?auto=format&fit=crop&w=800&q=75" alt="Barco de carga con contenedores en el puerto" loading="lazy">
-    <div class="foto-caption"><span class="foto-num">02</span>Viaja por mar o aire hasta Panamá</div>
-  </div>
-  <div class="foto-item">
-    <img src="https://images.unsplash.com/photo-1735047974891-df59713d8192?auto=format&fit=crop&w=800&q=75" alt="Contenedores de carga apilados" loading="lazy">
-    <div class="foto-caption"><span class="foto-num">03</span>Lo recibes en tu sucursal más cercana</div>
-  </div>
-</section>
-<section class="section reveal" id="como-funciona">
-  <div class="section-head">
-    <div class="eyebrow">Proceso</div>
-    <h2>Cuatro pasos, sin complicaciones</h2>
-    <p>Desde que compras hasta que retiras tu paquete, siempre sabes en qué punto va.</p>
-  </div>
-  <div class="steps-grid">
-    <div class="step-card"><div class="num">01</div><h3>Crea tu casillero</h3><p>Regístrate gratis y te asignamos una dirección personal en Miami al instante.</p></div>
-    <div class="step-card"><div class="num">02</div><h3>Compra y prealerta</h3><p>Compra en la tienda que quieras usando tu dirección, y avísanos qué compraste en la app.</p></div>
-    <div class="step-card"><div class="num">03</div><h3>Lo recibimos y pesamos</h3><p>Tu paquete llega a nuestra bodega, lo fotografiamos, pesamos y actualizamos su estado.</p></div>
-    <div class="step-card"><div class="num">04</div><h3>Retira en Panamá</h3><p>Te avisamos por correo y WhatsApp cuando esté listo en tu sucursal más cercana.</p></div>
-  </div>
-</section>
-<section class="section tarifas-band reveal" id="tarifas">
-  <div class="section-head">
-    <div class="eyebrow">Tarifas</div>
-    <h2>Precios claros, sin sorpresas</h2>
-    <p>Pagas por lo que pesa tu paquete. Sin cargos escondidos.</p>
-  </div>
-  <div class="tarifas-grid" id="tarifasGrid"><div class="tarifa-card"><p>Cargando tarifas…</p></div></div>
-  <div class="calculadora-box">
-    <h3>Calcula el costo estimado de tu envío</h3>
-    <div class="calc-row">
-      <div><label for="calcTarifa">Tarifa</label><select id="calcTarifa"></select></div>
-      <div><label for="calcPeso">Peso estimado (lb)</label><input type="number" id="calcPeso" min="0" step="0.1" placeholder="Ej. 3.5"></div>
-      <div><label for="calcValor">Valor declarado (USD, opcional)</label><input type="number" id="calcValor" min="0" step="0.01" placeholder="Ej. 60"></div>
-    </div>
-    <label class="calc-check"><input type="checkbox" id="calcSeguro"> Agregar seguro sobre el valor declarado</label>
-    <div id="calcResultado"></div>
-  </div>
-</section>
-<section class="section reveal" id="sucursales">
-  <div class="section-head">
-    <div class="eyebrow">Puntos de retiro</div>
-    <h2>Nuestras sucursales</h2>
-    <p>Retira tu paquete en el punto más cercano a ti.</p>
-  </div>
-  <div class="sucursales-grid" id="sucursalesGrid"><div class="sucursal-card"><p class="linea">Cargando sucursales…</p></div></div>
-</section>
-<section class="section reveal" id="preguntas">
-  <div class="section-head">
-    <div class="eyebrow">Preguntas frecuentes</div>
-    <h2>Todo lo que necesitas saber</h2>
-    <p>¿No encuentras tu respuesta? Escríbenos por WhatsApp, te contestamos rápido.</p>
-  </div>
-  <div id="faqLista">
-    <div class="faq-item open" id="faq-prealertar">
-      <div class="faq-q"><span>¿Cómo prealerto un paquete?</span><span class="plus">+</span></div>
-      <div class="faq-a">Desde tu dashboard, en la sección "Prealertar un paquete", ingresa la tienda, el número de tracking, una descripción y el valor declarado. Así lo identificamos apenas llega a la bodega.</div>
-    </div>
-    <div class="faq-item" id="faq-tiempo">
-      <div class="faq-q"><span>¿Cuánto tarda en llegar a Panamá?</span><span class="plus">+</span></div>
-      <div class="faq-a">En promedio de 4 a 7 días hábiles desde que el paquete sale de nuestra bodega en Miami, dependiendo del volumen y la aduana.</div>
-    </div>
-    <div class="faq-item" id="faq-costo">
-      <div class="faq-q"><span>¿Cómo se calcula el costo del envío?</span><span class="plus">+</span></div>
-      <div class="faq-a">Se cobra por el peso real del paquete confirmado en bodega (precio por libra), con un cargo mínimo por envío. Si agregas seguro, se suma un porcentaje sobre el valor declarado. Verás el detalle completo en tu factura.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q"><span>¿Puedo ver fotos de cómo llegó mi paquete?</span><span class="plus">+</span></div>
-      <div class="faq-a">Sí. Cuando tu paquete llega a la bodega le tomamos fotos, y puedes verlas directamente en tu dashboard, en la tarjeta de ese paquete.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q"><span>¿Cómo pago mi factura?</span><span class="plus">+</span></div>
-      <div class="faq-a">Te enviamos la factura por correo (con PDF adjunto) y por WhatsApp apenas se genera. Puedes pagarla en cualquiera de nuestras sucursales.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q"><span>¿Qué no puedo enviar?</span><span class="plus">+</span></div>
-      <div class="faq-a">No se aceptan artículos restringidos o ilegales según la aduana panameña (armas, líquidos inflamables, ciertos medicamentos, etc.). Si tienes dudas sobre un producto en particular, escríbenos por WhatsApp antes de comprarlo.</div>
+<div class="wrap">
+  <!-- ======================= VISTA: LOGIN / REGISTRO ======================= -->
+  <div id="vistaAuth">
+    <div class="auth-shell">
+      <div class="auth-side">
+        <canvas id="authNetworkCanvas"></canvas>
+        <div>
+          <div style="font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; color:var(--accent); text-transform:uppercase;">Casillero virtual</div>
+          <h1>Compra en EE.UU.<br>recibe en Panamá.</h1>
+          <p>Crea tu casillero gratis, prealerta cada compra y sigue su recorrido hasta que llega a tus manos.</p>
+        </div>
+        <div class="route">
+          <span class="dot"></span>
+          <span class="track"></span>
+          <span>MIA</span>
+          <span class="track"></span>
+          <span class="dot"></span>
+          <span class="track"></span>
+          <span>PTY</span>
+          <span class="track"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+      <div class="auth-form-side">
+        <div class="tabs">
+          <button class="tab-btn active" id="tabLogin">Iniciar sesión</button>
+          <button class="tab-btn" id="tabRegistro">Crear casillero</button>
+        </div>
+        <!-- Login -->
+        <form id="formLogin">
+          <label for="loginEmail">Correo electrónico</label>
+          <input id="loginEmail" type="email" placeholder="tu@correo.com">
+          <label for="loginPassword">Contraseña</label>
+          <input id="loginPassword" type="password" placeholder="••••••••">
+          <button class="btn-primary" type="submit" id="btnLogin">
+            <span class="spinner"></span><span>Entrar a mi casillero</span>
+          </button>
+          <button type="button" id="btnMostrarOlvide" class="link-olvide">¿Olvidaste tu contraseña?</button>
+          <div class="banner" id="bannerLogin"></div>
+        </form>
+        <!-- Olvidé mi contraseña: solicitar enlace -->
+        <form id="formOlvide" style="display:none;">
+          <p class="card-sub" style="margin:0 0 14px;">Escribe tu correo y te enviamos un enlace para restablecer tu contraseña.</p>
+          <label for="olvideEmail">Correo electrónico</label>
+          <input id="olvideEmail" type="email" placeholder="tu@correo.com">
+          <button class="btn-primary" type="submit" id="btnOlvide">
+            <span class="spinner"></span><span>Enviar enlace</span>
+          </button>
+          <button type="button" id="btnVolverLogin" class="link-olvide">← Volver a iniciar sesión</button>
+          <div class="banner" id="bannerOlvide"></div>
+        </form>
+        <!-- Restablecer contraseña (llega con ?reset=token) -->
+        <form id="formRestablecer" style="display:none;">
+          <p class="card-sub" style="margin:0 0 14px;">Escribe tu nueva contraseña.</p>
+          <label for="nuevaPassword">Nueva contraseña</label>
+          <input id="nuevaPassword" type="password" placeholder="Mínimo 8 caracteres">
+          <label for="nuevaPassword2">Confirmar nueva contraseña</label>
+          <input id="nuevaPassword2" type="password" placeholder="Repite la contraseña">
+          <button class="btn-primary" type="submit" id="btnRestablecer">
+            <span class="spinner"></span><span>Guardar nueva contraseña</span>
+          </button>
+          <div class="banner" id="bannerRestablecer"></div>
+        </form>
+        <!-- Registro -->
+        <form id="formRegistro" style="display:none;">
+          <!-- Selector Personal / Empresa -->
+          <div class="reg-tipo-tabs">
+            <button type="button" class="reg-tipo-btn active" data-tipo="personal">👤 Personal</button>
+            <button type="button" class="reg-tipo-btn" data-tipo="empresa">🏢 Empresa</button>
+          </div>
+          <input type="hidden" id="regTipoCuenta" value="personal">
+          <!-- Campos personales -->
+          <div id="camposPersonal">
+            <div class="row2">
+              <div>
+                <label for="regNombre">Nombre</label>
+                <input id="regNombre" type="text" placeholder="Ana">
+              </div>
+              <div>
+                <label for="regApellido">Apellido</label>
+                <input id="regApellido" type="text" placeholder="Pérez">
+              </div>
+            </div>
+          </div>
+          <!-- Campos empresa -->
+          <div id="camposEmpresa" style="display:none;">
+            <label for="regRazonSocial">Razón social</label>
+            <input id="regRazonSocial" type="text" placeholder="Ferretería López S.A.">
+            <label for="regRuc">RUC</label>
+            <input id="regRuc" type="text" placeholder="123-456-789">
+            <label for="regNombreContacto">Nombre del contacto</label>
+            <input id="regNombreContacto" type="text" placeholder="Carlos López">
+            <label for="regAvisoOperacion">Aviso de operación (PDF, obligatorio)</label>
+            <input id="regAvisoOperacion" type="file" accept="application/pdf" style="border:none;padding:6px 0;">
+            <div class="hint" id="hintAviso"></div>
+          </div>
+          <!-- Campos comunes -->
+          <label for="regEmail">Correo electrónico</label>
+          <input id="regEmail" type="email" placeholder="ana@ejemplo.com">
+          <label for="regTelefono">Teléfono (opcional)</label>
+          <input id="regTelefono" type="tel" placeholder="6123-4567">
+          <label for="regPassword">Contraseña</label>
+          <input id="regPassword" type="password" placeholder="Mínimo 8 caracteres">
+          <button class="btn-primary" type="submit" id="btnRegistro">
+            <span class="spinner"></span><span>Crear mi casillero</span>
+          </button>
+          <div class="banner" id="bannerRegistro"></div>
+        </form>
+      </div>
     </div>
   </div>
-</section>
-<section class="section reveal" id="contacto">
-  <div class="section-head">
-    <div class="eyebrow">Contáctanos</div>
-    <h2>Estamos para ayudarte</h2>
-    <p>Elige el canal que prefieras.</p>
   </div>
-  <div class="contacto-grid">
-    <div class="contacto-card">
-      <div class="ico">💬</div>
-      <h3>WhatsApp</h3>
-      <p>La forma más rápida de resolver dudas o dar seguimiento a tu paquete.</p>
-      <a class="link" href="https://wa.me/50762937497" target="_blank" rel="noopener">+507 6293-7497 →</a>
-    </div>
-    <div class="contacto-card">
-      <div class="ico">✉️</div>
-      <h3>Correo</h3>
-      <p>Para consultas más detalladas o temas de facturación.</p>
-      <a class="link" href="mailto:info@neacargoxpress.com">info@neacargoxpress.com →</a>
-    </div>
+  <!-- fin de .wrap: el login queda centrado y angosto, el dashboard usa todo el ancho -->
+  <!-- ======================= VISTA: APP (dashboard con menú lateral) ======================= -->
+  <div id="vistaApp" class="app-shell">
+    <div class="sidebar-scrim" id="sidebarScrim"></div>
+    <aside class="sidebar" id="sidebar">
+      <button class="sidebar-toggle" id="btnSidebarToggle" aria-label="Colapsar menú">‹</button>
+      <nav class="sidebar-nav">
+        <button class="side-item active" data-seccion="inicio">
+          <span class="side-ico">🏠</span><span class="side-label">Inicio</span>
+        </button>
+        <button class="side-item" data-seccion="perfil">
+          <span class="side-ico">👤</span><span class="side-label">Mi perfil</span>
+        </button>
+        <button class="side-item" data-seccion="casillero">
+          <span class="side-ico">📍</span><span class="side-label">Casillero</span>
+        </button>
+        <button class="side-item" data-seccion="paquetes">
+          <span class="side-ico">📦</span><span class="side-label">Paquetes</span>
+        </button>
+        <button class="side-item side-parent" id="btnFacturasParent">
+          <span class="side-ico">🧾</span><span class="side-label">Facturas</span><span class="side-caret">▾</span>
+        </button>
+        <div class="side-submenu" id="submenuFacturas">
+          <button class="side-subitem active" data-seccion="historial-facturas">Historial de facturas</button>
+          <button class="side-subitem" data-seccion="estado-cuenta">Estado de cuenta</button>
+        </div>
+        <button class="side-item" data-seccion="autorizados">
+          <span class="side-ico">🛡️</span><span class="side-label">Autorizados</span>
+        </button>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <div class="app-main-inner">
+        <div class="hero">
+          <div>
+            <h1 id="saludoNombre">Hola</h1>
+            <p id="subtituloSeccion">Este es el estado de tu casillero y tus paquetes.</p>
+          </div>
+        </div>
+        <!-- ---- Sección: Inicio ---- -->
+        <div class="seccion-app" id="seccionInicio">
+          <div class="grid2">
+            <div class="card reveal">
+              <h2>Mi dirección de casillero</h2>
+              <p class="card-sub">Usa esta dirección al comprar en tiendas de EE.UU.</p>
+              <div class="address-block" id="bloqueDireccion">Cargando…</div>
+              <button class="copy-btn" id="btnCopiar">Copiar dirección</button>
+              <div class="stat-row">
+                <div class="stat">
+                  <div class="n" id="statTotal">0</div>
+                  <div class="l">Paquetes</div>
+                </div>
+                <div class="stat">
+                  <div class="n" id="statActivos">0</div>
+                  <div class="l">En camino</div>
+                </div>
+              </div>
+            </div>
+            <div class="card reveal">
+              <h2>Últimos paquetes</h2>
+              <p class="card-sub">Vista rápida — ve a "Paquetes" en el menú para ver todo el historial.</p>
+              <div id="listaPaquetesInicio"></div>
+            </div>
+          </div>
+        </div>
+        <!-- ---- Sección: Casillero ---- -->
+        <div class="seccion-app" id="seccionCasillero" style="display:none;">
+          <div class="card reveal" style="max-width:520px;">
+            <h2>Mi dirección de casillero</h2>
+            <p class="card-sub">Usa exactamente esta dirección al comprar en cualquier tienda de EE.UU. — el número de casillero (Suite) es lo que nos permite identificar que el paquete es tuyo.</p>
+            <div class="address-block" id="bloqueDireccionCasillero">Cargando…</div>
+            <button class="copy-btn" id="btnCopiarCasillero">Copiar dirección</button>
+          </div>
+        </div>
+        <!-- ---- Sección: Paquetes ---- -->
+        <div class="seccion-app" id="seccionPaquetes" style="display:none;">
+          <div class="card reveal" style="margin-bottom:20px;">
+            <h2>Prealertar un paquete</h2>
+            <p class="card-sub">Avísanos qué compraste antes de que llegue a la bodega.</p>
+            <form id="formPrealerta">
+              <div class="form-grid">
+                <div>
+                  <label for="paqTienda">Tienda</label>
+                  <input id="paqTienda" type="text" placeholder="Amazon">
+                </div>
+                <div>
+                  <label for="paqTracking"># de tracking</label>
+                  <input id="paqTracking" type="text" placeholder="1Z999AA10123456784">
+                </div>
+                <div>
+                  <label for="paqValor">Valor declarado (USD)</label>
+                  <input id="paqValor" type="number" step="0.01" min="0" placeholder="45.99">
+                </div>
+                <div>
+                  <label for="paqPeso">Peso aprox. (lb, opcional)</label>
+                  <input id="paqPeso" type="number" step="0.01" min="0" placeholder="1.2">
+                </div>
+                <div class="full">
+                  <label for="paqDescripcion">Descripción (opcional)</label>
+                  <input id="paqDescripcion" type="text" placeholder="Audífonos inalámbricos">
+                </div>
+              </div>
+              <button class="btn-primary" type="submit" id="btnPrealerta">
+                <span class="spinner"></span><span>Prealertar paquete</span>
+              </button>
+              <div class="banner" id="bannerPrealerta"></div>
+            </form>
+          </div>
+          <div class="card reveal">
+            <h2>Mis paquetes</h2>
+            <p class="card-sub">Todo lo que has prealertado, del más reciente al más antiguo.</p>
+            <div class="panel-tabs">
+              <button class="panel-tab active" data-filtro="todos">Todos</button>
+              <button class="panel-tab" data-filtro="activos">En camino</button>
+              <button class="panel-tab" data-filtro="entregado">Entregados</button>
+            </div>
+            <div id="listaPaquetes"></div>
+          </div>
+        </div>
+        <!-- ---- Sección: Facturas > Historial de facturas ---- -->
+        <div class="seccion-app" id="seccionHistorialFacturas" style="display:none;">
+          <div class="card reveal">
+            <h2>Historial de facturas</h2>
+            <p class="card-sub">Descarga el PDF o revisa si están pendientes de pago.</p>
+            <div id="listaFacturas"></div>
+          </div>
+        </div>
+        <!-- ---- Sección: Facturas > Estado de cuenta ---- -->
+        <div class="seccion-app" id="seccionEstadoCuenta" style="display:none;">
+          <div class="card reveal">
+            <h2>Estado de cuenta</h2>
+            <p class="card-sub">Resumen de lo facturado, pagado y pendiente en tu cuenta.</p>
+            <div class="rep-stats" id="cuentaStats"></div>
+          </div>
+          <div class="card reveal" style="margin-top:20px;">
+            <h2>Facturas pendientes de pago</h2>
+            <p class="card-sub">Estas son las que aún debes — puedes pagarlas desde aquí.</p>
+            <div id="listaCuentaPendientes"></div>
+          </div>
+        </div>
+        <!-- ---- Sección: Autorizados ---- -->
+        <div class="seccion-app" id="seccionAutorizados" style="display:none;">
+          <div class="card reveal">
+            <h2>¿Qué son los autorizados?</h2>
+            <p class="card-sub">Si tú no puedes recoger tu pedido, puedes asignar aquí hasta 3 personas que puedan recogerlo por ti. Escribe su nombre y cédula completos y sin errores — en la sucursal se los pedirán para verificar.</p>
+            <form id="formAutorizados">
+              <div class="form-grid" style="margin-bottom:14px;">
+                <div>
+                  <label for="aut1Nombre">Nombre persona 1</label>
+                  <input id="aut1Nombre" type="text" placeholder="Nombre completo">
+                </div>
+                <div>
+                  <label for="aut1Cedula">Cédula persona 1</label>
+                  <input id="aut1Cedula" type="text" placeholder="8-123-4567">
+                </div>
+              </div>
+              <div class="form-grid" style="margin-bottom:14px;">
+                <div>
+                  <label for="aut2Nombre">Nombre persona 2</label>
+                  <input id="aut2Nombre" type="text" placeholder="Nombre completo">
+                </div>
+                <div>
+                  <label for="aut2Cedula">Cédula persona 2</label>
+                  <input id="aut2Cedula" type="text" placeholder="8-123-4567">
+                </div>
+              </div>
+              <div class="form-grid" style="margin-bottom:14px;">
+                <div>
+                  <label for="aut3Nombre">Nombre persona 3</label>
+                  <input id="aut3Nombre" type="text" placeholder="Nombre completo">
+                </div>
+                <div>
+                  <label for="aut3Cedula">Cédula persona 3</label>
+                  <input id="aut3Cedula" type="text" placeholder="8-123-4567">
+                </div>
+              </div>
+              <button class="btn-primary" type="submit" id="btnGuardarAutorizados" style="max-width:220px;">
+                <span class="spinner"></span><span>Guardar</span>
+              </button>
+              <div class="banner" id="bannerAutorizados"></div>
+            </form>
+          </div>
+        </div>
+        <!-- ---- Sección: Perfil ---- -->
+        <div class="seccion-app" id="seccionPerfil" style="display:none;">
+          <div class="card reveal" style="margin-bottom:20px;">
+            <h2>Mi información</h2>
+            <p class="card-sub">Actualiza tu número de teléfono de contacto.</p>
+            <form id="formTelefono">
+              <label for="perfilTelefono">Teléfono</label>
+              <input id="perfilTelefono" type="tel" placeholder="6123-4567">
+              <button class="btn-primary" type="submit" id="btnGuardarTelefono" style="max-width:200px;margin-top:14px;">
+                <span class="spinner"></span><span>Guardar teléfono</span>
+              </button>
+              <div class="banner" id="bannerTelefono"></div>
+            </form>
+          </div>
+          <div class="card reveal">
+            <h2>Cambiar contraseña</h2>
+            <p class="card-sub">Por seguridad, necesitas ingresar tu contraseña actual.</p>
+            <form id="formPassword">
+              <label for="passActual">Contraseña actual</label>
+              <input id="passActual" type="password" placeholder="••••••••">
+              <label for="passNueva">Nueva contraseña</label>
+              <input id="passNueva" type="password" placeholder="Mínimo 8 caracteres">
+              <label for="passConfirmar">Confirmar nueva contraseña</label>
+              <input id="passConfirmar" type="password" placeholder="Repite la nueva contraseña">
+              <button class="btn-primary" type="submit" id="btnCambiarPassword" style="max-width:200px;margin-top:14px;">
+                <span class="spinner"></span><span>Cambiar contraseña</span>
+              </button>
+              <div class="banner" id="bannerPassword"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
-</section>
-<footer>
-  <div class="footer-inner">
-    <div class="brand" style="font-family: var(--font-display); font-weight:700;">NEA CARGO XPRESS</div>
-    <div>© <span id="anioActual"></span> NEA Cargo Xpress. Miami → Panamá.</div>
-  </div>
-</footer>
-<a class="whatsapp-float" href="https://wa.me/50762937497?text=Hola%2C%20necesito%20ayuda%20con%20mi%20env%C3%ADo" target="_blank" rel="noopener" aria-label="Chatear por WhatsApp">
-  <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16 2.5C8.5 2.5 2.5 8.5 2.5 16c0 2.6.7 5 2 7.1L2.5 29.5l6.6-1.9c2 1.1 4.4 1.8 6.9 1.8 7.5 0 13.5-6 13.5-13.4C29.5 8.5 23.5 2.5 16 2.5z" fill="white"/>
-    <path d="M16 2.5C8.5 2.5 2.5 8.5 2.5 16c0 2.6.7 5 2 7.1L2.5 29.5l6.6-1.9c2 1.1 4.4 1.8 6.9 1.8 7.5 0 13.5-6 13.5-13.4C29.5 8.5 23.5 2.5 16 2.5zm0 24.6c-2.2 0-4.4-.6-6.2-1.7l-.4-.3-4 1.1 1.1-3.9-.3-.4c-1.2-1.9-1.9-4.1-1.9-6.4 0-6.6 5.4-12 12-12s12 5.4 12 12-5.5 11.6-12.3 11.6z" fill="#25d366"/>
-    <path d="M22.1 18.9c-.4-.2-2.1-1-2.4-1.2-.3-.1-.5-.2-.8.2-.2.3-.9 1.2-1.1 1.4-.2.2-.4.3-.7.1-.4-.2-1.5-.5-2.8-1.7-1-.9-1.7-2.1-1.9-2.4-.2-.4 0-.5.1-.7.1-.2.4-.5.5-.6.2-.2.2-.4.3-.6.1-.2.1-.4 0-.6-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.3 3.6 5.7 5 .8.3 1.4.5 1.9.7.8.2 1.5.2 2 .1.6-.1 2.1-.8 2.3-1.7.3-.8.3-1.5.2-1.7-.1-.1-.3-.2-.7-.4z" fill="#25d366"/>
-  </svg>
-</a>
 <script>
+  // Cambia esto si tu API vive en otro dominio o puerto.
+  const API_URL = '/api';
+  const TOKEN_KEY = 'nea_cargo_token';
+  const ESTADOS = ['prealertado','en_bodega_miami','en_transito','en_panama','listo_para_retiro','entregado'];
+  const ESTADO_LABEL = {
+    prealertado: 'Prealertado',
+    en_bodega_miami: 'En bodega Miami',
+    en_transito: 'En tránsito',
+    en_panama: 'En Panamá',
+    listo_para_retiro: 'Listo para retiro',
+    entregado: 'Entregado',
+  };
   const $ = (sel) => document.querySelector(sel);
-  $('#anioActual').textContent = new Date().getFullYear();
-  (function redParticulas(){
-    const canvas = document.getElementById('networkCanvas');
+  // ---------- Fondo de partículas del panel de login (mismo lenguaje visual que index.html) ----------
+  (function redParticulasAuth(){
+    const canvas = document.getElementById('authNetworkCanvas');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const heroShell = canvas.parentElement;
+    const host = canvas.parentElement;
     const prefiereReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let puntos = [], ancho, alto;
-    function medir(){ ancho=heroShell.offsetWidth; alto=heroShell.offsetHeight; canvas.width=ancho*devicePixelRatio; canvas.height=alto*devicePixelRatio; canvas.style.width=ancho+'px'; canvas.style.height=alto+'px'; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
-    function crearPuntos(){ const cantidad=Math.min(70,Math.floor((ancho*alto)/16000)); puntos=Array.from({length:cantidad},()=>({x:Math.random()*ancho,y:Math.random()*alto,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.4+.6})); }
-    function paso(){ ctx.clearRect(0,0,ancho,alto); const distMax=130; puntos.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>ancho)p.vx*=-1;if(p.y<0||p.y>alto)p.vy*=-1;}); for(let i=0;i<puntos.length;i++){for(let j=i+1;j<puntos.length;j++){const a=puntos[i],b=puntos[j],dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<distMax){ctx.strokeStyle=`rgba(255,106,26,${(1-dist/distMax)*.16})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}} puntos.forEach(p=>{ctx.beginPath();ctx.fillStyle='rgba(241,243,242,0.5)';ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}); if(!prefiereReducido)requestAnimationFrame(paso); }
-    medir(); crearPuntos(); paso(); if(prefiereReducido)paso();
-    window.addEventListener('resize',()=>{medir();crearPuntos();});
+    function medir(){
+      ancho = host.offsetWidth; alto = host.offsetHeight;
+      canvas.width = ancho * devicePixelRatio;
+      canvas.height = alto * devicePixelRatio;
+      canvas.style.width = ancho + 'px';
+      canvas.style.height = alto + 'px';
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+    function crearPuntos(){
+      const cantidad = Math.min(36, Math.floor((ancho * alto) / 9000));
+      puntos = Array.from({ length: cantidad }, () => ({
+        x: Math.random() * ancho, y: Math.random() * alto,
+        vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.2, r: Math.random() * 1.3 + 0.6,
+      }));
+    }
+    function paso(){
+      ctx.clearRect(0, 0, ancho, alto);
+      const distMax = 110;
+      puntos.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > ancho) p.vx *= -1;
+        if (p.y < 0 || p.y > alto) p.vy *= -1;
+      });
+      for (let i = 0; i < puntos.length; i++){
+        for (let j = i + 1; j < puntos.length; j++){
+          const a = puntos[i], b = puntos[j];
+          const dist = Math.hypot(a.x - b.x, a.y - b.y);
+          if (dist < distMax){
+            ctx.strokeStyle = `rgba(255,106,26,${(1 - dist / distMax) * 0.18})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+      puntos.forEach(p => {
+        ctx.beginPath(); ctx.fillStyle = 'rgba(241,243,242,0.45)';
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+      });
+      if (!prefiereReducido) requestAnimationFrame(paso);
+    }
+    medir(); crearPuntos(); paso();
+    window.addEventListener('resize', () => { medir(); crearPuntos(); });
   })();
-  (function tiltHeroCard(){
-    const wrap=document.querySelector('.tilt-wrap'), card=document.getElementById('heroCard');
-    if(!wrap||!card)return;
-    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-    if(window.matchMedia('(pointer: coarse)').matches)return;
-    wrap.addEventListener('mousemove',(e)=>{const rect=wrap.getBoundingClientRect(),px=(e.clientX-rect.left)/rect.width-.5,py=(e.clientY-rect.top)/rect.height-.5;card.style.transform=`rotateY(${px*10}deg) rotateX(${-py*10}deg) translateZ(10px)`;});
-    wrap.addEventListener('mouseleave',()=>{card.style.transform='rotateY(0deg) rotateX(0deg) translateZ(0)';});
-  })();
-  function animarContador(el){const meta=Number(el.dataset.countTo),suf=el.dataset.suffix||'',duracion=1100,inicio=performance.now();function tick(ahora){const t=Math.min((ahora-inicio)/duracion,1),valor=Math.floor(t*meta);el.textContent=valor+suf;if(t<1)requestAnimationFrame(tick);else el.textContent=meta+suf;}requestAnimationFrame(tick);}
-  if('IntersectionObserver' in window){const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('in-view');observer.unobserve(entry.target);}});},{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));}else{document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in-view'));}
-  document.querySelectorAll('[data-count-to]').forEach(animarContador);
-  function cerrarTodosLosDropdowns(){document.querySelectorAll('.nav-item.open').forEach(item=>{item.classList.remove('open');const menu=item.querySelector('.dropdown');if(menu)menu.style.display='';});}
-  document.querySelectorAll('.nav-btn[data-dropdown]').forEach(btn=>{btn.addEventListener('click',(e)=>{e.stopPropagation();const item=btn.closest('.nav-item'),yaAbierto=item.classList.contains('open');cerrarTodosLosDropdowns();if(!yaAbierto)item.classList.add('open');});});
-  document.addEventListener('click',cerrarTodosLosDropdowns);
-  function ajustarAlturaMenuMovil(){const nav=document.querySelector('.nav'),menu=$('#navMenu');menu.style.height=(window.innerHeight-nav.getBoundingClientRect().bottom)+'px';}
-  function cerrarMenuMovilPrincipal(){$('#navMenu').classList.remove('open');}
-  $('#navToggle').addEventListener('click',(e)=>{e.stopPropagation();const abriendo=!$('#navMenu').classList.contains('open');if(abriendo)ajustarAlturaMenuMovil();$('#navMenu').classList.toggle('open');});
-  window.addEventListener('resize',()=>{if($('#navMenu').classList.contains('open'))ajustarAlturaMenuMovil();});
-  document.querySelectorAll('.faq-q').forEach(q=>{q.addEventListener('click',()=>{q.closest('.faq-item').classList.toggle('open');});});
-  const enlacesDelMenu=document.querySelectorAll('.dropdown-link, .nav-menu > a.nav-btn');
-  enlacesDelMenu.forEach(link=>{link.addEventListener('click',(e)=>{e.stopPropagation();const href=link.getAttribute('href')||'',esPreguntaEspecifica=link.classList.contains('faq-link'),esAnclaEnEstaPagina=href.startsWith('#');cerrarTodosLosDropdowns();cerrarMenuMovilPrincipal();if(esAnclaEnEstaPagina){e.preventDefault();const destino=document.querySelector(href);if(!destino)return;if(esPreguntaEspecifica){document.querySelectorAll('.faq-item').forEach(item=>item.classList.remove('open'));destino.classList.add('open');}setTimeout(()=>{destino.scrollIntoView({behavior:'smooth',block:'start'});},80);}});});
-  function escapeHtml(str){const div=document.createElement('div');div.textContent=str||'';return div.innerHTML;}
-  async function cargarSucursales(){const grid=$('#sucursalesGrid');try{const res=await fetch('/api/sucursales'),data=await res.json(),sucursales=data.sucursales||[];if(sucursales.length===0){grid.innerHTML='<div class="sucursal-card"><p class="linea">Muy pronto anunciaremos nuestras sucursales.</p></div>';return;}grid.innerHTML=sucursales.map(s=>`<div class="sucursal-card"><h3>${escapeHtml(s.nombre)}</h3><div class="linea">📍 ${escapeHtml(s.direccion)}</div>${s.telefono?`<div class="linea">📞 ${escapeHtml(s.telefono)}</div>`:''} ${s.horario?`<div class="linea">🕐 ${escapeHtml(s.horario)}</div>`:''}</div>`).join('');}catch(err){grid.innerHTML='<div class="sucursal-card"><p class="linea">No se pudieron cargar las sucursales.</p></div>';}}
-  cargarSucursales();
-  let tarifasCache=[];
-  async function cargarTarifas(){const grid=$('#tarifasGrid'),select=$('#calcTarifa');try{const res=await fetch('/api/public/tarifas'),data=await res.json();tarifasCache=data.tarifas||[];if(tarifasCache.length===0){grid.innerHTML='<div class="tarifa-card"><p>Muy pronto publicaremos nuestras tarifas.</p></div>';select.innerHTML='<option value="">No hay tarifas disponibles</option>';return;}grid.innerHTML=tarifasCache.map(t=>`<div class="tarifa-card"><div class="precio">$${Number(t.precio_libra).toFixed(2)}<span>/lb</span></div><h3>${escapeHtml(t.nombre)}</h3><p>Cargo mínimo $${Number(t.cargo_minimo).toFixed(2)} · Manejo $${Number(t.cargo_manejo).toFixed(2)}${Number(t.pct_seguro)>0?` · Seguro opcional ${Number(t.pct_seguro)}%`:''}</p></div>`).join('');select.innerHTML=tarifasCache.map(t=>`<option value="${t.id}">${escapeHtml(t.nombre)} — $${Number(t.precio_libra).toFixed(2)}/lb</option>`).join('');calcularEstimado();}catch(err){grid.innerHTML='<div class="tarifa-card"><p>No se pudieron cargar las tarifas.</p></div>';}}
-  function calcularEstimado(){const cont=$('#calcResultado'),tarifa=tarifasCache.find(t=>t.id==$('#calcTarifa').value),peso=parseFloat($('#calcPeso').value),valor=parseFloat($('#calcValor').value),conSeguro=$('#calcSeguro').checked;if(!tarifa||isNaN(peso)||peso<=0){cont.innerHTML='';return;}const costoEnvio=Math.max(peso*Number(tarifa.precio_libra),Number(tarifa.cargo_minimo)),cargoManejo=Number(tarifa.cargo_manejo),seguro=conSeguro&&!isNaN(valor)?(valor*Number(tarifa.pct_seguro))/100:0,total=costoEnvio+cargoManejo+seguro;cont.innerHTML=`<div class="calc-total"><div class="linea"><span>Costo de envío (${peso} lb × $${tarifa.precio_libra}/lb, mín. $${Number(tarifa.cargo_minimo).toFixed(2)})</span><span>$${costoEnvio.toFixed(2)}</span></div><div class="linea"><span>Cargo de manejo</span><span>$${cargoManejo.toFixed(2)}</span></div>${conSeguro?`<div class="linea"><span>Seguro (${tarifa.pct_seguro}% del valor declarado)</span><span>$${seguro.toFixed(2)}</span></div>`:''}<div class="total-final"><span>Estimado total</span><span>$${total.toFixed(2)}</span></div></div>`;}
-  ['calcTarifa','calcPeso','calcValor','calcSeguro'].forEach(id=>{document.getElementById(id)?.addEventListener('input',calcularEstimado);});
-  cargarTarifas();
-  const ESTADOS_RASTREO=['prealertado','en_bodega_miami','en_transito','en_panama','listo_para_retiro','entregado'];
-  const ESTADO_RASTREO_LABEL={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
-  $('#formRastreo').addEventListener('submit',async(e)=>{e.preventDefault();const tracking=$('#inputTracking').value.trim(),cont=$('#resultadoRastreo'),btn=$('#btnRastreo');if(!tracking){cont.innerHTML='<div class="rt-error">Ingresa un número de tracking.</div>';return;}btn.classList.add('loading-rastreo');btn.disabled=true;cont.innerHTML='';try{const res=await fetch(`/api/public/rastreo/${encodeURIComponent(tracking)}`),data=await res.json();if(!res.ok){cont.innerHTML=`<div class="rt-error">${escapeHtml(data.mensaje||'No encontramos ese paquete.')}</div>`;return;}const idx=ESTADOS_RASTREO.indexOf(data.estado),rail=ESTADOS_RASTREO.map((_,i)=>`<div class="seg ${i<=idx?'done':''}"></div>`).join(''),fecha=new Date(data.fecha_actualizacion).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});cont.innerHTML=`<div class="rastreo-card"><div class="rt-top"><div><div class="rt-tienda">${escapeHtml(data.tienda)}</div><div class="rt-tracking">#${escapeHtml(data.numero_tracking)} · Actualizado ${fecha}</div></div><span class="rt-badge ${data.estado}">${ESTADO_RASTREO_LABEL[data.estado]||data.estado}</span></div><div class="rt-rail">${rail}</div><div class="rt-steps-label"><span>Prealertado</span><span>Entregado</span></div>${data.fotos&&data.fotos.length?`<div class="rt-fotos">${data.fotos.map(url=>`<img src="${url}" alt="Foto del paquete">`).join('')}</div>`:''}</div>`;cont.querySelectorAll('.rt-fotos img').forEach(img=>{img.addEventListener('click',()=>window.open(img.src,'_blank'));});}catch(err){cont.innerHTML='<div class="rt-error">No pudimos conectar con el servidor. Intenta de nuevo.</div>';}finally{btn.classList.remove('loading-rastreo');btn.disabled=false;}});
-  document.querySelectorAll('.rastreo-tab-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.rastreo-tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const esMundial=btn.dataset.rtab==='mundial';$('#panelRastreoNea').style.display=esMundial?'none':'block';$('#panelRastreoMundial').style.display=esMundial?'block':'none';});});
-  $('#formMundial').addEventListener('submit',(e)=>{e.preventDefault();const num=$('#inputMundial').value.trim();if(!num){alert('Escribe un número de tracking.');return;}window.open(`https://t.17track.net/es#nums=${encodeURIComponent(num)}`,'_blank');});
+  // ---------- Reveal on scroll para las tarjetas del dashboard ----------
+  function activarReveal(){
+    if (!('IntersectionObserver' in window)){
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){ entry.target.classList.add('in-view'); observer.unobserve(entry.target); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  }
+  // ---------- Navegación entre vistas ----------
+  function mostrarApp(mostrar){
+    $('#vistaAuth').style.display = mostrar ? 'none' : 'flex';
+    document.querySelector('.wrap').style.display = mostrar ? 'none' : 'block';
+    $('#vistaApp').style.display = mostrar ? 'flex' : 'none';
+    $('#btnLogout').style.display = mostrar ? 'inline-block' : 'none';
+    $('#pillCasillero').style.display = mostrar ? 'inline-block' : 'none';
+    if (mostrar) activarReveal();
+  }
+  // ---------- Menú lateral del dashboard ----------
+  const SECCIONES_INFO = {
+    'inicio': { titulo: (nombre) => `Hola, ${nombre}`, sub: 'Este es el estado de tu casillero y tus paquetes.' },
+    'casillero': { titulo: () => 'Mi casillero', sub: 'Tu dirección personal para comprar en EE.UU.' },
+    'paquetes': { titulo: () => 'Paquetes', sub: 'Prealerta y sigue el estado de cada compra.' },
+    'historial-facturas': { titulo: () => 'Historial de facturas', sub: 'Todas tus facturas, pagadas y pendientes.' },
+    'estado-cuenta': { titulo: () => 'Estado de cuenta', sub: 'Resumen de lo facturado, pagado y pendiente.' },
+    'autorizados': { titulo: () => 'Autorizados', sub: 'Personas que pueden retirar tu pedido por ti.' },
+    'perfil': { titulo: () => 'Mi perfil', sub: 'Actualiza tu información de contacto y contraseña.' },
+  };
+  let nombreUsuarioActual = '';
+  const MAPA_SECCION_DIV = {
+    'inicio': 'seccionInicio',
+    'casillero': 'seccionCasillero',
+    'paquetes': 'seccionPaquetes',
+    'historial-facturas': 'seccionHistorialFacturas',
+    'estado-cuenta': 'seccionEstadoCuenta',
+    'autorizados': 'seccionAutorizados',
+    'perfil': 'seccionPerfil',
+  };
+  function irASeccion(seccion){
+    document.querySelectorAll('.seccion-app').forEach(div => div.style.display = 'none');
+    const idDiv = MAPA_SECCION_DIV[seccion];
+    if (idDiv) document.getElementById(idDiv).style.display = 'block';
+    document.querySelectorAll('.side-item[data-seccion], .side-subitem[data-seccion]').forEach(el => {
+      el.classList.toggle('active', el.dataset.seccion === seccion);
+    });
+    const info = SECCIONES_INFO[seccion];
+    if (info){
+      $('#saludoNombre').textContent = seccion === 'inicio' ? info.titulo(nombreUsuarioActual) : info.titulo();
+      $('#subtituloSeccion').textContent = info.sub;
+    }
+    if (seccion === 'autorizados') cargarAutorizados();
+    if (seccion === 'perfil') cargarDatosPerfil();
+    // En móvil, cierra el menú al elegir una sección.
+    if (window.innerWidth <= 860) cerrarMenuMovil();
+  }
+  document.querySelectorAll('.side-item[data-seccion], .side-subitem[data-seccion]').forEach(btn => {
+    btn.addEventListener('click', () => irASeccion(btn.dataset.seccion));
+  });
+  $('#btnFacturasParent').addEventListener('click', () => {
+    $('#btnFacturasParent').classList.toggle('open');
+    $('#submenuFacturas').classList.toggle('open');
+  });
+  $('#btnSidebarToggle').addEventListener('click', () => {
+    $('#sidebar').classList.toggle('collapsed');
+  });
+  function abrirMenuMovil(){
+    $('#sidebar').classList.add('mobile-open');
+    $('#sidebarScrim').classList.add('show');
+  }
+  function cerrarMenuMovil(){
+    $('#sidebar').classList.remove('mobile-open');
+    $('#sidebarScrim').classList.remove('show');
+  }
+  $('#btnMenuMovilApp').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if ($('#sidebar').classList.contains('mobile-open')) cerrarMenuMovil();
+    else abrirMenuMovil();
+  });
+  $('#sidebarScrim').addEventListener('click', cerrarMenuMovil);
+  $('#tabLogin').addEventListener('click', () => {
+    $('#tabLogin').classList.add('active');
+    $('#tabRegistro').classList.remove('active');
+    $('#formLogin').style.display = 'block';
+    $('#formRegistro').style.display = 'none';
+    $('#formOlvide').style.display = 'none';
+    $('#formRestablecer').style.display = 'none';
+  });
+  $('#tabRegistro').addEventListener('click', () => {
+    $('#tabRegistro').classList.add('active');
+    $('#tabLogin').classList.remove('active');
+    $('#formRegistro').style.display = 'block';
+    $('#formLogin').style.display = 'none';
+    $('#formOlvide').style.display = 'none';
+    $('#formRestablecer').style.display = 'none';
+  });
+  // ---------- Olvidé mi contraseña ----------
+  $('#btnMostrarOlvide').addEventListener('click', () => {
+    $('#formLogin').style.display = 'none';
+    $('#formOlvide').style.display = 'block';
+  });
+  $('#btnVolverLogin').addEventListener('click', () => {
+    $('#formOlvide').style.display = 'none';
+    $('#formLogin').style.display = 'block';
+  });
+  $('#formOlvide').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnOlvide');
+    const email = $('#olvideEmail').value.trim();
+    if (!email){
+      mostrarBanner('#bannerOlvide', 'error', 'Escribe tu correo.');
+      return;
+    }
+    setCargando(btn, true);
+    try {
+      const res = await fetch(`${API_URL}/auth/olvide-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      mostrarBanner('#bannerOlvide', 'success', data.mensaje || 'Si ese correo existe, te enviamos un enlace.');
+      $('#formOlvide').reset();
+    } catch (err) {
+      mostrarBanner('#bannerOlvide', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+  // ---------- Restablecer contraseña (llega con ?reset=token) ----------
+  $('#formRestablecer').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnRestablecer');
+    const p1 = $('#nuevaPassword').value;
+    const p2 = $('#nuevaPassword2').value;
+    const token = new URLSearchParams(window.location.search).get('reset');
+    if (p1.length < 8){
+      mostrarBanner('#bannerRestablecer', 'error', 'La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (p1 !== p2){
+      mostrarBanner('#bannerRestablecer', 'error', 'Las contraseñas no coinciden.');
+      return;
+    }
+    setCargando(btn, true);
+    try {
+      const res = await fetch(`${API_URL}/auth/restablecer-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password: p1 }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok){
+        mostrarBanner('#bannerRestablecer', 'success', data.mensaje || 'Contraseña actualizada. Ya puedes iniciar sesión.');
+        setTimeout(() => {
+          window.location.href = 'app.html'; // limpia el ?reset= de la URL y muestra el login normal
+        }, 1800);
+      } else {
+        mostrarBanner('#bannerRestablecer', 'error', data.mensaje || 'No se pudo restablecer la contraseña.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerRestablecer', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+  function setCargando(boton, cargando, textoNormal){
+    boton.disabled = cargando;
+    boton.classList.toggle('loading', cargando);
+  }
+  function mostrarBanner(id, tipo, mensaje){
+    const el = $(id);
+    el.textContent = mensaje;
+    el.className = 'banner show ' + tipo;
+  }
+  // ---------- Selector Personal / Empresa en el registro ----------
+  document.querySelectorAll('.reg-tipo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.reg-tipo-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tipo = btn.dataset.tipo;
+      $('#regTipoCuenta').value = tipo;
+      $('#camposPersonal').style.display = tipo === 'personal' ? 'block' : 'none';
+      $('#camposEmpresa').style.display  = tipo === 'empresa'  ? 'block' : 'none';
+    });
+  });
+  // ---------- Registro ----------
+  $('#formRegistro').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnRegistro');
+    const tipo = $('#regTipoCuenta').value;
+    const email    = $('#regEmail').value.trim();
+    const telefono = $('#regTelefono').value.trim();
+    const password = $('#regPassword').value;
+    // Validación básica en el cliente
+    if (!email || password.length < 8){
+      mostrarBanner('#bannerRegistro', 'error', 'Completa todos los campos. La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    // Construimos un FormData para poder enviar el PDF junto con los datos
+    const formData = new FormData();
+    formData.append('tipo_cuenta', tipo);
+    formData.append('email', email);
+    formData.append('telefono', telefono);
+    formData.append('password', password);
+    if (tipo === 'personal'){
+      const nombre   = $('#regNombre').value.trim();
+      const apellido = $('#regApellido').value.trim();
+      if (!nombre || !apellido){
+        mostrarBanner('#bannerRegistro', 'error', 'Escribe tu nombre y apellido.');
+        return;
+      }
+      formData.append('nombre', nombre);
+      formData.append('apellido', apellido);
+    } else {
+      const razon_social    = $('#regRazonSocial').value.trim();
+      const ruc             = $('#regRuc').value.trim();
+      const nombre_contacto = $('#regNombreContacto').value.trim();
+      const archivo         = $('#regAvisoOperacion').files[0];
+      if (!razon_social || !ruc || !nombre_contacto){
+        mostrarBanner('#bannerRegistro', 'error', 'Completa razón social, RUC y nombre del contacto.');
+        return;
+      }
+      if (!archivo){
+        mostrarBanner('#bannerRegistro', 'error', 'El aviso de operación en PDF es obligatorio para empresas.');
+        $('#hintAviso').textContent = '⚠ Debes subir el aviso de operación';
+        return;
+      }
+      $('#hintAviso').textContent = '';
+      formData.append('razon_social', razon_social);
+      formData.append('ruc', ruc);
+      formData.append('nombre_contacto', nombre_contacto);
+      formData.append('aviso_operacion', archivo);
+    }
+    setCargando(btn, true);
+    try {
+      // Sin Content-Type: el navegador pone automáticamente el boundary del multipart
+      const res = await fetch(`${API_URL}/auth/registro`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 201){
+        mostrarBanner('#bannerRegistro', 'success',
+          `¡Casillero creado! Revisa ${email} para confirmar tu cuenta antes de iniciar sesión.`);
+        $('#formRegistro').reset();
+        document.querySelectorAll('.reg-tipo-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.reg-tipo-btn[data-tipo="personal"]').classList.add('active');
+        $('#regTipoCuenta').value = 'personal';
+        $('#camposPersonal').style.display = 'block';
+        $('#camposEmpresa').style.display  = 'none';
+      } else if (res.status === 409){
+        mostrarBanner('#bannerRegistro', 'error', 'Ese correo ya tiene un casillero registrado.');
+      } else {
+        const errores = data.errores?.map(e => e.msg).join(' · ') || data.mensaje || 'No se pudo crear el casillero.';
+        mostrarBanner('#bannerRegistro', 'error', errores);
+      }
+    } catch (err) {
+      mostrarBanner('#bannerRegistro', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+  // ---------- Login ----------
+  $('#formLogin').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnLogin');
+    const payload = {
+      email: $('#loginEmail').value.trim(),
+      password: $('#loginPassword').value,
+    };
+    setCargando(btn, true);
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok){
+        localStorage.setItem(TOKEN_KEY, data.token);
+        mostrarBanner('#bannerLogin', 'success', '');
+        $('#bannerLogin').className = 'banner';
+        await iniciarApp();
+      } else {
+        mostrarBanner('#bannerLogin', 'error', data.mensaje || 'Correo o contraseña incorrectos.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerLogin', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+  // ---------- Logout ----------
+  $('#btnBrand').addEventListener('click', (e) => {
+    e.preventDefault();
+    localStorage.removeItem(TOKEN_KEY);
+    // replace: borra app.html del historial, no se puede volver atrás
+    window.location.replace('index.html');
+  });
+  $('#btnLogout').addEventListener('click', () => {
+    localStorage.removeItem(TOKEN_KEY);
+    // replace: no se puede volver atrás al dashboard con el botón ←
+    window.location.replace('index.html');
+  });
+  // ---------- Helper de fetch autenticado ----------
+  async function apiAutenticado(path, opciones = {}){
+    const token = localStorage.getItem(TOKEN_KEY);
+    const res = await fetch(`${API_URL}${path}`, {
+      ...opciones,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(opciones.headers || {}),
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (res.status === 401){
+      localStorage.removeItem(TOKEN_KEY);
+      mostrarApp(false);
+      throw new Error('Sesión expirada');
+    }
+    return res;
+  }
+  // ---------- Cargar perfil / casillero ----------
+  async function cargarPerfil(){
+    const res = await apiAutenticado('/casillero/perfil');
+    const data = await res.json();
+    const { usuario, direccion_casillero } = data;
+    nombreUsuarioActual = usuario.nombre;
+    $('#saludoNombre').textContent = `Hola, ${usuario.nombre}`;
+    $('#pillCasillero').textContent = usuario.numero_casillero;
+    $('#bloqueDireccion').innerHTML = `
+      ${direccion_casillero.nombre_destinatario}<br>
+      ${direccion_casillero.linea1}<br>
+      <span class="suite">${direccion_casillero.linea2}</span><br>
+      ${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}<br>
+      ${direccion_casillero.pais}
+    `;
+    $('#bloqueDireccionCasillero').innerHTML = $('#bloqueDireccion').innerHTML;
+    const textoDireccion = `${direccion_casillero.nombre_destinatario}\n${direccion_casillero.linea1}\n${direccion_casillero.linea2}\n${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}\n${direccion_casillero.pais}`;
+    function copiarDireccion(btn){
+      navigator.clipboard.writeText(textoDireccion).then(() => {
+        const textoOriginal = btn.textContent;
+        btn.textContent = 'Copiada ✓';
+        setTimeout(() => { btn.textContent = textoOriginal; }, 1800);
+      });
+    }
+    $('#btnCopiar').onclick = () => copiarDireccion($('#btnCopiar'));
+    $('#btnCopiarCasillero').onclick = () => copiarDireccion($('#btnCopiarCasillero'));
+  }
+  // ---------- Prealertar paquete ----------
+  $('#formPrealerta').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnPrealerta');
+    const payload = {
+      tienda: $('#paqTienda').value.trim(),
+      numero_tracking: $('#paqTracking').value.trim(),
+      valor_declarado: parseFloat($('#paqValor').value),
+      peso_lb: $('#paqPeso').value ? parseFloat($('#paqPeso').value) : undefined,
+      descripcion: $('#paqDescripcion').value.trim(),
+    };
+    if (!payload.tienda || !payload.numero_tracking || isNaN(payload.valor_declarado)){
+      mostrarBanner('#bannerPrealerta', 'error', 'Completa tienda, tracking y valor declarado.');
+      return;
+    }
+    setCargando(btn, true);
+    try {
+      const res = await apiAutenticado('/paquetes/prealertar', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 201){
+        mostrarBanner('#bannerPrealerta', 'success', 'Paquete prealertado. Te avisaremos cuando llegue a la bodega.');
+        $('#formPrealerta').reset();
+        await cargarPaquetes();
+      } else {
+        mostrarBanner('#bannerPrealerta', 'error', data.mensaje || 'No se pudo prealertar el paquete.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerPrealerta', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+  // ---------- Listar paquetes ----------
+  let paquetesCache = [];
+  let filtroActual = 'todos';
+  async function cargarPaquetes(){
+    const res = await apiAutenticado('/paquetes');
+    const data = await res.json();
+    paquetesCache = data.paquetes || [];
+    $('#statTotal').textContent = paquetesCache.length;
+    $('#statActivos').textContent = paquetesCache.filter(p => p.estado !== 'entregado').length;
+    renderPaquetes();
+    renderPaquetesInicio();
+  }
+  function renderPaquetesInicio(){
+    const cont = $('#listaPaquetesInicio');
+    const lista = paquetesCache.slice(0, 3);
+    if (lista.length === 0){
+      cont.innerHTML = '<div class="empty">Aún no has prealertado ningún paquete.</div>';
+      return;
+    }
+    cont.innerHTML = lista.map(p => {
+      const fecha = new Date(p.fecha_prealerta).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+      return `
+        <div class="paquete-card">
+          <div class="paquete-top">
+            <div>
+              <div class="paquete-tienda">${escapeHtml(p.tienda)}</div>
+              <div class="paquete-tracking">#${escapeHtml(p.numero_tracking)} · ${fecha}</div>
+            </div>
+            <span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  function renderPaquetes(){
+    const cont = $('#listaPaquetes');
+    let lista = paquetesCache;
+    if (filtroActual === 'activos') lista = lista.filter(p => p.estado !== 'entregado');
+    if (filtroActual === 'entregado') lista = lista.filter(p => p.estado === 'entregado');
+    if (lista.length === 0){
+      cont.innerHTML = '<div class="empty">Aún no hay paquetes en esta categoría.</div>';
+      return;
+    }
+    cont.innerHTML = lista.map(p => {
+      const idxEstado = ESTADOS.indexOf(p.estado);
+      const rail = ESTADOS.map((_, i) => `<div class="seg ${i <= idxEstado ? 'done' : ''}"></div>`).join('');
+      const fecha = new Date(p.fecha_prealerta).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+      return `
+        <div class="paquete-card">
+          <div class="paquete-top">
+            <div>
+              <div class="paquete-tienda">${escapeHtml(p.tienda)}</div>
+              <div class="paquete-tracking">#${escapeHtml(p.numero_tracking)} · ${fecha}</div>
+            </div>
+            <div style="text-align:right;">
+              <span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span>
+              <div class="paquete-valor">$${Number(p.valor_declarado).toFixed(2)}</div>
+            </div>
+          </div>
+          <div class="rail">${rail}</div>
+          <button class="btn-ver-fotos" data-id="${p.id}">📷 Ver fotos de cómo llegó</button>
+          <div class="mini-galeria" id="galeria-${p.id}" style="display:none;"></div>
+        </div>
+      `;
+    }).join('');
+    cont.querySelectorAll('.btn-ver-fotos').forEach(btn => {
+      btn.addEventListener('click', () => toggleFotosPaquete(btn.dataset.id, btn));
+    });
+  }
+  async function toggleFotosPaquete(id, btn){
+    const galeria = document.getElementById(`galeria-${id}`);
+    if (galeria.style.display === 'block'){
+      galeria.style.display = 'none';
+      btn.textContent = '📷 Ver fotos de cómo llegó';
+      return;
+    }
+    btn.textContent = 'Cargando…';
+    try {
+      const res = await apiAutenticado(`/paquetes/${id}/fotos`);
+      const data = await res.json();
+      const fotos = data.fotos || [];
+      galeria.innerHTML = fotos.length
+        ? fotos.map(f => `<img src="${f.url}" class="mini-foto" data-url="${f.url}">`).join('')
+        : '<div class="empty" style="padding:14px;">Aún no hay fotos de este paquete.</div>';
+      galeria.querySelectorAll('.mini-foto').forEach(img => {
+        img.addEventListener('click', () => window.open(img.dataset.url, '_blank'));
+      });
+      galeria.style.display = 'block';
+      btn.textContent = '📷 Ocultar fotos';
+    } catch (err) {
+      galeria.innerHTML = '<div class="empty" style="padding:14px;">No se pudieron cargar las fotos.</div>';
+      galeria.style.display = 'block';
+      btn.textContent = '📷 Ocultar fotos';
+    }
+  }
+  document.querySelectorAll('.panel-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.panel-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filtroActual = btn.dataset.filtro;
+      renderPaquetes();
+    });
+  });
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+  const ESTADO_FACTURA_LABEL = { pendiente: 'Pendiente de pago', pagada: 'Pagada', anulada: 'Anulada' };
+  let yappyDisponible = false;
+  let facturasCache = [];
+  async function cargarFacturas(){
+    const cont = $('#listaFacturas');
+    try {
+      const [resFacturas, resMetodos] = await Promise.all([
+        apiAutenticado('/facturas'),
+        apiAutenticado('/facturas/metodos-pago').catch(() => null),
+      ]);
+      const data = await resFacturas.json();
+      facturasCache = data.facturas || [];
+      if (resMetodos){
+        const metodos = await resMetodos.json().catch(() => ({}));
+        yappyDisponible = Boolean(metodos.yappy);
+      }
+      renderHistorialFacturas();
+      renderEstadoCuenta();
+    } catch (err) {
+      cont.innerHTML = '<div class="empty">No se pudieron cargar tus facturas.</div>';
+    }
+  }
+  function renderHistorialFacturas(){
+    const cont = $('#listaFacturas');
+    if (facturasCache.length === 0){
+      cont.innerHTML = '<div class="empty">Aún no tienes facturas. Se generan cuando tu paquete llega a la bodega.</div>';
+      return;
+    }
+    cont.innerHTML = facturasCache.map(f => {
+      const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+      return `
+        <div class="factura-card">
+          <div class="factura-info">
+            <div class="num">${escapeHtml(f.numero_factura)}</div>
+            <div class="sub">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${fecha}</div>
+          </div>
+          <div class="factura-right">
+            <span class="badge badge-${f.estado}">${ESTADO_FACTURA_LABEL[f.estado] || f.estado}</span>
+            <span class="factura-total">$${Number(f.total).toFixed(2)}</span>
+            ${f.estado === 'pendiente' && yappyDisponible ? `<button class="btn-pagar btn-yappy" data-id="${f.id}">Pagar con Yappy</button>` : ''}
+            <button class="btn-pdf" data-id="${f.id}">Descargar PDF</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    cont.querySelectorAll('.btn-pdf').forEach(btn => {
+      btn.addEventListener('click', () => descargarFacturaPdf(btn.dataset.id, btn));
+    });
+    cont.querySelectorAll('.btn-yappy').forEach(btn => {
+      btn.addEventListener('click', () => pagarFacturaYappy(btn.dataset.id, btn));
+    });
+  }
+  function renderEstadoCuenta(){
+    const statsBox = $('#cuentaStats');
+    const pendientesBox = $('#listaCuentaPendientes');
+    if (!statsBox) return; // sección no montada aún
+    const pagadas = facturasCache.filter(f => f.estado === 'pagada');
+    const pendientes = facturasCache.filter(f => f.estado === 'pendiente');
+    const totalPagado = pagadas.reduce((acum, f) => acum + Number(f.total), 0);
+    const totalPendiente = pendientes.reduce((acum, f) => acum + Number(f.total), 0);
+    const totalFacturado = totalPagado + totalPendiente;
+    statsBox.innerHTML = `
+      <div class="rep-stat">
+        <div class="rep-stat-l">Total facturado</div>
+        <div class="rep-stat-n">$${totalFacturado.toFixed(2)}</div>
+      </div>
+      <div class="rep-stat">
+        <div class="rep-stat-l">Total pagado</div>
+        <div class="rep-stat-n green">$${totalPagado.toFixed(2)}</div>
+      </div>
+      <div class="rep-stat">
+        <div class="rep-stat-l">Saldo pendiente</div>
+        <div class="rep-stat-n amber">$${totalPendiente.toFixed(2)}</div>
+      </div>
+    `;
+    if (pendientes.length === 0){
+      pendientesBox.innerHTML = '<div class="empty">No tienes facturas pendientes de pago. 🎉</div>';
+      return;
+    }
+    pendientesBox.innerHTML = pendientes.map(f => {
+      const fecha = new Date(f.fecha_creacion).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+      return `
+        <div class="factura-card">
+          <div class="factura-info">
+            <div class="num">${escapeHtml(f.numero_factura)}</div>
+            <div class="sub">${escapeHtml(f.tienda)} · #${escapeHtml(f.numero_tracking)} · ${fecha}</div>
+          </div>
+          <div class="factura-right">
+            <span class="factura-total">$${Number(f.total).toFixed(2)}</span>
+            ${yappyDisponible ? `<button class="btn-pagar btn-yappy" data-id="${f.id}">Pagar con Yappy</button>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+    pendientesBox.querySelectorAll('.btn-yappy').forEach(btn => {
+      btn.addEventListener('click', () => pagarFacturaYappy(btn.dataset.id, btn));
+    });
+  }
+  async function pagarFacturaYappy(id, btn){
+    const textoOriginal = btn.textContent;
+    btn.textContent = 'Redirigiendo…';
+    btn.disabled = true;
+    try {
+      const res = await apiAutenticado(`/facturas/${id}/pagar-yappy`, { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.url){
+        window.location.href = data.url; // el cliente sale a la app de Banco General / Yappy
+        return;
+      }
+      alert(data.mensaje || 'No se pudo iniciar el pago con Yappy. Intenta de nuevo.');
+    } catch (err) {
+      alert('No pudimos conectar con el servidor.');
+    } finally {
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    }
+  }
+  async function descargarFacturaPdf(id, btn){
+    const textoOriginal = btn.textContent;
+    btn.textContent = 'Descargando…';
+    btn.disabled = true;
+    try {
+      const res = await apiAutenticado(`/facturas/${id}/pdf`);
+      if (!res.ok) throw new Error('No se pudo descargar');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (err) {
+      alert('No se pudo descargar el PDF. Intenta de nuevo.');
+    } finally {
+      btn.textContent = textoOriginal;
+      btn.disabled = false;
+    }
+  }
+  // ---------- Arranque de la app ----------
+  // ---------- Autorizados ----------
+  async function cargarAutorizados(){
+    try {
+      const res = await apiAutenticado('/autorizados');
+      const data = await res.json();
+      const lista = data.autorizados || [];
+      // Limpia los 3 slots primero, luego llena los que existan.
+      for (let i = 1; i <= 3; i++){
+        $(`#aut${i}Nombre`).value = '';
+        $(`#aut${i}Cedula`).value = '';
+      }
+      lista.forEach((persona, i) => {
+        if (i >= 3) return;
+        $(`#aut${i + 1}Nombre`).value = persona.nombre;
+        $(`#aut${i + 1}Cedula`).value = persona.cedula;
+      });
+    } catch (err) {}
+  }
+  $('#formAutorizados').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnGuardarAutorizados');
+    const autorizados = [1, 2, 3]
+      .map(i => ({
+        nombre: $(`#aut${i}Nombre`).value.trim(),
+        cedula: $(`#aut${i}Cedula`).value.trim(),
+      }))
+      .filter(p => p.nombre || p.cedula);
+    const incompleto = autorizados.find(p => !p.nombre || !p.cedula);
+    if (incompleto){
+      mostrarBanner('#bannerAutorizados', 'error', 'Completa nombre y cédula de cada persona que agregues (o deja el par vacío para no usarlo).');
+      return;
+    }
+    setCargando(btn, true);
+    try {
+      const res = await apiAutenticado('/autorizados', {
+        method: 'PUT',
+        body: JSON.stringify({ autorizados }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok){
+        mostrarBanner('#bannerAutorizados', 'success', '✓ Autorizados guardados correctamente.');
+      } else {
+        mostrarBanner('#bannerAutorizados', 'error', data.mensaje || 'No se pudieron guardar los autorizados.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerAutorizados', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+  // ---------- Perfil ----------
+  async function cargarDatosPerfil(){
+    try {
+      const res = await apiAutenticado('/perfil');
+      const data = await res.json();
+      if (data.perfil?.telefono){
+        $('#perfilTelefono').value = data.perfil.telefono;
+      }
+    } catch (err) {}
+  }
+  $('#formTelefono').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnGuardarTelefono');
+    const telefono = $('#perfilTelefono').value.trim();
+    if (!telefono){
+      mostrarBanner('#bannerTelefono', 'error', 'Escribe tu número de teléfono.');
+      return;
+    }
+    setCargando(btn, true);
+    try {
+      const res = await apiAutenticado('/perfil/telefono', {
+        method: 'PATCH',
+        body: JSON.stringify({ telefono }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok){
+        mostrarBanner('#bannerTelefono', 'success', '✓ Teléfono actualizado correctamente.');
+      } else {
+        mostrarBanner('#bannerTelefono', 'error', data.mensaje || 'No se pudo actualizar el teléfono.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerTelefono', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+  $('#formPassword').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('#btnCambiarPassword');
+    const password_actual   = $('#passActual').value;
+    const password_nueva    = $('#passNueva').value;
+    const password_confirmar = $('#passConfirmar').value;
+    if (!password_actual || !password_nueva || !password_confirmar){
+      mostrarBanner('#bannerPassword', 'error', 'Completa todos los campos.');
+      return;
+    }
+    if (password_nueva.length < 8){
+      mostrarBanner('#bannerPassword', 'error', 'La nueva contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (password_nueva !== password_confirmar){
+      mostrarBanner('#bannerPassword', 'error', 'Las contraseñas nuevas no coinciden.');
+      return;
+    }
+    setCargando(btn, true);
+    try {
+      const res = await apiAutenticado('/perfil/password', {
+        method: 'PATCH',
+        body: JSON.stringify({ password_actual, password_nueva, password_confirmar }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok){
+        mostrarBanner('#bannerPassword', 'success', '✓ ' + (data.mensaje || 'Contraseña actualizada. Inicia sesión de nuevo.'));
+        $('#formPassword').reset();
+        // Cierra la sesión después de 2 segundos para que el cliente inicie de nuevo
+        setTimeout(() => {
+          localStorage.removeItem(TOKEN_KEY);
+          window.location.reload();
+        }, 2500);
+      } else {
+        mostrarBanner('#bannerPassword', 'error', data.mensaje || 'No se pudo cambiar la contraseña.');
+      }
+    } catch (err) {
+      mostrarBanner('#bannerPassword', 'error', 'No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
+  async function iniciarApp(){
+    try {
+      await cargarPerfil();
+      await cargarPaquetes();
+      await cargarFacturas();
+      irASeccion('inicio');
+      mostrarApp(true);
+    } catch (err) {
+      mostrarApp(false);
+    }
+  }
+  // Si se llega con ?reset=TOKEN (desde el correo de recuperación), muestra
+  // directo el formulario de nueva contraseña en vez del login.
+  if (new URLSearchParams(window.location.search).get('reset')){
+    $('#formLogin').style.display = 'none';
+    $('#formRestablecer').style.display = 'block';
+  }
+  // Detecta cuando la página se restaura desde el caché del navegador (bfcache)
+  // al presionar ← atrás. En ese caso el JS no se re-ejecuta, así que hay que
+  // verificar manualmente si la sesión sigue viva.
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted || performance.getEntriesByType('navigation')[0]?.type === 'back_forward'){
+      // Si no hay token, la sesión se cerró — recarga forzada para mostrar el login
+      if (!localStorage.getItem(TOKEN_KEY)){
+        window.location.reload();
+      }
+    }
+  });
+  // Bloquea el botón "← atrás" del navegador cuando hay sesión activa.
+  if (localStorage.getItem(TOKEN_KEY)){
+    window.history.replaceState({ app: true }, '', window.location.href);
+    window.addEventListener('popstate', () => {
+      if (localStorage.getItem(TOKEN_KEY)){
+        window.history.pushState({ app: true }, '', window.location.href);
+        iniciarApp();
+      } else {
+        window.location.reload();
+      }
+    });
+    iniciarApp();
+  }
+  // Si se llega con ?registro (ej. desde el botón "Crear casillero" de la página principal),
+  // abre directo la pestaña de registro — solo si NO hay sesión activa.
+  if (new URLSearchParams(window.location.search).has('registro') && !localStorage.getItem(TOKEN_KEY)){
+    $('#tabRegistro').click();
+  }
 </script>
 </body>
 </html>
