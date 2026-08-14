@@ -3,7 +3,6 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
-
 const authRoutes = require('./routes/auth');
 const casilleroRoutes = require('./routes/casillero');
 const autorizadosRoutes = require('./routes/autorizados');
@@ -26,18 +25,19 @@ const adminRecepcionRoutes = require('./routes/admin/recepcion');
 const app = express();
 
 // Necesario en Render (y cualquier hosting detrás de proxy) para que
-// Express identifique la IP real del visitante — sin esto, el rate
-// limiting de abajo no funciona correctamente.
+// Express identifique la IP real del visitante.
 app.set('trust proxy', 1);
 
-// Cabeceras de seguridad (clickjacking, sniffing MIME, etc.).
-// Se desactivan solo las partes que rompen tu página actual:
-// - contentSecurityPolicy: tu app.html usa <script> y <style> internos
-//   (no en archivos separados), así que el CSP por defecto los bloquea.
-// - crossOriginResourcePolicy / crossOriginEmbedderPolicy: bloqueaban
-//   cargar las fotos de los paquetes desde Cloudinary (dominio externo).
-// El resto de protecciones de Helmet (X-Frame-Options, HSTS, no-sniff, etc.)
-// se mantienen activas.
+// Redirigir la URL vieja de Render al dominio propio.
+// Cualquiera que entre por nea-cargo-xpress.onrender.com es enviado
+// automáticamente a www.neacargoxpress.com conservando la ruta.
+app.use((req, res, next) => {
+  if (req.headers.host === 'nea-cargo-xpress.onrender.com') {
+    return res.redirect(301, `https://www.neacargoxpress.com${req.url}`);
+  }
+  next();
+});
+
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -45,17 +45,12 @@ app.use(
     crossOriginEmbedderPolicy: false,
   })
 );
-
-// Deja de anunciar que usamos Express en cada respuesta.
 app.disable('x-powered-by');
-
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
-// --- Rate limiting general ---
-// Límite amplio para toda la API, evita abuso masivo/bots.
 const limiteGeneral = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
+  windowMs: 15 * 60 * 1000,
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
@@ -63,8 +58,6 @@ const limiteGeneral = rateLimit({
 });
 app.use('/api', limiteGeneral);
 
-// --- Rate limiting estricto para login/registro/recuperación ---
-// Evita fuerza bruta de contraseñas y spam de registros.
 const limiteAuth = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -77,8 +70,6 @@ app.use('/api/auth/registro', limiteAuth);
 app.use('/api/auth/olvide-password', limiteAuth);
 app.use('/api/auth/restablecer-password', limiteAuth);
 
-// --- Rate limiting para rastreo público ---
-// Evita que alguien "adivine" números de tracking por fuerza bruta.
 const limiteRastreo = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 30,
@@ -107,13 +98,8 @@ app.use('/api/admin/mostrador', adminMostradorRoutes);
 app.use('/api/admin/caja', adminCajaRoutes);
 app.use('/api/admin/recepcion', adminRecepcionRoutes);
 
-// Sirve el frontend (public/index.html) desde el mismo servidor,
-// así no hay problemas de CORS al llamar a /api/... desde el navegador.
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- Manejador de errores global ---
-// Atrapa cualquier error no controlado (ej. JSON malformado) y responde
-// con un mensaje limpio en vez de exponer detalles internos del servidor.
 app.use((err, req, res, next) => {
   console.error('Error no controlado:', err);
   res.status(err.status || 500).json({ mensaje: 'Ocurrió un error interno. Intenta de nuevo.' });
