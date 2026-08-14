@@ -1294,15 +1294,18 @@
     nombreUsuarioActual = usuario.nombre;
     $('#saludoNombre').textContent = `Hola, ${usuario.nombre}`;
     $('#pillCasillero').textContent = usuario.numero_casillero;
-    $('#bloqueDireccion').innerHTML = `
-      ${direccion_casillero.nombre_destinatario}<br>
-      ${direccion_casillero.linea1}<br>
-      <span class="suite">${direccion_casillero.linea2}</span><br>
-      ${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}<br>
-      ${direccion_casillero.pais}
-    `;
-    $('#bloqueDireccionCasillero').innerHTML = $('#bloqueDireccion').innerHTML;
-    const textoDireccion = `${direccion_casillero.nombre_destinatario}\n${direccion_casillero.linea1}\n${direccion_casillero.linea2}\n${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}\n${direccion_casillero.pais}`;
+    const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ''}`.trim();
+const numeroCasillero = usuario.numero_casillero;
+const htmlCasillero = `
+  <span class="suite">${numeroCasillero}</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS<br>
+  8610 NW 72 STREET<br>
+  MIAMI, FLORIDA 33195<br>
+  ESTADOS UNIDOS<br>
+  1-305-406-3654
+`;
+$('#bloqueDireccion').innerHTML = htmlCasillero;
+$('#bloqueDireccionCasillero').innerHTML = htmlCasillero;
+const textoDireccion = `${numeroCasillero}  ${nombreCompleto}  NEA CARGO XPRESS\n8610 NW 72 STREET\nMIAMI, FLORIDA 33195\nESTADOS UNIDOS\n1-305-406-3654`;
     function copiarDireccion(btn){
       navigator.clipboard.writeText(textoDireccion).then(() => {
         const textoOriginal = btn.textContent;
