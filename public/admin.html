@@ -1024,6 +1024,13 @@
     </div>
     <!-- ---- TAB: PTY Cargo Express ---- -->
     <div class="card tab-panel" id="tabPty" style="display:none;">
+      <div style="margin-bottom:20px;padding:16px;background:var(--paper);border-radius:10px;border:1px solid var(--line);">
+        <div style="font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">🔑 Sesión PTY Cargo Express</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="text" id="ptySession" placeholder="Pega aquí el PHPSESSID de PTY Cargo…" style="flex:1;min-width:260px;font-family:var(--font-mono);font-size:12px;padding:9px 12px;">
+          <div style="font-size:11.5px;color:var(--ink-soft);max-width:320px;line-height:1.5;">F12 → Application → Cookies → <span style="font-family:var(--font-mono);color:var(--accent);">carga.ptycargoexpress.com</span> → copia el valor de <strong>PHPSESSID</strong></div>
+        </div>
+      </div>
       <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px;">
         <div>
           <h2 style="margin:0 0 4px;">🚢 PTY Cargo Express</h2>
@@ -2581,6 +2588,8 @@
     'Listo':'background:var(--cargo-green-bg);color:var(--cargo-green)',
   };
   async function cargarPty(){
+    const sesion = $('#ptySession')?.value.trim();
+    if(!sesion){ mostrarBanner('#bannerPty','error','Pega el PHPSESSID en el campo de sesión primero.'); return; }
     const btn = $('#btnCargarPty');
     setCargando(btn, true);
     mostrarBanner('#bannerPty','','');
@@ -2588,7 +2597,7 @@
     $('#ptyTabla').style.display = 'none';
     try {
       const filtro = $('#ptyFiltro').value.trim();
-      const res = await apiAdmin(`/admin/pty/paquetes?porPagina=100${filtro?'&filtro='+encodeURIComponent(filtro):''}`);
+      const res = await apiAdmin(`/admin/pty/paquetes?porPagina=100&sesion=${encodeURIComponent(sesion)}${filtro?'&filtro='+encodeURIComponent(filtro):''}`);
       const data = await res.json();
       if(!res.ok){ mostrarBanner('#bannerPty','error',data.mensaje||'No se pudo cargar.'); $('#ptyEstado').textContent=''; return; }
       ptyPaquetesCache = data.paquetes || [];
