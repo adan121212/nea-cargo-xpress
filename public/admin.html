@@ -840,7 +840,7 @@
           <thead>
             <tr>
               <th>Cliente</th><th>Casillero</th><th>Tienda / Tracking</th>
-              <th>Valor</th><th>Peso real (lb)</th><th>Estado</th><th>Actualizar</th><th></th>
+              <th>Valor</th><th>Peso real (lb)</th><th>Estado</th><th>Actualizar</th><th>PTY</th><th></th>
             </tr>
           </thead>
           <tbody id="tbodyPaquetes"></tbody>
@@ -1381,6 +1381,9 @@
             </select>
           `}
         </td>
+        <td data-label="PTY">
+          <button class="btn-secondary btn-pty" data-guia="${escapeHtml(p.numero_tracking)}" style="font-size:11px;padding:5px 8px;white-space:nowrap;">PTY 🔍</button>
+        </td>
         <td data-label="">
           <div class="row-actions">
             <button class="btn-secondary btn-fotos" data-id="${p.id}">📷 Fotos</button>
@@ -1390,6 +1393,7 @@
       </tr>
     `).join('');
     tbody.querySelectorAll('.btn-fotos').forEach(btn => btn.addEventListener('click', () => abrirModalFotos(btn.dataset.id)));
+    tbody.querySelectorAll('.btn-pty').forEach(btn => btn.addEventListener('click', () => abrirModalPty(btn.dataset.guia)));
     tbody.querySelectorAll('.btn-dimensiones').forEach(btn => btn.addEventListener('click', () => abrirModalDimensiones(btn.dataset.id, btn.dataset.largo, btn.dataset.ancho, btn.dataset.alto)));
     tbody.querySelectorAll('.btn-guardar-peso').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -2420,6 +2424,52 @@
     finally { setCargando(btn,false); }
     });
   }); // fin DOMContentLoaded
+
+  // ---- PTY Cargo Express ----
+  async function abrirModalPty(guia){
+    const popup = document.createElement('div');
+    popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;';
+    popup.innerHTML = `<div style="background:var(--panel);border-radius:16px;width:100%;max-width:480px;box-shadow:0 32px 80px rgba(0,0,0,.4);overflow:hidden;">
+      <div style="background:var(--ink);color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-family:var(--font-display);font-size:15px;font-weight:700;">🔍 PTY Cargo Express</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,0.5);margin-top:2px;font-family:var(--font-mono);">${escapeHtml(guia)}</div>
+        </div>
+        <button onclick="this.closest('[style]').remove()" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer;">✕</button>
+      </div>
+      <div id="ptyResultado" style="padding:22px;">
+        <div style="text-align:center;color:var(--ink-soft);font-size:13px;padding:20px 0;">Consultando PTY Cargo Express…</div>
+      </div>
+    </div>`;
+    document.body.appendChild(popup);
+    popup.addEventListener('click', e => { if(e.target === popup) popup.remove(); });
+    const cont = popup.querySelector('#ptyResultado');
+    try {
+      const res = await apiAdmin(`/admin/pty/rastrear?guia=${encodeURIComponent(guia)}`);
+      const data = await res.json();
+      if(!res.ok){ cont.innerHTML = `<div style="background:var(--amber-bg);border:1px solid rgba(255,106,26,.3);border-radius:10px;padding:16px;font-size:13px;color:var(--accent-dark);">${escapeHtml(data.mensaje||'No se pudo obtener el resultado.')}</div>`; return; }
+      const r = data.resultado;
+      // Intentar renderizar los campos más comunes
+      const filas = [];
+      if(r.estado || r.status || r.Estado) filas.push(['Estado', r.estado || r.status || r.Estado]);
+      if(r.ubicacion || r.ubicacion_actual || r.location) filas.push(['Ubicación', r.ubicacion || r.ubicacion_actual || r.location]);
+      if(r.peso) filas.push(['Peso', r.peso]);
+      if(r.fecha_estimada || r.eta || r.entrega_estimada) filas.push(['Entrega estimada', r.fecha_estimada || r.eta || r.entrega_estimada]);
+      if(r.comentario || r.descripcion) filas.push(['Comentario', r.comentario || r.descripcion]);
+      if(r.warehouse || r.almacen) filas.push(['Warehouse', r.warehouse || r.almacen]);
+      if(r.piezas || r.bultos) filas.push(['Piezas/Bultos', r.piezas || r.bultos]);
+      if(filas.length > 0){
+        cont.innerHTML = `<div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;">
+          ${filas.map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--line);font-size:13px;"><span style="color:var(--ink-soft);font-weight:500;">${escapeHtml(k)}</span><span style="font-weight:600;">${escapeHtml(String(v))}</span></div>`).join('')}
+        </div>
+        <details style="margin-top:14px;"><summary style="font-size:12px;color:var(--ink-soft);cursor:pointer;">Ver respuesta completa (JSON)</summary><pre style="font-size:11px;background:var(--paper);border-radius:8px;padding:12px;margin-top:8px;overflow-x:auto;color:var(--ink-soft);">${escapeHtml(JSON.stringify(r, null, 2))}</pre></details>`;
+      } else {
+        cont.innerHTML = `<pre style="font-size:12px;background:var(--paper);border-radius:10px;padding:16px;overflow-x:auto;color:var(--ink-soft);">${escapeHtml(JSON.stringify(r, null, 2))}</pre>`;
+      }
+    } catch(err){
+      cont.innerHTML = `<div style="background:var(--amber-bg);border:1px solid rgba(255,106,26,.3);border-radius:10px;padding:16px;font-size:13px;color:var(--accent-dark);">No pudimos conectar con PTY Cargo Express.</div>`;
+    }
+  }
 
   // ---- Notificaciones internas ----
   const NOTIF_KEY = 'nea_notifs';
