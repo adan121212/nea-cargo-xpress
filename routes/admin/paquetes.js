@@ -154,7 +154,10 @@ router.patch(
 // --- PATCH /api/admin/paquetes/:id/peso ---
 router.patch(
   '/:id/peso',
-  [body('peso_real_lb').isFloat({ min: 0.01 }).withMessage('Ingresa un peso válido en libras')],
+  [
+    body('peso_real_lb').isFloat({ min: 0.01 }).withMessage('Ingresa un peso válido en libras'),
+    body('tarifa_id').optional().isInt().withMessage('tarifa_id debe ser un número entero'),
+  ],
   async (req, res) => {
     const errores = validationResult(req);
     if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
@@ -167,6 +170,7 @@ router.patch(
       }
       const paquete = actual.rows[0];
       const pesoConfirmado = req.body.peso_real_lb;
+      const tarifaIdSolicitada = req.body.tarifa_id || null;
       const facturaExistente = await client.query(
         `SELECT id FROM facturas WHERE paquete_id = $1 AND estado <> 'anulada'`, [req.params.id]
       );
@@ -177,12 +181,24 @@ router.patch(
       );
       let facturaGenerada = null;
       if (facturaExistente.rows.length === 0) {
-        const tarifaRes = await client.query('SELECT * FROM tarifas ORDER BY id ASC LIMIT 1');
-        if (tarifaRes.rows.length === 0) {
+        // Usar la tarifa enviada desde el frontend, o la primera activa si no se envió
+        let tarifaRows;
+        if(tarifaIdSolicitada){
+          const r = await client.query('SELECT * FROM tarifas WHERE id = $1 LIMIT 1', [tarifaIdSolicitada]);
+          tarifaRows = r.rows;
+        } else {
+          const r = await client.query('SELECT * FROM tarifas WHERE activa = TRUE ORDER BY id ASC LIMIT 1');
+          tarifaRows = r.rows;
+          if(tarifaRows.length === 0){
+            const r2 = await client.query('SELECT * FROM tarifas ORDER BY id ASC LIMIT 1');
+            tarifaRows = r2.rows;
+          }
+        }
+        if (tarifaRows.length === 0) {
           await client.query('ROLLBACK');
           return res.status(400).json({ mensaje: 'No hay ninguna tarifa configurada.' });
         }
-        const tarifa = tarifaRes.rows[0];
+        const tarifa = tarifaRows[0];
         const costoEnvio = Math.max(Number(pesoConfirmado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
         const seguro = paquete.valor_declarado ? (Number(paquete.valor_declarado) * Number(tarifa.pct_seguro)) / 100 : 0;
         const cargoManejo = Number(tarifa.cargo_manejo);
