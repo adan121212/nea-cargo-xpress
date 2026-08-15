@@ -371,7 +371,24 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
       <a href="#tarifas" class="nav-a">Tarifas</a>
       <a href="#rastreo" class="nav-a">Rastrear</a>
       <a href="#preguntas" class="nav-a">FAQ</a>
-      <a href="app.html" class="nav-a">Iniciar sesión</a>
+      <div style="position:relative;" id="navSesion">
+        <button class="nav-a" id="btnSesion" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;">Iniciar sesión <span style="font-size:9px;opacity:.6;">▾</span></button>
+        <div id="ddSesion" style="display:none;position:absolute;top:calc(100% + 10px);left:0;background:rgba(12,27,51,0.97);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.1);border-radius:12px;min-width:220px;padding:8px;box-shadow:0 24px 60px rgba(0,0,0,0.5);z-index:100;">
+          <a href="app.html" style="display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:8px;color:#fff;font-size:13px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background=''">
+            <span style="font-weight:600;">Iniciar sesión</span>
+            <span style="font-size:11px;color:rgba(255,255,255,0.45);">Ya tengo un casillero</span>
+          </a>
+          <a href="app.html?registro" style="display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:8px;color:#fff;font-size:13px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background=''">
+            <span style="font-weight:600;">Crear casillero</span>
+            <span style="font-size:11px;color:rgba(255,255,255,0.45);">Es gratis, toma 2 minutos</span>
+          </a>
+          <div style="border-top:1px solid rgba(255,255,255,0.08);margin:6px 0;"></div>
+          <a href="admin.html" style="display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:8px;color:#fff;font-size:13px;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background=''">
+            <span style="font-weight:600;">Acceso staff</span>
+            <span style="font-size:11px;color:rgba(255,255,255,0.45);">Panel de operaciones</span>
+          </a>
+        </div>
+      </div>
     </div>
     <div class="nav-right">
       <button class="ctrl-btn" id="btnLang" title="Cambiar idioma">
@@ -1012,6 +1029,14 @@ loadSuc();
 document.querySelectorAll('.faq-q').forEach(q => {
   q.addEventListener('click', () => q.closest('.faq-item').classList.toggle('open'));
 });
+// Dropdown sesión
+const btnSesion = $('#btnSesion'), ddSesion = $('#ddSesion');
+if(btnSesion){
+  btnSesion.addEventListener('click', e => { e.stopPropagation(); ddSesion.style.display = ddSesion.style.display === 'block' ? 'none' : 'block'; });
+  document.addEventListener('click', () => { ddSesion.style.display = 'none'; });
+  ddSesion.addEventListener('click', e => e.stopPropagation());
+}
+
 $('#faqSearch').addEventListener('input', e => {
   const q = e.target.value.toLowerCase().trim();
   document.querySelectorAll('.faq-item').forEach(item => {
