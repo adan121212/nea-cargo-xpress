@@ -18,9 +18,10 @@ function getSesion() {
 // --- GET /api/admin/pty/paquetes ---
 // Trae la lista de paquetes desde PTY Cargo Express
 router.get('/paquetes', async (req, res) => {
-  const sesion = getSesion();
+  // Aceptar sesión desde el query (enviada desde el frontend) o desde variable de entorno
+  const sesion = req.query.sesion || getSesion();
   if (!sesion) {
-    return res.status(503).json({ mensaje: 'Sesión PTY no configurada. Agrega PTY_PHPSESSID en las variables de entorno de Render.' });
+    return res.status(503).json({ mensaje: 'Pega el PHPSESSID en el campo de sesión del panel PTY.' });
   }
   const pagina = parseInt(req.query.pagina) || 1;
   const porPagina = parseInt(req.query.porPagina) || 100;
