@@ -569,6 +569,9 @@
     <button class="tab-nav-btn" data-tab="caja">
       <span class="sb-icon">🏦</span> Cierre de caja
     </button>
+    <button class="tab-nav-btn" data-tab="pty">
+      <span class="sb-icon">🚢</span> PTY Cargo
+    </button>
   </nav>
   <div class="sb-footer" id="sbFooter" style="display:none;">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px;margin-bottom:6px;">
@@ -1019,6 +1022,51 @@
         <div class="dash-section"><h3 class="dash-section-title">Top 5 clientes por paquetes</h3><div class="chart-box-sm"><canvas id="chartTopClientes"></canvas></div></div>
       </div>
     </div>
+    <!-- ---- TAB: PTY Cargo Express ---- -->
+    <div class="card tab-panel" id="tabPty" style="display:none;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px;">
+        <div>
+          <h2 style="margin:0 0 4px;">🚢 PTY Cargo Express</h2>
+          <p class="card-sub" style="margin:0;">Paquetes en bodega de PTY Cargo. Importa los que no están en NEA con un clic.</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="ptyFiltro" placeholder="Filtrar por tracking…" style="padding:8px 12px;font-size:13px;width:200px;">
+          <button class="btn-secondary" id="btnCargarPty" style="white-space:nowrap;">🔄 Cargar paquetes</button>
+          <button class="btn-primary" id="btnImportarSeleccionados" style="white-space:nowrap;display:none;">
+            <span class="spinner"></span><span>⬇ Importar seleccionados</span>
+          </button>
+        </div>
+      </div>
+      <div class="banner" id="bannerPty"></div>
+      <div id="ptyEstado" style="text-align:center;padding:40px;color:var(--ink-soft);font-size:13.5px;">
+        Presiona "Cargar paquetes" para traer la lista desde PTY Cargo Express.
+      </div>
+      <div id="ptyTabla" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:12.5px;color:var(--ink-soft);" id="ptyResumen"></div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;margin:0;">
+            <input type="checkbox" id="ptySelAll" style="width:15px;height:15px;accent-color:var(--accent);"> Seleccionar todos los nuevos
+          </label>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;"></th>
+                <th>Tracking</th>
+                <th>WHR</th>
+                <th>Referencias</th>
+                <th>Peso (lb)</th>
+                <th>Estado PTY</th>
+                <th>Fecha</th>
+                <th>NEA</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPty"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div><!-- /vistaAdmin -->
 </div><!-- /main-content -->
 
@@ -1312,6 +1360,7 @@
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
       if (tab === 'caja'){ $('#tabCaja').style.display = 'block'; cargarCaja(); cargarHistorialCaja(); }
       if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
+      if (tab === 'pty'){ $('#tabPty').style.display = 'block'; }
       // Cierra sidebar en móvil al elegir pestaña
       if (window.innerWidth <= 760){
         $('#sidebar').classList.remove('open');
@@ -2519,6 +2568,85 @@
     }
     _ultimoTotalPendientes = total;
   };
+
+  // ---- PTY Cargo Express ----
+  let ptyPaquetesCache = [];
+  const STATUS_COLOR = {
+    'En Bodega':'background:#dbeafe;color:#1e40af',
+    'En Transito':'background:#fef3c7;color:#92400e',
+    'En tránsito':'background:#fef3c7;color:#92400e',
+    'En Panamá':'background:#d1fae5;color:#065f46',
+    'En Panama':'background:#d1fae5;color:#065f46',
+    'Entregado':'background:rgba(12,27,51,0.08);color:var(--ink-soft)',
+    'Listo':'background:var(--cargo-green-bg);color:var(--cargo-green)',
+  };
+  async function cargarPty(){
+    const btn = $('#btnCargarPty');
+    setCargando(btn, true);
+    mostrarBanner('#bannerPty','','');
+    $('#ptyEstado').textContent = 'Cargando desde PTY Cargo Express…';
+    $('#ptyTabla').style.display = 'none';
+    try {
+      const filtro = $('#ptyFiltro').value.trim();
+      const res = await apiAdmin(`/admin/pty/paquetes?porPagina=100${filtro?'&filtro='+encodeURIComponent(filtro):''}`);
+      const data = await res.json();
+      if(!res.ok){ mostrarBanner('#bannerPty','error',data.mensaje||'No se pudo cargar.'); $('#ptyEstado').textContent=''; return; }
+      ptyPaquetesCache = data.paquetes || [];
+      renderPtyTabla(ptyPaquetesCache, data.total);
+      $('#ptyEstado').textContent = '';
+      $('#ptyTabla').style.display = 'block';
+    } catch(err){
+      mostrarBanner('#bannerPty','error','No pudimos conectar.');
+      $('#ptyEstado').textContent = '';
+    } finally { setCargando(btn, false); }
+  }
+  function renderPtyTabla(paquetes, total){
+    const nuevos = paquetes.filter(p => !p.ya_en_nea).length;
+    $('#ptyResumen').textContent = `${total} paquetes en PTY · ${nuevos} nuevos (no están en NEA) · ${paquetes.length - nuevos} ya importados`;
+    $('#btnImportarSeleccionados').style.display = nuevos > 0 ? 'flex' : 'none';
+    const tbody = $('#tbodyPty');
+    tbody.innerHTML = paquetes.map(p => {
+      const color = STATUS_COLOR[p.Status] || 'background:var(--amber-bg);color:var(--accent-dark)';
+      const fecha = p.Fecha ? p.Fecha.slice(0,10) : '—';
+      return `<tr style="${p.ya_en_nea?'opacity:.55;':''}" data-tracking="${escapeHtml(p.TrackingNum||'')}">
+        <td><input type="checkbox" class="pty-check" data-tracking="${escapeHtml(p.TrackingNum||'')}" ${p.ya_en_nea?'disabled':''} style="width:15px;height:15px;accent-color:var(--accent);"></td>
+        <td class="mono" style="font-size:12px;">${escapeHtml(p.TrackingNum||'—')}</td>
+        <td class="mono muted">${escapeHtml(p.WHR||'—')}</td>
+        <td style="font-size:12.5px;">${escapeHtml(p.Referencias||'—')}</td>
+        <td class="mono">${p.Peso||'—'} lb</td>
+        <td><span style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;${color}">${escapeHtml(p.Status||'—')}</span></td>
+        <td class="muted" style="font-size:12px;">${fecha}</td>
+        <td>${p.ya_en_nea
+          ? '<span style="color:var(--cargo-green);font-size:12px;font-weight:600;">✓ En NEA</span>'
+          : '<span style="color:var(--accent-dark);font-size:12px;font-weight:600;">Nuevo</span>'}</td>
+      </tr>`;
+    }).join('');
+    // Checkbox seleccionar todos
+    $('#ptySelAll').addEventListener('change', () => {
+      const checked = $('#ptySelAll').checked;
+      tbody.querySelectorAll('.pty-check:not(:disabled)').forEach(cb => cb.checked = checked);
+    });
+  }
+  async function importarSeleccionados(){
+    const checks = [...$('#tbodyPty').querySelectorAll('.pty-check:checked')];
+    if(checks.length === 0){ mostrarBanner('#bannerPty','error','Selecciona al menos un paquete.'); return; }
+    const trackings = checks.map(cb => cb.dataset.tracking);
+    const paquetes = ptyPaquetesCache.filter(p => trackings.includes(p.TrackingNum));
+    const btn = $('#btnImportarSeleccionados'); setCargando(btn, true);
+    mostrarBanner('#bannerPty','','');
+    try {
+      const res = await apiAdmin('/admin/pty/importar', { method:'POST', body: JSON.stringify({ paquetes }) });
+      const data = await res.json().catch(()=>({}));
+      if(res.ok){
+        mostrarBanner('#bannerPty','success',`✓ ${data.mensaje}`);
+        await cargarPty();
+      } else { mostrarBanner('#bannerPty','error',data.mensaje||'No se pudo importar.'); }
+    } catch(err){ mostrarBanner('#bannerPty','error','No pudimos conectar.'); }
+    finally { setCargando(btn, false); }
+  }
+  $('#btnCargarPty').addEventListener('click', cargarPty);
+  $('#btnImportarSeleccionados').addEventListener('click', importarSeleccionados);
+  $('#ptyFiltro').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); cargarPty(); } });
 
   async function iniciarAdmin(){
     cargarNotificacionesGuardadas();
