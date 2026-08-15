@@ -2287,7 +2287,39 @@
     $('#editClienteTelefono').value = u.telefono || '';
     $('#editClienteCasillero').value = u.numero_casillero || '';
     mostrarBanner('#bannerEditCliente','','');
+    mostrarBanner('#bannerAutorizadosAdmin','','');
+    $('#autorizadosAdminLista').innerHTML = '';
+    $('#btnGuardarAutorizadosAdmin').style.display = 'none';
     $('#modalEditCliente').classList.add('show');
+    cargarAutorizadosAdmin(u.id);
+  }
+  async function cargarAutorizadosAdmin(usuarioId){
+    $('#autorizadosLoadingIndicator').style.display = 'block';
+    try {
+      const res = await apiAdmin(`/admin/usuarios/${usuarioId}/autorizados`);
+      const data = await res.json();
+      const lista = data.autorizados || [];
+      renderAutorizadosAdmin(lista);
+    } catch(err){
+      $('#autorizadosAdminLista').innerHTML = '<div style="font-size:12.5px;color:var(--accent-dark);">No se pudieron cargar los autorizados.</div>';
+    } finally {
+      $('#autorizadosLoadingIndicator').style.display = 'none';
+    }
+  }
+  function renderAutorizadosAdmin(lista){
+    const slots = [0,1,2].map(i => lista[i] || {nombre:'',cedula:''});
+    $('#autorizadosAdminLista').innerHTML = slots.map((p,i) => `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;padding:12px;background:var(--paper);border-radius:8px;">
+        <div>
+          <label style="margin:0 0 5px;">Persona ${i+1} — Nombre</label>
+          <input class="aut-admin-nombre" data-idx="${i}" type="text" value="${escapeHtml(p.nombre)}" placeholder="Nombre completo">
+        </div>
+        <div>
+          <label style="margin:0 0 5px;">Cédula</label>
+          <input class="aut-admin-cedula" data-idx="${i}" type="text" value="${escapeHtml(p.cedula)}" placeholder="8-123-4567">
+        </div>
+      </div>`).join('');
+    $('#btnGuardarAutorizadosAdmin').style.display = 'flex';
   }
   function cerrarEditCliente(){ $('#modalEditCliente').classList.remove('show'); clienteEditandoId=null; }
   window.addEventListener('DOMContentLoaded', () => {
@@ -2297,6 +2329,24 @@
     $('#btnCerrarNotif').addEventListener('click',()=>{ $('#notifPanel').classList.remove('open'); $('#notifOverlay').style.display='none'; });
     $('#notifOverlay').addEventListener('click',()=>{ $('#notifPanel').classList.remove('open'); $('#notifOverlay').style.display='none'; });
     $('#btnMarcarTodasLeidas').addEventListener('click',()=>{ notifLista.forEach(n=>n.leida=true); guardarNotificaciones(); renderNotifBadge(); renderNotifLista(); });
+    $('#btnGuardarAutorizadosAdmin').addEventListener('click', async()=>{
+      if(!clienteEditandoId) return;
+      const btn=$('#btnGuardarAutorizadosAdmin');
+      const autorizados=[0,1,2].map(i=>({
+        nombre: ($('.aut-admin-nombre[data-idx="'+i+'"]')?.value||'').trim(),
+        cedula: ($('.aut-admin-cedula[data-idx="'+i+'"]')?.value||'').trim(),
+      })).filter(p=>p.nombre||p.cedula);
+      const incompleto=autorizados.find(p=>!p.nombre||!p.cedula);
+      if(incompleto){ mostrarBanner('#bannerAutorizadosAdmin','error','Completa nombre y cédula de cada persona.'); return; }
+      setCargando(btn,true);
+      try {
+        const res=await apiAdmin(`/admin/usuarios/${clienteEditandoId}/autorizados`,{method:'PUT',body:JSON.stringify({autorizados})});
+        const data=await res.json().catch(()=>({}));
+        if(res.ok){ mostrarBanner('#bannerAutorizadosAdmin','success','✓ Autorizados guardados.'); }
+        else { mostrarBanner('#bannerAutorizadosAdmin','error',data.mensaje||'No se pudo guardar.'); }
+      } catch(err){ mostrarBanner('#bannerAutorizadosAdmin','error','No pudimos conectar.'); }
+      finally { setCargando(btn,false); }
+    });
     $('#btnGuardarEditCliente').addEventListener('click', async()=>{
     if(!clienteEditandoId) return;
     const btn=$('#btnGuardarEditCliente');
@@ -2414,6 +2464,20 @@
       <span class="spinner"></span><span>Guardar cambios</span>
     </button>
     <div class="banner" id="bannerEditCliente"></div>
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div>
+          <div style="font-family:var(--font-display);font-size:14px;font-weight:600;">Personas autorizadas</div>
+          <div style="font-size:12px;color:var(--ink-soft);">Pueden retirar paquetes en nombre del cliente.</div>
+        </div>
+        <div id="autorizadosLoadingIndicator" style="font-size:12px;color:var(--ink-soft);display:none;">Cargando…</div>
+      </div>
+      <div id="autorizadosAdminLista"></div>
+      <button class="btn-primary" id="btnGuardarAutorizadosAdmin" style="margin-top:14px;max-width:220px;display:none;">
+        <span class="spinner"></span><span>Guardar autorizados</span>
+      </button>
+      <div class="banner" id="bannerAutorizadosAdmin"></div>
+    </div>
   </div>
 </div>
 </body>
