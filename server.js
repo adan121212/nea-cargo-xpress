@@ -23,7 +23,6 @@ const adminCajaRoutes = require('./routes/admin/caja');
 const adminRecepcionRoutes = require('./routes/admin/recepcion');
 const adminPtyRoutes = require('./routes/admin/ptycargoexpress');
 
-
 const app = express();
 
 app.set('trust proxy', 1);
@@ -42,6 +41,27 @@ app.use(
     crossOriginEmbedderPolicy: false,
   })
 );
+
+// CORS para que el bookmarklet de PTY Cargo pueda llamar al servidor de NEA
+app.use('/api/admin/pty/verificar', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://carga.ptycargoexpress.com');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+app.use('/api/admin/pty/importar', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://carga.ptycargoexpress.com');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+// Servir el script del bookmarklet con cabeceras correctas
+app.get('/pty-importer.js', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.sendFile(require('path').join(__dirname, 'public', 'pty-importer.js'));
+});
 app.disable('x-powered-by');
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
@@ -89,7 +109,6 @@ app.use('/api/admin/mostrador', adminMostradorRoutes);
 app.use('/api/admin/caja', adminCajaRoutes);
 app.use('/api/admin/recepcion', adminRecepcionRoutes);
 app.use('/api/admin/pty', adminPtyRoutes);
-
 
 app.use(express.static(path.join(__dirname, 'public')));
 
