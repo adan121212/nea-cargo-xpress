@@ -2262,9 +2262,14 @@
     $('#modalEditCliente').classList.add('show');
   }
   function cerrarEditCliente(){ $('#modalEditCliente').classList.remove('show'); clienteEditandoId=null; }
-  $('#btnCerrarEditCliente').addEventListener('click', cerrarEditCliente);
-  $('#modalEditCliente').addEventListener('click',(e)=>{ if(e.target.id==='modalEditCliente') cerrarEditCliente(); });
-  $('#btnGuardarEditCliente').addEventListener('click', async()=>{
+  window.addEventListener('DOMContentLoaded', () => {
+    $('#btnCerrarEditCliente').addEventListener('click', cerrarEditCliente);
+    $('#modalEditCliente').addEventListener('click',(e)=>{ if(e.target.id==='modalEditCliente') cerrarEditCliente(); });
+    $('#btnCampana').addEventListener('click',(e)=>{ e.stopPropagation(); $('#notifPanel').classList.toggle('open'); $('#notifOverlay').style.display=$('#notifPanel').classList.contains('open')?'block':'none'; if($('#notifPanel').classList.contains('open')) renderNotifLista(); });
+    $('#btnCerrarNotif').addEventListener('click',()=>{ $('#notifPanel').classList.remove('open'); $('#notifOverlay').style.display='none'; });
+    $('#notifOverlay').addEventListener('click',()=>{ $('#notifPanel').classList.remove('open'); $('#notifOverlay').style.display='none'; });
+    $('#btnMarcarTodasLeidas').addEventListener('click',()=>{ notifLista.forEach(n=>n.leida=true); guardarNotificaciones(); renderNotifBadge(); renderNotifLista(); });
+    $('#btnGuardarEditCliente').addEventListener('click', async()=>{
     if(!clienteEditandoId) return;
     const btn=$('#btnGuardarEditCliente');
     const payload={
@@ -2286,7 +2291,8 @@
       } else { mostrarBanner('#bannerEditCliente','error',data.mensaje||'No se pudo guardar.'); }
     } catch(err){ mostrarBanner('#bannerEditCliente','error','No pudimos conectar.'); }
     finally { setCargando(btn,false); }
-  });
+    });
+  }); // fin DOMContentLoaded
 
   // ---- Notificaciones internas ----
   const NOTIF_KEY = 'nea_notifs';
@@ -2324,16 +2330,6 @@
       });
     });
   }
-  $('#btnCampana').addEventListener('click',(e)=>{
-    e.stopPropagation();
-    $('#notifPanel').classList.toggle('open');
-    $('#notifOverlay').style.display=$('#notifPanel').classList.contains('open')?'block':'none';
-    if($('#notifPanel').classList.contains('open')) renderNotifLista();
-  });
-  $('#btnCerrarNotif').addEventListener('click',()=>{ $('#notifPanel').classList.remove('open'); $('#notifOverlay').style.display='none'; });
-  $('#notifOverlay').addEventListener('click',()=>{ $('#notifPanel').classList.remove('open'); $('#notifOverlay').style.display='none'; });
-  $('#btnMarcarTodasLeidas').addEventListener('click',()=>{ notifLista.forEach(n=>n.leida=true); guardarNotificaciones(); renderNotifBadge(); renderNotifLista(); });
-
   // Interceptar cargarPendientesMostrador para generar notif cuando hay facturas nuevas
   const _cargarPendientesOriginal = cargarPendientesMostrador;
   let _ultimoTotalPendientes = 0;
