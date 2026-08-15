@@ -21,16 +21,12 @@ const adminReportesRoutes = require('./routes/admin/reportes');
 const adminMostradorRoutes = require('./routes/admin/mostrador');
 const adminCajaRoutes = require('./routes/admin/caja');
 const adminRecepcionRoutes = require('./routes/admin/recepcion');
+const adminPtyRoutes = require('./routes/admin/ptycargoexpress');
 
 const app = express();
 
-// Necesario en Render (y cualquier hosting detrás de proxy) para que
-// Express identifique la IP real del visitante.
 app.set('trust proxy', 1);
 
-// Redirigir la URL vieja de Render al dominio propio.
-// Cualquiera que entre por nea-cargo-xpress.onrender.com es enviado
-// automáticamente a www.neacargoxpress.com conservando la ruta.
 app.use((req, res, next) => {
   if (req.headers.host === 'nea-cargo-xpress.onrender.com') {
     return res.redirect(301, `https://www.neacargoxpress.com${req.url}`);
@@ -50,19 +46,15 @@ app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 const limiteGeneral = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 300,
-  standardHeaders: true,
-  legacyHeaders: false,
+  windowMs: 15 * 60 * 1000, max: 300,
+  standardHeaders: true, legacyHeaders: false,
   message: { mensaje: 'Demasiadas solicitudes. Intenta de nuevo en unos minutos.' },
 });
 app.use('/api', limiteGeneral);
 
 const limiteAuth = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
+  windowMs: 15 * 60 * 1000, max: 10,
+  standardHeaders: true, legacyHeaders: false,
   message: { mensaje: 'Demasiados intentos. Espera unos minutos antes de volver a intentar.' },
 });
 app.use('/api/auth/login', limiteAuth);
@@ -71,10 +63,8 @@ app.use('/api/auth/olvide-password', limiteAuth);
 app.use('/api/auth/restablecer-password', limiteAuth);
 
 const limiteRastreo = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
+  windowMs: 15 * 60 * 1000, max: 30,
+  standardHeaders: true, legacyHeaders: false,
   message: { mensaje: 'Demasiadas búsquedas. Espera unos minutos.' },
 });
 app.use('/api/public/rastreo', limiteRastreo);
@@ -97,6 +87,7 @@ app.use('/api/admin/reportes', adminReportesRoutes);
 app.use('/api/admin/mostrador', adminMostradorRoutes);
 app.use('/api/admin/caja', adminCajaRoutes);
 app.use('/api/admin/recepcion', adminRecepcionRoutes);
+app.use('/api/admin/pty', adminPtyRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
