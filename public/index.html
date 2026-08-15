@@ -4,645 +4,1022 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEA Cargo Xpress — Compra en EE.UU., recibe en Panamá</title>
+<meta name="description" content="Casillero virtual en Miami. Compra en Amazon, eBay, Shein y más — te lo traemos a Panamá en días. Seguimiento en tiempo real, sin complicaciones.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --ink:#0c1b33; --ink-soft:rgba(12,27,51,0.62); --ink-faint:rgba(12,27,51,0.42);
-    --paper:#f1f3f2; --panel:#ffffff; --line:rgba(12,27,51,0.12); --line-soft:rgba(12,27,51,0.07);
-    --accent:#ff6a1a; --accent-dark:#e2570e; --accent-glow:rgba(255,106,26,0.55);
-    --cargo-green:#177a63; --cargo-green-bg:rgba(23,122,99,0.1); --amber-bg:rgba(255,106,26,0.1);
-    --whatsapp:#25d366;
-    --font-display:'Space Grotesk',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
-    --radius-sm:8px; --radius-md:12px; --radius-lg:20px;
-    --shadow-card:0 1px 2px rgba(12,27,51,0.04),0 10px 30px -12px rgba(12,27,51,0.10);
-    --shadow-card-hover:0 4px 10px rgba(12,27,51,0.06),0 24px 50px -16px rgba(12,27,51,0.18);
-    --trans:.25s ease;
-  }
-  [data-theme="dark"]{
-    --ink:#e8edf5; --ink-soft:rgba(232,237,245,0.65); --ink-faint:rgba(232,237,245,0.42);
-    --paper:#0d1524; --panel:#162035; --line:rgba(232,237,245,0.1); --line-soft:rgba(232,237,245,0.06);
-    --shadow-card:0 1px 2px rgba(0,0,0,0.2),0 10px 30px -12px rgba(0,0,0,0.4);
-    --shadow-card-hover:0 4px 10px rgba(0,0,0,0.3),0 24px 50px -16px rgba(0,0,0,0.5);
-  }
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);overflow-x:hidden;transition:background var(--trans),color var(--trans);}
-  a{color:inherit;text-decoration:none;}
-  img{max-width:100%;}
-  section{scroll-margin-top:90px;}
-  ::selection{background:var(--accent);color:#fff;}
-  @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
-  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease;}
-  .reveal.in-view{opacity:1;transform:none;}
-  /* NAV */
-  .nav{position:sticky;top:0;z-index:40;background:rgba(12,27,51,0.92);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);color:#f1f3f2;padding:14px 26px;border-bottom:1px solid rgba(241,243,242,0.08);}
-  [data-theme="dark"] .nav{background:rgba(8,14,28,0.94);}
-  .nav-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;}
-  .brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:16px;}
-  .brand .mark{width:30px;height:30px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#0c1b33;font-weight:700;font-size:14px;box-shadow:0 0 0 1px rgba(255,106,26,0.3),0 2px 16px var(--accent-glow);}
-  .brand small{display:block;font-weight:400;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(241,243,242,0.5);font-family:var(--font-body);}
-  .nav-menu{display:flex;align-items:center;gap:2px;}
-  .nav-item{position:relative;}
-  .nav-btn{background:none;border:none;color:#f1f3f2;font-family:var(--font-body);font-size:13.5px;font-weight:500;padding:9px 14px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s ease,opacity .15s ease;opacity:.88;}
-  .nav-btn:hover{background:rgba(241,243,242,0.08);opacity:1;}
-  .nav-btn .caret{font-size:9px;transition:transform .15s ease;opacity:.6;}
-  .nav-item.open .caret{transform:rotate(180deg);}
-  .nav-btn.cta{background:var(--accent);color:#fff;font-weight:700;padding:9px 18px;opacity:1;box-shadow:0 2px 20px var(--accent-glow);}
-  .nav-btn.cta:hover{background:var(--accent-dark);}
-  /* Botones de idioma y tema en el nav */
-  .nav-controls{display:flex;align-items:center;gap:6px;margin-left:8px;}
-  .ctrl-btn{background:rgba(241,243,242,0.1);border:1px solid rgba(241,243,242,0.2);color:#f1f3f2;padding:6px 10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s ease;display:flex;align-items:center;gap:4px;white-space:nowrap;}
-  .ctrl-btn:hover{background:rgba(241,243,242,0.18);}
-  .ctrl-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-  .dropdown{position:absolute;top:calc(100% + 10px);left:0;background:rgba(20,34,58,0.96);backdrop-filter:blur(16px);color:#f1f3f2;border-radius:12px;border:1px solid rgba(241,243,242,0.12);min-width:240px;padding:8px;box-shadow:0 24px 60px -12px rgba(0,0,0,0.5);display:none;}
-  .nav-item.right .dropdown{left:auto;right:0;}
-  .nav-item.open .dropdown{display:block;animation:dropIn .15s ease;}
-  @keyframes dropIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
-  .dropdown a,.dropdown button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:left;background:none;border:none;padding:10px 11px;border-radius:8px;cursor:pointer;font-family:var(--font-body);font-size:13px;color:#f1f3f2;}
-  .dropdown a:hover,.dropdown button:hover{background:rgba(241,243,242,0.08);}
-  .dropdown .item-sub{font-size:11px;color:rgba(241,243,242,0.55);}
-  .nav-toggle{display:none;background:none;border:none;color:#f1f3f2;font-size:22px;cursor:pointer;position:relative;z-index:50;padding:8px 10px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-  @media(max-width:860px){
-    .nav-menu{position:absolute;top:100%;left:0;right:0;background:var(--ink);backdrop-filter:none;-webkit-backdrop-filter:none;isolation:isolate;flex-direction:column;align-items:stretch;padding:10px 16px;display:none;overflow-y:auto;z-index:45;}
-    .nav-menu.open{display:flex;}
-    .nav-toggle{display:block;}
-    .nav-btn{width:100%;justify-content:space-between;}
-    .dropdown{position:static;box-shadow:none;margin:0 0 8px 12px;width:calc(100% - 12px);background:rgba(241,243,242,0.06);border-color:rgba(241,243,242,0.12);}
-    .nav-btn.cta{margin-top:6px;justify-content:center;}
-    .nav-controls{margin:10px 0 4px;justify-content:center;}
-    .ctrl-btn{flex:1;justify-content:center;}
-  }
-  /* HERO */
-  .hero-shell{position:relative;overflow:hidden;background:var(--ink);}
-  .hero-shell::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 15% 10%,rgba(255,106,26,0.16),transparent 60%),radial-gradient(ellipse 50% 40% at 90% 80%,rgba(23,122,99,0.14),transparent 60%);pointer-events:none;z-index:0;}
-  #networkCanvas{position:absolute;inset:0;z-index:0;opacity:.85;}
-  .hero{max-width:1180px;margin:0 auto;padding:88px 26px 74px;display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center;position:relative;z-index:2;color:#f1f3f2;}
-  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:8px;}
-  .eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 10px var(--accent-glow);animation:pulseDot 1.8s ease-in-out infinite;}
-  @keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:.35;}}
-  .hero h1{font-family:var(--font-display);font-size:clamp(32px,4.6vw,52px);line-height:1.06;letter-spacing:-0.015em;margin:16px 0 18px;}
-  .hero h1 .glow-word{color:var(--accent);text-shadow:0 0 34px var(--accent-glow);}
-  .hero p.lead{font-size:16px;line-height:1.65;color:rgba(241,243,242,0.68);max-width:46ch;margin:0 0 28px;}
-  .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;}
-  .btn-solid{position:relative;background:var(--accent);color:#fff;font-weight:700;font-size:14px;padding:14px 24px;border-radius:var(--radius-sm);display:inline-block;overflow:hidden;box-shadow:0 4px 24px var(--accent-glow);transition:transform .15s ease,box-shadow .15s ease;}
-  .btn-solid::after{content:'';position:absolute;inset:0;translate:-120% 0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,0.45) 50%,transparent 70%);transition:translate .5s ease;}
-  .btn-solid:hover{transform:translateY(-2px);box-shadow:0 8px 30px var(--accent-glow);}
-  .btn-solid:hover::after{translate:120% 0;}
-  .btn-outline{border:1.5px solid rgba(241,243,242,0.25);color:#f1f3f2;font-weight:600;font-size:14px;padding:13px 24px;border-radius:var(--radius-sm);display:inline-block;transition:border-color .15s ease,background .15s ease;}
-  .btn-outline:hover{border-color:rgba(241,243,242,0.6);background:rgba(241,243,242,0.06);}
-  .route-strip{margin-top:34px;display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:11px;color:rgba(241,243,242,0.55);}
-  .route-strip .city{flex-shrink:0;font-weight:500;}
-  .route-strip svg{flex:1;height:14px;overflow:visible;}
-  .route-strip .route-line{stroke:rgba(241,243,242,0.25);stroke-width:1.5;stroke-dasharray:1 7;stroke-linecap:round;fill:none;}
-  .route-strip .route-dot{fill:var(--accent);filter:drop-shadow(0 0 4px var(--accent-glow));}
-  .route-strip .route-plane{fill:var(--accent);offset-path:path('M2,7 L138,7');animation:fly-route 4.5s ease-in-out infinite;filter:drop-shadow(0 0 5px var(--accent-glow));}
-  @keyframes fly-route{0%{offset-distance:0%;opacity:0;}8%{opacity:1;}92%{opacity:1;}100%{offset-distance:100%;opacity:0;}}
-  .tilt-wrap{perspective:1200px;}
-  .hero-card{background:linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015));border:1px solid rgba(241,243,242,0.14);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#f1f3f2;border-radius:var(--radius-lg);padding:32px;position:relative;overflow:hidden;box-shadow:0 30px 80px -20px rgba(0,0,0,0.6);transform-style:preserve-3d;transition:transform .12s ease-out,box-shadow .3s ease;will-change:transform;}
-  .hero-card::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:conic-gradient(from var(--angle,0deg),transparent 0%,var(--accent) 12%,transparent 26%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rotateBorder 5s linear infinite;pointer-events:none;}
-  @keyframes rotateBorder{to{--angle:360deg;}}
-  @property --angle{syntax:'<angle>';inherits:false;initial-value:0deg;}
-  .hero-card .casillero-mock{background:rgba(0,0,0,0.22);border:1px dashed rgba(241,243,242,0.22);border-radius:12px;padding:18px;font-family:var(--font-mono);font-size:12.5px;line-height:1.95;position:relative;}
-  .hero-card .casillero-mock .suite{color:var(--accent);font-weight:600;}
-  .hero-card h3{font-family:var(--font-display);font-size:15px;margin:0 0 4px;position:relative;}
-  .hero-card p.small{font-size:12.5px;color:rgba(241,243,242,0.55);margin:0 0 18px;position:relative;}
-  .stat-mini-row{display:flex;gap:10px;margin-top:20px;position:relative;}
-  .stat-mini{flex:1;background:rgba(0,0,0,0.2);border-radius:10px;padding:13px;border:1px solid rgba(241,243,242,0.1);}
-  .stat-mini .n{font-family:var(--font-display);font-size:21px;color:var(--accent);text-shadow:0 0 18px var(--accent-glow);}
-  .stat-mini .l{font-size:10.5px;color:rgba(241,243,242,0.5);text-transform:uppercase;letter-spacing:.04em;}
-  @media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:48px;gap:40px;}}
-  /* FOTOS */
-  .foto-banda{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:1180px;margin:0 auto;padding:0 26px;}
-  .foto-item{position:relative;overflow:hidden;border-radius:var(--radius-md);aspect-ratio:4/3;}
-  .foto-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.2,.8,.2,1);filter:saturate(1.05);}
-  .foto-item:hover img{transform:scale(1.07);}
-  .foto-item::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(255,106,26,0);transition:box-shadow .3s ease;border-radius:inherit;pointer-events:none;}
-  .foto-item:hover::after{box-shadow:inset 0 0 0 2px rgba(255,106,26,0.7);}
-  .foto-caption{position:absolute;inset:auto 0 0 0;background:linear-gradient(to top,rgba(12,27,51,0.92),transparent);color:#fff;font-size:12.5px;font-weight:600;padding:34px 16px 14px;display:flex;align-items:baseline;gap:9px;}
-  .foto-caption .foto-num{font-family:var(--font-mono);color:var(--accent);font-size:11px;font-weight:700;}
-  @media(max-width:700px){.foto-banda{grid-template-columns:1fr;gap:8px;}.foto-item{aspect-ratio:16/9;}}
-  /* RASTREO */
-  .rastreo-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-  .rastreo-tab-btn{padding:9px 17px;border-radius:20px;border:1px solid var(--line);background:var(--panel);font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:all .15s ease;}
-  .rastreo-tab-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 4px 16px rgba(12,27,51,0.25);}
-  [data-theme="dark"] .rastreo-tab-btn.active{box-shadow:0 4px 16px rgba(0,0,0,0.4);}
-  .rastreo-hint{font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;}
-  .rastreo-box{max-width:640px;}
-  .rastreo-form{display:flex;gap:10px;flex-wrap:wrap;}
-  .rastreo-form input{flex:1;min-width:220px;padding:14px 17px;border-radius:var(--radius-sm);border:1.5px solid var(--line);font-family:var(--font-mono);font-size:14px;color:var(--ink);background:var(--panel);transition:border-color .15s ease,box-shadow .15s ease;}
-  .rastreo-form input:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,106,26,0.14);}
-  .rastreo-form .btn-solid{border:none;cursor:pointer;display:flex;align-items:center;gap:8px;color:#fff;}
-  .spinner-rastreo{width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,0.45);border-top-color:#fff;animation:spin-rastreo .7s linear infinite;display:none;}
-  .loading-rastreo .spinner-rastreo{display:inline-block;}
-  @keyframes spin-rastreo{to{transform:rotate(360deg);}}
-  #resultadoRastreo{margin-top:24px;}
-  .rastreo-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-md);padding:24px;box-shadow:var(--shadow-card);animation:cardIn .35s ease;}
-  @keyframes cardIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
-  .rastreo-card .rt-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
-  .rastreo-card .rt-tienda{font-family:var(--font-display);font-size:16.5px;}
-  .rastreo-card .rt-tracking{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);margin-top:2px;}
-  .rt-badge{display:inline-block;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;}
-  .rt-badge.prealertado{background:var(--amber-bg);color:var(--accent-dark);}
-  .rt-badge.en_bodega_miami,.rt-badge.en_transito,.rt-badge.en_panama{background:rgba(58,110,165,0.12);color:#3a6ea5;}
-  .rt-badge.listo_para_retiro{background:var(--cargo-green-bg);color:var(--cargo-green);}
-  .rt-badge.entregado{background:rgba(12,27,51,0.08);color:var(--ink-soft);}
-  .rt-rail{display:flex;gap:3px;margin-top:20px;}
-  .rt-rail .seg{flex:1;height:5px;border-radius:3px;background:rgba(12,27,51,0.09);transition:background .3s ease,box-shadow .3s ease;}
-  [data-theme="dark"] .rt-rail .seg{background:rgba(232,237,245,0.09);}
-  .rt-rail .seg.done{background:var(--accent);box-shadow:0 0 8px rgba(255,106,26,0.5);}
-  .rt-steps-label{display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--ink-soft);}
-  .rt-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:20px;}
-  .rt-fotos img{width:100%;height:90px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--line);cursor:pointer;}
-  .rt-error{background:var(--amber-bg);border:1px solid rgba(255,106,26,0.3);color:var(--accent-dark);border-radius:var(--radius-md);padding:17px;font-size:13.5px;}
-  /* SECCIONES */
-  .section{max-width:1180px;margin:0 auto;padding:78px 26px;}
-  .section-head{max-width:580px;margin:0 0 38px;}
-  .section-head .eyebrow{color:var(--accent-dark);margin-bottom:12px;}
-  .section-head .eyebrow::before{box-shadow:none;animation:none;}
-  .section-head h2{font-family:var(--font-display);font-size:clamp(23px,3.1vw,32px);letter-spacing:-0.01em;margin:0 0 11px;}
-  .section-head p{color:var(--ink-soft);font-size:14.5px;line-height:1.6;margin:0;}
-  .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;perspective:1000px;}
-  .step-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-md);padding:22px;box-shadow:var(--shadow-card);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;position:relative;transform-style:preserve-3d;}
-  .step-card:hover{transform:translateY(-4px) rotateX(4deg);box-shadow:var(--shadow-card-hover);border-color:rgba(255,106,26,0.35);}
-  .step-card:not(:last-child)::after{content:'';position:absolute;top:50%;right:-9px;width:8px;height:1px;background-image:linear-gradient(to right,rgba(12,27,51,0.25) 50%,transparent 0%);background-size:4px 1px;background-repeat:repeat-x;}
-  .step-card .num{font-family:var(--font-display);font-size:23px;color:var(--accent);}
-  .step-card h3{font-family:var(--font-display);font-size:14.5px;margin:11px 0 6px;}
-  .step-card p{font-size:12.5px;color:var(--ink-soft);line-height:1.55;margin:0;}
-  @media(max-width:860px){.steps-grid{grid-template-columns:1fr 1fr;}.step-card::after{display:none;}}
-  @media(max-width:520px){.steps-grid{grid-template-columns:1fr;}}
-  .tarifas-band{background:var(--ink);color:#f1f3f2;position:relative;overflow:hidden;}
-  [data-theme="dark"] .tarifas-band{background:#0a1220;}
-  .tarifas-band::before{content:'';position:absolute;top:-20%;left:-10%;width:50%;height:80%;background:radial-gradient(circle,rgba(255,106,26,0.12),transparent 70%);pointer-events:none;}
-  .tarifas-band::after{content:'';position:absolute;bottom:-30%;right:-15%;width:55%;height:80%;background:radial-gradient(circle,rgba(23,122,99,0.14),transparent 70%);pointer-events:none;}
-  .tarifas-band .section-head p{color:rgba(241,243,242,0.6);}
-  .tarifas-band .section-head .eyebrow{color:var(--accent);}
-  .tarifas-band>*{position:relative;}
-  .tarifas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-  .tarifa-card{background:rgba(241,243,242,0.05);border:1px solid rgba(241,243,242,0.14);border-radius:var(--radius-md);padding:24px;transition:border-color .2s ease,background .2s ease,transform .2s ease;backdrop-filter:blur(6px);}
-  .tarifa-card:hover{border-color:rgba(255,106,26,0.45);background:rgba(241,243,242,0.08);transform:translateY(-3px);}
-  .tarifa-card .precio{font-family:var(--font-display);font-size:29px;color:var(--accent);text-shadow:0 0 20px var(--accent-glow);}
-  .tarifa-card .precio span{font-size:13px;color:rgba(241,243,242,0.6);font-family:var(--font-body);text-shadow:none;}
-  .tarifa-card h3{font-family:var(--font-display);font-size:14px;margin:9px 0 7px;}
-  .tarifa-card p{font-size:12px;color:rgba(241,243,242,0.6);line-height:1.6;margin:0;}
-  @media(max-width:760px){.tarifas-grid{grid-template-columns:1fr;}}
-  .calculadora-box{margin-top:38px;background:rgba(241,243,242,0.05);border:1px solid rgba(241,243,242,0.15);border-radius:var(--radius-lg);padding:28px;backdrop-filter:blur(6px);}
-  .calculadora-box h3{font-family:var(--font-display);font-size:16px;margin:0 0 18px;color:#f1f3f2;}
-  .calc-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-  .calc-row label{display:block;font-size:12px;color:rgba(241,243,242,0.6);margin-bottom:6px;}
-  .calc-row input,.calc-row select{width:100%;padding:11px 13px;border-radius:var(--radius-sm);border:1px solid rgba(241,243,242,0.2);background:rgba(0,0,0,0.2);color:#f1f3f2;font-family:var(--font-body);font-size:13.5px;}
-  .calc-row select option{color:var(--ink);}
-  .calc-check{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;color:rgba(241,243,242,0.75);cursor:pointer;}
-  #calcResultado{margin-top:18px;}
-  .calc-total{background:rgba(255,106,26,0.12);border:1px solid rgba(255,106,26,0.35);border-radius:var(--radius-md);padding:18px 20px;animation:cardIn .3s ease;}
-  .calc-total .linea{display:flex;justify-content:space-between;font-size:12.5px;color:rgba(241,243,242,0.7);margin-bottom:5px;}
-  .calc-total .total-final{display:flex;justify-content:space-between;font-family:var(--font-display);font-size:20px;color:var(--accent);margin-top:11px;padding-top:11px;border-top:1px solid rgba(241,243,242,0.15);text-shadow:0 0 20px var(--accent-glow);}
-  @media(max-width:760px){.calc-row{grid-template-columns:1fr;}}
-  .sucursales-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-  .sucursal-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-md);padding:20px;box-shadow:var(--shadow-card);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;}
-  .sucursal-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-card-hover);border-color:rgba(255,106,26,0.3);}
-  .sucursal-card h3{font-family:var(--font-display);font-size:14.5px;margin:0 0 10px;}
-  .sucursal-card .linea{font-size:12.5px;color:var(--ink-soft);margin-bottom:5px;}
-  @media(max-width:860px){.sucursales-grid{grid-template-columns:1fr 1fr;}}
-  @media(max-width:560px){.sucursales-grid{grid-template-columns:1fr;}}
-  .faq-item{border-bottom:1px solid var(--line);padding:18px 0;}
-  .faq-q{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;font-family:var(--font-display);font-size:15.5px;}
-  .faq-q .plus{font-size:19px;color:var(--accent);transition:transform .2s ease;flex-shrink:0;}
-  .faq-item.open .faq-q .plus{transform:rotate(45deg);}
-  .faq-a{display:none;font-size:13.5px;color:var(--ink-soft);line-height:1.65;margin-top:11px;max-width:68ch;}
-  .faq-item.open .faq-a{display:block;animation:faqIn .25s ease;}
-  @keyframes faqIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
-  .contacto-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .contacto-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-md);padding:24px;display:flex;flex-direction:column;gap:7px;box-shadow:var(--shadow-card);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;}
-  .contacto-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-card-hover);border-color:rgba(255,106,26,0.3);}
-  .contacto-card .ico{font-size:21px;}
-  .contacto-card h3{font-family:var(--font-display);font-size:14.5px;margin:7px 0 2px;}
-  .contacto-card p{font-size:12.5px;color:var(--ink-soft);margin:0;}
-  .contacto-card a.link{font-size:12.5px;color:var(--accent-dark);font-weight:600;margin-top:7px;}
-  @media(max-width:760px){.contacto-grid{grid-template-columns:1fr;}}
-  footer{background:var(--ink);color:rgba(241,243,242,0.6);padding:38px 26px;position:relative;overflow:hidden;}
-  [data-theme="dark"] footer{background:#080e1c;}
-  .footer-inner{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;font-size:12.5px;position:relative;}
-  .footer-inner .brand{color:#f1f3f2;}
-  .whatsapp-float{position:fixed;bottom:22px;right:22px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--whatsapp);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(37,211,102,0.4);animation:pulse-wsp 2.4s ease-in-out infinite;transition:transform .15s ease;}
-  .whatsapp-float:hover{transform:scale(1.08);}
-  @keyframes pulse-wsp{0%,100%{box-shadow:0 8px 24px rgba(37,211,102,0.4);}50%{box-shadow:0 8px 24px rgba(37,211,102,0.7),0 0 0 8px rgba(37,211,102,0.12);}}
-  a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+/* ============================================================
+   TOKENS
+============================================================ */
+:root{
+  --ink:#0c1b33; --ink-soft:rgba(12,27,51,0.62); --ink-faint:rgba(12,27,51,0.38);
+  --paper:#f0f2f1; --panel:#ffffff; --panel-alt:#f7f8f7;
+  --line:rgba(12,27,51,0.10); --line-soft:rgba(12,27,51,0.06);
+  --accent:#ff6a1a; --accent-dark:#e2570e; --accent-light:#ff8c4b;
+  --accent-glow:rgba(255,106,26,0.50); --accent-bg:rgba(255,106,26,0.08);
+  --green:#177a63; --green-bg:rgba(23,122,99,0.10); --green-glow:rgba(23,122,99,0.40);
+  --blue:#2563eb; --blue-bg:rgba(37,99,235,0.08);
+  --whatsapp:#25d366;
+  --fd:'Space Grotesk',sans-serif; --fb:'Inter',sans-serif; --fm:'JetBrains Mono',monospace;
+  --r-sm:8px; --r-md:14px; --r-lg:22px; --r-xl:32px;
+  --sh:0 1px 2px rgba(12,27,51,0.04),0 8px 24px -8px rgba(12,27,51,0.10);
+  --sh-hover:0 4px 12px rgba(12,27,51,0.06),0 20px 48px -12px rgba(12,27,51,0.18);
+  --tr:.22s ease;
+}
+[data-theme="dark"]{
+  --ink:#e4eaf5; --ink-soft:rgba(228,234,245,0.62); --ink-faint:rgba(228,234,245,0.38);
+  --paper:#0b1220; --panel:#111927; --panel-alt:#141e2e;
+  --line:rgba(228,234,245,0.09); --line-soft:rgba(228,234,245,0.05);
+  --sh:0 1px 2px rgba(0,0,0,0.25),0 8px 24px -8px rgba(0,0,0,0.45);
+  --sh-hover:0 4px 12px rgba(0,0,0,0.35),0 20px 48px -12px rgba(0,0,0,0.55);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:16px;}
+body{background:var(--paper);color:var(--ink);font-family:var(--fb);overflow-x:hidden;transition:background var(--tr),color var(--tr);}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+section{scroll-margin-top:80px;}
+::selection{background:var(--accent);color:#fff;}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}
+
+/* ============================================================
+   REVEAL
+============================================================ */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .65s ease,transform .65s ease;}
+.reveal.in{opacity:1;transform:none;}
+.reveal-l{opacity:0;transform:translateX(-24px);transition:opacity .65s ease,transform .65s ease;}
+.reveal-l.in{opacity:1;transform:none;}
+.reveal-r{opacity:0;transform:translateX(24px);transition:opacity .65s ease,transform .65s ease;}
+.reveal-r.in{opacity:1;transform:none;}
+.delay-1{transition-delay:.1s;}
+.delay-2{transition-delay:.2s;}
+.delay-3{transition-delay:.3s;}
+.delay-4{transition-delay:.4s;}
+
+/* ============================================================
+   NAV
+============================================================ */
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(12,27,51,0.93);backdrop-filter:blur(18px) saturate(170%);
+  -webkit-backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  transition:background var(--tr);
+}
+[data-theme="dark"] .nav{background:rgba(7,12,22,0.95);}
+.nav-inner{max-width:1180px;margin:0 auto;padding:0 24px;height:62px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--fd);font-weight:700;font-size:15px;color:#fff;flex-shrink:0;}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;box-shadow:0 0 0 1px rgba(255,106,26,0.3),0 2px 18px var(--accent-glow);flex-shrink:0;}
+.brand-sub{font-size:10px;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.42);font-family:var(--fb);display:block;margin-top:1px;}
+.nav-links{display:flex;align-items:center;gap:2px;flex:1;justify-content:center;}
+.nav-a{color:rgba(255,255,255,0.8);font-size:13.5px;font-weight:500;padding:8px 13px;border-radius:7px;transition:background var(--tr),color var(--tr);white-space:nowrap;}
+.nav-a:hover{background:rgba(255,255,255,0.08);color:#fff;}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.ctrl-btn{background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);padding:6px 10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:background var(--tr);display:flex;align-items:center;gap:4px;}
+.ctrl-btn:hover{background:rgba(255,255,255,0.15);color:#fff;}
+.ctrl-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-cta{background:var(--accent);color:#fff!important;font-weight:700;padding:9px 18px;border-radius:7px;font-size:13.5px;box-shadow:0 2px 18px var(--accent-glow);transition:background var(--tr),transform var(--tr);}
+.nav-cta:hover{background:var(--accent-dark);transform:translateY(-1px);}
+.nav-toggle{display:none;background:none;border:none;color:rgba(255,255,255,0.8);font-size:22px;cursor:pointer;padding:6px 8px;-webkit-tap-highlight-color:transparent;}
+@media(max-width:900px){
+  .nav-links{display:none;position:absolute;top:62px;left:0;right:0;background:rgba(10,18,36,0.98);flex-direction:column;align-items:stretch;padding:12px 16px 20px;gap:4px;border-bottom:1px solid rgba(255,255,255,0.07);}
+  .nav-links.open{display:flex;}
+  .nav-a{padding:11px 14px;}
+  .nav-toggle{display:block;}
+  .nav-right .nav-cta{display:none;}
+}
+
+/* ============================================================
+   HERO
+============================================================ */
+.hero-shell{position:relative;overflow:hidden;background:var(--ink);min-height:620px;}
+.hero-shell::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 65% 55% at 12% 8%,rgba(255,106,26,0.17),transparent 58%),radial-gradient(ellipse 55% 45% at 88% 85%,rgba(23,122,99,0.16),transparent 60%),radial-gradient(ellipse 40% 60% at 55% 50%,rgba(37,99,235,0.06),transparent 70%);pointer-events:none;}
+#heroCanvas{position:absolute;inset:0;z-index:0;opacity:.9;}
+.hero{max-width:1180px;margin:0 auto;padding:92px 26px 80px;display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center;position:relative;z-index:2;color:#fff;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);}
+.eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 10px var(--accent-glow);animation:pulse-dot 1.9s ease-in-out infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.7);}}
+.hero h1{font-family:var(--fd);font-size:clamp(34px,4.8vw,56px);line-height:1.04;letter-spacing:-0.018em;margin:18px 0 20px;font-weight:700;}
+.hero h1 .hl{color:var(--accent);text-shadow:0 0 40px var(--accent-glow);}
+.hero .lead{font-size:16.5px;line-height:1.68;color:rgba(255,255,255,0.66);max-width:48ch;margin:0 0 32px;}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-solid{position:relative;display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-weight:700;font-size:14px;padding:14px 26px;border-radius:var(--r-sm);overflow:hidden;box-shadow:0 4px 28px var(--accent-glow);transition:transform var(--tr),box-shadow var(--tr);}
+.btn-solid::after{content:'';position:absolute;inset:0;translate:-120% 0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,0.4) 50%,transparent 70%);transition:translate .55s ease;}
+.btn-solid:hover{transform:translateY(-2px);box-shadow:0 8px 36px var(--accent-glow);}
+.btn-solid:hover::after{translate:120% 0;}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;border:1.5px solid rgba(255,255,255,0.24);color:#fff;font-weight:600;font-size:14px;padding:13px 24px;border-radius:var(--r-sm);transition:border-color var(--tr),background var(--tr);}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.55);background:rgba(255,255,255,0.06);}
+.route-strip{display:flex;align-items:center;gap:10px;margin-top:36px;font-family:var(--fm);font-size:11px;color:rgba(255,255,255,0.45);}
+.route-strip .city{flex-shrink:0;font-weight:600;letter-spacing:.05em;}
+.route-line-wrap{flex:1;position:relative;height:18px;overflow:visible;}
+.route-line-wrap svg{width:100%;height:18px;overflow:visible;}
+
+/* CARD DERECHA */
+.hero-card-wrap{perspective:1300px;}
+.hero-card{
+  background:linear-gradient(155deg,rgba(255,255,255,0.075),rgba(255,255,255,0.02));
+  border:1px solid rgba(255,255,255,0.13);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-radius:var(--r-lg);padding:30px;
+  box-shadow:0 32px 80px -16px rgba(0,0,0,0.6);
+  transform-style:preserve-3d;transition:transform .14s ease-out;
+  will-change:transform;position:relative;overflow:hidden;
+}
+.hero-card::before{
+  content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1px;
+  background:conic-gradient(from var(--a,0deg),transparent 0%,var(--accent) 14%,transparent 28%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  animation:spin-border 5s linear infinite;pointer-events:none;
+}
+@keyframes spin-border{to{--a:360deg;}}
+@property --a{syntax:'<angle>';inherits:false;initial-value:0deg;}
+.card-label{font-size:13px;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:4px;font-family:var(--fd);}
+.card-sub{font-size:11.5px;color:rgba(255,255,255,0.45);margin-bottom:20px;}
+.casillero-mock{
+  background:rgba(0,0,0,0.25);border:1px dashed rgba(255,255,255,0.18);
+  border-radius:10px;padding:16px 18px;
+  font-family:var(--fm);font-size:12.5px;line-height:2;color:rgba(255,255,255,0.8);
+}
+.casillero-mock .pty{color:var(--accent);font-weight:600;font-size:14px;}
+.card-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:20px;}
+.card-stat{background:rgba(0,0,0,0.22);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 12px;text-align:center;}
+.card-stat .n{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--accent);text-shadow:0 0 16px var(--accent-glow);}
+.card-stat .l{font-size:9.5px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+@media(max-width:860px){.hero{grid-template-columns:1fr;padding:52px 20px 56px;gap:44px;}.hero-card{max-width:440px;}}
+
+/* ============================================================
+   TRUST BAND
+============================================================ */
+.trust-band{background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.trust-inner{max-width:1180px;margin:0 auto;padding:28px 26px;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+.trust-item{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;}
+.trust-ico{font-size:26px;}
+.trust-num{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--ink);}
+.trust-lbl{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+@media(max-width:760px){.trust-inner{grid-template-columns:repeat(3,1fr);}.trust-item:nth-child(4),.trust-item:nth-child(5){display:none;}}
+@media(max-width:440px){.trust-inner{grid-template-columns:1fr 1fr;}.trust-item:nth-child(5){display:none;}.trust-item:nth-child(4){display:flex;}}
+
+/* ============================================================
+   SECCIÓN BASE
+============================================================ */
+.sec{max-width:1180px;margin:0 auto;padding:82px 26px;}
+.sec-head{max-width:600px;margin-bottom:48px;}
+.sec-head .eyebrow{color:var(--accent-dark);margin-bottom:14px;}
+.sec-head .eyebrow .pulse{animation:none;box-shadow:none;}
+.sec-head h2{font-family:var(--fd);font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.012em;font-weight:700;margin-bottom:12px;line-height:1.15;}
+.sec-head p{color:var(--ink-soft);font-size:15px;line-height:1.65;}
+
+/* ============================================================
+   RASTREO
+============================================================ */
+.rastreo-tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+.rtab{padding:9px 18px;border-radius:20px;border:1.5px solid var(--line);background:var(--panel);font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:all var(--tr);}
+.rtab.active{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 4px 16px rgba(12,27,51,0.2);}
+[data-theme="dark"] .rtab.active{box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+.rbox{max-width:660px;}
+.rform{display:flex;gap:10px;}
+.rform input{flex:1;padding:14px 18px;border-radius:var(--r-sm);border:1.5px solid var(--line);font-family:var(--fm);font-size:14px;color:var(--ink);background:var(--panel);transition:border-color var(--tr),box-shadow var(--tr);}
+.rform input:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,106,26,0.13);}
+.rform .btn-solid{border:none;cursor:pointer;font-size:14px;white-space:nowrap;}
+.spr{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;animation:spin-r .7s linear infinite;display:none;}
+.busy .spr{display:inline-block;}
+@keyframes spin-r{to{transform:rotate(360deg);}}
+.rhint{font-size:12.5px;color:var(--ink-soft);margin-bottom:18px;line-height:1.5;}
+#rResult{margin-top:26px;}
+.rcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:26px;box-shadow:var(--sh);animation:fadeUp .35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.rcard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+.rcard-store{font-family:var(--fd);font-size:17px;font-weight:600;}
+.rcard-track{font-family:var(--fm);font-size:11.5px;color:var(--ink-soft);margin-top:3px;}
+.rbadge{display:inline-block;padding:5px 13px;border-radius:20px;font-size:11.5px;font-weight:700;}
+.rbadge.prealertado{background:var(--accent-bg);color:var(--accent-dark);}
+.rbadge.en_bodega_miami,.rbadge.en_transito,.rbadge.en_panama{background:var(--blue-bg);color:var(--blue);}
+.rbadge.listo_para_retiro{background:var(--green-bg);color:var(--green);}
+.rbadge.entregado{background:rgba(12,27,51,0.07);color:var(--ink-soft);}
+.rrail{display:flex;gap:4px;margin-top:22px;}
+.rseg{flex:1;height:5px;border-radius:3px;background:var(--line);transition:background .4s ease,box-shadow .4s ease;}
+.rseg.done{background:var(--accent);box-shadow:0 0 8px rgba(255,106,26,0.45);}
+.rsteps{display:flex;justify-content:space-between;margin-top:9px;font-size:10px;color:var(--ink-faint);}
+.rfotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:20px;}
+.rfotos img{width:100%;height:88px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--line);cursor:pointer;transition:transform var(--tr);}
+.rfotos img:hover{transform:scale(1.04);}
+.rerror{background:var(--accent-bg);border:1px solid rgba(255,106,26,0.25);color:var(--accent-dark);border-radius:var(--r-md);padding:18px;font-size:13.5px;}
+
+/* ============================================================
+   FOTO BANDA
+============================================================ */
+.foto-banda{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+.foto-item{position:relative;overflow:hidden;aspect-ratio:4/3;}
+.foto-item img{width:100%;height:100%;object-fit:cover;transition:transform .55s cubic-bezier(.2,.8,.2,1),filter .55s ease;filter:saturate(1.08);}
+.foto-item:hover img{transform:scale(1.06);filter:saturate(1.2);}
+.foto-item::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 0 0 rgba(255,106,26,0);transition:box-shadow .3s ease;pointer-events:none;border-radius:0;}
+.foto-item:hover::after{box-shadow:inset 0 0 0 2px rgba(255,106,26,0.65);}
+.foto-cap{position:absolute;inset:auto 0 0 0;background:linear-gradient(to top,rgba(12,27,51,0.9) 0%,transparent 100%);padding:40px 18px 16px;color:#fff;font-size:13px;font-weight:600;}
+.foto-cap-num{font-family:var(--fm);color:var(--accent);font-size:10.5px;font-weight:700;display:block;margin-bottom:3px;}
+@media(max-width:680px){.foto-banda{grid-template-columns:1fr;gap:6px;}.foto-item{aspect-ratio:16/9;}}
+
+/* ============================================================
+   CÓMO FUNCIONA — TIMELINE
+============================================================ */
+.steps-timeline{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:32px 56px;}
+.steps-timeline::before{content:'';position:absolute;top:0;bottom:0;left:50%;width:1px;background:linear-gradient(to bottom,transparent,var(--line) 10%,var(--line) 90%,transparent);transform:translateX(-50%);}
+.step-item{display:flex;gap:20px;align-items:flex-start;}
+.step-item:nth-child(odd){justify-content:flex-end;text-align:right;flex-direction:row-reverse;}
+.step-item:nth-child(even){justify-content:flex-start;text-align:left;}
+.step-node{flex-shrink:0;width:52px;height:52px;border-radius:50%;background:var(--panel);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:18px;font-weight:700;color:var(--accent);box-shadow:var(--sh);transition:border-color var(--tr),box-shadow var(--tr),transform var(--tr);position:relative;z-index:1;}
+.step-item:hover .step-node{border-color:var(--accent);box-shadow:0 0 0 6px rgba(255,106,26,0.10);transform:scale(1.08);}
+.step-body h3{font-family:var(--fd);font-size:15.5px;font-weight:700;margin-bottom:7px;line-height:1.2;}
+.step-body p{font-size:13.5px;color:var(--ink-soft);line-height:1.6;max-width:28ch;}
+.step-icon{font-size:28px;margin-bottom:10px;}
+@media(max-width:760px){
+  .steps-timeline{grid-template-columns:1fr;gap:24px;}
+  .steps-timeline::before{display:none;}
+  .step-item,.step-item:nth-child(odd){flex-direction:row;text-align:left;justify-content:flex-start;}
+  .step-body p{max-width:none;}
+}
+
+/* ============================================================
+   TARIFAS + CALCULADORA
+============================================================ */
+.tarifas-shell{background:var(--ink);color:#fff;position:relative;overflow:hidden;}
+[data-theme="dark"] .tarifas-shell{background:#080d18;}
+.tarifas-shell::before{content:'';position:absolute;top:-25%;left:-15%;width:55%;height:90%;background:radial-gradient(circle,rgba(255,106,26,0.11),transparent 70%);pointer-events:none;}
+.tarifas-shell::after{content:'';position:absolute;bottom:-30%;right:-10%;width:55%;height:80%;background:radial-gradient(circle,rgba(23,122,99,0.13),transparent 70%);pointer-events:none;}
+.tarifas-shell .sec-head h2,.tarifas-shell .card-label{color:#fff;}
+.tarifas-shell .sec-head p{color:rgba(255,255,255,0.58);}
+.tarifas-shell .eyebrow{color:var(--accent);}
+.tarifas-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;position:relative;}
+.tcard{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r-md);padding:26px;backdrop-filter:blur(8px);transition:border-color var(--tr),background var(--tr),transform var(--tr);}
+.tcard:hover{border-color:rgba(255,106,26,0.45);background:rgba(255,255,255,0.09);transform:translateY(-4px);}
+.tcard .tprice{font-family:var(--fd);font-size:32px;font-weight:700;color:var(--accent);text-shadow:0 0 24px var(--accent-glow);}
+.tcard .tprice span{font-size:13px;color:rgba(255,255,255,0.5);font-family:var(--fb);text-shadow:none;font-weight:400;}
+.tcard h3{font-family:var(--fd);font-size:14.5px;font-weight:600;margin:10px 0 8px;}
+.tcard .tdetail{font-size:12px;color:rgba(255,255,255,0.55);line-height:1.65;}
+.tcard .tdetail span{display:block;}
+/* Calculadora */
+.calc-box{margin-top:44px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.13);border-radius:var(--r-lg);padding:32px;backdrop-filter:blur(8px);position:relative;}
+.calc-box h3{font-family:var(--fd);font-size:16.5px;font-weight:700;color:#fff;margin-bottom:22px;}
+.calc-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.calc-field label{display:block;font-size:11.5px;color:rgba(255,255,255,0.55);font-weight:600;margin-bottom:7px;text-transform:uppercase;letter-spacing:.05em;}
+.calc-field input,.calc-field select{width:100%;padding:12px 14px;border-radius:var(--r-sm);border:1px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.25);color:#fff;font-family:var(--fb);font-size:14px;transition:border-color var(--tr),box-shadow var(--tr);}
+.calc-field input:focus-visible,.calc-field select:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,106,26,0.15);}
+.calc-field select option{color:var(--ink);background:#fff;}
+.calc-check{display:flex;align-items:center;gap:9px;margin-top:18px;font-size:13.5px;color:rgba(255,255,255,0.7);cursor:pointer;}
+.calc-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
+#calcRes{margin-top:22px;}
+.calc-result{background:linear-gradient(135deg,rgba(255,106,26,0.14),rgba(255,106,26,0.06));border:1px solid rgba(255,106,26,0.32);border-radius:var(--r-md);padding:22px 24px;animation:fadeUp .3s ease;}
+.calc-row-line{display:flex;justify-content:space-between;font-size:13px;color:rgba(255,255,255,0.65);margin-bottom:6px;}
+.calc-total-line{display:flex;justify-content:space-between;font-family:var(--fd);font-size:22px;color:var(--accent);margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.14);text-shadow:0 0 22px var(--accent-glow);}
+@media(max-width:760px){.calc-fields{grid-template-columns:1fr;}}
+
+/* ============================================================
+   SUCURSALES
+============================================================ */
+.suc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.suc-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:22px;box-shadow:var(--sh);transition:transform var(--tr),box-shadow var(--tr),border-color var(--tr);}
+.suc-card:hover{transform:translateY(-4px);box-shadow:var(--sh-hover);border-color:rgba(255,106,26,0.28);}
+.suc-card h3{font-family:var(--fd);font-size:14.5px;font-weight:700;margin-bottom:12px;}
+.suc-line{font-size:13px;color:var(--ink-soft);margin-bottom:6px;display:flex;align-items:flex-start;gap:6px;}
+.suc-line .ico{flex-shrink:0;font-size:14px;}
+@media(max-width:860px){.suc-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.suc-grid{grid-template-columns:1fr;}}
+
+/* ============================================================
+   FAQ
+============================================================ */
+.faq-search-wrap{position:relative;max-width:480px;margin-bottom:28px;}
+.faq-search-wrap input{width:100%;padding:13px 18px 13px 44px;border-radius:var(--r-md);border:1.5px solid var(--line);background:var(--panel);color:var(--ink);font-size:14px;transition:border-color var(--tr),box-shadow var(--tr);}
+.faq-search-wrap input:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,106,26,0.12);}
+.faq-search-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none;color:var(--ink-faint);}
+.faq-item{border-bottom:1px solid var(--line);overflow:hidden;}
+.faq-q{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 0;cursor:pointer;font-family:var(--fd);font-size:15.5px;font-weight:600;line-height:1.3;transition:color var(--tr);}
+.faq-q:hover{color:var(--accent);}
+.faq-ico{width:28px;height:28px;border-radius:50%;background:var(--panel-alt);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:400;color:var(--accent);flex-shrink:0;transition:transform var(--tr),background var(--tr);}
+.faq-item.open .faq-ico{transform:rotate(45deg);background:var(--accent-bg);}
+.faq-a{display:none;font-size:14px;color:var(--ink-soft);line-height:1.7;padding-bottom:22px;max-width:70ch;}
+.faq-item.open .faq-a{display:block;animation:fadeUp .25s ease;}
+.faq-hidden{display:none!important;}
+
+/* ============================================================
+   CONTACTO
+============================================================ */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.contact-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:28px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:8px;transition:transform var(--tr),box-shadow var(--tr),border-color var(--tr);}
+.contact-card:hover{transform:translateY(-4px);box-shadow:var(--sh-hover);border-color:rgba(255,106,26,0.28);}
+.contact-ico{font-size:26px;margin-bottom:4px;}
+.contact-card h3{font-family:var(--fd);font-size:15px;font-weight:700;}
+.contact-card p{font-size:13px;color:var(--ink-soft);line-height:1.6;}
+.contact-link{font-size:13px;font-weight:700;color:var(--accent-dark);margin-top:6px;display:inline-flex;align-items:center;gap:5px;transition:color var(--tr);}
+.contact-link:hover{color:var(--accent);}
+@media(max-width:660px){.contact-grid{grid-template-columns:1fr;}}
+
+/* ============================================================
+   CTA BAND
+============================================================ */
+.cta-band{background:var(--accent);color:#fff;text-align:center;padding:72px 26px;}
+.cta-band h2{font-family:var(--fd);font-size:clamp(26px,4vw,38px);font-weight:700;margin-bottom:12px;letter-spacing:-0.01em;}
+.cta-band p{font-size:16px;color:rgba(255,255,255,0.8);margin-bottom:32px;max-width:52ch;margin-left:auto;margin-right:auto;line-height:1.6;}
+.btn-white{background:#fff;color:var(--accent);font-weight:700;font-size:15px;padding:15px 32px;border-radius:var(--r-sm);display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,0.2);transition:transform var(--tr),box-shadow var(--tr);}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.25);}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+footer{background:var(--ink);color:rgba(255,255,255,0.55);}
+[data-theme="dark"] footer{background:#060b16;}
+.footer-top{max-width:1180px;margin:0 auto;padding:52px 26px 44px;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;}
+.footer-brand{display:flex;flex-direction:column;gap:16px;}
+.footer-brand .brand{color:#fff;}
+.footer-brand p{font-size:13px;line-height:1.65;max-width:28ch;}
+.footer-brand .footer-social{display:flex;gap:10px;margin-top:4px;}
+.footer-social a{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:15px;transition:background var(--tr);}
+.footer-social a:hover{background:var(--accent);}
+.footer-col h4{font-family:var(--fd);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,0.5);margin-bottom:16px;}
+.footer-col a{display:block;font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:10px;transition:color var(--tr);}
+.footer-col a:hover{color:#fff;}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.07);padding:22px 26px;}
+.footer-bottom-inner{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-size:12px;color:rgba(255,255,255,0.35);}
+@media(max-width:760px){.footer-top{grid-template-columns:1fr 1fr;}.footer-brand{grid-column:1/-1;}}
+@media(max-width:480px){.footer-top{grid-template-columns:1fr;}.footer-brand{grid-column:auto;}}
+
+/* ============================================================
+   WHATSAPP FLOAT
+============================================================ */
+.wa-float{position:fixed;bottom:24px;right:24px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--whatsapp);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(37,211,102,0.45);animation:wa-pulse 2.6s ease-in-out infinite;transition:transform var(--tr);}
+.wa-float:hover{transform:scale(1.1);}
+@keyframes wa-pulse{0%,100%{box-shadow:0 8px 28px rgba(37,211,102,0.45);}50%{box-shadow:0 8px 28px rgba(37,211,102,0.7),0 0 0 10px rgba(37,211,102,0.10);}}
+
+/* ============================================================
+   RESPONSIVE MISC
+============================================================ */
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
 </style>
 </head>
 <body>
+
+<!-- NAV -->
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="brand">
-      <div class="mark">N</div>
-      <div>NEA CARGO XPRESS<small>Miami → Panamá</small></div>
+      <div class="brand-mark">N</div>
+      <div>NEA CARGO XPRESS<span class="brand-sub">Miami → Panamá</span></div>
     </a>
-    <button class="nav-toggle" id="navToggle">☰</button>
-    <div class="nav-menu" id="navMenu">
-      <div class="nav-item">
-        <button class="nav-btn" data-dropdown="ddSesion"><span data-i18n="nav_login">Iniciar sesión</span> <span class="caret">▾</span></button>
-        <div class="dropdown" id="ddSesion">
-          <a href="app.html" class="dropdown-link"><span data-i18n="nav_login">Iniciar sesión</span><span class="item-sub" data-i18n="nav_login_sub">Ya tengo un casillero</span></a>
-          <a href="app.html?registro" class="dropdown-link"><span data-i18n="nav_crear">Crear casillero</span><span class="item-sub" data-i18n="nav_crear_sub">Es gratis, toma 2 minutos</span></a>
-          <a href="admin.html" class="dropdown-link"><span data-i18n="nav_staff">Acceso staff</span><span class="item-sub" data-i18n="nav_staff_sub">Panel de operaciones</span></a>
-        </div>
-      </div>
-      <div class="nav-item">
-        <button class="nav-btn" data-dropdown="ddPreguntas"><span data-i18n="nav_faq">Preguntas</span> <span class="caret">▾</span></button>
-        <div class="dropdown" id="ddPreguntas">
-          <a href="#faq-prealertar" class="dropdown-link faq-link" data-i18n="faq_q1">¿Cómo prealerto un paquete?</a>
-          <a href="#faq-tiempo" class="dropdown-link faq-link" data-i18n="faq_q2">¿Cuánto tarda en llegar?</a>
-          <a href="#faq-costo" class="dropdown-link faq-link" data-i18n="faq_q3">¿Cómo se calcula el costo?</a>
-          <a href="#preguntas" class="dropdown-link" data-i18n="nav_all_faq">Ver todas las preguntas</a>
-        </div>
-      </div>
-      <a href="#rastreo" class="nav-btn" data-i18n="nav_track">Rastrear paquete</a>
-      <div class="nav-item right">
-        <button class="nav-btn" data-dropdown="ddContacto"><span data-i18n="nav_contact">Contáctanos</span> <span class="caret">▾</span></button>
-        <div class="dropdown" id="ddContacto">
-          <a href="https://wa.me/50762937497" target="_blank" rel="noopener" class="dropdown-link">WhatsApp<span class="item-sub">+507 6293-7497</span></a>
-          <a href="mailto:info@neacargoxpress.com" class="dropdown-link"><span data-i18n="nav_email">Correo</span><span class="item-sub">info@neacargoxpress.com</span></a>
-          <a href="#sucursales" class="dropdown-link"><span data-i18n="nav_branches">Nuestras sucursales</span><span class="item-sub" data-i18n="nav_branches_sub">Puntos de retiro en Panamá</span></a>
-        </div>
-      </div>
-      <a href="app.html?registro" class="nav-btn cta" data-i18n="nav_cta">Crear casillero gratis</a>
-      <!-- Controles de idioma y tema -->
-      <div class="nav-controls">
-        <button class="ctrl-btn" id="btnLang" title="Cambiar idioma / Change language">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          <span id="langLabel">EN</span>
-        </button>
-        <button class="ctrl-btn" id="btnTheme" title="Cambiar tema / Toggle theme">
-          <svg id="iconSun" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg id="iconMoon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-      </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menú">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="#como-funciona" class="nav-a">Cómo funciona</a>
+      <a href="#tarifas" class="nav-a">Tarifas</a>
+      <a href="#rastreo" class="nav-a">Rastrear</a>
+      <a href="#preguntas" class="nav-a">FAQ</a>
+      <a href="app.html" class="nav-a">Iniciar sesión</a>
+    </div>
+    <div class="nav-right">
+      <button class="ctrl-btn" id="btnLang" title="Cambiar idioma">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span id="langLabel">EN</span>
+      </button>
+      <button class="ctrl-btn" id="btnTheme">
+        <svg id="iSun" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="iMoon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="app.html?registro" class="nav-cta">Crear casillero gratis</a>
     </div>
   </div>
 </nav>
+
+<!-- HERO -->
 <div class="hero-shell">
-  <canvas id="networkCanvas"></canvas>
-  <section class="hero">
-    <div>
-      <div class="eyebrow" data-i18n="hero_eyebrow">Casillero virtual · Estados Unidos y China → Panamá</div>
-      <h1 data-i18n="hero_h1">Compra en EE.UU. y China.<br>Recíbelo en <span class="glow-word">Panamá</span>.</h1>
-      <p class="lead" data-i18n="hero_lead">Te damos una dirección en Miami, tú compras en Amazon, eBay, Shein, Alibaba o donde quieras — también traemos mercancía directo desde China. Nosotros lo recibimos, te avisamos, y lo traemos hasta tus manos — con seguimiento en cada paso.</p>
+  <canvas id="heroCanvas"></canvas>
+  <div class="hero">
+    <div class="reveal-l in">
+      <div class="eyebrow"><span class="pulse"></span> Casillero virtual · EE.UU. y China → Panamá</div>
+      <h1>Compra en EE.UU.<br>Recíbelo en <span class="hl">Panamá</span>.</h1>
+      <p class="lead">Te damos una dirección en Miami, tú compras en Amazon, eBay, Shein, Alibaba o donde quieras. Nosotros lo recibimos, fotografiamos, pesamos y lo traemos hasta tus manos — con seguimiento en cada paso.</p>
       <div class="hero-ctas">
-        <a href="app.html?registro" class="btn-solid" data-i18n="hero_cta1">Crear mi casillero gratis</a>
-        <a href="#rastreo" class="btn-outline" data-i18n="hero_cta2">Rastrear mi paquete</a>
+        <a href="app.html?registro" class="btn-solid">🚀 Crear mi casillero gratis</a>
+        <a href="#rastreo" class="btn-ghost">Rastrear mi paquete</a>
       </div>
       <div class="route-strip">
         <span class="city">MIAMI / CHINA</span>
-        <svg viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
-          <line class="route-line" x1="2" y1="7" x2="138" y2="7"/>
-          <circle class="route-dot" cx="2" cy="7" r="2.5"/>
-          <circle class="route-dot" cx="138" cy="7" r="2.5"/>
-          <path class="route-plane" d="M0,-3 L4,0 L0,3 L1,0 Z"/>
-        </svg>
+        <div class="route-line-wrap">
+          <svg viewBox="0 0 200 18" preserveAspectRatio="none" aria-hidden="true">
+            <line x1="4" y1="9" x2="196" y2="9" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-dasharray="2 6" stroke-linecap="round"/>
+            <circle cx="4" cy="9" r="3" fill="var(--accent)" filter="url(#gd)"/>
+            <circle cx="196" cy="9" r="3" fill="var(--accent)" filter="url(#gd)"/>
+            <path id="plane" d="M0,-4 L6,0 L0,4 L1.5,0 Z" fill="var(--accent)" filter="url(#gd)">
+              <animateMotion dur="4s" repeatCount="indefinite" keyTimes="0;0.07;0.93;1" keySplines=".42,0,.58,1;.42,0,.58,1;0,0,0,0" calcMode="spline">
+                <mpath href="#rpath"/>
+              </animateMotion>
+            </path>
+            <path id="rpath" d="M4,9 L196,9" fill="none"/>
+            <defs><filter id="gd"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          </svg>
+        </div>
         <span class="city">PANAMÁ</span>
       </div>
     </div>
-    <div class="tilt-wrap">
-      <div class="hero-card reveal" id="heroCard">
-        <h3 data-i18n="card_title">Tu casillero se ve así</h3>
-        <p class="small" data-i18n="card_sub">Lo usas como tu dirección de envío en cualquier tienda de EE.UU.</p>
+    <div class="hero-card-wrap reveal-r in" id="hCardWrap">
+      <div class="hero-card" id="hCard">
+        <div class="card-label">Tu casillero se ve así</div>
+        <div class="card-sub">Úsalo como dirección de envío en cualquier tienda de EE.UU.</div>
         <div class="casillero-mock">
-          <span class="suite">PTY-14981</span> <span data-i18n="card_name">TU NOMBRE</span> NEA CARGO XPRESS<br>
+          <span class="pty">PTY-14981</span> TU NOMBRE NEA CARGO XPRESS<br>
           8610 NW 72 STREET<br>
           MIAMI, FLORIDA 33195<br>
-          <span data-i18n="card_country">ESTADOS UNIDOS</span><br>
+          ESTADOS UNIDOS<br>
           1-305-406-3654
         </div>
-        <div class="stat-mini-row">
-          <div class="stat-mini"><div class="n" data-count-to="4">0</div><div class="l" data-i18n="stat_days">Días Miami–PTY (min)</div></div>
-          <div class="stat-mini"><div class="n" data-count-to="100" data-suffix="%">0%</div><div class="l" data-i18n="stat_track">Con seguimiento</div></div>
+        <div class="card-stats">
+          <div class="card-stat"><div class="n" data-to="4" data-suf="">0</div><div class="l">Días mín</div></div>
+          <div class="card-stat"><div class="n" data-to="100" data-suf="%">0%</div><div class="l">Seguimiento</div></div>
+          <div class="card-stat"><div class="n" data-to="0" data-suf="$0">$0</div><div class="l">Registro</div></div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 </div>
-<section class="section reveal" id="rastreo">
-  <div class="section-head">
-    <div class="eyebrow" data-i18n="track_eyebrow">Rastreo</div>
-    <h2 data-i18n="track_h2">¿Dónde está mi paquete?</h2>
-    <p data-i18n="track_p">No necesitas iniciar sesión para rastrear.</p>
+
+<!-- TRUST BAND -->
+<div class="trust-band">
+  <div class="trust-inner">
+    <div class="trust-item reveal delay-1">
+      <span class="trust-ico">📦</span>
+      <span class="trust-num" data-to="500" data-suf="+">500+</span>
+      <span class="trust-lbl">Paquetes entregados</span>
+    </div>
+    <div class="trust-item reveal delay-2">
+      <span class="trust-ico">👥</span>
+      <span class="trust-num" data-to="200" data-suf="+">200+</span>
+      <span class="trust-lbl">Clientes activos</span>
+    </div>
+    <div class="trust-item reveal delay-3">
+      <span class="trust-ico">⚡</span>
+      <span class="trust-num">4–7</span>
+      <span class="trust-lbl">Días de tránsito</span>
+    </div>
+    <div class="trust-item reveal delay-4">
+      <span class="trust-ico">🔒</span>
+      <span class="trust-num">100%</span>
+      <span class="trust-lbl">Paquetes asegurados</span>
+    </div>
+    <div class="trust-item reveal delay-4">
+      <span class="trust-ico">📸</span>
+      <span class="trust-num">100%</span>
+      <span class="trust-lbl">Fotografiados en bodega</span>
+    </div>
   </div>
-  <div class="rastreo-tabs">
-    <button class="rastreo-tab-btn active" data-rtab="nea" data-i18n="track_tab1">Mi paquete NEA Cargo Xpress</button>
-    <button class="rastreo-tab-btn" data-rtab="mundial" data-i18n="track_tab2">Rastreo mundial (cualquier courier)</button>
-  </div>
-  <div class="rastreo-box" id="panelRastreoNea">
-    <p class="rastreo-hint" data-i18n="track_hint1">Para paquetes que ya prealertaste con nosotros.</p>
-    <form id="formRastreo" class="rastreo-form">
-      <input type="text" id="inputTracking" placeholder="Ej. 1Z999AA10123456784" autocomplete="off">
-      <button class="btn-solid" type="submit" id="btnRastreo">
-        <span class="spinner-rastreo"></span><span data-i18n="track_btn">Rastrear</span>
-      </button>
-    </form>
-    <div id="resultadoRastreo"></div>
-  </div>
-  <div class="rastreo-box" id="panelRastreoMundial" style="display:none;">
-    <p class="rastreo-hint" data-i18n="track_hint2">Para cualquier número de tracking (USPS, UPS, DHL, FedEx, UniUni, y +3,400 transportistas más).</p>
-    <form id="formMundial" class="rastreo-form">
-      <input type="text" id="inputMundial" maxlength="50" placeholder="Ej. RR123456789CN" autocomplete="off">
-      <button class="btn-solid" type="submit" style="color:#fff;" data-i18n="track_btn2">Rastrear en el mundo ↗</button>
-    </form>
+</div>
+
+<!-- RASTREO -->
+<section id="rastreo">
+  <div class="sec">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="pulse"></span> Rastreo en tiempo real</div>
+      <h2>¿Dónde está mi paquete?</h2>
+      <p>No necesitas iniciar sesión. Ingresa tu número de tracking y te decimos en qué punto va.</p>
+    </div>
+    <div class="rastreo-tabs">
+      <button class="rtab active" data-rt="nea">Mi paquete NEA Cargo Xpress</button>
+      <button class="rtab" data-rt="mundial">Rastreo mundial (cualquier courier)</button>
+    </div>
+    <div class="rbox" id="panelNea">
+      <p class="rhint">Para paquetes que ya prealertaste con nosotros. Usa el número de tracking del courier (UPS, FedEx, USPS, DHL…).</p>
+      <form id="fRastreo" class="rform">
+        <input type="text" id="iTracking" placeholder="Ej. 1Z999AA10123456784" autocomplete="off">
+        <button class="btn-solid" type="submit" id="btnRastreo" style="border:none;cursor:pointer;">
+          <span class="spr"></span><span>Rastrear →</span>
+        </button>
+      </form>
+      <div id="rResult"></div>
+    </div>
+    <div class="rbox" id="panelMundial" style="display:none;">
+      <p class="rhint">Para cualquier número de tracking — USPS, UPS, DHL, FedEx, UniUni y +3,400 transportistas más.</p>
+      <form id="fMundial" class="rform">
+        <input type="text" id="iMundial" placeholder="Ej. RR123456789CN" autocomplete="off">
+        <button class="btn-solid" type="submit" style="border:none;cursor:pointer;color:#fff;">Rastrear en el mundo ↗</button>
+      </form>
+    </div>
   </div>
 </section>
-<section class="foto-banda reveal">
+
+<!-- FOTOS -->
+<div class="foto-banda reveal">
   <div class="foto-item">
-    <img src="https://images.unsplash.com/photo-1633174524827-db00a6b7bc74?auto=format&fit=crop&w=800&q=75" alt="Cajas de compras en línea listas para envío" loading="lazy">
-    <div class="foto-caption"><span class="foto-num">01</span><span data-i18n="foto1">Compras en Amazon, eBay y más</span></div>
+    <img src="https://images.unsplash.com/photo-1633174524827-db00a6b7bc74?auto=format&fit=crop&w=800&q=75" alt="Compras en línea" loading="lazy">
+    <div class="foto-cap"><span class="foto-cap-num">01 — Compras</span>Amazon, eBay, Shein y miles de tiendas más</div>
   </div>
   <div class="foto-item">
-    <img src="https://images.unsplash.com/photo-1635851801927-44c4d1c555af?auto=format&fit=crop&w=800&q=75" alt="Barco de carga con contenedores en el puerto" loading="lazy">
-    <div class="foto-caption"><span class="foto-num">02</span><span data-i18n="foto2">Viaja por mar o aire hasta Panamá</span></div>
+    <img src="https://images.unsplash.com/photo-1635851801927-44c4d1c555af?auto=format&fit=crop&w=800&q=75" alt="Carga marítima" loading="lazy">
+    <div class="foto-cap"><span class="foto-cap-num">02 — Tránsito</span>Por aire o mar hasta Panamá</div>
   </div>
   <div class="foto-item">
-    <img src="https://images.unsplash.com/photo-1735047974891-df59713d8192?auto=format&fit=crop&w=800&q=75" alt="Contenedores de carga apilados" loading="lazy">
-    <div class="foto-caption"><span class="foto-num">03</span><span data-i18n="foto3">Lo recibes en tu sucursal más cercana</span></div>
+    <img src="https://images.unsplash.com/photo-1735047974891-df59713d8192?auto=format&fit=crop&w=800&q=75" alt="Retiro de paquetes" loading="lazy">
+    <div class="foto-cap"><span class="foto-cap-num">03 — Retiro</span>En tu sucursal más cercana</div>
   </div>
-</section>
-<section class="section reveal" id="como-funciona">
-  <div class="section-head">
-    <div class="eyebrow" data-i18n="steps_eyebrow">Proceso</div>
-    <h2 data-i18n="steps_h2">Cuatro pasos, sin complicaciones</h2>
-    <p data-i18n="steps_p">Desde que compras hasta que retiras tu paquete, siempre sabes en qué punto va.</p>
-  </div>
-  <div class="steps-grid">
-    <div class="step-card"><div class="num">01</div><h3 data-i18n="step1_h">Crea tu casillero</h3><p data-i18n="step1_p">Regístrate gratis y te asignamos una dirección personal en Miami al instante.</p></div>
-    <div class="step-card"><div class="num">02</div><h3 data-i18n="step2_h">Compra y prealerta</h3><p data-i18n="step2_p">Compra en la tienda que quieras usando tu dirección, y avísanos qué compraste en la app.</p></div>
-    <div class="step-card"><div class="num">03</div><h3 data-i18n="step3_h">Lo recibimos y pesamos</h3><p data-i18n="step3_p">Tu paquete llega a nuestra bodega, lo fotografiamos, pesamos y actualizamos su estado.</p></div>
-    <div class="step-card"><div class="num">04</div><h3 data-i18n="step4_h">Retira en Panamá</h3><p data-i18n="step4_p">Te avisamos por correo y WhatsApp cuando esté listo en tu sucursal más cercana.</p></div>
-  </div>
-</section>
-<section class="section tarifas-band reveal" id="tarifas">
-  <div class="section-head">
-    <div class="eyebrow" data-i18n="rates_eyebrow">Tarifas</div>
-    <h2 data-i18n="rates_h2">Precios claros, sin sorpresas</h2>
-    <p data-i18n="rates_p">Pagas por lo que pesa tu paquete. Sin cargos escondidos.</p>
-  </div>
-  <div class="tarifas-grid" id="tarifasGrid"><div class="tarifa-card"><p data-i18n="loading">Cargando tarifas…</p></div></div>
-  <div class="calculadora-box">
-    <h3 data-i18n="calc_h">Calcula el costo estimado de tu envío</h3>
-    <div class="calc-row">
-      <div><label for="calcTarifa" data-i18n="calc_rate">Tarifa</label><select id="calcTarifa"></select></div>
-      <div><label for="calcPeso" data-i18n="calc_weight">Peso estimado (lb)</label><input type="number" id="calcPeso" min="0" step="0.1" placeholder="Ej. 3.5"></div>
-      <div><label for="calcValor" data-i18n="calc_value">Valor declarado (USD, opcional)</label><input type="number" id="calcValor" min="0" step="0.01" placeholder="Ej. 60"></div>
+</div>
+
+<!-- CÓMO FUNCIONA -->
+<section id="como-funciona">
+  <div class="sec">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="pulse"></span> Proceso</div>
+      <h2>Cuatro pasos, sin complicaciones</h2>
+      <p>Desde que compras hasta que retiras tu paquete, siempre sabes en qué punto va.</p>
     </div>
-    <label class="calc-check"><input type="checkbox" id="calcSeguro"> <span data-i18n="calc_insurance">Agregar seguro sobre el valor declarado</span></label>
-    <div id="calcResultado"></div>
-  </div>
-</section>
-<section class="section reveal" id="sucursales">
-  <div class="section-head">
-    <div class="eyebrow" data-i18n="branches_eyebrow">Puntos de retiro</div>
-    <h2 data-i18n="branches_h2">Nuestras sucursales</h2>
-    <p data-i18n="branches_p">Retira tu paquete en el punto más cercano a ti.</p>
-  </div>
-  <div class="sucursales-grid" id="sucursalesGrid"><div class="sucursal-card"><p class="linea" data-i18n="loading_branches">Cargando sucursales…</p></div></div>
-</section>
-<section class="section reveal" id="preguntas">
-  <div class="section-head">
-    <div class="eyebrow" data-i18n="faq_eyebrow">Preguntas frecuentes</div>
-    <h2 data-i18n="faq_h2">Todo lo que necesitas saber</h2>
-    <p data-i18n="faq_p">¿No encuentras tu respuesta? Escríbenos por WhatsApp, te contestamos rápido.</p>
-  </div>
-  <div id="faqLista">
-    <div class="faq-item open" id="faq-prealertar">
-      <div class="faq-q"><span data-i18n="faq_q1">¿Cómo prealerto un paquete?</span><span class="plus">+</span></div>
-      <div class="faq-a" data-i18n="faq_a1">Desde tu dashboard, en la sección "Prealertar un paquete", ingresa la tienda, el número de tracking, una descripción y el valor declarado. Así lo identificamos apenas llega a la bodega.</div>
-    </div>
-    <div class="faq-item" id="faq-tiempo">
-      <div class="faq-q"><span data-i18n="faq_q2">¿Cuánto tarda en llegar a Panamá?</span><span class="plus">+</span></div>
-      <div class="faq-a" data-i18n="faq_a2">En promedio de 4 a 7 días hábiles desde que el paquete sale de nuestra bodega en Miami, dependiendo del volumen y la aduana.</div>
-    </div>
-    <div class="faq-item" id="faq-costo">
-      <div class="faq-q"><span data-i18n="faq_q3">¿Cómo se calcula el costo del envío?</span><span class="plus">+</span></div>
-      <div class="faq-a" data-i18n="faq_a3">Se cobra por el peso real del paquete confirmado en bodega (precio por libra), con un cargo mínimo por envío. Si agregas seguro, se suma un porcentaje sobre el valor declarado. Verás el detalle completo en tu factura.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q"><span data-i18n="faq_q4">¿Puedo ver fotos de cómo llegó mi paquete?</span><span class="plus">+</span></div>
-      <div class="faq-a" data-i18n="faq_a4">Sí. Cuando tu paquete llega a la bodega le tomamos fotos, y puedes verlas directamente en tu dashboard, en la tarjeta de ese paquete.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q"><span data-i18n="faq_q5">¿Cómo pago mi factura?</span><span class="plus">+</span></div>
-      <div class="faq-a" data-i18n="faq_a5">Te enviamos la factura por correo (con PDF adjunto) y por WhatsApp apenas se genera. Puedes pagarla en cualquiera de nuestras sucursales.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q"><span data-i18n="faq_q6">¿Qué no puedo enviar?</span><span class="plus">+</span></div>
-      <div class="faq-a" data-i18n="faq_a6">No se aceptan artículos restringidos o ilegales según la aduana panameña (armas, líquidos inflamables, ciertos medicamentos, etc.). Si tienes dudas sobre un producto en particular, escríbenos por WhatsApp antes de comprarlo.</div>
+    <div class="steps-timeline">
+      <div class="step-item reveal delay-1">
+        <div class="step-node">1</div>
+        <div class="step-body">
+          <div class="step-icon">🏠</div>
+          <h3>Crea tu casillero</h3>
+          <p>Regístrate gratis y recibe tu dirección personal en Miami al instante. Sin costos de apertura.</p>
+        </div>
+      </div>
+      <div class="step-item reveal delay-2">
+        <div class="step-node">2</div>
+        <div class="step-body">
+          <div class="step-icon">🛒</div>
+          <h3>Compra y prealerta</h3>
+          <p>Compra en cualquier tienda con tu dirección de Miami y avísanos qué enviaste desde la app.</p>
+        </div>
+      </div>
+      <div class="step-item reveal delay-3">
+        <div class="step-node">3</div>
+        <div class="step-body">
+          <div class="step-icon">📷</div>
+          <h3>Recibimos y fotografiamos</h3>
+          <p>Tu paquete llega a nuestra bodega en Miami. Lo fotografiamos, pesamos y actualizamos el estado.</p>
+        </div>
+      </div>
+      <div class="step-item reveal delay-4">
+        <div class="step-node">4</div>
+        <div class="step-body">
+          <div class="step-icon">🎉</div>
+          <h3>Retira en Panamá</h3>
+          <p>Te avisamos por correo y WhatsApp cuando esté listo. Retira con tu cédula o autoriza a alguien más.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
-<section class="section reveal" id="contacto">
-  <div class="section-head">
-    <div class="eyebrow" data-i18n="contact_eyebrow">Contáctanos</div>
-    <h2 data-i18n="contact_h2">Estamos para ayudarte</h2>
-    <p data-i18n="contact_p">Elige el canal que prefieras.</p>
-  </div>
-  <div class="contacto-grid">
-    <div class="contacto-card">
-      <div class="ico">💬</div>
-      <h3>WhatsApp</h3>
-      <p data-i18n="contact_wa_p">La forma más rápida de resolver dudas o dar seguimiento a tu paquete.</p>
-      <a class="link" href="https://wa.me/50762937497" target="_blank" rel="noopener">+507 6293-7497 →</a>
+
+<!-- TARIFAS + CALCULADORA -->
+<section class="tarifas-shell" id="tarifas">
+  <div class="sec">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="pulse"></span> Tarifas</div>
+      <h2>Precios claros, sin sorpresas</h2>
+      <p>Pagas por el peso real de tu paquete. Sin cargos escondidos, sin letra chica.</p>
     </div>
-    <div class="contacto-card">
-      <div class="ico">✉️</div>
-      <h3 data-i18n="contact_email_h">Correo</h3>
-      <p data-i18n="contact_email_p">Para consultas más detalladas o temas de facturación.</p>
-      <a class="link" href="mailto:info@neacargoxpress.com">info@neacargoxpress.com →</a>
+    <div class="tarifas-grid" id="tarifasGrid">
+      <div class="tcard"><p style="color:rgba(255,255,255,0.5);font-size:13px;">Cargando tarifas…</p></div>
+    </div>
+    <div class="calc-box reveal">
+      <h3>🧮 Calcula el costo estimado de tu envío</h3>
+      <div class="calc-fields">
+        <div class="calc-field"><label>Tarifa</label><select id="calcTarifa"></select></div>
+        <div class="calc-field"><label>Peso estimado (lb)</label><input type="number" id="calcPeso" min="0" step="0.1" placeholder="Ej. 3.5"></div>
+        <div class="calc-field"><label>Valor declarado (USD, opcional)</label><input type="number" id="calcValor" min="0" step="0.01" placeholder="Ej. 60"></div>
+      </div>
+      <label class="calc-check"><input type="checkbox" id="calcSeguro"> Agregar seguro sobre el valor declarado</label>
+      <div id="calcRes"></div>
     </div>
   </div>
 </section>
+
+<!-- SUCURSALES -->
+<section id="sucursales">
+  <div class="sec">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="pulse"></span> Puntos de retiro</div>
+      <h2>Nuestras sucursales</h2>
+      <p>Retira tu paquete en el punto más cercano a ti, con solo presentar tu cédula.</p>
+    </div>
+    <div class="suc-grid" id="sucGrid">
+      <div class="suc-card"><p style="color:var(--ink-soft);font-size:13px;">Cargando sucursales…</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="preguntas" style="background:var(--panel-alt);">
+  <div class="sec">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="pulse"></span> Preguntas frecuentes</div>
+      <h2>Todo lo que necesitas saber</h2>
+      <p>¿No encuentras tu respuesta? Escríbenos por WhatsApp, te contestamos en minutos.</p>
+    </div>
+    <div class="faq-search-wrap reveal">
+      <span class="faq-search-ico">🔍</span>
+      <input type="text" id="faqSearch" placeholder="Buscar pregunta…" autocomplete="off">
+    </div>
+    <div id="faqLista">
+      <div class="faq-item open" id="faq-prealertar">
+        <div class="faq-q"><span>¿Cómo prealerto un paquete?</span><span class="faq-ico">+</span></div>
+        <div class="faq-a">Desde tu dashboard, en la sección "Prealertar un paquete", ingresa la tienda, el número de tracking, una descripción y el valor declarado. Así lo identificamos apenas llega a nuestra bodega en Miami.</div>
+      </div>
+      <div class="faq-item" id="faq-tiempo">
+        <div class="faq-q"><span>¿Cuánto tarda en llegar a Panamá?</span><span class="faq-ico">+</span></div>
+        <div class="faq-a">En promedio de 4 a 7 días hábiles desde que el paquete sale de nuestra bodega en Miami, dependiendo del volumen y el proceso aduanal. Te avisamos en cada etapa del camino.</div>
+      </div>
+      <div class="faq-item" id="faq-costo">
+        <div class="faq-q"><span>¿Cómo se calcula el costo del envío?</span><span class="faq-ico">+</span></div>
+        <div class="faq-a">Se cobra por el peso real confirmado en bodega (precio × libra), con un cargo mínimo por paquete. Si agregas seguro, se suma un porcentaje del valor declarado. Puedes usar nuestra calculadora arriba para estimar tu costo antes de comprar.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>¿Puedo ver fotos de cómo llegó mi paquete?</span><span class="faq-ico">+</span></div>
+        <div class="faq-a">Sí. Cuando tu paquete llega a la bodega le tomamos fotos del exterior, y puedes verlas en tu dashboard en la tarjeta de ese paquete. Así tienes evidencia del estado en que llegó.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>¿Cómo pago mi factura?</span><span class="faq-ico">+</span></div>
+        <div class="faq-a">Te enviamos la factura por correo con PDF adjunto y por WhatsApp cuando se confirma el peso. El pago se realiza al momento de retirar tu paquete en la sucursal — aceptamos efectivo, tarjeta, transferencia y Yappy.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>¿Puedo autorizar a alguien más a retirar mis paquetes?</span><span class="faq-ico">+</span></div>
+        <div class="faq-a">Sí. Desde tu perfil puedes agregar hasta 3 personas autorizadas con nombre y cédula. Ellas podrán retirar tus paquetes presentando su cédula en la sucursal.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>¿También traen productos desde China?</span><span class="faq-ico">+</span></div>
+        <div class="faq-a">Sí. Trabajamos importaciones directas desde China, incluyendo compras en Alibaba y otras plataformas. Contáctanos por WhatsApp para coordinar los detalles de tu pedido.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>¿Qué artículos no puedo enviar?</span><span class="faq-ico">+</span></div>
+        <div class="faq-a">No aceptamos artículos restringidos o ilegales según la aduana panameña: armas, municiones, líquidos inflamables, ciertos medicamentos, cigarrillos electrónicos, entre otros. Si tienes dudas sobre un producto específico, escríbenos antes de comprarlo.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>¿Cuánto cuesta crear mi casillero?</span><span class="faq-ico">+</span></div>
+        <div class="faq-a">El registro es completamente gratuito. No hay cuotas mensuales ni cargos de apertura. Solo pagas cuando traemos un paquete.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="sec">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="pulse"></span> Contáctanos</div>
+      <h2>Estamos para ayudarte</h2>
+      <p>Elige el canal que prefieras. Respondemos rápido.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card reveal delay-1">
+        <div class="contact-ico">💬</div>
+        <h3>WhatsApp</h3>
+        <p>La forma más rápida de resolver dudas, dar seguimiento a tu paquete o coordinar una importación desde China.</p>
+        <a class="contact-link" href="https://wa.me/50762937497?text=Hola%2C%20necesito%20ayuda" target="_blank" rel="noopener">+507 6293-7497 →</a>
+      </div>
+      <div class="contact-card reveal delay-2">
+        <div class="contact-ico">✉️</div>
+        <h3>Correo electrónico</h3>
+        <p>Para consultas más detalladas, temas de facturación o documentación de importación.</p>
+        <a class="contact-link" href="mailto:info@neacargoxpress.com">info@neacargoxpress.com →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band reveal">
+  <h2>¿Listo para empezar?</h2>
+  <p>Crea tu casillero gratis en 2 minutos y empieza a comprar desde EE.UU. hoy mismo.</p>
+  <a href="app.html?registro" class="btn-white">Crear mi casillero gratis →</a>
+</div>
+
+<!-- FOOTER -->
 <footer>
-  <div class="footer-inner">
-    <div class="brand" style="font-family:var(--font-display);font-weight:700;">NEA CARGO XPRESS</div>
-    <div>© <span id="anioActual"></span> NEA Cargo Xpress. Miami → Panamá.</div>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="brand" style="font-family:var(--fd);font-weight:700;color:#fff;">
+        <div class="brand-mark">N</div>
+        <div>NEA CARGO XPRESS<span class="brand-sub">Miami → Panamá</span></div>
+      </div>
+      <p>Tu casillero virtual en Miami. Compra en EE.UU. y China, recibe en Panamá con seguimiento en tiempo real.</p>
+      <div class="footer-social">
+        <a href="https://wa.me/50762937497" target="_blank" rel="noopener" title="WhatsApp">💬</a>
+        <a href="mailto:info@neacargoxpress.com" title="Correo">✉️</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Servicio</h4>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#tarifas">Tarifas</a>
+      <a href="#sucursales">Sucursales</a>
+      <a href="#rastreo">Rastrear paquete</a>
+    </div>
+    <div class="footer-col">
+      <h4>Cuenta</h4>
+      <a href="app.html">Iniciar sesión</a>
+      <a href="app.html?registro">Crear casillero</a>
+      <a href="admin.html">Acceso staff</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <a href="https://wa.me/50762937497" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="mailto:info@neacargoxpress.com">info@neacargoxpress.com</a>
+      <a href="#preguntas">Preguntas frecuentes</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-bottom-inner">
+      <span>© <span id="anio"></span> NEA Cargo Xpress. Panamá.</span>
+      <span>Miami · Florida 33195 · 1-305-406-3654</span>
+    </div>
   </div>
 </footer>
-<a class="whatsapp-float" href="https://wa.me/50762937497?text=Hola%2C%20necesito%20ayuda%20con%20mi%20env%C3%ADo" target="_blank" rel="noopener" aria-label="WhatsApp">
-  <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16 2.5C8.5 2.5 2.5 8.5 2.5 16c0 2.6.7 5 2 7.1L2.5 29.5l6.6-1.9c2 1.1 4.4 1.8 6.9 1.8 7.5 0 13.5-6 13.5-13.4C29.5 8.5 23.5 2.5 16 2.5z" fill="white"/>
-    <path d="M16 2.5C8.5 2.5 2.5 8.5 2.5 16c0 2.6.7 5 2 7.1L2.5 29.5l6.6-1.9c2 1.1 4.4 1.8 6.9 1.8 7.5 0 13.5-6 13.5-13.4C29.5 8.5 23.5 2.5 16 2.5zm0 24.6c-2.2 0-4.4-.6-6.2-1.7l-.4-.3-4 1.1 1.1-3.9-.3-.4c-1.2-1.9-1.9-4.1-1.9-6.4 0-6.6 5.4-12 12-12s12 5.4 12 12-5.5 11.6-12.3 11.6z" fill="#25d366"/>
-    <path d="M22.1 18.9c-.4-.2-2.1-1-2.4-1.2-.3-.1-.5-.2-.8.2-.2.3-.9 1.2-1.1 1.4-.2.2-.4.3-.7.1-.4-.2-1.5-.5-2.8-1.7-1-.9-1.7-2.1-1.9-2.4-.2-.4 0-.5.1-.7.1-.2.4-.5.5-.6.2-.2.2-.4.3-.6.1-.2.1-.4 0-.6-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.3 3.6 5.7 5 .8.3 1.4.5 1.9.7.8.2 1.5.2 2 .1.6-.1 2.1-.8 2.3-1.7.3-.8.3-1.5.2-1.7-.1-.1-.3-.2-.7-.4z" fill="#25d366"/>
+
+<!-- WHATSAPP -->
+<a class="wa-float" href="https://wa.me/50762937497?text=Hola%2C%20necesito%20ayuda%20con%20mi%20env%C3%ADo" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+    <path d="M16 2.5C8.5 2.5 2.5 8.5 2.5 16c0 2.6.7 5 2 7.1L2.5 29.5l6.6-1.9c2 1.1 4.4 1.8 6.9 1.8 7.5 0 13.5-6 13.5-13.4C29.5 8.5 23.5 2.5 16 2.5zm0 24.6c-2.2 0-4.4-.6-6.2-1.7l-.4-.3-4 1.1 1.1-3.9-.3-.4c-1.2-1.9-1.9-4.1-1.9-6.4 0-6.6 5.4-12 12-12s12 5.4 12 12-5.5 11.6-12.3 11.6z" fill="white"/>
+    <path d="M22.1 18.9c-.4-.2-2.1-1-2.4-1.2-.3-.1-.5-.2-.8.2-.2.3-.9 1.2-1.1 1.4-.2.2-.4.3-.7.1-.4-.2-1.5-.5-2.8-1.7-1-.9-1.7-2.1-1.9-2.4-.2-.4 0-.5.1-.7.1-.2.4-.5.5-.6.2-.2.2-.4.3-.6.1-.2.1-.4 0-.6-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.4-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.3 3.6 5.7 5 .8.3 1.4.5 1.9.7.8.2 1.5.2 2 .1.6-.1 2.1-.8 2.3-1.7.3-.8.3-1.5.2-1.7-.1-.1-.3-.2-.7-.4z" fill="white"/>
   </svg>
 </a>
+
 <script>
-const $ = (sel) => document.querySelector(sel);
-$('#anioActual').textContent = new Date().getFullYear();
+/* ============================================================
+   INIT
+============================================================ */
+const $ = s => document.querySelector(s);
+$('#anio').textContent = new Date().getFullYear();
 
-/* ========== TRADUCCIONES ========== */
-const I18N = {
-  es: {
-    nav_login:'Iniciar sesión', nav_login_sub:'Ya tengo un casillero',
-    nav_crear:'Crear casillero', nav_crear_sub:'Es gratis, toma 2 minutos',
-    nav_staff:'Acceso staff', nav_staff_sub:'Panel de operaciones',
-    nav_faq:'Preguntas', nav_all_faq:'Ver todas las preguntas',
-    nav_track:'Rastrear paquete', nav_contact:'Contáctanos',
-    nav_email:'Correo', nav_branches:'Nuestras sucursales', nav_branches_sub:'Puntos de retiro en Panamá',
-    nav_cta:'Crear casillero gratis',
-    hero_eyebrow:'Casillero virtual · Estados Unidos y China → Panamá',
-    hero_h1:'Compra en EE.UU. y China.<br>Recíbelo en <span class="glow-word">Panamá</span>.',
-    hero_lead:'Te damos una dirección en Miami, tú compras en Amazon, eBay, Shein, Alibaba o donde quieras — también traemos mercancía directo desde China. Nosotros lo recibimos, te avisamos, y lo traemos hasta tus manos — con seguimiento en cada paso.',
-    hero_cta1:'Crear mi casillero gratis', hero_cta2:'Rastrear mi paquete',
-    card_title:'Tu casillero se ve así', card_sub:'Lo usas como tu dirección de envío en cualquier tienda de EE.UU.',
-    card_name:'TU NOMBRE', card_country:'ESTADOS UNIDOS',
-    stat_days:'Días Miami–PTY (min)', stat_track:'Con seguimiento',
-    track_eyebrow:'Rastreo', track_h2:'¿Dónde está mi paquete?', track_p:'No necesitas iniciar sesión para rastrear.',
-    track_tab1:'Mi paquete NEA Cargo Xpress', track_tab2:'Rastreo mundial (cualquier courier)',
-    track_hint1:'Para paquetes que ya prealertaste con nosotros.',
-    track_hint2:'Para cualquier número de tracking (USPS, UPS, DHL, FedEx, UniUni, y +3,400 transportistas más).',
-    track_btn:'Rastrear', track_btn2:'Rastrear en el mundo ↗',
-    foto1:'Compras en Amazon, eBay y más', foto2:'Viaja por mar o aire hasta Panamá', foto3:'Lo recibes en tu sucursal más cercana',
-    steps_eyebrow:'Proceso', steps_h2:'Cuatro pasos, sin complicaciones', steps_p:'Desde que compras hasta que retiras tu paquete, siempre sabes en qué punto va.',
-    step1_h:'Crea tu casillero', step1_p:'Regístrate gratis y te asignamos una dirección personal en Miami al instante.',
-    step2_h:'Compra y prealerta', step2_p:'Compra en la tienda que quieras usando tu dirección, y avísanos qué compraste en la app.',
-    step3_h:'Lo recibimos y pesamos', step3_p:'Tu paquete llega a nuestra bodega, lo fotografiamos, pesamos y actualizamos su estado.',
-    step4_h:'Retira en Panamá', step4_p:'Te avisamos por correo y WhatsApp cuando esté listo en tu sucursal más cercana.',
-    rates_eyebrow:'Tarifas', rates_h2:'Precios claros, sin sorpresas', rates_p:'Pagas por lo que pesa tu paquete. Sin cargos escondidos.',
-    calc_h:'Calcula el costo estimado de tu envío', calc_rate:'Tarifa', calc_weight:'Peso estimado (lb)', calc_value:'Valor declarado (USD, opcional)', calc_insurance:'Agregar seguro sobre el valor declarado',
-    loading:'Cargando tarifas…',
-    branches_eyebrow:'Puntos de retiro', branches_h2:'Nuestras sucursales', branches_p:'Retira tu paquete en el punto más cercano a ti.',
-    loading_branches:'Cargando sucursales…',
-    faq_eyebrow:'Preguntas frecuentes', faq_h2:'Todo lo que necesitas saber', faq_p:'¿No encuentras tu respuesta? Escríbenos por WhatsApp, te contestamos rápido.',
-    faq_q1:'¿Cómo prealerto un paquete?', faq_a1:'Desde tu dashboard, en la sección "Prealertar un paquete", ingresa la tienda, el número de tracking, una descripción y el valor declarado. Así lo identificamos apenas llega a la bodega.',
-    faq_q2:'¿Cuánto tarda en llegar a Panamá?', faq_a2:'En promedio de 4 a 7 días hábiles desde que el paquete sale de nuestra bodega en Miami, dependiendo del volumen y la aduana.',
-    faq_q3:'¿Cómo se calcula el costo del envío?', faq_a3:'Se cobra por el peso real del paquete confirmado en bodega (precio por libra), con un cargo mínimo por envío. Si agregas seguro, se suma un porcentaje sobre el valor declarado. Verás el detalle completo en tu factura.',
-    faq_q4:'¿Puedo ver fotos de cómo llegó mi paquete?', faq_a4:'Sí. Cuando tu paquete llega a la bodega le tomamos fotos, y puedes verlas directamente en tu dashboard, en la tarjeta de ese paquete.',
-    faq_q5:'¿Cómo pago mi factura?', faq_a5:'Te enviamos la factura por correo (con PDF adjunto) y por WhatsApp apenas se genera. Puedes pagarla en cualquiera de nuestras sucursales.',
-    faq_q6:'¿Qué no puedo enviar?', faq_a6:'No se aceptan artículos restringidos o ilegales según la aduana panameña (armas, líquidos inflamables, ciertos medicamentos, etc.). Si tienes dudas, escríbenos por WhatsApp antes de comprarlo.',
-    contact_eyebrow:'Contáctanos', contact_h2:'Estamos para ayudarte', contact_p:'Elige el canal que prefieras.',
-    contact_wa_p:'La forma más rápida de resolver dudas o dar seguimiento a tu paquete.',
-    contact_email_h:'Correo', contact_email_p:'Para consultas más detalladas o temas de facturación.',
-  },
-  en: {
-    nav_login:'Sign in', nav_login_sub:'I already have a locker',
-    nav_crear:'Create locker', nav_crear_sub:'It\'s free, takes 2 minutes',
-    nav_staff:'Staff access', nav_staff_sub:'Operations panel',
-    nav_faq:'FAQ', nav_all_faq:'View all questions',
-    nav_track:'Track package', nav_contact:'Contact us',
-    nav_email:'Email', nav_branches:'Our locations', nav_branches_sub:'Pickup points in Panama',
-    nav_cta:'Create free locker',
-    hero_eyebrow:'Virtual locker · United States and China → Panama',
-    hero_h1:'Shop in the U.S. and China.<br>Receive it in <span class="glow-word">Panama</span>.',
-    hero_lead:'We give you a Miami address — shop on Amazon, eBay, Shein, Alibaba or anywhere. We also bring merchandise directly from China. We receive it, notify you, and deliver it to your hands — with tracking at every step.',
-    hero_cta1:'Create my free locker', hero_cta2:'Track my package',
-    card_title:'Your locker looks like this', card_sub:'Use this as your shipping address at any U.S. store.',
-    card_name:'YOUR NAME', card_country:'UNITED STATES',
-    stat_days:'Days Miami–PTY (min)', stat_track:'With tracking',
-    track_eyebrow:'Tracking', track_h2:'Where is my package?', track_p:'You don\'t need to sign in to track.',
-    track_tab1:'My NEA Cargo Xpress package', track_tab2:'World tracking (any courier)',
-    track_hint1:'For packages you have already pre-alerted with us.',
-    track_hint2:'For any tracking number (USPS, UPS, DHL, FedEx, UniUni, and +3,400 more carriers).',
-    track_btn:'Track', track_btn2:'Track worldwide ↗',
-    foto1:'Shop on Amazon, eBay and more', foto2:'Travels by sea or air to Panama', foto3:'Pick up at your nearest location',
-    steps_eyebrow:'Process', steps_h2:'Four steps, no complications', steps_p:'From when you buy to when you pick up, you always know where it is.',
-    step1_h:'Create your locker', step1_p:'Sign up for free and we assign you a personal Miami address instantly.',
-    step2_h:'Shop and pre-alert', step2_p:'Shop at any store using your address, and let us know what you bought in the app.',
-    step3_h:'We receive and weigh it', step3_p:'Your package arrives at our warehouse, we photograph it, weigh it and update its status.',
-    step4_h:'Pick up in Panama', step4_p:'We notify you by email and WhatsApp when it\'s ready at your nearest location.',
-    rates_eyebrow:'Rates', rates_h2:'Clear pricing, no surprises', rates_p:'You pay for what your package weighs. No hidden charges.',
-    calc_h:'Calculate your estimated shipping cost', calc_rate:'Rate', calc_weight:'Estimated weight (lb)', calc_value:'Declared value (USD, optional)', calc_insurance:'Add insurance on declared value',
-    loading:'Loading rates…',
-    branches_eyebrow:'Pickup points', branches_h2:'Our locations', branches_p:'Pick up your package at the nearest point.',
-    loading_branches:'Loading locations…',
-    faq_eyebrow:'Frequently asked questions', faq_h2:'Everything you need to know', faq_p:'Can\'t find your answer? Message us on WhatsApp, we reply fast.',
-    faq_q1:'How do I pre-alert a package?', faq_a1:'From your dashboard, in the "Pre-alert a package" section, enter the store, tracking number, description and declared value. This helps us identify your package when it arrives at the warehouse.',
-    faq_q2:'How long does it take to arrive in Panama?', faq_a2:'On average 4 to 7 business days from when the package leaves our Miami warehouse, depending on volume and customs.',
-    faq_q3:'How is the shipping cost calculated?', faq_a3:'Charged by the actual weight confirmed at the warehouse (price per pound), with a minimum shipping charge. If you add insurance, a percentage of the declared value is added. You\'ll see the full breakdown in your invoice.',
-    faq_q4:'Can I see photos of how my package arrived?', faq_a4:'Yes. When your package arrives at the warehouse we photograph it, and you can see them directly in your dashboard, on that package\'s card.',
-    faq_q5:'How do I pay my invoice?', faq_a5:'We send the invoice by email (with PDF attached) and by WhatsApp as soon as it\'s generated. You can pay it at any of our locations.',
-    faq_q6:'What can\'t I ship?', faq_a6:'Restricted or illegal items per Panamanian customs (weapons, flammable liquids, certain medications, etc.) are not accepted. If you have doubts about a specific product, WhatsApp us before purchasing.',
-    contact_eyebrow:'Contact us', contact_h2:'We\'re here to help', contact_p:'Choose your preferred channel.',
-    contact_wa_p:'The fastest way to resolve questions or track your package.',
-    contact_email_h:'Email', contact_email_p:'For more detailed inquiries or billing matters.',
+/* ============================================================
+   TEMA
+============================================================ */
+let tema = localStorage.getItem('nea_theme') || 'light';
+function setTema(t){
+  tema = t; localStorage.setItem('nea_theme', t);
+  document.documentElement.setAttribute('data-theme', t);
+  $('#iSun').style.display = t === 'dark' ? 'block' : 'none';
+  $('#iMoon').style.display = t === 'dark' ? 'none' : 'block';
+}
+$('#btnTheme').addEventListener('click', () => setTema(tema === 'light' ? 'dark' : 'light'));
+setTema(tema);
+
+/* ============================================================
+   IDIOMA (stub — listo para expansión)
+============================================================ */
+let lang = localStorage.getItem('nea_lang') || 'es';
+function setLang(l){ lang = l; localStorage.setItem('nea_lang', l); $('#langLabel').textContent = l === 'es' ? 'EN' : 'ES'; }
+$('#btnLang').addEventListener('click', () => setLang(lang === 'es' ? 'en' : 'es'));
+setLang(lang);
+
+/* ============================================================
+   NAV MÓVIL
+============================================================ */
+$('#navToggle').addEventListener('click', e => {
+  e.stopPropagation();
+  $('#navLinks').classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if(!$('#navLinks').contains(e.target) && e.target !== $('#navToggle'))
+    $('#navLinks').classList.remove('open');
+});
+document.querySelectorAll('.nav-links .nav-a').forEach(a => {
+  a.addEventListener('click', () => $('#navLinks').classList.remove('open'));
+});
+
+/* ============================================================
+   SCROLL REVEAL
+============================================================ */
+if('IntersectionObserver' in window){
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+  }, { threshold: .10 });
+  document.querySelectorAll('.reveal, .reveal-l, .reveal-r').forEach(el => obs.observe(el));
+} else {
+  document.querySelectorAll('.reveal, .reveal-l, .reveal-r').forEach(el => el.classList.add('in'));
+}
+
+/* ============================================================
+   CONTADORES
+============================================================ */
+function animCount(el){
+  const to = Number(el.dataset.to), suf = el.dataset.suf || '', dur = 1200, start = performance.now();
+  if(to === 0){ el.textContent = suf; return; }
+  function tick(now){
+    const p = Math.min((now - start) / dur, 1), ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(ease * to) + suf;
+    if(p < 1) requestAnimationFrame(tick);
+    else el.textContent = to + suf;
   }
-};
-
-let currentLang = localStorage.getItem('nea_lang') || 'es';
-let currentTheme = localStorage.getItem('nea_theme') || 'light';
-
-function applyLang(lang) {
-  currentLang = lang;
-  localStorage.setItem('nea_lang', lang);
-  document.documentElement.lang = lang;
-  $('#langLabel').textContent = lang === 'es' ? 'EN' : 'ES';
-  const t = I18N[lang];
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (t[key] !== undefined) el.innerHTML = t[key];
-  });
+  requestAnimationFrame(tick);
 }
+const countObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ animCount(e.target); countObs.unobserve(e.target); } });
+}, { threshold: .5 });
+document.querySelectorAll('[data-to]').forEach(el => countObs.observe(el));
 
-function applyTheme(theme) {
-  currentTheme = theme;
-  localStorage.setItem('nea_theme', theme);
-  document.documentElement.setAttribute('data-theme', theme);
-  $('#iconSun').style.display = theme === 'dark' ? 'block' : 'none';
-  $('#iconMoon').style.display = theme === 'dark' ? 'none' : 'block';
-}
-
-$('#btnLang').addEventListener('click', () => applyLang(currentLang === 'es' ? 'en' : 'es'));
-$('#btnTheme').addEventListener('click', () => applyTheme(currentTheme === 'light' ? 'dark' : 'light'));
-
-applyLang(currentLang);
-applyTheme(currentTheme);
-
-/* ========== PARTÍCULAS ========== */
-(function redParticulas(){
-  const canvas=document.getElementById('networkCanvas'),ctx=canvas.getContext('2d'),heroShell=canvas.parentElement,prefiereReducido=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let puntos=[],ancho,alto;
-  function medir(){ancho=heroShell.offsetWidth;alto=heroShell.offsetHeight;canvas.width=ancho*devicePixelRatio;canvas.height=alto*devicePixelRatio;canvas.style.width=ancho+'px';canvas.style.height=alto+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);}
-  function crearPuntos(){const c=Math.min(70,Math.floor((ancho*alto)/16000));puntos=Array.from({length:c},()=>({x:Math.random()*ancho,y:Math.random()*alto,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.4+.6}));}
-  function paso(){ctx.clearRect(0,0,ancho,alto);const d=130;puntos.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>ancho)p.vx*=-1;if(p.y<0||p.y>alto)p.vy*=-1;});for(let i=0;i<puntos.length;i++){for(let j=i+1;j<puntos.length;j++){const a=puntos[i],b=puntos[j],dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<d){ctx.strokeStyle=`rgba(255,106,26,${(1-dist/d)*.16})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}}puntos.forEach(p=>{ctx.beginPath();ctx.fillStyle='rgba(241,243,242,0.5)';ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();});if(!prefiereReducido)requestAnimationFrame(paso);}
-  medir();crearPuntos();paso();if(prefiereReducido)paso();
-  window.addEventListener('resize',()=>{medir();crearPuntos();});
-})();
-
-/* ========== TILT ========== */
+/* ============================================================
+   HERO CANVAS (partículas)
+============================================================ */
 (function(){
-  const wrap=document.querySelector('.tilt-wrap'),card=document.getElementById('heroCard');
-  if(!wrap||!card||window.matchMedia('(prefers-reduced-motion:reduce)').matches||window.matchMedia('(pointer:coarse)').matches)return;
-  wrap.addEventListener('mousemove',(e)=>{const r=wrap.getBoundingClientRect(),px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;card.style.transform=`rotateY(${px*10}deg) rotateX(${-py*10}deg) translateZ(10px)`;});
-  wrap.addEventListener('mouseleave',()=>{card.style.transform='rotateY(0deg) rotateX(0deg) translateZ(0)';});
+  const canvas = $('#heroCanvas'), ctx = canvas.getContext('2d');
+  const shell = canvas.parentElement;
+  const reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let pts = [], w, h;
+  function size(){
+    w = shell.offsetWidth; h = shell.offsetHeight;
+    canvas.width = w * devicePixelRatio; canvas.height = h * devicePixelRatio;
+    canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  }
+  function init(){
+    const n = Math.min(65, Math.floor(w * h / 16000));
+    pts = Array.from({length:n}, () => ({
+      x: Math.random()*w, y: Math.random()*h,
+      vx: (Math.random()-.5)*.22, vy: (Math.random()-.5)*.22,
+      r: Math.random()*1.3+.6
+    }));
+  }
+  function draw(){
+    ctx.clearRect(0, 0, w, h);
+    const D = 120;
+    pts.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if(p.x < 0 || p.x > w) p.vx *= -1;
+      if(p.y < 0 || p.y > h) p.vy *= -1;
+    });
+    for(let i = 0; i < pts.length; i++)
+      for(let j = i+1; j < pts.length; j++){
+        const a = pts[i], b = pts[j], d = Math.hypot(a.x-b.x, a.y-b.y);
+        if(d < D){
+          ctx.strokeStyle = `rgba(255,106,26,${(1-d/D)*.16})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+    pts.forEach(p => {
+      ctx.fillStyle = 'rgba(241,243,242,0.48)';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+    });
+    if(!reduced) requestAnimationFrame(draw);
+  }
+  size(); init(); draw();
+  window.addEventListener('resize', () => { size(); init(); });
 })();
 
-/* ========== CONTADORES ========== */
-function animarContador(el){const meta=Number(el.dataset.countTo),suf=el.dataset.suffix||'',dur=1100,ini=performance.now();function tick(t){const p=Math.min((t-ini)/dur,1);el.textContent=Math.floor(p*meta)+suf;if(p<1)requestAnimationFrame(tick);else el.textContent=meta+suf;}requestAnimationFrame(tick);}
-if('IntersectionObserver' in window){const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in-view');obs.unobserve(e.target);}});},{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));}else{document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in-view'));}
-document.querySelectorAll('[data-count-to]').forEach(animarContador);
+/* ============================================================
+   TILT CARD
+============================================================ */
+(function(){
+  const wrap = $('#hCardWrap'), card = $('#hCard');
+  if(!wrap || !card || window.matchMedia('(prefers-reduced-motion:reduce)').matches || window.matchMedia('(pointer:coarse)').matches) return;
+  wrap.addEventListener('mousemove', e => {
+    const r = wrap.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - .5;
+    const py = (e.clientY - r.top) / r.height - .5;
+    card.style.transform = `rotateY(${px*10}deg) rotateX(${-py*10}deg) translateZ(12px)`;
+  });
+  wrap.addEventListener('mouseleave', () => { card.style.transform = ''; });
+})();
 
-/* ========== NAV ========== */
-function cerrarDropdowns(){document.querySelectorAll('.nav-item.open').forEach(i=>{i.classList.remove('open');const m=i.querySelector('.dropdown');if(m)m.style.display='';});}
-document.querySelectorAll('.nav-btn[data-dropdown]').forEach(btn=>{btn.addEventListener('click',(e)=>{e.stopPropagation();const item=btn.closest('.nav-item'),ya=item.classList.contains('open');cerrarDropdowns();if(!ya)item.classList.add('open');});});
-document.addEventListener('click',cerrarDropdowns);
-function ajustarMenuMovil(){const nav=document.querySelector('.nav'),menu=$('#navMenu');menu.style.height=(window.innerHeight-nav.getBoundingClientRect().bottom)+'px';}
-function cerrarMenuMovil(){$('#navMenu').classList.remove('open');}
-$('#navToggle').addEventListener('click',(e)=>{e.stopPropagation();const abriendo=!$('#navMenu').classList.contains('open');if(abriendo)ajustarMenuMovil();$('#navMenu').classList.toggle('open');});
-window.addEventListener('resize',()=>{if($('#navMenu').classList.contains('open'))ajustarMenuMovil();});
-document.querySelectorAll('.faq-q').forEach(q=>{q.addEventListener('click',()=>{q.closest('.faq-item').classList.toggle('open');});});
-const enlaces=document.querySelectorAll('.dropdown-link, .nav-menu > a.nav-btn');
-enlaces.forEach(link=>{link.addEventListener('click',(e)=>{e.stopPropagation();const href=link.getAttribute('href')||'',esFaq=link.classList.contains('faq-link'),esAncla=href.startsWith('#');cerrarDropdowns();cerrarMenuMovil();if(esAncla){e.preventDefault();const dest=document.querySelector(href);if(!dest)return;if(esFaq){document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));dest.classList.add('open');}setTimeout(()=>{dest.scrollIntoView({behavior:'smooth',block:'start'});},80);}});});
+/* ============================================================
+   RASTREO
+============================================================ */
+const ESTADOS = ['prealertado','en_bodega_miami','en_transito','en_panama','listo_para_retiro','entregado'];
+const ELABEL = {
+  prealertado:'Prealertado', en_bodega_miami:'En bodega Miami', en_transito:'En tránsito',
+  en_panama:'En Panamá', listo_para_retiro:'Listo para retiro', entregado:'Entregado'
+};
+function esc(s){ const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
 
-/* ========== API ========== */
-function escapeHtml(str){const d=document.createElement('div');d.textContent=str||'';return d.innerHTML;}
-async function cargarSucursales(){const grid=$('#sucursalesGrid');try{const res=await fetch('/api/sucursales'),data=await res.json(),s=data.sucursales||[];if(!s.length){grid.innerHTML=`<div class="sucursal-card"><p class="linea">${currentLang==='es'?'Muy pronto anunciaremos nuestras sucursales.':'Locations coming soon.'}</p></div>`;return;}grid.innerHTML=s.map(x=>`<div class="sucursal-card"><h3>${escapeHtml(x.nombre)}</h3><div class="linea">📍 ${escapeHtml(x.direccion)}</div>${x.telefono?`<div class="linea">📞 ${escapeHtml(x.telefono)}</div>`:''} ${x.horario?`<div class="linea">🕐 ${escapeHtml(x.horario)}</div>`:''}</div>`).join('');}catch(e){grid.innerHTML='<div class="sucursal-card"><p class="linea">—</p></div>';}}
-cargarSucursales();
-let tarifasCache=[];
-async function cargarTarifas(){const grid=$('#tarifasGrid'),sel=$('#calcTarifa');try{const res=await fetch('/api/public/tarifas'),data=await res.json();tarifasCache=data.tarifas||[];if(!tarifasCache.length){grid.innerHTML=`<div class="tarifa-card"><p>${currentLang==='es'?'Muy pronto publicaremos nuestras tarifas.':'Rates coming soon.'}</p></div>`;sel.innerHTML=`<option value="">${currentLang==='es'?'No hay tarifas':'No rates available'}</option>`;return;}grid.innerHTML=tarifasCache.map(t=>`<div class="tarifa-card"><div class="precio">$${Number(t.precio_libra).toFixed(2)}<span>/lb</span></div><h3>${escapeHtml(t.nombre)}</h3><p>${currentLang==='es'?'Cargo mínimo':'Min. charge'} $${Number(t.cargo_minimo).toFixed(2)} · ${currentLang==='es'?'Manejo':'Handling'} $${Number(t.cargo_manejo).toFixed(2)}${Number(t.pct_seguro)>0?` · ${currentLang==='es'?'Seguro opcional':'Optional insurance'} ${Number(t.pct_seguro)}%`:''}</p></div>`).join('');sel.innerHTML=tarifasCache.map(t=>`<option value="${t.id}">${escapeHtml(t.nombre)} — $${Number(t.precio_libra).toFixed(2)}/lb</option>`).join('');calcularEstimado();}catch(e){grid.innerHTML='<div class="tarifa-card"><p>—</p></div>';}}
-function calcularEstimado(){const cont=$('#calcResultado'),tarifa=tarifasCache.find(t=>t.id==$('#calcTarifa').value),peso=parseFloat($('#calcPeso').value),valor=parseFloat($('#calcValor').value),conSeguro=$('#calcSeguro').checked;if(!tarifa||isNaN(peso)||peso<=0){cont.innerHTML='';return;}const costoEnvio=Math.max(peso*Number(tarifa.precio_libra),Number(tarifa.cargo_minimo)),manejo=Number(tarifa.cargo_manejo),seguro=conSeguro&&!isNaN(valor)?(valor*Number(tarifa.pct_seguro))/100:0,total=costoEnvio+manejo+seguro;const l=currentLang;cont.innerHTML=`<div class="calc-total"><div class="linea"><span>${l==='es'?'Costo de envío':'Shipping cost'} (${peso} lb × $${tarifa.precio_libra}/lb)</span><span>$${costoEnvio.toFixed(2)}</span></div><div class="linea"><span>${l==='es'?'Cargo de manejo':'Handling fee'}</span><span>$${manejo.toFixed(2)}</span></div>${conSeguro?`<div class="linea"><span>${l==='es'?'Seguro':'Insurance'} (${tarifa.pct_seguro}%)</span><span>$${seguro.toFixed(2)}</span></div>`:''}<div class="total-final"><span>${l==='es'?'Estimado total':'Estimated total'}</span><span>$${total.toFixed(2)}</span></div></div>`;}
-['calcTarifa','calcPeso','calcValor','calcSeguro'].forEach(id=>{document.getElementById(id)?.addEventListener('input',calcularEstimado);});
-cargarTarifas();
+document.querySelectorAll('.rtab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.rtab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const mundial = btn.dataset.rt === 'mundial';
+    $('#panelNea').style.display = mundial ? 'none' : 'block';
+    $('#panelMundial').style.display = mundial ? 'block' : 'none';
+  });
+});
 
-/* ========== RASTREO ========== */
-const ESTADOS=['prealertado','en_bodega_miami','en_transito','en_panama','listo_para_retiro','entregado'];
-const ELABEL_ES={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
-const ELABEL_EN={prealertado:'Pre-alerted',en_bodega_miami:'In Miami warehouse',en_transito:'In transit',en_panama:'In Panama',listo_para_retiro:'Ready for pickup',entregado:'Delivered'};
-$('#formRastreo').addEventListener('submit',async(e)=>{e.preventDefault();const t=$('#inputTracking').value.trim(),cont=$('#resultadoRastreo'),btn=$('#btnRastreo');if(!t){cont.innerHTML=`<div class="rt-error">${currentLang==='es'?'Ingresa un número de tracking.':'Enter a tracking number.'}</div>`;return;}btn.classList.add('loading-rastreo');btn.disabled=true;cont.innerHTML='';try{const res=await fetch(`/api/public/rastreo/${encodeURIComponent(t)}`),data=await res.json();if(!res.ok){cont.innerHTML=`<div class="rt-error">${escapeHtml(data.mensaje||'No encontramos ese paquete.')}</div>`;return;}const idx=ESTADOS.indexOf(data.estado),rail=ESTADOS.map((_,i)=>`<div class="seg ${i<=idx?'done':''}"></div>`).join(''),fecha=new Date(data.fecha_actualizacion).toLocaleDateString(currentLang==='es'?'es-PA':'en-US',{day:'2-digit',month:'short',year:'numeric'}),lbl=currentLang==='es'?ELABEL_ES:ELABEL_EN;cont.innerHTML=`<div class="rastreo-card"><div class="rt-top"><div><div class="rt-tienda">${escapeHtml(data.tienda)}</div><div class="rt-tracking">#${escapeHtml(data.numero_tracking)} · ${currentLang==='es'?'Actualizado':'Updated'} ${fecha}</div></div><span class="rt-badge ${data.estado}">${lbl[data.estado]||data.estado}</span></div><div class="rt-rail">${rail}</div><div class="rt-steps-label"><span>${currentLang==='es'?'Prealertado':'Pre-alerted'}</span><span>${currentLang==='es'?'Entregado':'Delivered'}</span></div>${data.fotos&&data.fotos.length?`<div class="rt-fotos">${data.fotos.map(u=>`<img src="${u}" alt="Foto">`).join('')}</div>`:''}</div>`;cont.querySelectorAll('.rt-fotos img').forEach(img=>{img.addEventListener('click',()=>window.open(img.src,'_blank'));});}catch(err){cont.innerHTML=`<div class="rt-error">${currentLang==='es'?'No pudimos conectar con el servidor.':'Could not connect to the server.'}</div>`;}finally{btn.classList.remove('loading-rastreo');btn.disabled=false;}});
-document.querySelectorAll('.rastreo-tab-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.rastreo-tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const m=btn.dataset.rtab==='mundial';$('#panelRastreoNea').style.display=m?'none':'block';$('#panelRastreoMundial').style.display=m?'block':'none';});});
-$('#formMundial').addEventListener('submit',(e)=>{e.preventDefault();const n=$('#inputMundial').value.trim();if(!n){alert(currentLang==='es'?'Escribe un número de tracking.':'Enter a tracking number.');return;}window.open(`https://t.17track.net/es#nums=${encodeURIComponent(n)}`,'_blank');});
+$('#fRastreo').addEventListener('submit', async e => {
+  e.preventDefault();
+  const t = $('#iTracking').value.trim(), cont = $('#rResult'), btn = $('#btnRastreo');
+  if(!t){ cont.innerHTML = `<div class="rerror">Ingresa un número de tracking.</div>`; return; }
+  btn.classList.add('busy'); btn.disabled = true; cont.innerHTML = '';
+  try {
+    const res = await fetch(`/api/public/rastreo/${encodeURIComponent(t)}`);
+    const data = await res.json();
+    if(!res.ok){ cont.innerHTML = `<div class="rerror">${esc(data.mensaje||'No encontramos ese paquete.')}</div>`; return; }
+    const idx = ESTADOS.indexOf(data.estado);
+    const rail = ESTADOS.map((_,i) => `<div class="rseg ${i<=idx?'done':''}"></div>`).join('');
+    const fecha = new Date(data.fecha_actualizacion).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});
+    cont.innerHTML = `<div class="rcard">
+      <div class="rcard-top">
+        <div><div class="rcard-store">${esc(data.tienda)}</div><div class="rcard-track">#${esc(data.numero_tracking)} · Actualizado ${fecha}</div></div>
+        <span class="rbadge ${data.estado}">${ELABEL[data.estado]||data.estado}</span>
+      </div>
+      <div class="rrail">${rail}</div>
+      <div class="rsteps"><span>Prealertado</span><span>Entregado</span></div>
+      ${data.fotos?.length ? `<div class="rfotos">${data.fotos.map(u=>`<img src="${u}" alt="Foto del paquete">`).join('')}</div>` : ''}
+    </div>`;
+    cont.querySelectorAll('.rfotos img').forEach(img => img.addEventListener('click', () => window.open(img.src,'_blank')));
+  } catch(err){
+    cont.innerHTML = `<div class="rerror">No pudimos conectar con el servidor.</div>`;
+  } finally {
+    btn.classList.remove('busy'); btn.disabled = false;
+  }
+});
+
+$('#fMundial').addEventListener('submit', e => {
+  e.preventDefault();
+  const n = $('#iMundial').value.trim();
+  if(!n){ alert('Escribe un número de tracking.'); return; }
+  window.open(`https://t.17track.net/es#nums=${encodeURIComponent(n)}`, '_blank');
+});
+
+/* ============================================================
+   TARIFAS + CALCULADORA
+============================================================ */
+let tarifasCache = [];
+async function loadTarifas(){
+  const grid = $('#tarifasGrid'), sel = $('#calcTarifa');
+  try {
+    const res = await fetch('/api/public/tarifas'), data = await res.json();
+    tarifasCache = data.tarifas || [];
+    if(!tarifasCache.length){
+      grid.innerHTML = `<div class="tcard"><p style="color:rgba(255,255,255,0.5);">Muy pronto publicaremos nuestras tarifas.</p></div>`;
+      sel.innerHTML = `<option value="">No hay tarifas disponibles</option>`;
+      return;
+    }
+    grid.innerHTML = tarifasCache.map(t => `
+      <div class="tcard">
+        <div class="tprice">$${Number(t.precio_libra).toFixed(2)}<span>/lb</span></div>
+        <h3>${esc(t.nombre)}</h3>
+        <div class="tdetail">
+          <span>Cargo mínimo: <strong style="color:rgba(255,255,255,0.8);">$${Number(t.cargo_minimo).toFixed(2)}</strong></span>
+          <span>Manejo: <strong style="color:rgba(255,255,255,0.8);">$${Number(t.cargo_manejo).toFixed(2)}</strong></span>
+          ${Number(t.pct_seguro)>0 ? `<span>Seguro opcional: ${Number(t.pct_seguro)}% del valor declarado</span>` : ''}
+        </div>
+      </div>`).join('');
+    sel.innerHTML = tarifasCache.map(t => `<option value="${t.id}">${esc(t.nombre)} — $${Number(t.precio_libra).toFixed(2)}/lb</option>`).join('');
+    calcular();
+  } catch(e){
+    grid.innerHTML = `<div class="tcard"><p style="color:rgba(255,255,255,0.5);">No se pudieron cargar las tarifas.</p></div>`;
+  }
+}
+function calcular(){
+  const cont = $('#calcRes');
+  const tarifa = tarifasCache.find(t => t.id == $('#calcTarifa').value);
+  const peso = parseFloat($('#calcPeso').value);
+  const valor = parseFloat($('#calcValor').value);
+  const conSeg = $('#calcSeguro').checked;
+  if(!tarifa || isNaN(peso) || peso <= 0){ cont.innerHTML = ''; return; }
+  const envio = Math.max(peso * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
+  const manejo = Number(tarifa.cargo_manejo);
+  const seguro = conSeg && !isNaN(valor) ? (valor * Number(tarifa.pct_seguro)) / 100 : 0;
+  const total = envio + manejo + seguro;
+  cont.innerHTML = `<div class="calc-result">
+    <div class="calc-row-line"><span>Costo de envío (${peso} lb × $${Number(tarifa.precio_libra).toFixed(2)}/lb)</span><span>$${envio.toFixed(2)}</span></div>
+    <div class="calc-row-line"><span>Cargo de manejo</span><span>$${manejo.toFixed(2)}</span></div>
+    ${conSeg ? `<div class="calc-row-line"><span>Seguro (${Number(tarifa.pct_seguro)}%)</span><span>$${seguro.toFixed(2)}</span></div>` : ''}
+    <div class="calc-total-line"><span>Estimado total</span><span>$${total.toFixed(2)}</span></div>
+  </div>`;
+}
+['calcTarifa','calcPeso','calcValor','calcSeguro'].forEach(id => document.getElementById(id)?.addEventListener('input', calcular));
+loadTarifas();
+
+/* ============================================================
+   SUCURSALES
+============================================================ */
+async function loadSuc(){
+  const grid = $('#sucGrid');
+  try {
+    const res = await fetch('/api/sucursales'), data = await res.json();
+    const s = data.sucursales || [];
+    if(!s.length){
+      grid.innerHTML = `<div class="suc-card"><p style="color:var(--ink-soft);font-size:13px;">Muy pronto anunciaremos nuestras sucursales.</p></div>`;
+      return;
+    }
+    grid.innerHTML = s.map(x => `
+      <div class="suc-card">
+        <h3>${esc(x.nombre)}</h3>
+        <div class="suc-line"><span class="ico">📍</span><span>${esc(x.direccion)}</span></div>
+        ${x.telefono ? `<div class="suc-line"><span class="ico">📞</span><span>${esc(x.telefono)}</span></div>` : ''}
+        ${x.horario ? `<div class="suc-line"><span class="ico">🕐</span><span>${esc(x.horario)}</span></div>` : ''}
+      </div>`).join('');
+  } catch(e){
+    grid.innerHTML = `<div class="suc-card"><p style="color:var(--ink-soft);font-size:13px;">—</p></div>`;
+  }
+}
+loadSuc();
+
+/* ============================================================
+   FAQ — accordion + búsqueda
+============================================================ */
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => q.closest('.faq-item').classList.toggle('open'));
+});
+$('#faqSearch').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const texto = item.querySelector('.faq-q span').textContent.toLowerCase() +
+                  item.querySelector('.faq-a').textContent.toLowerCase();
+    item.classList.toggle('faq-hidden', q && !texto.includes(q));
+  });
+});
 </script>
 </body>
 </html>
