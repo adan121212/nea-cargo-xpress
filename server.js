@@ -22,6 +22,7 @@ const adminMostradorRoutes = require('./routes/admin/mostrador');
 const adminCajaRoutes = require('./routes/admin/caja');
 const adminRecepcionRoutes = require('./routes/admin/recepcion');
 const adminPtyRoutes = require('./routes/admin/ptycargoexpress');
+app.use('/api/admin/pty', adminPtyRoutes);
 
 const app = express();
 
