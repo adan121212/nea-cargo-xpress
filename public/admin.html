@@ -1024,11 +1024,28 @@
     </div>
     <!-- ---- TAB: PTY Cargo Express ---- -->
     <div class="card tab-panel" id="tabPty" style="display:none;">
-      <div style="margin-bottom:20px;padding:16px;background:var(--paper);border-radius:10px;border:1px solid var(--line);">
-        <div style="font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">🔑 Sesión PTY Cargo Express</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <input type="text" id="ptySession" placeholder="Pega aquí el PHPSESSID de PTY Cargo…" style="flex:1;min-width:260px;font-family:var(--font-mono);font-size:12px;padding:9px 12px;">
-          <div style="font-size:11.5px;color:var(--ink-soft);max-width:320px;line-height:1.5;">F12 → Application → Cookies → <span style="font-family:var(--font-mono);color:var(--accent);">carga.ptycargoexpress.com</span> → copia el valor de <strong>PHPSESSID</strong></div>
+      <div style="margin-bottom:20px;padding:18px;background:var(--paper);border-radius:12px;border:1px solid var(--line);">
+        <div style="font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">🔖 Importar desde PTY Cargo Express</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="background:var(--panel);border-radius:10px;padding:16px;border:1px solid var(--line);">
+            <div style="font-family:var(--font-display);font-size:13.5px;font-weight:700;margin-bottom:8px;">Paso 1 — Guarda el bookmarklet</div>
+            <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.55;">Arrastra este botón a tu barra de favoritos del navegador:</p>
+            <a id="ptyBookmarklet" href="#" style="display:inline-block;background:var(--accent);color:#fff;font-weight:700;font-size:13px;padding:10px 18px;border-radius:8px;cursor:grab;box-shadow:0 2px 16px var(--accent-glow);">📦 Importar a NEA</a>
+            <p style="font-size:11px;color:var(--ink-soft);margin:10px 0 0;">⚠ Arrástralo — no hagas clic aquí directamente.</p>
+          </div>
+          <div style="background:var(--panel);border-radius:10px;padding:16px;border:1px solid var(--line);">
+            <div style="font-family:var(--font-display);font-size:13.5px;font-weight:700;margin-bottom:8px;">Paso 2 — Úsalo en PTY Cargo</div>
+            <ol style="font-size:12.5px;color:var(--ink-soft);margin:0;padding-left:18px;line-height:2;">
+              <li>Ve a <a href="https://carga.ptycargoexpress.com" target="_blank" style="color:var(--accent);font-weight:600;">carga.ptycargoexpress.com</a></li>
+              <li>Inicia sesión con las credenciales de Noris</li>
+              <li>Ve a la sección <strong>Tracking</strong></li>
+              <li>Haz clic en el favorito <strong>"📦 Importar a NEA"</strong></li>
+              <li>¡Listo! Los paquetes nuevos se importan solos</li>
+            </ol>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:rgba(23,122,99,0.08);border:1px solid rgba(23,122,99,0.2);border-radius:8px;font-size:12.5px;color:var(--cargo-green);">
+          ✓ El bookmarklet detecta automáticamente qué paquetes ya están en NEA y solo importa los nuevos.
         </div>
       </div>
       <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px;">
@@ -2699,6 +2716,24 @@
     } catch(err){ mostrarBanner('#bannerPty','error','No pudimos conectar.'); }
     finally { setCargando(btn, false); }
   }
+  // Generar bookmarklet con la URL del servidor actual
+  (function generarBookmarklet(){
+    const base = window.location.origin;
+    const token = localStorage.getItem('nea_cargo_admin_token') || '';
+    const script = `
+(function(){
+  const BASE='${base}';
+  const TOKEN=localStorage.getItem('nea_cargo_admin_token')||'${token}';
+  const s=document.createElement('script');
+  s.src=BASE+'/pty-importer.js?t='+Date.now();
+  s.onload=function(){ window.NEAImporter && window.NEAImporter.init(BASE,TOKEN); };
+  document.head.appendChild(s);
+})();
+`.trim();
+    const bm = $('#ptyBookmarklet');
+    if(bm) bm.href = 'javascript:' + encodeURIComponent(script);
+  })();
+
   $('#btnCargarPty').addEventListener('click', cargarPty);
   $('#btnImportarSeleccionados').addEventListener('click', importarSeleccionados);
   $('#ptyFiltro').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); cargarPty(); } });
