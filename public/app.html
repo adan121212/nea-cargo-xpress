@@ -6,6 +6,7 @@
 <title>NEA Cargo Xpress — Mi Casillero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
     --ink:#0c1b33;--ink-soft: rgba(12,27,51,0.62);--paper:#f1f3f2;--panel:#ffffff;--line: rgba(12,27,51,0.12);--accent:#ff6a1a;--accent-dark:#e2570e;--accent-glow: rgba(255,106,26,0.5);--cargo-green:#177a63;--cargo-green-bg: rgba(23,122,99,0.1);--amber-bg: rgba(255,106,26,0.1);--font-display: 'Space Grotesk', sans-serif;--font-body: 'Inter', sans-serif;--font-mono: 'JetBrains Mono', monospace;--radius-sm: 8px;--radius-md: 12px;--radius-lg: 18px;--shadow-card: 0 1px 2px rgba(12,27,51,0.04), 0 10px 30px -12px rgba(12,27,51,0.10);--shadow-card-hover: 0 4px 10px rgba(12,27,51,0.06), 0 20px 44px -16px rgba(12,27,51,0.16);
@@ -168,6 +169,23 @@
     .stat-row{ flex-wrap: wrap; }
   }
   a:focus-visible, button:focus-visible{ outline: 2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+  /* Dashboard del cliente */
+  .cli-kpi-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+  .cli-kpi{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-md); padding:16px; box-shadow:var(--shadow-card); }
+  .cli-kpi-label{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin-bottom:6px; }
+  .cli-kpi-num{ font-family:var(--font-display); font-size:24px; font-weight:700; }
+  .cli-kpi-num.green{ color:var(--cargo-green); }
+  .cli-kpi-num.amber{ color:var(--accent-dark); }
+  .cli-kpi-num.blue{ color:#2563eb; }
+  .cli-chart-box{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px; margin-bottom:20px; box-shadow:var(--shadow-card); }
+  .cli-chart-box h3{ font-family:var(--font-display); font-size:14px; margin:0 0 14px; }
+  .cli-chart-box canvas{ max-height:180px; }
+  @media(max-width:620px){ .cli-kpi-row{ grid-template-columns:1fr 1fr; } }
+  /* Editar nombre del casillero */
+  .nombre-casillero-edit{ display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap; }
+  .nombre-casillero-edit input{ flex:1; min-width:180px; padding:9px 12px; border-radius:8px; border:1px solid var(--line); font-family:var(--font-body); font-size:13.5px; color:var(--ink); background:#fff; }
+  .nombre-casillero-edit button{ padding:9px 16px; border-radius:8px; border:none; background:var(--accent); color:#fff; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .nombre-casillero-edit button:hover{ background:var(--accent-dark); }
   /* Pantalla de bienvenida */
   #modalBienvenida{ position:fixed; inset:0; z-index:100; background:rgba(12,27,51,0.82); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; padding:20px; animation:fadeInModal .3s ease; }
   @keyframes fadeInModal{ from{opacity:0;} to{opacity:1;} }
@@ -340,6 +358,7 @@
         <button class="side-subitem" data-seccion="estado-cuenta">Estado de cuenta</button>
       </div>
       <button class="side-item" data-seccion="autorizados"><span class="side-ico">🛡️</span><span class="side-label">Autorizados</span></button>
+      <button class="side-item" data-seccion="mis-stats"><span class="side-ico">📊</span><span class="side-label">Mis estadísticas</span></button>
     </nav>
   </aside>
   <main class="app-main">
@@ -372,6 +391,15 @@
           <p class="card-sub">Usa exactamente esta dirección al comprar en cualquier tienda de EE.UU.</p>
           <div class="address-block" id="bloqueDireccionCasillero">Cargando…</div>
           <button class="copy-btn" id="btnCopiarCasillero">Copiar dirección</button>
+          <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line);">
+            <h2 style="font-size:14px;margin:0 0 4px;">Nombre en el casillero</h2>
+            <p class="card-sub" style="margin:0 0 10px;">Cambia el nombre que aparece en tu dirección de Miami.</p>
+            <div class="nombre-casillero-edit">
+              <input id="inputNombreCasillero" type="text" placeholder="Tu nombre completo">
+              <button id="btnGuardarNombreCasillero">Guardar nombre</button>
+            </div>
+            <div class="banner" id="bannerNombreCasillero" style="margin-top:10px;"></div>
+          </div>
         </div>
       </div>
       <div class="seccion-app" id="seccionPaquetes" style="display:none;">
@@ -431,6 +459,25 @@
           </form>
         </div>
       </div>
+      <div class="seccion-app" id="seccionMisStats" style="display:none;">
+        <div class="card reveal" style="margin-bottom:20px;">
+          <h2>Mis estadísticas</h2>
+          <p class="card-sub">Resumen de tu actividad como cliente NEA Cargo Xpress.</p>
+          <div class="cli-kpi-row">
+            <div class="cli-kpi"><div class="cli-kpi-label">Total paquetes</div><div class="cli-kpi-num blue" id="statsTotal">—</div></div>
+            <div class="cli-kpi"><div class="cli-kpi-label">Total gastado</div><div class="cli-kpi-num green" id="statsGastado">—</div></div>
+            <div class="cli-kpi"><div class="cli-kpi-label">Pendiente pago</div><div class="cli-kpi-num amber" id="statsPendiente">—</div></div>
+          </div>
+          <div class="cli-chart-box">
+            <h3>Estado de mis paquetes</h3>
+            <canvas id="chartClienteEstados"></canvas>
+          </div>
+          <div class="cli-chart-box">
+            <h3>Mis paquetes por mes</h3>
+            <canvas id="chartClienteMeses"></canvas>
+          </div>
+        </div>
+      </div>
       <div class="seccion-app" id="seccionPerfil" style="display:none;">
         <div class="card reveal" style="margin-bottom:20px;">
           <h2>Mi información</h2><p class="card-sub">Actualiza tu número de teléfono de contacto.</p>
@@ -471,10 +518,10 @@
   })();
   function activarReveal(){ if(!('IntersectionObserver' in window)){document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in-view'));return;} const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('in-view');observer.unobserve(entry.target);}});},{threshold:0.1});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el)); }
   function mostrarApp(mostrar){ $('#vistaAuth').style.display=mostrar?'none':'flex'; document.querySelector('.wrap').style.display=mostrar?'none':'block'; $('#vistaApp').style.display=mostrar?'flex':'none'; $('#btnLogout').style.display=mostrar?'inline-block':'none'; $('#pillCasillero').style.display=mostrar?'inline-block':'none'; if(mostrar)activarReveal(); }
-  const SECCIONES_INFO = { 'inicio':{titulo:(n)=>`Hola, ${n}`,sub:'Este es el estado de tu casillero y tus paquetes.'},'casillero':{titulo:()=>'Mi casillero',sub:'Tu dirección personal para comprar en EE.UU.'},'paquetes':{titulo:()=>'Paquetes',sub:'Prealerta y sigue el estado de cada compra.'},'historial-facturas':{titulo:()=>'Historial de facturas',sub:'Todas tus facturas, pagadas y pendientes.'},'estado-cuenta':{titulo:()=>'Estado de cuenta',sub:'Resumen de lo facturado, pagado y pendiente.'},'autorizados':{titulo:()=>'Autorizados',sub:'Personas que pueden retirar tu pedido por ti.'},'perfil':{titulo:()=>'Mi perfil',sub:'Actualiza tu información de contacto y contraseña.'} };
+  const SECCIONES_INFO = { 'inicio':{titulo:(n)=>`Hola, ${n}`,sub:'Este es el estado de tu casillero y tus paquetes.'},'casillero':{titulo:()=>'Mi casillero',sub:'Tu dirección personal para comprar en EE.UU.'},'paquetes':{titulo:()=>'Paquetes',sub:'Prealerta y sigue el estado de cada compra.'},'historial-facturas':{titulo:()=>'Historial de facturas',sub:'Todas tus facturas, pagadas y pendientes.'},'estado-cuenta':{titulo:()=>'Estado de cuenta',sub:'Resumen de lo facturado, pagado y pendiente.'},'autorizados':{titulo:()=>'Autorizados',sub:'Personas que pueden retirar tu pedido por ti.'},'perfil':{titulo:()=>'Mi perfil',sub:'Actualiza tu información de contacto y contraseña.'},'mis-stats':{titulo:()=>'Mis estadísticas',sub:'Resumen de tu actividad como cliente.'} };
   let nombreUsuarioActual='';
-  const MAPA_SECCION_DIV={'inicio':'seccionInicio','casillero':'seccionCasillero','paquetes':'seccionPaquetes','historial-facturas':'seccionHistorialFacturas','estado-cuenta':'seccionEstadoCuenta','autorizados':'seccionAutorizados','perfil':'seccionPerfil'};
-  function irASeccion(seccion){ document.querySelectorAll('.seccion-app').forEach(div=>div.style.display='none'); const idDiv=MAPA_SECCION_DIV[seccion]; if(idDiv)document.getElementById(idDiv).style.display='block'; document.querySelectorAll('.side-item[data-seccion], .side-subitem[data-seccion]').forEach(el=>el.classList.toggle('active',el.dataset.seccion===seccion)); const info=SECCIONES_INFO[seccion]; if(info){$('#saludoNombre').textContent=seccion==='inicio'?info.titulo(nombreUsuarioActual):info.titulo();$('#subtituloSeccion').textContent=info.sub;} if(seccion==='autorizados')cargarAutorizados(); if(seccion==='perfil')cargarDatosPerfil(); if(window.innerWidth<=860)cerrarMenuMovil(); }
+  const MAPA_SECCION_DIV={'inicio':'seccionInicio','casillero':'seccionCasillero','paquetes':'seccionPaquetes','historial-facturas':'seccionHistorialFacturas','estado-cuenta':'seccionEstadoCuenta','autorizados':'seccionAutorizados','perfil':'seccionPerfil','mis-stats':'seccionMisStats'};
+  function irASeccion(seccion){ document.querySelectorAll('.seccion-app').forEach(div=>div.style.display='none'); const idDiv=MAPA_SECCION_DIV[seccion]; if(idDiv)document.getElementById(idDiv).style.display='block'; document.querySelectorAll('.side-item[data-seccion], .side-subitem[data-seccion]').forEach(el=>el.classList.toggle('active',el.dataset.seccion===seccion)); const info=SECCIONES_INFO[seccion]; if(info){$('#saludoNombre').textContent=seccion==='inicio'?info.titulo(nombreUsuarioActual):info.titulo();$('#subtituloSeccion').textContent=info.sub;} if(seccion==='autorizados')cargarAutorizados(); if(seccion==='perfil')cargarDatosPerfil(); if(seccion==='mis-stats')cargarEstadisticasCliente(); if(window.innerWidth<=860)cerrarMenuMovil(); }
   document.querySelectorAll('.side-item[data-seccion], .side-subitem[data-seccion]').forEach(btn=>btn.addEventListener('click',()=>irASeccion(btn.dataset.seccion)));
   $('#btnFacturasParent').addEventListener('click',()=>{ $('#btnFacturasParent').classList.toggle('open'); $('#submenuFacturas').classList.toggle('open'); });
   $('#btnSidebarToggle').addEventListener('click',()=>$('#sidebar').classList.toggle('collapsed'));
@@ -512,6 +559,8 @@
     function copiarDireccion(btn){ navigator.clipboard.writeText(textoDireccion).then(()=>{ const t=btn.textContent; btn.textContent='Copiada ✓'; setTimeout(()=>{btn.textContent=t;},1800); }); }
     $('#btnCopiar').onclick=()=>copiarDireccion($('#btnCopiar'));
     $('#btnCopiarCasillero').onclick=()=>copiarDireccion($('#btnCopiarCasillero'));
+    // Pre-cargar el nombre en el campo de edición del casillero
+    if($('#inputNombreCasillero')) $('#inputNombreCasillero').value=nombreCompleto;
     mostrarBienvenida(nombreCompleto, textoDireccion, htmlCasillero);
   }
   $('#formPrealerta').addEventListener('submit',async(e)=>{ e.preventDefault(); const btn=$('#btnPrealerta'); const payload={tienda:$('#paqTienda').value.trim(),numero_tracking:$('#paqTracking').value.trim(),valor_declarado:parseFloat($('#paqValor').value),peso_lb:$('#paqPeso').value?parseFloat($('#paqPeso').value):undefined,descripcion:$('#paqDescripcion').value.trim()}; if(!payload.tienda||!payload.numero_tracking||isNaN(payload.valor_declarado)){mostrarBanner('#bannerPrealerta','error','Completa tienda, tracking y valor declarado.');return;} setCargando(btn,true); try{ const res=await apiAutenticado('/paquetes/prealertar',{method:'POST',body:JSON.stringify(payload)}); const data=await res.json().catch(()=>({})); if(res.status===201){mostrarBanner('#bannerPrealerta','success','Paquete prealertado. Te avisaremos cuando llegue a la bodega.');$('#formPrealerta').reset();await cargarPaquetes();}else{mostrarBanner('#bannerPrealerta','error',data.mensaje||'No se pudo prealertar el paquete.');} }catch(err){mostrarBanner('#bannerPrealerta','error','No pudimos conectar con el servidor.');}finally{setCargando(btn,false);} });
@@ -538,6 +587,67 @@
   window.addEventListener('pageshow',(event)=>{ if(event.persisted||performance.getEntriesByType('navigation')[0]?.type==='back_forward'){ if(!localStorage.getItem(TOKEN_KEY))window.location.reload(); } });
   if(localStorage.getItem(TOKEN_KEY)){ window.history.replaceState({app:true},'',window.location.href); window.addEventListener('popstate',()=>{ if(localStorage.getItem(TOKEN_KEY)){window.history.pushState({app:true},'',window.location.href);iniciarApp();}else{window.location.reload();} }); iniciarApp(); }
   if(new URLSearchParams(window.location.search).has('registro')&&!localStorage.getItem(TOKEN_KEY)){ $('#tabRegistro').click(); }
+
+  // ---- Editar nombre del casillero ----
+  let nombreCasilleroActual = '';
+  $('#btnGuardarNombreCasillero').addEventListener('click', async()=>{
+    const btn=$('#btnGuardarNombreCasillero');
+    const nuevoNombre=$('#inputNombreCasillero').value.trim();
+    if(!nuevoNombre){ mostrarBanner('#bannerNombreCasillero','error','Escribe un nombre válido.'); return; }
+    btn.disabled=true; btn.textContent='Guardando…';
+    try {
+      const res=await apiAutenticado('/perfil/nombre',{method:'PATCH',body:JSON.stringify({nombre:nuevoNombre.split(' ')[0]||nuevoNombre,apellido:nuevoNombre.split(' ').slice(1).join(' ')||''})}); 
+      const data=await res.json().catch(()=>({}));
+      if(res.ok){
+        mostrarBanner('#bannerNombreCasillero','success','✓ Nombre actualizado. Recarga para ver el cambio en tu dirección.');
+        nombreCasilleroActual=nuevoNombre;
+        // Actualizar el casillero en pantalla
+        const html=`<span class="suite">PTY-14981</span> &nbsp; ${nuevoNombre} &nbsp; NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
+        $('#bloqueDireccion').innerHTML=html;
+        $('#bloqueDireccionCasillero').innerHTML=html;
+      } else { mostrarBanner('#bannerNombreCasillero','error',data.mensaje||'No se pudo actualizar el nombre.'); }
+    } catch(err){ mostrarBanner('#bannerNombreCasillero','error','No pudimos conectar.'); }
+    finally { btn.disabled=false; btn.textContent='Guardar nombre'; }
+  });
+
+  // ---- Dashboard / estadísticas del cliente ----
+  let chartCliEstados=null, chartCliMeses=null;
+  async function cargarEstadisticasCliente(){
+    try {
+      const [resPaq, resFac] = await Promise.all([apiAutenticado('/paquetes'), apiAutenticado('/facturas')]);
+      const paquetes=(await resPaq.json()).paquetes||[];
+      const facturas=(await resFac.json()).facturas||[];
+
+      // KPIs
+      const gastado=facturas.filter(f=>f.estado==='pagada').reduce((s,f)=>s+Number(f.total),0);
+      const pendiente=facturas.filter(f=>f.estado==='pendiente').reduce((s,f)=>s+Number(f.total),0);
+      $('#statsTotal').textContent=paquetes.length;
+      $('#statsGastado').textContent='$'+gastado.toFixed(2);
+      $('#statsPendiente').textContent='$'+pendiente.toFixed(2);
+
+      // Gráfica estados
+      const ESTADOS_LABEL={prealertado:'Prealertado',en_bodega_miami:'Bodega MIA',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo retiro',entregado:'Entregado'};
+      const ESTADOS_COLORES={prealertado:'#ff6a1a',en_bodega_miami:'#2563eb',en_transito:'#7c3aed',en_panama:'#0891b2',listo_para_retiro:'#177a63',entregado:'#6b7280'};
+      const conteoEstados={};
+      paquetes.forEach(p=>{ conteoEstados[p.estado]=(conteoEstados[p.estado]||0)+1; });
+      const estadosKeys=Object.keys(conteoEstados);
+
+      if(typeof Chart !== 'undefined'){
+        if(chartCliEstados){ chartCliEstados.destroy(); chartCliEstados=null; }
+        const ctxE=document.getElementById('chartClienteEstados');
+        if(ctxE && estadosKeys.length>0) chartCliEstados=new Chart(ctxE.getContext('2d'),{type:'doughnut',data:{labels:estadosKeys.map(e=>ESTADOS_LABEL[e]||e),datasets:[{data:estadosKeys.map(e=>conteoEstados[e]),backgroundColor:estadosKeys.map(e=>ESTADOS_COLORES[e]||'#94a3b8'),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10,boxWidth:12}}},cutout:'60%'}});
+
+        // Gráfica paquetes por mes
+        const porMes={};
+        paquetes.forEach(p=>{ const d=new Date(p.fecha_prealerta),k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; porMes[k]=(porMes[k]||0)+1; });
+        const mesesKeys=Object.keys(porMes).sort().slice(-6);
+        const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        if(chartCliMeses){ chartCliMeses.destroy(); chartCliMeses=null; }
+        const ctxM=document.getElementById('chartClienteMeses');
+        if(ctxM && mesesKeys.length>0) chartCliMeses=new Chart(ctxM.getContext('2d'),{type:'bar',data:{labels:mesesKeys.map(k=>{ const[a,m]=k.split('-'); return MESES[parseInt(m)-1]+' '+a; }),datasets:[{label:'Paquetes',data:mesesKeys.map(k=>porMes[k]),backgroundColor:'rgba(255,106,26,0.75)',borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(12,27,51,0.06)'},ticks:{font:{size:10},stepSize:1}}}}});
+      }
+    } catch(err){ console.error('Stats error:', err); }
+  }
 
   // ---------- Detección automática de tienda por tracking ----------
   const TIENDAS_POR_TRACKING = [

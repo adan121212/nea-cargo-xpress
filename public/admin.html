@@ -485,6 +485,25 @@
     #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; }
     #cajaMetodosCards{ grid-template-columns:1fr 1fr !important; }
   }
+  /* Modal editar cliente */
+  .modal-edit-cliente .modal-box{ max-width:480px; }
+  /* Campana de notificaciones */
+  .notif-btn{ position:relative; background:none; border:none; cursor:pointer; padding:6px; color:rgba(255,255,255,0.7); font-size:20px; border-radius:8px; transition:background .15s; }
+  .notif-btn:hover{ background:rgba(255,255,255,0.1); color:#fff; }
+  .notif-badge{ position:absolute; top:2px; right:2px; width:16px; height:16px; border-radius:50%; background:var(--accent); color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; display:none; }
+  .notif-panel{ position:fixed; top:0; right:0; bottom:0; width:320px; background:var(--panel); box-shadow:-4px 0 24px rgba(12,27,51,0.18); z-index:200; display:flex; flex-direction:column; transform:translateX(100%); transition:transform .25s ease; }
+  .notif-panel.open{ transform:translateX(0); }
+  .notif-panel-head{ display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--line); font-family:var(--font-display); font-weight:600; font-size:15px; }
+  .notif-panel-head button{ background:none; border:none; cursor:pointer; font-size:14px; color:var(--ink-soft); padding:4px 8px; border-radius:6px; }
+  .notif-panel-head button:hover{ background:var(--paper); }
+  .notif-lista{ flex:1; overflow-y:auto; padding:8px; }
+  .notif-item{ padding:12px 14px; border-radius:10px; margin-bottom:6px; border-left:3px solid var(--line); background:var(--paper); cursor:pointer; transition:background .15s; }
+  .notif-item:hover{ background:rgba(255,106,26,0.06); border-left-color:var(--accent); }
+  .notif-item.unread{ border-left-color:var(--accent); background:#fff8f3; }
+  .notif-item .notif-titulo{ font-weight:600; font-size:13px; margin-bottom:2px; }
+  .notif-item .notif-sub{ font-size:12px; color:var(--ink-soft); }
+  .notif-item .notif-hora{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
+  .notif-empty{ text-align:center; padding:40px 20px; color:var(--ink-soft); font-size:13px; }
   .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:26px; }
   .kpi-card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-md); padding:18px 16px; box-shadow:var(--shadow-card); transition:transform .2s ease,box-shadow .2s ease; }
   .kpi-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-card-hover); }
@@ -552,6 +571,12 @@
     </button>
   </nav>
   <div class="sb-footer" id="sbFooter" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px;margin-bottom:6px;">
+      <button class="notif-btn" id="btnCampana" title="Notificaciones">
+        🔔<span class="notif-badge" id="notifBadge">0</span>
+      </button>
+      <button class="sb-logout" id="btnLogout" style="margin-top:0;">⬖ Salir</button>
+    </div>
     <div class="sb-user">
       <div class="sb-avatar" id="sbAvatarLetra">A</div>
       <div>
@@ -559,7 +584,6 @@
         <div class="sb-urole">Administrador</div>
       </div>
     </div>
-    <button class="sb-logout" id="btnLogout">⬖ Cerrar sesión</button>
   </div>
 </div>
 
@@ -829,7 +853,7 @@
       <p class="card-sub">Total de clientes y paquetes por cliente.</p>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>Nombre</th><th>Correo</th><th>Casillero</th><th>Verificado</th><th>Paquetes</th><th>Registrado</th></tr></thead>
+          <thead><tr><th>Nombre</th><th>Correo</th><th>Casillero</th><th>Verificado</th><th>Paquetes</th><th>Registrado</th><th></th></tr></thead>
           <tbody id="tbodyClientes"></tbody>
         </table>
       </div>
@@ -1385,15 +1409,19 @@
       $('#emptyClientes').style.display = usuarios.length ? 'none' : 'block';
       $('#tbodyClientes').innerHTML = usuarios.map(u => {
         const fecha = new Date(u.fecha_registro).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
-        return `<tr>
+        return `<tr data-uid="${u.id}">
           <td data-label="Nombre">${escapeHtml(u.nombre)} ${escapeHtml(u.apellido)}</td>
           <td data-label="Correo">${escapeHtml(u.email)}</td>
           <td data-label="Casillero" class="mono">${escapeHtml(u.numero_casillero || '—')}</td>
           <td data-label="Verificado">${u.verificado ? '✓' : '—'}</td>
           <td data-label="Paquetes">${u.total_paquetes}</td>
           <td data-label="Registrado" class="muted">${fecha}</td>
+          <td><button class="btn-secondary btn-editar-cliente" data-id="${u.id}" style="font-size:12px;padding:5px 10px;">✏ Editar</button></td>
         </tr>`;
       }).join('');
+      $('#tbodyClientes').querySelectorAll('.btn-editar-cliente').forEach(btn=>{
+        btn.addEventListener('click',()=>{ const u=usuarios.find(x=>x.id==btn.dataset.id); if(u) abrirEditCliente(u); });
+      });
     } catch (err) {}
   }
 
@@ -2221,10 +2249,148 @@
       const top=dataMes.top_clientes||[]; if(chartDashT){chartDashT.destroy();chartDashT=null;} chartDashT=new Chart(document.getElementById('chartDashTopClientes').getContext('2d'),{type:'bar',data:{labels:top.map(c=>`${c.nombre} ${c.apellido}`),datasets:[{label:'Paquetes',data:top.map(c=>Number(c.total_paquetes)),backgroundColor:'rgba(23,122,99,0.75)',borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(12,27,51,0.06)'},ticks:{color:'#6b7280',font:{size:10}}},y:{grid:{display:false},ticks:{color:'#0c1b33',font:{size:10}}}}}});
     } catch(err){ console.error('Dashboard error:',err); }
   }
+  // ---- Editar cliente ----
+  let clienteEditandoId = null;
+  function abrirEditCliente(u){
+    clienteEditandoId = u.id;
+    $('#editClienteNombre').value = u.nombre || '';
+    $('#editClienteApellido').value = u.apellido || '';
+    $('#editClienteEmail').value = u.email || '';
+    $('#editClienteTelefono').value = u.telefono || '';
+    $('#editClienteCasillero').value = u.numero_casillero || '';
+    mostrarBanner('#bannerEditCliente','','');
+    $('#modalEditCliente').classList.add('show');
+  }
+  function cerrarEditCliente(){ $('#modalEditCliente').classList.remove('show'); clienteEditandoId=null; }
+  $('#btnCerrarEditCliente').addEventListener('click', cerrarEditCliente);
+  $('#modalEditCliente').addEventListener('click',(e)=>{ if(e.target.id==='modalEditCliente') cerrarEditCliente(); });
+  $('#btnGuardarEditCliente').addEventListener('click', async()=>{
+    if(!clienteEditandoId) return;
+    const btn=$('#btnGuardarEditCliente');
+    const payload={
+      nombre: $('#editClienteNombre').value.trim(),
+      apellido: $('#editClienteApellido').value.trim(),
+      email: $('#editClienteEmail').value.trim(),
+      telefono: $('#editClienteTelefono').value.trim()||null,
+      numero_casillero: $('#editClienteCasillero').value.trim()||null,
+    };
+    if(!payload.nombre||!payload.apellido||!payload.email){ mostrarBanner('#bannerEditCliente','error','Nombre, apellido y correo son obligatorios.'); return; }
+    setCargando(btn,true);
+    try {
+      const res=await apiAdmin(`/admin/usuarios/${clienteEditandoId}`,{method:'PUT',body:JSON.stringify(payload)});
+      const data=await res.json().catch(()=>({}));
+      if(res.ok){
+        mostrarBanner('#bannerEditCliente','success','✓ Cliente actualizado correctamente.');
+        f1ClientesCache=[];
+        setTimeout(()=>{ cerrarEditCliente(); cargarClientes(); },900);
+      } else { mostrarBanner('#bannerEditCliente','error',data.mensaje||'No se pudo guardar.'); }
+    } catch(err){ mostrarBanner('#bannerEditCliente','error','No pudimos conectar.'); }
+    finally { setCargando(btn,false); }
+  });
+
+  // ---- Notificaciones internas ----
+  const NOTIF_KEY = 'nea_notifs';
+  let notifLista = [];
+  function cargarNotificacionesGuardadas(){
+    try { notifLista = JSON.parse(localStorage.getItem(NOTIF_KEY)||'[]'); } catch(e){ notifLista=[]; }
+  }
+  function guardarNotificaciones(){ localStorage.setItem(NOTIF_KEY, JSON.stringify(notifLista.slice(0,50))); }
+  function agregarNotificacion(titulo, sub, tipo='info'){
+    const n={ id:Date.now(), titulo, sub, tipo, hora:new Date().toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}), leida:false };
+    notifLista.unshift(n);
+    guardarNotificaciones();
+    renderNotifBadge();
+    renderNotifLista();
+  }
+  function renderNotifBadge(){
+    const noLeidas = notifLista.filter(n=>!n.leida).length;
+    const badge = $('#notifBadge');
+    if(badge){ badge.textContent=noLeidas; badge.style.display=noLeidas>0?'flex':'none'; }
+  }
+  function renderNotifLista(){
+    const lista = $('#notifLista');
+    if(!lista) return;
+    if(notifLista.length===0){ lista.innerHTML='<div class="notif-empty">Sin notificaciones nuevas</div>'; return; }
+    lista.innerHTML = notifLista.map(n=>`
+      <div class="notif-item ${n.leida?'':'unread'}" data-id="${n.id}">
+        <div class="notif-titulo">${escapeHtml(n.titulo)}</div>
+        <div class="notif-sub">${escapeHtml(n.sub)}</div>
+        <div class="notif-hora">${n.hora}</div>
+      </div>`).join('');
+    lista.querySelectorAll('.notif-item').forEach(item=>{
+      item.addEventListener('click',()=>{
+        const n=notifLista.find(x=>x.id==item.dataset.id);
+        if(n){ n.leida=true; guardarNotificaciones(); renderNotifBadge(); item.classList.remove('unread'); }
+      });
+    });
+  }
+  $('#btnCampana').addEventListener('click',(e)=>{
+    e.stopPropagation();
+    $('#notifPanel').classList.toggle('open');
+    $('#notifOverlay').style.display=$('#notifPanel').classList.contains('open')?'block':'none';
+    if($('#notifPanel').classList.contains('open')) renderNotifLista();
+  });
+  $('#btnCerrarNotif').addEventListener('click',()=>{ $('#notifPanel').classList.remove('open'); $('#notifOverlay').style.display='none'; });
+  $('#notifOverlay').addEventListener('click',()=>{ $('#notifPanel').classList.remove('open'); $('#notifOverlay').style.display='none'; });
+  $('#btnMarcarTodasLeidas').addEventListener('click',()=>{ notifLista.forEach(n=>n.leida=true); guardarNotificaciones(); renderNotifBadge(); renderNotifLista(); });
+
+  // Interceptar cargarPendientesMostrador para generar notif cuando hay facturas nuevas
+  const _cargarPendientesOriginal = cargarPendientesMostrador;
+  let _ultimoTotalPendientes = 0;
+  cargarPendientesMostrador = async function(){
+    await _cargarPendientesOriginal();
+    const total = parseInt($('#facBadgeCount').textContent)||0;
+    if(total > _ultimoTotalPendientes && _ultimoTotalPendientes >= 0){
+      const nuevas = total - _ultimoTotalPendientes;
+      if(nuevas > 0 && _ultimoTotalPendientes >= 0) agregarNotificacion(`${nuevas} factura${nuevas>1?'s':''} pendiente${nuevas>1?'s':''}`, 'Ve al Facturador para cobrarlas.');
+    }
+    _ultimoTotalPendientes = total;
+  };
+
   async function iniciarAdmin(){
+    cargarNotificacionesGuardadas();
+    renderNotifBadge();
     try { await cargarDashboard(); cargarPendientesMostrador(); mostrarAdmin(true); } catch(err){ mostrarAdmin(false); }
   }
   if(localStorage.getItem(TOKEN_KEY)){ iniciarAdmin(); }
 </script>
+<!-- Panel de notificaciones -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-head">
+    <span>🔔 Notificaciones</span>
+    <div style="display:flex;gap:6px;">
+      <button id="btnMarcarTodasLeidas" title="Marcar todas como leídas">✓ Todo leído</button>
+      <button id="btnCerrarNotif">✕</button>
+    </div>
+  </div>
+  <div class="notif-lista" id="notifLista">
+    <div class="notif-empty">Sin notificaciones</div>
+  </div>
+</div>
+<div id="notifOverlay" style="display:none;position:fixed;inset:0;z-index:199;"></div>
+<!-- Modal editar cliente -->
+<div id="modalEditCliente" class="modal-overlay modal-edit-cliente">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Editar datos del cliente</h2>
+      <button class="modal-close" id="btnCerrarEditCliente">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><label for="editClienteNombre">Nombre</label><input id="editClienteNombre" type="text" placeholder="Ana"></div>
+      <div><label for="editClienteApellido">Apellido</label><input id="editClienteApellido" type="text" placeholder="Pérez"></div>
+    </div>
+    <label for="editClienteEmail">Correo electrónico</label>
+    <input id="editClienteEmail" type="email" placeholder="ana@ejemplo.com">
+    <label for="editClienteTelefono">Teléfono</label>
+    <input id="editClienteTelefono" type="tel" placeholder="6123-4567">
+    <label for="editClienteCasillero">Número de casillero</label>
+    <input id="editClienteCasillero" type="text" placeholder="PTY-00042" style="font-family:var(--font-mono);">
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;">⚠ Cambiar el casillero actualiza la dirección que el cliente usa para sus compras.</p>
+    <button class="btn-primary" id="btnGuardarEditCliente" style="margin-top:18px;">
+      <span class="spinner"></span><span>Guardar cambios</span>
+    </button>
+    <div class="banner" id="bannerEditCliente"></div>
+  </div>
+</div>
 </body>
 </html>
