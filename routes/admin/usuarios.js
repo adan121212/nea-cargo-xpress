@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, query, validationResult } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
@@ -55,6 +55,66 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// --- GET /api/admin/usuarios/:id/autorizados ---
+// Lista las personas autorizadas de un cliente.
+router.get('/:id/autorizados', async (req, res) => {
+  try {
+    const usuario = await pool.query('SELECT id FROM usuarios WHERE id = $1', [req.params.id]);
+    if (usuario.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Cliente no encontrado' });
+    }
+    const resultado = await pool.query(
+      `SELECT id, nombre, cedula FROM autorizados WHERE usuario_id = $1 ORDER BY id ASC`,
+      [req.params.id]
+    );
+    return res.json({ autorizados: resultado.rows });
+  } catch (error) {
+    console.error('Error en GET /admin/usuarios/:id/autorizados:', error);
+    return res.status(500).json({ mensaje: 'Error interno al listar autorizados' });
+  }
+});
+
+// --- PUT /api/admin/usuarios/:id/autorizados ---
+// El admin puede editar los autorizados de un cliente.
+router.put(
+  '/:id/autorizados',
+  [
+    body('autorizados').isArray({ max: 3 }).withMessage('Máximo 3 personas autorizadas'),
+    body('autorizados.*.nombre').trim().notEmpty().withMessage('Falta el nombre'),
+    body('autorizados.*.cedula').trim().notEmpty().withMessage('Falta la cédula'),
+  ],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      return res.status(400).json({ errores: errores.array() });
+    }
+    const { autorizados } = req.body;
+    const client = await pool.connect();
+    try {
+      const usuario = await client.query('SELECT id FROM usuarios WHERE id = $1', [req.params.id]);
+      if (usuario.rows.length === 0) {
+        return res.status(404).json({ mensaje: 'Cliente no encontrado' });
+      }
+      await client.query('BEGIN');
+      await client.query('DELETE FROM autorizados WHERE usuario_id = $1', [req.params.id]);
+      for (const persona of autorizados) {
+        await client.query(
+          'INSERT INTO autorizados (usuario_id, nombre, cedula) VALUES ($1, $2, $3)',
+          [req.params.id, persona.nombre.trim(), persona.cedula.trim()]
+        );
+      }
+      await client.query('COMMIT');
+      return res.json({ mensaje: 'Autorizados actualizados correctamente' });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Error en PUT /admin/usuarios/:id/autorizados:', error);
+      return res.status(500).json({ mensaje: 'Error interno al guardar autorizados' });
+    } finally {
+      client.release();
+    }
+  }
+);
+
 // --- PUT /api/admin/usuarios/:id ---
 // Edita nombre, apellido, email, teléfono y casillero de un cliente.
 router.put(
@@ -73,36 +133,33 @@ router.put(
     }
     const { nombre, apellido, email, telefono, numero_casillero } = req.body;
     try {
-      // Verificar que el cliente existe
       const existe = await pool.query('SELECT id FROM usuarios WHERE id = $1', [req.params.id]);
       if (existe.rows.length === 0) {
         return res.status(404).json({ mensaje: 'Cliente no encontrado' });
       }
-      // Verificar que el email no lo use otro cliente
       if (email) {
-        const emailDuplicado = await pool.query(
+        const dup = await pool.query(
           'SELECT id FROM usuarios WHERE email = $1 AND id <> $2',
           [email, req.params.id]
         );
-        if (emailDuplicado.rows.length > 0) {
+        if (dup.rows.length > 0) {
           return res.status(409).json({ mensaje: 'Ese correo ya está registrado por otro cliente' });
         }
       }
-      // Verificar que el casillero no lo use otro cliente
       if (numero_casillero) {
-        const casillDuplicado = await pool.query(
+        const dupCas = await pool.query(
           'SELECT id FROM usuarios WHERE numero_casillero = $1 AND id <> $2',
           [numero_casillero, req.params.id]
         );
-        if (casillDuplicado.rows.length > 0) {
-          return res.status(409).json({ mensaje: 'Ese número de casillero ya está en uso por otro cliente' });
+        if (dupCas.rows.length > 0) {
+          return res.status(409).json({ mensaje: 'Ese casillero ya está en uso por otro cliente' });
         }
       }
       const resultado = await pool.query(
         `UPDATE usuarios
-         SET nombre = $1, apellido = $2, email = $3,
-             telefono = $4, numero_casillero = COALESCE($5, numero_casillero)
-         WHERE id = $6
+         SET nombre=$1, apellido=$2, email=$3,
+             telefono=$4, numero_casillero=COALESCE($5, numero_casillero)
+         WHERE id=$6
          RETURNING id, nombre, apellido, email, telefono, numero_casillero`,
         [nombre, apellido, email, telefono || null, numero_casillero || null, req.params.id]
       );
