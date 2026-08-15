@@ -36,11 +36,17 @@ router.get('/paquetes', async (req, res) => {
     const response = await fetch(PTY_TRACK_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Cookie': `PHPSESSID=${sesion}`,
         'Origin': PTY_BASE,
         'Referer': `${PTY_BASE}/dashboard.php`,
-        'User-Agent': 'Mozilla/5.0 (compatible; NEA-Cargo/1.0)',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Language': 'es-ES,es;q=0.9',
+        'X-Requested-With': 'XMLHttpRequest',
+        'sec-ch-ua': '"Not=A?Brand";v="99", "Google Chrome";v="131", "Chromium";v="131"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
       },
       body: body.toString(),
     });
