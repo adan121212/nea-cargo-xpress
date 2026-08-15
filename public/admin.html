@@ -1399,12 +1399,15 @@
         if (!input.value.trim() || isNaN(peso) || peso <= 0){ mostrarBanner('#bannerPaquetes', 'error', 'El peso no puede quedar en blanco — ingresa un valor válido antes de guardar.'); return; }
         const confirmado = window.confirm(`¿Estás seguro que el peso correcto de este paquete es ${peso} lb?\n\nUna vez confirmado, NO se podrá cambiar.`);
         if (!confirmado){ mostrarBanner('#bannerPaquetes', 'error', '⚠ Revisa el peso bien y vuelve pronto cuando estés seguro.'); return; }
+        // Pedir la tarifa antes de confirmar
+        const tarifaId = await pedirTarifa(peso);
+        if(!tarifaId) return; // canceló
         btn.disabled = true;
         try {
-          const res = await apiAdmin(`/admin/paquetes/${id}/peso`, { method: 'PATCH', body: JSON.stringify({ peso_real_lb: peso }) });
+          const res = await apiAdmin(`/admin/paquetes/${id}/peso`, { method: 'PATCH', body: JSON.stringify({ peso_real_lb: peso, tarifa_id: tarifaId }) });
           const data = await res.json().catch(() => ({}));
           if (res.ok){
-            mostrarBanner('#bannerPaquetes', 'success', '✓ Peso confirmado y bloqueado.');
+            mostrarBanner('#bannerPaquetes', 'success', '✓ Peso confirmado y factura generada.');
             const celda = btn.closest('td');
             celda.innerHTML = `<div style="display:flex;align-items:center;gap:5px;"><span class="mono" style="font-weight:700;">${peso.toFixed(2)} lb</span><span style="font-size:12px;">🔒</span></div>`;
           } else if (res.status === 409){ mostrarBanner('#bannerPaquetes', 'error', data.mensaje || 'Este peso ya fue confirmado.'); cargarPaquetes();
@@ -1839,6 +1842,52 @@
       cargarPendientesMostrador();
     }
     if(errores>0) mostrarBanner('#bannerMostrador','error',errores+' factura(s) no se pudieron generar.');
+  }
+  // Cache de tarifas para el popup
+  let _tarifasCache = [];
+  async function pedirTarifa(pesoLb){
+    // Cargar tarifas si no las tenemos en caché
+    if(_tarifasCache.length === 0){
+      try {
+        const res = await apiAdmin('/admin/tarifas');
+        const data = await res.json();
+        _tarifasCache = (data.tarifas || []).filter(t => t.activa);
+      } catch(e){ _tarifasCache = []; }
+    }
+    if(_tarifasCache.length === 0){
+      alert('No hay tarifas activas. Ve a la pestaña Tarifas y activa una primero.');
+      return null;
+    }
+    // Si solo hay una tarifa, usarla directamente sin popup
+    if(_tarifasCache.length === 1) return _tarifasCache[0].id;
+    // Calcular precios para mostrarlos
+    return new Promise(resolve => {
+      const popup = document.createElement('div');
+      popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;';
+      const opciones = _tarifasCache.map(t => {
+        const costo = Math.max(pesoLb * Number(t.precio_libra), Number(t.cargo_minimo));
+        const total = costo + Number(t.cargo_manejo);
+        return `<button class="pop-tarifa" data-id="${t.id}"
+          style="padding:14px 16px;border-radius:10px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;text-align:left;transition:border-color .15s,background .15s;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">${escapeHtml(t.nombre)}</div>
+          <div style="font-size:12px;color:#6b7280;">$${Number(t.precio_libra).toFixed(2)}/lb · mín $${Number(t.cargo_minimo).toFixed(2)} · manejo $${Number(t.cargo_manejo).toFixed(2)}</div>
+          <div style="font-size:15px;font-weight:700;color:#ff6a1a;margin-top:6px;">Estimado: $${total.toFixed(2)}</div>
+        </button>`;
+      }).join('');
+      popup.innerHTML = `<div style="background:#fff;border-radius:16px;padding:24px;width:380px;max-width:calc(100vw - 32px);box-shadow:0 24px 60px rgba(0,0,0,.3);">
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px;">Selecciona la tarifa</div>
+        <div style="font-size:12.5px;color:#6b7280;margin-bottom:16px;">Peso: <strong>${pesoLb} lb</strong> — el estimado puede variar por seguro.</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">${opciones}</div>
+        <button id="popTarifaCancelar" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:13px;color:#6b7280;">Cancelar</button>
+      </div>`;
+      document.body.appendChild(popup);
+      popup.querySelectorAll('.pop-tarifa').forEach(b => {
+        b.addEventListener('mouseenter', () => { b.style.borderColor='#ff6a1a'; b.style.background='#fff8f3'; });
+        b.addEventListener('mouseleave', () => { b.style.borderColor='#e5e7eb'; b.style.background='#fff'; });
+        b.addEventListener('click', () => { popup.remove(); resolve(parseInt(b.dataset.id)); });
+      });
+      popup.querySelector('#popTarifaCancelar').addEventListener('click', () => { popup.remove(); resolve(null); });
+    });
   }
   function pedirMetodoPago(btnOrigen){
     return new Promise(resolve=>{
