@@ -1995,7 +1995,10 @@
           <div style="margin-top:14px;">
             <label style="font-size:12.5px;font-weight:600;margin-bottom:6px;display:block;">Buscar cliente por casillero</label>
             <div style="display:flex;gap:8px;">
-              <input type="text" id="ptyClienteCasillero" placeholder="PTY-00042" style="flex:1;">
+              <div style="position:relative;flex:1;">
+                <input type="text" id="ptyClienteCasillero" placeholder="PTY-00042 — o presiona 1" style="width:100%;padding-right:32px;">
+                <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">1</span>
+              </div>
               <button type="button" id="btnBuscarClientePty" class="btn-secondary">Buscar</button>
             </div>
             <div id="ptyClienteEncontrado" style="margin-top:8px;font-size:12.5px;display:none;padding:8px 12px;background:var(--paper);border-radius:8px;"></div>
@@ -2005,6 +2008,11 @@
           </div>
         </div>`;
         let clientePtyId=null;
+        document.addEventListener('keydown', function ptyKey(e){
+          if(e.key==='1' && document.activeElement && document.activeElement.id==='ptyClienteCasillero'){
+            e.preventDefault(); f1Abrir('ptyCliente');
+          }
+        });
         $('#btnBuscarClientePty').addEventListener('click',async()=>{
           const cas=$('#ptyClienteCasillero').value.trim(); if(!cas) return;
           try {
@@ -2371,7 +2379,7 @@
     f1Filtrados=[...f1ClientesCache]; f1Render(); setTimeout(()=>$('#f1SearchInput').focus(),50);
   }
   function f1Cerrar(){ $('#modalF1Clientes').style.display='none'; }
-  function f1Seleccionar(idx){ const c=f1Filtrados[idx]; if(!c) return; if(f1Destino==='recepcion'){ $('#recNuevoCasillero').value=c.numero_casillero; f1Cerrar(); $('#btnBuscarClienteRec').click(); } else { $('#mostradorQ').value=c.numero_casillero; f1Cerrar(); $('#formBuscarMostrador').dispatchEvent(new Event('submit')); } }
+  function f1Seleccionar(idx){ const c=f1Filtrados[idx]; if(!c) return; if(f1Destino==='recepcion'){ $('#recNuevoCasillero').value=c.numero_casillero; f1Cerrar(); $('#btnBuscarClienteRec').click(); } else if(f1Destino==='ptyCliente'){ const inp=$('#ptyClienteCasillero'); if(inp){ inp.value=c.numero_casillero; f1Cerrar(); $('#btnBuscarClientePty').click(); } } else { $('#mostradorQ').value=c.numero_casillero; f1Cerrar(); $('#formBuscarMostrador').dispatchEvent(new Event('submit')); } }
   $('#f1SearchInput').addEventListener('input',(e)=>{ const q=e.target.value.toLowerCase(); f1Activo=0; f1Filtrados=q?f1ClientesCache.filter(c=>`${c.nombre} ${c.apellido}`.toLowerCase().includes(q)||c.email.toLowerCase().includes(q)||c.numero_casillero.toLowerCase().includes(q)):[...f1ClientesCache]; f1Render(); });
   $('#f1SearchInput').addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ f1Cerrar(); return; } if(e.key==='ArrowDown'){ f1Activo=Math.min(f1Activo+1,f1Filtrados.length-1); f1Render(); } if(e.key==='ArrowUp'){ f1Activo=Math.max(f1Activo-1,0); f1Render(); } if(e.key==='Enter') f1Seleccionar(f1Activo); });
   $('#modalF1Clientes').addEventListener('click',(e)=>{ if(e.target===$('#modalF1Clientes')) f1Cerrar(); });
