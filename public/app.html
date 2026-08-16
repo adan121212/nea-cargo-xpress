@@ -569,6 +569,7 @@
   }
 
   @media (max-width: 760px){
+    #seccionCasillero > div:first-child { grid-template-columns: 1fr !important; }
     .auth-shell{ grid-template-columns: 1fr; }
     .auth-side{ display:none; }
     .grid2{ grid-template-columns: 1fr; }
@@ -807,12 +808,34 @@
 
         <!-- ---- Sección: Casillero ---- -->
         <div class="seccion-app" id="seccionCasillero" style="display:none;">
-          <div class="card reveal" style="max-width:520px;">
-            <h2>Mi dirección de casillero</h2>
-            <p class="card-sub">Usa exactamente esta dirección al comprar en cualquier tienda de EE.UU. — el número de casillero (Suite) es lo que nos permite identificar que el paquete es tuyo.</p>
-            <div class="address-block" id="bloqueDireccionCasillero">Cargando…</div>
-            <button class="copy-btn" id="btnCopiarCasillero">Copiar dirección</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <!-- Aéreo -->
+            <div class="card reveal">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <span style="font-size:26px;">✈️</span>
+                <div>
+                  <h2 style="margin:0 0 2px;">Dirección Aérea</h2>
+                  <p style="margin:0;font-size:12px;color:var(--cargo-green);font-weight:600;">$3.00/lb · 4 días aprox.</p>
+                </div>
+              </div>
+              <div class="address-block" id="bloqueDireccionAereo">Cargando…</div>
+              <button class="copy-btn" id="btnCopiarAereo">Copiar dirección aérea</button>
+            </div>
+            <!-- Marítimo -->
+            <div class="card reveal" style="opacity:.65;position:relative;overflow:hidden;">
+              <div style="position:absolute;top:14px;right:14px;background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.05em;">PRÓXIMAMENTE</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <span style="font-size:26px;">🚢</span>
+                <div>
+                  <h2 style="margin:0 0 2px;">Dirección Marítima</h2>
+                  <p style="margin:0;font-size:12px;color:var(--ink-soft);font-weight:600;">Precio y días — próximamente</p>
+                </div>
+              </div>
+              <div class="address-block" id="bloqueDireccionMaritimo" style="opacity:.5;">Cargando…</div>
+              <button class="copy-btn" disabled style="opacity:.4;cursor:not-allowed;">Copiar dirección marítima</button>
+            </div>
           </div>
+          <p style="font-size:12.5px;color:var(--ink-soft);text-align:center;">Usa la dirección que corresponde a tu tipo de envío. El número <strong>PTY-14981</strong> en naranja identifica tus paquetes cuando llegan a bodega.</p>
         </div>
 
         <!-- ---- Sección: Paquetes ---- -->
@@ -1424,6 +1447,14 @@
     }
     $('#btnCopiar').onclick = () => copiarDireccion($('#btnCopiar'));
     $('#btnCopiarCasillero').onclick = () => copiarDireccion($('#btnCopiarCasillero'));
+    // Llenar casilleros aéreo y marítimo
+    const htmlAereo = `<span class="suite">${numCasillero}</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
+    const textoAereo = `${numCasillero}  ${nombreCompleto}  NEA CARGO XPRESS\n8610 NW 72 STREET\nMIAMI, FLORIDA 33195\nESTADOS UNIDOS\n1-305-406-3654`;
+    const htmlMaritimo = `<span class="suite">${numCasillero}</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS OCEAN<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
+    if(document.getElementById('bloqueDireccionAereo')) document.getElementById('bloqueDireccionAereo').innerHTML = htmlAereo;
+    if(document.getElementById('bloqueDireccionMaritimo')) document.getElementById('bloqueDireccionMaritimo').innerHTML = htmlMaritimo;
+    const btnAereo = document.getElementById('btnCopiarAereo');
+    if(btnAereo) btnAereo.onclick = () => navigator.clipboard.writeText(textoAereo).then(()=>{ const t=btnAereo.textContent; btnAereo.textContent='Copiada ✓'; setTimeout(()=>{ btnAereo.textContent=t; },1800); });
   }
 
   // ---------- Prealertar paquete ----------
