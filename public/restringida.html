@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mercancía Restringida y Prohibida — NEA Cargo Xpress</title>
+<meta name="description" content="Lista de mercancía restringida y prohibida para envíos de Miami a Panamá. Conoce qué artículos no puedes enviar a tu casillero NEA Cargo Xpress.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0c1b33; --ink-soft:rgba(12,27,51,0.62); --ink-faint:rgba(12,27,51,0.38);
+  --paper:#f0f2f1; --panel:#ffffff; --panel-alt:#f7f8f7;
+  --line:rgba(12,27,51,0.10);
+  --accent:#ff6a1a; --accent-dark:#e2570e; --accent-glow:rgba(255,106,26,0.50); --accent-bg:rgba(255,106,26,0.08);
+  --green:#177a63; --green-bg:rgba(23,122,99,0.10);
+  --red:#dc2626; --red-bg:rgba(220,38,38,0.08); --red-border:rgba(220,38,38,0.20);
+  --amber:#d97706; --amber-bg:rgba(217,119,6,0.08); --amber-border:rgba(217,119,6,0.22);
+  --fd:'Space Grotesk',sans-serif; --fb:'Inter',sans-serif;
+  --r-sm:8px; --r-md:14px; --r-lg:22px;
+  --sh:0 1px 2px rgba(12,27,51,0.04),0 8px 24px -8px rgba(12,27,51,0.10);
+  --sh-hover:0 4px 12px rgba(12,27,51,0.06),0 20px 48px -12px rgba(12,27,51,0.18);
+  --tr:.22s ease;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--fb);overflow-x:hidden;}
+a{color:inherit;text-decoration:none;}
+/* NAV */
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(12,27,51,0.93);backdrop-filter:blur(18px) saturate(170%);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.nav-inner{max-width:1180px;margin:0 auto;padding:0 24px;height:62px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--fd);font-weight:700;font-size:15px;color:#fff;}
+.brand-mark{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;box-shadow:0 0 0 1px rgba(255,106,26,0.3),0 2px 18px var(--accent-glow);flex-shrink:0;}
+.brand-sub{font-size:10px;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,0.42);font-family:var(--fb);display:block;margin-top:1px;}
+.nav-links{display:flex;align-items:center;gap:2px;}
+.nav-a{color:rgba(255,255,255,0.8);font-size:13.5px;font-weight:500;padding:8px 13px;border-radius:7px;transition:background var(--tr),color var(--tr);}
+.nav-a:hover{background:rgba(255,255,255,0.08);color:#fff;}
+.nav-cta{background:var(--accent);color:#fff!important;font-weight:700;padding:9px 18px;border-radius:7px;font-size:13.5px;box-shadow:0 2px 18px var(--accent-glow);}
+.nav-cta:hover{background:var(--accent-dark);}
+@media(max-width:760px){.nav-links{display:none;}.nav-cta{display:none;}}
+
+/* HERO */
+.page-hero{
+  background:var(--ink);
+  padding:64px 24px 56px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.page-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 50% 0%,rgba(220,38,38,0.18),transparent 65%),
+             radial-gradient(ellipse 40% 50% at 20% 100%,rgba(255,106,26,0.12),transparent 60%);
+  pointer-events:none;
+}
+.page-hero-inner{position:relative;z-index:1;max-width:680px;margin:0 auto;}
+.page-hero .eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-family:var(--fd);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:18px;
+}
+.page-hero .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0;box-shadow:0 0 10px rgba(220,38,38,0.7);animation:pulse-r 1.9s ease-in-out infinite;}
+@keyframes pulse-r{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(.7);}}
+.page-hero h1{font-family:var(--fd);font-size:clamp(26px,4vw,44px);font-weight:700;color:#fff;letter-spacing:-0.015em;margin-bottom:14px;line-height:1.1;}
+.page-hero h1 span{color:var(--accent);}
+.page-hero p{font-size:15px;color:rgba(255,255,255,0.62);line-height:1.65;max-width:52ch;margin:0 auto 28px;}
+.warning-strip{
+  display:inline-flex;align-items:flex-start;gap:12px;
+  background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.3);
+  border-radius:var(--r-md);padding:16px 22px;
+  font-size:13px;color:rgba(255,255,255,0.85);line-height:1.55;
+  text-align:left;max-width:560px;
+}
+.warning-strip .wi{font-size:20px;flex-shrink:0;margin-top:1px;}
+
+/* CONTENIDO */
+.page-content{max-width:1100px;margin:0 auto;padding:60px 24px 80px;}
+.section-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:48px;}
+@media(max-width:760px){.section-grid{grid-template-columns:1fr;}}
+
+/* TARJETAS DE CATEGORÍA */
+.restrict-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);
+  overflow:hidden;box-shadow:var(--sh);
+}
+.restrict-card.prohibida{border-color:var(--red-border);}
+.restrict-card.restringida{border-color:var(--amber-border);}
+.card-header{padding:22px 26px 18px;}
+.card-header-inner{display:flex;align-items:center;gap:14px;}
+.card-badge{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.prohibida .card-badge{background:var(--red-bg);}
+.restringida .card-badge{background:var(--amber-bg);}
+.card-header h2{font-family:var(--fd);font-size:18px;font-weight:700;margin-bottom:4px;}
+.prohibida .card-header h2{color:var(--red);}
+.restringida .card-header h2{color:var(--amber);}
+.card-header p{font-size:12.5px;color:var(--ink-soft);line-height:1.5;}
+.card-header-bar{height:3px;}
+.prohibida .card-header-bar{background:linear-gradient(to right,var(--red),rgba(220,38,38,0.2));}
+.restringida .card-header-bar{background:linear-gradient(to right,var(--amber),rgba(217,119,6,0.2));}
+.items-list{padding:20px 26px 24px;display:flex;flex-direction:column;gap:0;}
+.item-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--line);
+  font-size:13.5px;color:var(--ink);transition:background var(--tr);
+}
+.item-row:last-child{border-bottom:none;}
+.item-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.prohibida .item-ico{background:var(--red-bg);}
+.restringida .item-ico{background:var(--amber-bg);}
+
+/* AVISO FINAL */
+.aviso-final{
+  background:linear-gradient(135deg,rgba(220,38,38,0.08),rgba(220,38,38,0.03));
+  border:1px solid var(--red-border);border-radius:var(--r-lg);
+  padding:32px 36px;margin-bottom:40px;
+}
+.aviso-final h3{font-family:var(--fd);font-size:17px;font-weight:700;color:var(--red);margin-bottom:10px;}
+.aviso-final p{font-size:14px;color:var(--ink-soft);line-height:1.7;}
+.aviso-final strong{color:var(--ink);}
+
+/* CTA */
+.cta-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:40px;}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--accent);color:#fff;font-weight:700;font-size:14px;
+  padding:13px 26px;border-radius:var(--r-sm);
+  box-shadow:0 4px 20px var(--accent-glow);
+  transition:transform var(--tr),box-shadow var(--tr),background var(--tr);
+}
+.btn-primary:hover{background:var(--accent-dark);transform:translateY(-2px);}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1.5px solid var(--line);color:var(--ink);font-weight:600;font-size:14px;
+  padding:12px 24px;border-radius:var(--r-sm);background:var(--panel);
+  transition:border-color var(--tr);
+}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent-dark);}
+
+/* FOOTER */
+footer{background:var(--ink);color:rgba(255,255,255,0.5);padding:36px 24px;text-align:center;font-size:13px;}
+footer a{color:rgba(255,255,255,0.6);transition:color var(--tr);}
+footer a:hover{color:#fff;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <div class="brand-mark">N</div>
+      <div>NEA CARGO XPRESS<span class="brand-sub">Miami → Panamá</span></div>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#como-funciona" class="nav-a">Cómo funciona</a>
+      <a href="index.html#tarifas" class="nav-a">Tarifas</a>
+      <a href="index.html#rastreo" class="nav-a">Rastrear</a>
+      <a href="index.html#preguntas" class="nav-a">FAQ</a>
+    </div>
+    <a href="app.html?registro" class="nav-cta">Crear casillero gratis</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="eyebrow"><span class="dot"></span> Regulaciones de envío</div>
+    <h1>Mercancía <span>Restringida</span> y Prohibida</h1>
+    <p>Antes de comprar, revisa esta lista. Algunos productos no pueden ser transportados a Panamá por restricciones aduanales o de seguridad.</p>
+    <div class="warning-strip">
+      <span class="wi">⚠️</span>
+      <span>Si tienes dudas sobre un producto que no aparece en esta lista, <strong style="color:#fff;">contáctanos antes de comprarlo</strong>. No nos hacemos responsables por mercancía enviada en contravención de estas normas.</span>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENIDO -->
+<div class="page-content">
+
+  <div class="section-grid">
+
+    <!-- RESTRINGIDA -->
+    <div class="restrict-card restringida">
+      <div class="card-header">
+        <div class="card-header-inner">
+          <div class="card-badge">⚠️</div>
+          <div>
+            <h2>Mercancía Restringida</h2>
+            <p>Requiere autorización especial o puede ser sujeta a revisión adicional.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-header-bar"></div>
+      <div class="items-list">
+        <div class="item-row"><div class="item-ico">🌶️</div> Gas pimienta</div>
+        <div class="item-row"><div class="item-ico">🌱</div> Semillas y plantas</div>
+        <div class="item-row"><div class="item-ico">☣️</div> Productos clasificados como material peligroso</div>
+        <div class="item-row"><div class="item-ico">🧪</div> Plaguicidas, pesticidas y agroquímicos</div>
+        <div class="item-row"><div class="item-ico">🌿</div> Fertilizantes y abonos para plantas</div>
+        <div class="item-row"><div class="item-ico">💊</div> Suplementos, medicinas y vitaminas para animales</div>
+        <div class="item-row"><div class="item-ico">🌾</div> Productos agrícolas</div>
+        <div class="item-row"><div class="item-ico">🐾</div> Comida para animales</div>
+        <div class="item-row"><div class="item-ico">🐕</div> Shampoo o acondicionador para animales</div>
+        <div class="item-row"><div class="item-ico">🦮</div> Collar para animales con contenido medicinal</div>
+        <div class="item-row"><div class="item-ico">🌿</div> Productos que contengan cannabis</div>
+      </div>
+    </div>
+
+    <!-- PROHIBIDA -->
+    <div class="restrict-card prohibida">
+      <div class="card-header">
+        <div class="card-header-inner">
+          <div class="card-badge">🚫</div>
+          <div>
+            <h2>Mercancía Prohibida</h2>
+            <p>Estos artículos <strong>no pueden ser enviados</strong> bajo ninguna circunstancia.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-header-bar"></div>
+      <div class="items-list">
+        <div class="item-row"><div class="item-ico">🔫</div> Municiones, armas y partes</div>
+        <div class="item-row"><div class="item-ico">💥</div> Explosivos, pólvora y fuegos artificiales</div>
+        <div class="item-row"><div class="item-ico">🔥</div> Fósforos, fulminantes y encendedores</div>
+        <div class="item-row"><div class="item-ico">☠️</div> Venenos</div>
+        <div class="item-row"><div class="item-ico">💵</div> Dinero en efectivo</div>
+        <div class="item-row"><div class="item-ico">💊</div> Drogas, estupefacientes y medicinas controladas</div>
+        <div class="item-row"><div class="item-ico">🔭</div> Mira telescópica infrarrojo</div>
+        <div class="item-row"><div class="item-ico">🚬</div> Cigarrillos electrónicos, vaporizadores y partes</div>
+        <div class="item-row"><div class="item-ico">💊</div> Suplementos con Dimethylamylamine (DMAA)</div>
+        <div class="item-row"><div class="item-ico">🌿</div> Cannabis y sus derivados</div>
+        <div class="item-row"><div class="item-ico">👜</div> Mercancía falsificada o réplicas</div>
+        <div class="item-row"><div class="item-ico">🧴</div> Acetona</div>
+        <div class="item-row"><div class="item-ico">🥩</div> Productos perecederos</div>
+        <div class="item-row"><div class="item-ico">💀</div> Cadáveres</div>
+        <div class="item-row"><div class="item-ico">🐾</div> Animales vivos</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AVISO FINAL -->
+  <div class="aviso-final">
+    <h3>⚠️ Importante — Lee antes de enviar</h3>
+    <p>
+      <strong>NO envíes ninguno de estos productos a tu casillero en Miami.</strong> La mercancía que se considere peligrosa o sospechosa estará sometida a revisión por las autoridades gubernamentales antes o después del embarque.<br><br>
+      Si la mercancía es retenida o decomisada, <strong>deberás asumir los costos de devolución al proveedor o destrucción del producto</strong>. NEA Cargo Xpress no se hace responsable por pérdidas derivadas del envío de artículos restringidos o prohibidos.<br><br>
+      ¿Tienes dudas sobre un producto específico? <strong>Consúltanos antes de comprarlo</strong> — es mejor preguntar primero.
+    </p>
+  </div>
+
+  <!-- CTA -->
+  <div style="text-align:center;">
+    <p style="font-size:14px;color:var(--ink-soft);margin-bottom:24px;">¿Todo listo? Crea tu casillero gratis y empieza a comprar en EE.UU.</p>
+    <div class="cta-row">
+      <a href="app.html?registro" class="btn-primary">🚀 Crear mi casillero gratis</a>
+      <a href="https://wa.me/50769491874?text=Hola%20NEA%20Cargo%2C%20tengo%20una%20duda%20sobre%20un%20producto" target="_blank" rel="noopener" class="btn-ghost">💬 Consultar por WhatsApp</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="max-width:1100px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:12px;">
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#fff;">NEA CARGO XPRESS</div>
+    <div>8610 NW 72 Street · Miami, Florida 33195 · 1-305-406-3654</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;">
+      <a href="index.html">Inicio</a>
+      <a href="index.html#tarifas">Tarifas</a>
+      <a href="index.html#rastreo">Rastrear</a>
+      <a href="index.html#preguntas">FAQ</a>
+      <a href="https://wa.me/50769491874" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.3);">© <span id="anio"></span> NEA Cargo Xpress. Panamá. Todos los derechos reservados.</div>
+  </div>
+</footer>
+<script>document.getElementById('anio').textContent = new Date().getFullYear();</script>
+</body>
+</html>
