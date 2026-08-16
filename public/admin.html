@@ -1766,6 +1766,8 @@
         return;
       }
       renderResultadoMostrador(data.cliente, data.paquetes, data.facturas_pendientes||[], data.autorizados||[]);
+      // Refrescar lista de pendientes para que filtre por el cliente encontrado
+      cargarPendientesMostrador();
     } catch(err){ mostrarBanner('#bannerMostrador','error','No pudimos conectar.'); }
     finally { setCargando(btn,false); }
   });
@@ -1886,7 +1888,7 @@
     if(resultados.length>0){
       const totalCobrado=$('#ftTotal').textContent;
       mostrarBanner('#bannerMostrador','success',`✓ ${resultados.map(f=>f.numero_factura).join(', ')} · ${totalCobrado} · ${facturadorMetodoPago}`);
-      setTimeout(()=>{ $('#resultadoMostrador').innerHTML=''; $('#facturadorResumen').style.display='none'; $('#facturadorResultado').style.display='none'; $('#bannerMostrador').innerHTML=''; $('#mostradorQ').value=''; facturadorMetodoPago=''; document.querySelectorAll('.ft-pago-btn').forEach(b=>b.classList.remove('selected')); $('#mostradorQ').focus(); }, 3000);
+      setTimeout(()=>{ $('#resultadoMostrador').innerHTML=''; $('#facturadorResumen').style.display='none'; $('#facturadorResultado').style.display='none'; $('#bannerMostrador').innerHTML=''; $('#mostradorQ').value=''; facturadorMetodoPago=''; facturadorCliente=null; document.querySelectorAll('.ft-pago-btn').forEach(b=>b.classList.remove('selected')); $('#mostradorQ').focus(); cargarPendientesMostrador(); }, 3000);
       cargarPendientesMostrador();
     }
     if(errores>0) mostrarBanner('#bannerMostrador','error',errores+' factura(s) no se pudieron generar.');
