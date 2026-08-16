@@ -780,7 +780,6 @@
 
         <!-- ---- Sección: Inicio ---- -->
         <div class="seccion-app" id="seccionInicio">
-          <div class="banner-listo" id="bannerListoRetiro"><h3>📦 ¡Tu paquete está listo para retiro!</h3><p id="bannerListoTexto">Visita nuestra sucursal con tu cédula para recogerlo.</p></div>
           <div class="grid2">
             <div class="card reveal">
               <h2>Mi dirección de casillero</h2>
@@ -1406,25 +1405,18 @@
   async function cargarPerfil(){
     const res = await apiAutenticado('/casillero/perfil');
     const data = await res.json();
-    const { usuario, direccion_casillero } = data;
-
+    const { usuario } = data;
     nombreUsuarioActual = usuario.nombre;
     $('#saludoNombre').textContent = `Hola, ${usuario.nombre}`;
     $('#pillCasillero').textContent = usuario.numero_casillero;
-
-    $('#bloqueDireccion').innerHTML = `
-      ${direccion_casillero.nombre_destinatario}<br>
-      ${direccion_casillero.linea1}<br>
-      <span class="suite">${direccion_casillero.linea2}</span><br>
-      ${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}<br>
-      ${direccion_casillero.pais}
-    `;
-    $('#bloqueDireccionCasillero').innerHTML = $('#bloqueDireccion').innerHTML;
-
-    const textoDireccion = `${direccion_casillero.nombre_destinatario}\n${direccion_casillero.linea1}\n${direccion_casillero.linea2}\n${direccion_casillero.ciudad}, ${direccion_casillero.estado} ${direccion_casillero.codigo_postal}\n${direccion_casillero.pais}`;
-
+    const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ''}`.trim();
+    const numCasillero = usuario.numero_casillero;
+    const htmlCasillero = `<span class="suite">${numCasillero}</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
+    const textoCasillero = `${numCasillero}  ${nombreCompleto}  NEA CARGO XPRESS\n8610 NW 72 STREET\nMIAMI, FLORIDA 33195\nESTADOS UNIDOS\n1-305-406-3654`;
+    $('#bloqueDireccion').innerHTML = htmlCasillero;
+    $('#bloqueDireccionCasillero').innerHTML = htmlCasillero;
     function copiarDireccion(btn){
-      navigator.clipboard.writeText(textoDireccion).then(() => {
+      navigator.clipboard.writeText(textoCasillero).then(() => {
         const textoOriginal = btn.textContent;
         btn.textContent = 'Copiada ✓';
         setTimeout(() => { btn.textContent = textoOriginal; }, 1800);
@@ -1512,7 +1504,7 @@
     }).join('');
   }
 
-    const TIENDAS_POR_TRACKING = [
+  const TIENDAS_POR_TRACKING = [
     { patron: /^1Z/i, tienda: 'UPS' },
     { patron: /^(940|927|926|925|920)[0-9]+/, tienda: 'USPS' },
     { patron: /^JD/i, tienda: 'DHL' },
@@ -1577,12 +1569,6 @@
               <span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span>
               <div class="paquete-valor">$${Number(p.valor_declarado).toFixed(2)}</div>
             </div>
-          </div>
-          <div style="display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;">
-            ${p.peso_real_lb ? `<div style="font-size:12px;color:var(--ink-soft);">⚖️ Peso real: <strong style="color:var(--ink);">${Number(p.peso_real_lb).toFixed(2)} lb</strong></div>` : (p.peso_lb ? `<div style="font-size:12px;color:var(--ink-soft);">⚖️ Peso aprox: ${Number(p.peso_lb).toFixed(2)} lb</div>` : '')}
-            ${p.estado !== 'entregado' && p.estado !== 'listo_para_retiro' ? `<div style="font-size:12px;color:var(--ink-soft);">🗓 ${estimarFecha(p.estado)}</div>` : ''}
-            ${p.estado === 'listo_para_retiro' ? `<div style="font-size:12px;color:var(--cargo-green);font-weight:600;">✓ Listo para retirar</div>` : ''}
-            ${p.fecha_entrega ? `<div style="font-size:12px;color:var(--ink-soft);">📅 Entregado: ${new Date(p.fecha_entrega).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'})}</div>` : ''}
           </div>
           <div class="rail">${rail}</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
