@@ -22,10 +22,11 @@ const adminMostradorRoutes = require('./routes/admin/mostrador');
 const adminCajaRoutes = require('./routes/admin/caja');
 const adminRecepcionRoutes = require('./routes/admin/recepcion');
 const adminPtyRoutes = require('./routes/admin/ptycargoexpress');
-
 const app = express();
-
 app.set('trust proxy', 1);
+
+// Deshabilitar ETag para evitar respuestas 304 con cuerpo vacío en las APIs
+app.set('etag', false);
 
 app.use((req, res, next) => {
   if (req.headers.host === 'nea-cargo-xpress.onrender.com') {
@@ -33,7 +34,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -41,6 +41,15 @@ app.use(
     crossOriginEmbedderPolicy: false,
   })
 );
+
+// Evitar caché en TODAS las rutas de API — nunca devolver 304
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('Surrogate-Control', 'no-store');
+  next();
+});
 
 // CORS para que el bookmarklet de PTY Cargo pueda llamar al servidor de NEA
 app.use('/api/admin/pty/verificar', (req, res, next) => {
@@ -65,14 +74,12 @@ app.get('/pty-importer.js', (req, res) => {
 app.disable('x-powered-by');
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
-
 const limiteGeneral = rateLimit({
   windowMs: 15 * 60 * 1000, max: 300,
   standardHeaders: true, legacyHeaders: false,
   message: { mensaje: 'Demasiadas solicitudes. Intenta de nuevo en unos minutos.' },
 });
 app.use('/api', limiteGeneral);
-
 const limiteAuth = rateLimit({
   windowMs: 15 * 60 * 1000, max: 10,
   standardHeaders: true, legacyHeaders: false,
@@ -82,14 +89,12 @@ app.use('/api/auth/login', limiteAuth);
 app.use('/api/auth/registro', limiteAuth);
 app.use('/api/auth/olvide-password', limiteAuth);
 app.use('/api/auth/restablecer-password', limiteAuth);
-
 const limiteRastreo = rateLimit({
   windowMs: 15 * 60 * 1000, max: 30,
   standardHeaders: true, legacyHeaders: false,
   message: { mensaje: 'Demasiadas búsquedas. Espera unos minutos.' },
 });
 app.use('/api/public/rastreo', limiteRastreo);
-
 app.use('/api/auth', authRoutes);
 app.use('/api/casillero', casilleroRoutes);
 app.use('/api/paquetes', paquetesRoutes);
@@ -109,14 +114,11 @@ app.use('/api/admin/mostrador', adminMostradorRoutes);
 app.use('/api/admin/caja', adminCajaRoutes);
 app.use('/api/admin/recepcion', adminRecepcionRoutes);
 app.use('/api/admin/pty', adminPtyRoutes);
-
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.use((err, req, res, next) => {
   console.error('Error no controlado:', err);
   res.status(err.status || 500).json({ mensaje: 'Ocurrió un error interno. Intenta de nuevo.' });
 });
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);
