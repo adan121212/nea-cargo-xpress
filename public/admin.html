@@ -1065,6 +1065,20 @@
       <div id="ptyEstado" style="text-align:center;padding:40px;color:var(--ink-soft);font-size:13.5px;">
         Presiona "Cargar paquetes" para traer la lista desde PTY Cargo Express.
       </div>
+
+      <!-- Importación manual por texto -->
+      <div style="margin-top:24px;padding:20px;background:var(--paper);border-radius:12px;border:1px solid var(--line);">
+        <div style="font-family:var(--font-display);font-size:14px;font-weight:700;margin-bottom:6px;">📋 Importar por texto</div>
+        <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;line-height:1.55;">Copia la lista de paquetes de PTY Cargo, pégala aquí y presiona importar. Solo se importan los que están <strong>En Bodega</strong> o <strong>En Tránsito</strong>.</p>
+        <textarea id="ptyTexto" rows="8" placeholder="Pega aquí la lista de paquetes de PTY Cargo…" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--font-mono);font-size:12px;color:var(--ink);background:var(--panel);resize:vertical;line-height:1.6;"></textarea>
+        <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-primary" id="btnImportarTexto" style="width:auto;">
+            <span class="spinner"></span><span>⬇ Procesar e importar</span>
+          </button>
+          <div id="ptyTextoResumen" style="font-size:12.5px;color:var(--ink-soft);"></div>
+        </div>
+        <div class="banner" id="bannerPtyTexto"></div>
+      </div>
       <div id="ptyTabla" style="display:none;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
           <div style="font-size:12.5px;color:var(--ink-soft);" id="ptyResumen"></div>
@@ -2731,6 +2745,86 @@
   $('#btnCargarPty').addEventListener('click', cargarPty);
   $('#btnImportarSeleccionados').addEventListener('click', importarSeleccionados);
   $('#ptyFiltro').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); cargarPty(); } });
+
+  // ---- Importar PTY por texto ----
+  const ESTADOS_IMPORTAR = ['en bodega', 'en tránsito', 'en transito', 'en_bodega', 'en_transito', 'en bodega miami'];
+  function parsearTextoPTY(texto){
+    const lineas = texto.split('
+').map(l => l.trim()).filter(l => l.length > 5);
+    const paquetes = [];
+    for(const linea of lineas){
+      // Formato: ▶ TRACKING  WHR  CONSIGNATARIO  REFERENCIAS  PESO  ESTADO  COMENTARIO
+      // Separado por tabs o espacios múltiples
+      const partes = linea.replace(/^[▶►\-\*]\s*/, '').split(/	+/);
+      if(partes.length < 3) continue;
+      const tracking = partes[0].trim();
+      const whr = partes[1].trim();
+      const consignatario = partes[2].trim();
+      const referencias = partes.length > 3 ? partes[3].trim() : '';
+      // Buscar peso (formato: XX.X lb)
+      const pesoMatch = linea.match(/(\d+\.?\d*)\s*lb/i);
+      const peso = pesoMatch ? parseFloat(pesoMatch[1]) : null;
+      // Buscar estado
+      const lineaLower = linea.toLowerCase();
+      let estado = null;
+      if(lineaLower.includes('en bodega')) estado = 'en_bodega_miami';
+      else if(lineaLower.includes('en tránsito') || lineaLower.includes('en transito')) estado = 'en_transito';
+      else if(lineaLower.includes('entregado')) estado = 'entregado';
+      else if(lineaLower.includes('en panamá') || lineaLower.includes('en panama')) estado = 'en_panama';
+      if(!tracking || tracking.length < 3) continue;
+      paquetes.push({ tracking, whr, consignatario, referencias, peso, estado, linea });
+    }
+    return paquetes;
+  }
+
+  $('#ptyTexto').addEventListener('input', () => {
+    const texto = $('#ptyTexto').value.trim();
+    if(!texto){ $('#ptyTextoResumen').textContent = ''; return; }
+    const todos = parsearTextoPTY(texto);
+    const importables = todos.filter(p => p.estado === 'en_bodega_miami' || p.estado === 'en_transito');
+    $('#ptyTextoResumen').textContent = `${todos.length} paquetes detectados · ${importables.length} para importar (bodega/tránsito) · ${todos.length - importables.length} entregados (se omiten)`;
+  });
+
+  $('#btnImportarTexto').addEventListener('click', async () => {
+    const texto = $('#ptyTexto').value.trim();
+    if(!texto){ mostrarBanner('#bannerPtyTexto','error','Pega el texto de PTY primero.'); return; }
+    const todos = parsearTextoPTY(texto);
+    const importables = todos.filter(p => p.estado === 'en_bodega_miami' || p.estado === 'en_transito');
+    if(!importables.length){ mostrarBanner('#bannerPtyTexto','error','No hay paquetes en bodega o en tránsito en el texto.'); return; }
+    const btn = $('#btnImportarTexto');
+    setCargando(btn, true);
+    mostrarBanner('#bannerPtyTexto','','');
+    // Convertir al formato que espera el backend
+    const paquetes = importables.map(p => ({
+      TrackingNum: p.tracking,
+      WHR: p.whr,
+      Consignatario: p.consignatario,
+      Referencias: p.referencias,
+      Peso: p.peso ? String(p.peso) : null,
+      Status: p.estado === 'en_bodega_miami' ? 'En Bodega' : 'En Transito',
+      Fecha: new Date().toISOString().slice(0,10),
+    }));
+    try {
+      const res = await apiAdmin('/admin/pty/importar', { method:'POST', body: JSON.stringify({ paquetes }) });
+      const data = await res.json().catch(()=>({}));
+      if(res.ok){
+        mostrarBanner('#bannerPtyTexto','success',`✓ ${data.mensaje}`);
+        $('#ptyTexto').value = '';
+        $('#ptyTextoResumen').textContent = '';
+        // Mostrar detalle
+        if(data.importados?.length){
+          setTimeout(() => mostrarBanner('#bannerPtyTexto','success',
+            `✓ Importados: ${data.importados.join(', ')}`), 100);
+        }
+      } else {
+        mostrarBanner('#bannerPtyTexto','error', data.mensaje||'No se pudo importar.');
+      }
+    } catch(err){
+      mostrarBanner('#bannerPtyTexto','error','No pudimos conectar con el servidor.');
+    } finally {
+      setCargando(btn, false);
+    }
+  });
 
   async function iniciarAdmin(){
     cargarNotificacionesGuardadas();
