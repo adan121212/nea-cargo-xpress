@@ -129,7 +129,7 @@ router.post('/importar', async (req, res) => {
       // Tienda: intentar extraer de Referencias, si no usar 'PTY Cargo'
       // Tienda: PTY no la da, usar el consignatario o valor por defecto
       const tienda = 'PTY Cargo Express';
-      const pesoLb = parseFloat(p.Peso) || null;
+      const pesoLb = p.Peso ? parseFloat(parseFloat(p.Peso).toFixed(2)) : null;
       // Combinar WHR + Referencias + Comentario en descripcion
       const partes = [];
       if(p.WHR) partes.push('WHR: ' + p.WHR);
