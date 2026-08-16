@@ -1969,6 +1969,45 @@
         $('#recNuevoTienda').value=''; $('#recNuevoValor').value=''; $('#recNuevoPeso').value=''; $('#recNuevoDesc').value=''; $('#recNuevoCasillero').value=''; $('#recClienteEncontrado').style.display='none'; clienteRecepcionId=null; $('#btnCrearPaquete').disabled=true;
         mostrarBanner('#bannerRecepcion','error',`⚠ "${tracking}" no tiene prealerta — completa los datos para crearlo manualmente.`);
       } else if(res.ok&&data.ya_recibido){ mostrarBanner('#bannerRecepcion','error',`Este paquete ya fue recibido (estado: ${data.paquete.estado}).`);
+      } else if(res.ok&&data.sin_cliente){
+        const p=data.paquete;
+        $('#recepcionResultado').style.display='block';
+        $('#recepcionResultado').innerHTML=`<div style="background:var(--amber-bg);border-radius:10px;padding:16px 18px;border:1.5px solid rgba(255,106,26,0.4);">
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px;">📦 Paquete PTY — sin cliente asignado</div>
+          <div style="font-size:13px;color:var(--ink-soft);">${escapeHtml(p.numero_tracking)} · ${p.peso_lb||'?'} lb</div>
+          <div style="margin-top:14px;">
+            <label style="font-size:12.5px;font-weight:600;margin-bottom:6px;display:block;">Buscar cliente por casillero</label>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="ptyClienteCasillero" placeholder="PTY-00042" style="flex:1;">
+              <button type="button" id="btnBuscarClientePty" class="btn-secondary">Buscar</button>
+            </div>
+            <div id="ptyClienteEncontrado" style="margin-top:8px;font-size:12.5px;display:none;padding:8px 12px;background:var(--paper);border-radius:8px;"></div>
+            <button class="btn-primary" id="btnAsignarClientePty" data-paquete-id="${p.id}" style="margin-top:12px;display:none;">
+              <span class="spinner"></span><span>✓ Asignar y marcar listo para retiro</span>
+            </button>
+          </div>
+        </div>`;
+        let clientePtyId=null;
+        $('#btnBuscarClientePty').addEventListener('click',async()=>{
+          const cas=$('#ptyClienteCasillero').value.trim(); if(!cas) return;
+          try {
+            const r2=await apiAdmin(`/admin/usuarios?q=${encodeURIComponent(cas)}`);
+            const d2=await r2.json().catch(()=>({}));
+            const cl=(d2.usuarios||[]).find(u=>u.numero_casillero.toLowerCase()===cas.toLowerCase());
+            if(cl){ clientePtyId=cl.id; $('#ptyClienteEncontrado').style.display='block'; $('#ptyClienteEncontrado').innerHTML=`✓ <strong>${escapeHtml(cl.nombre)} ${escapeHtml(cl.apellido)}</strong> · ${escapeHtml(cl.email)}`; $('#btnAsignarClientePty').style.display='flex'; }
+            else { clientePtyId=null; $('#ptyClienteEncontrado').style.display='block'; $('#ptyClienteEncontrado').innerHTML='<span style="color:#dc2626;">No se encontró ningún cliente con ese casillero.</span>'; $('#btnAsignarClientePty').style.display='none'; }
+          } catch(e){}
+        });
+        $('#btnAsignarClientePty').addEventListener('click',async()=>{
+          if(!clientePtyId) return;
+          const btn=$('#btnAsignarClientePty'); setCargando(btn,true);
+          try {
+            const r3=await apiAdmin('/admin/recepcion/asignar-cliente',{method:'POST',body:JSON.stringify({paquete_id:parseInt(btn.dataset.paqueteId),usuario_id:clientePtyId})});
+            const d3=await r3.json().catch(()=>({}));
+            if(r3.ok){ recepcionContador++; $('#recepcionContador').textContent=recepcionContador; agregarAlLogRecepcion({tipo:'ok',tracking:p.numero_tracking,detalle:'PTY → cliente asignado',hora:horaActual()}); $('#recepcionResultado').style.display='none'; mostrarBanner('#bannerRecepcion','success','✓ Cliente asignado. Listo para retiro.'); $('#recepcionTracking').value=''; iniciarFlujoFotoDimensiones(p.id,p.numero_tracking); }
+            else { mostrarBanner('#bannerRecepcion','error',d3.mensaje||'No se pudo asignar.'); setCargando(btn,false); }
+          } catch(e){ mostrarBanner('#bannerRecepcion','error','No pudimos conectar.'); setCargando(btn,false); }
+        });
       } else if(res.ok){
         const p=data.paquete;
         $('#recepcionResultado').style.display='block';
