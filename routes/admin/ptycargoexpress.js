@@ -127,20 +127,32 @@ router.post('/importar', async (req, res) => {
       };
       const estadoNea = estadoMap[p.Status] || 'en_bodega_miami';
       // Tienda: intentar extraer de Referencias, si no usar 'PTY Cargo'
-      const tienda = p.Referencias?.trim() || 'PTY Cargo Express';
+      // Tienda: PTY no la da, usar el consignatario o valor por defecto
+      const tienda = 'PTY Cargo Express';
       const pesoLb = parseFloat(p.Peso) || null;
+      // Combinar WHR + Referencias + Comentario en descripcion
+      const partes = [];
+      if(p.WHR) partes.push('WHR: ' + p.WHR);
+      if(p.Referencias && p.Referencias.trim()) partes.push(p.Referencias.trim());
+      if(p.Comentario && p.Comentario.trim()) partes.push(p.Comentario.trim().substring(0, 200));
+      const descripcion = partes.join(' | ').substring(0, 500) || null;
+
+      // Fecha de prealerta: usar la de PTY o ahora
+      const fechaPrealerta = p.Fecha ? new Date(p.Fecha) : new Date();
+
       await pool.query(
         `INSERT INTO paquetes
            (usuario_id, numero_tracking, tienda, estado, peso_lb,
             descripcion, fecha_prealerta, fecha_actualizacion)
-         VALUES ($1,$2,$3,$4,$5,$6,NOW(),NOW())`,
+         VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())`,
         [
           usuarioId,
           p.TrackingNum,
           tienda,
           estadoNea,
           pesoLb,
-          p.Comentario ? p.Comentario.substring(0, 255) : null,
+          descripcion,
+          fechaPrealerta,
         ]
       );
       resultados.importados.push(p.TrackingNum);
@@ -182,6 +194,25 @@ router.get('/rastrear', async (req, res) => {
   } catch (err) {
     console.error('Error consultando PTY rastreo:', err);
     return res.status(502).json({ mensaje: 'No se pudo conectar con PTY Cargo Express.' });
+  }
+});
+
+// --- POST /api/admin/pty/verificar ---
+// Recibe una lista de trackings y devuelve cuáles ya existen en NEA
+router.post('/verificar', async (req, res) => {
+  const { trackings } = req.body;
+  if (!Array.isArray(trackings) || trackings.length === 0) {
+    return res.json({ en_nea: [] });
+  }
+  try {
+    const resultado = await pool.query(
+      `SELECT numero_tracking FROM paquetes WHERE numero_tracking = ANY($1)`,
+      [trackings]
+    );
+    return res.json({ en_nea: resultado.rows.map(r => r.numero_tracking) });
+  } catch (err) {
+    console.error('Error verificando trackings en NEA:', err);
+    return res.json({ en_nea: [] });
   }
 });
 
