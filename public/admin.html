@@ -1024,85 +1024,15 @@
     </div>
     <!-- ---- TAB: PTY Cargo Express ---- -->
     <div class="card tab-panel" id="tabPty" style="display:none;">
-      <div style="margin-bottom:20px;padding:18px;background:var(--paper);border-radius:12px;border:1px solid var(--line);">
-        <div style="font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">🔖 Importar desde PTY Cargo Express</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div style="background:var(--panel);border-radius:10px;padding:16px;border:1px solid var(--line);">
-            <div style="font-family:var(--font-display);font-size:13.5px;font-weight:700;margin-bottom:8px;">Paso 1 — Guarda el bookmarklet</div>
-            <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.55;">Arrastra este botón a tu barra de favoritos del navegador:</p>
-            <a id="ptyBookmarklet" href="#" style="display:inline-block;background:var(--accent);color:#fff;font-weight:700;font-size:13px;padding:10px 18px;border-radius:8px;cursor:grab;box-shadow:0 2px 16px var(--accent-glow);">📦 Importar a NEA</a>
-            <p style="font-size:11px;color:var(--ink-soft);margin:10px 0 0;">⚠ Arrástralo — no hagas clic aquí directamente.</p>
-          </div>
-          <div style="background:var(--panel);border-radius:10px;padding:16px;border:1px solid var(--line);">
-            <div style="font-family:var(--font-display);font-size:13.5px;font-weight:700;margin-bottom:8px;">Paso 2 — Úsalo en PTY Cargo</div>
-            <ol style="font-size:12.5px;color:var(--ink-soft);margin:0;padding-left:18px;line-height:2;">
-              <li>Ve a <a href="https://carga.ptycargoexpress.com" target="_blank" style="color:var(--accent);font-weight:600;">carga.ptycargoexpress.com</a></li>
-              <li>Inicia sesión con las credenciales de Noris</li>
-              <li>Ve a la sección <strong>Tracking</strong></li>
-              <li>Haz clic en el favorito <strong>"📦 Importar a NEA"</strong></li>
-              <li>¡Listo! Los paquetes nuevos se importan solos</li>
-            </ol>
-          </div>
-        </div>
-        <div style="margin-top:14px;padding:12px 14px;background:rgba(23,122,99,0.08);border:1px solid rgba(23,122,99,0.2);border-radius:8px;font-size:12.5px;color:var(--cargo-green);">
-          ✓ El bookmarklet detecta automáticamente qué paquetes ya están en NEA y solo importa los nuevos.
-        </div>
-      </div>
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px;">
-        <div>
-          <h2 style="margin:0 0 4px;">🚢 PTY Cargo Express</h2>
-          <p class="card-sub" style="margin:0;">Paquetes en bodega de PTY Cargo. Importa los que no están en NEA con un clic.</p>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <input type="text" id="ptyFiltro" placeholder="Filtrar por tracking…" style="padding:8px 12px;font-size:13px;width:200px;">
-          <button class="btn-secondary" id="btnCargarPty" style="white-space:nowrap;">🔄 Cargar paquetes</button>
-          <button class="btn-primary" id="btnImportarSeleccionados" style="white-space:nowrap;display:none;">
-            <span class="spinner"></span><span>⬇ Importar seleccionados</span>
-          </button>
-        </div>
-      </div>
-      <div class="banner" id="bannerPty"></div>
-      <div id="ptyEstado" style="text-align:center;padding:40px;color:var(--ink-soft);font-size:13.5px;">
-        Presiona "Cargar paquetes" para traer la lista desde PTY Cargo Express.
-      </div>
-
-      <!-- Importación manual por texto -->
-      <div style="margin-top:24px;padding:20px;background:var(--paper);border-radius:12px;border:1px solid var(--line);">
-        <div style="font-family:var(--font-display);font-size:14px;font-weight:700;margin-bottom:6px;">📋 Importar por texto</div>
-        <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;line-height:1.55;">Copia la lista de paquetes de PTY Cargo, pégala aquí y presiona importar. Solo se importan los que están <strong>En Bodega</strong> o <strong>En Tránsito</strong>.</p>
-        <textarea id="ptyTexto" rows="8" placeholder="Pega aquí la lista de paquetes de PTY Cargo…" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--font-mono);font-size:12px;color:var(--ink);background:var(--panel);resize:vertical;line-height:1.6;"></textarea>
-        <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-primary" id="btnImportarTexto" style="width:auto;">
-            <span class="spinner"></span><span>⬇ Procesar e importar</span>
-          </button>
-          <div id="ptyTextoResumen" style="font-size:12.5px;color:var(--ink-soft);"></div>
-        </div>
-        <div class="banner" id="bannerPtyTexto"></div>
-      </div>
-      <div id="ptyTabla" style="display:none;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-          <div style="font-size:12.5px;color:var(--ink-soft);" id="ptyResumen"></div>
-          <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;margin:0;">
-            <input type="checkbox" id="ptySelAll" style="width:15px;height:15px;accent-color:var(--accent);"> Seleccionar todos los nuevos
-          </label>
-        </div>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:36px;"></th>
-                <th>Tracking</th>
-                <th>WHR</th>
-                <th>Referencias</th>
-                <th>Peso (lb)</th>
-                <th>Estado PTY</th>
-                <th>Fecha</th>
-                <th>NEA</th>
-              </tr>
-            </thead>
-            <tbody id="tbodyPty"></tbody>
-          </table>
-        </div>
+      <h2 style="margin:0 0 4px;">🚢 PTY Cargo Express</h2>
+      <p class="card-sub" style="margin:0 0 22px;">Copia la lista de paquetes desde PTY Cargo y égala aquí. Solo se importan los paquetes con estado <strong>EN BODEGA</strong>. Los demás se omiten automáticamente.</p>
+      <div class="banner" id="bannerPtyTexto"></div>
+      <textarea id="ptyTexto" rows="10" placeholder="Pega aquí la lista de paquetes de PTY Cargo… Solo se importan los EN BODEGA." style="width:100%;padding:14px;border:1.5px solid var(--line);border-radius:10px;font-family:var(--font-mono);font-size:12px;color:var(--ink);background:var(--panel);resize:vertical;line-height:1.7;margin-bottom:12px;"></textarea>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-primary" id="btnImportarTexto" style="width:auto;">
+          <span class="spinner"></span><span>&#x2B07; Procesar e importar</span>
+        </button>
+        <div id="ptyTextoResumen" style="font-size:12.5px;color:var(--ink-soft);"></div>
       </div>
     </div>
   </div><!-- /vistaAdmin -->
@@ -2608,145 +2538,7 @@
   };
 
   // ---- PTY Cargo Express ----
-  let ptyPaquetesCache = [];
-  const STATUS_COLOR = {
-    'En Bodega':'background:#dbeafe;color:#1e40af',
-    'En Transito':'background:#fef3c7;color:#92400e',
-    'En tránsito':'background:#fef3c7;color:#92400e',
-    'En Panamá':'background:#d1fae5;color:#065f46',
-    'En Panama':'background:#d1fae5;color:#065f46',
-    'Entregado':'background:rgba(12,27,51,0.08);color:var(--ink-soft)',
-    'Listo':'background:var(--cargo-green-bg);color:var(--cargo-green)',
-  };
-  async function cargarPty(){
-    const sesion = $('#ptySession')?.value.trim();
-    if(!sesion){ mostrarBanner('#bannerPty','error','Pega el PHPSESSID en el campo de sesión primero.'); return; }
-    const btn = $('#btnCargarPty');
-    setCargando(btn, true);
-    mostrarBanner('#bannerPty','','');
-    $('#ptyEstado').textContent = 'Cargando desde PTY Cargo Express…';
-    $('#ptyTabla').style.display = 'none';
-    try {
-      const filtro = $('#ptyFiltro').value.trim();
-      // Petición directa desde el navegador a PTY Cargo (evita bloqueo de IP del servidor)
-      const body = new URLSearchParams({
-        accion: 'tracking', pagina: '1', orderCol: 'Fecha',
-        orderDir: 'DESC', porPagina: '100', filtro: filtro || ''
-      });
-      const ptyRes = await fetch('https://carga.ptycargoexpress.com/ajax.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'Cookie': `PHPSESSID=${sesion}`,
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        credentials: 'omit',
-        body: body.toString(),
-      });
-      if(!ptyRes.ok){
-        // Si falla por CORS, usar el backend como proxy
-        const res = await apiAdmin(`/admin/pty/paquetes?porPagina=100&sesion=${encodeURIComponent(sesion)}${filtro?'&filtro='+encodeURIComponent(filtro):''}`);
-        const data = await res.json();
-        if(!res.ok){ mostrarBanner('#bannerPty','error',data.mensaje||'No se pudo cargar.'); $('#ptyEstado').textContent=''; return; }
-        ptyPaquetesCache = data.paquetes || [];
-        renderPtyTabla(ptyPaquetesCache, data.total);
-      } else {
-        const data = await ptyRes.json();
-        if(!data.success){ mostrarBanner('#bannerPty','error','Sesión expirada o inválida. Copia un PHPSESSID nuevo.'); $('#ptyEstado').textContent=''; return; }
-        const items = data.data?.items || [];
-        // Comparar con NEA para marcar duplicados
-        const trackings = items.map(i => i.TrackingNum).filter(Boolean);
-        let yaEnNea = new Set();
-        if(trackings.length > 0){
-          try {
-            const chkRes = await apiAdmin('/admin/pty/verificar', { method:'POST', body: JSON.stringify({ trackings }) });
-            const chkData = await chkRes.json().catch(()=>({}));
-            yaEnNea = new Set((chkData.en_nea || []).map(t => t.toLowerCase()));
-          } catch(e){}
-        }
-        ptyPaquetesCache = items.map(p => ({ ...p, ya_en_nea: yaEnNea.has((p.TrackingNum||'').toLowerCase()) }));
-        renderPtyTabla(ptyPaquetesCache, data.data?.total || items.length);
-      }
-      $('#ptyEstado').textContent = '';
-      $('#ptyTabla').style.display = 'block';
-    } catch(err){
-      // CORS bloqueado — usar backend como proxy
-      try {
-        const filtro = $('#ptyFiltro').value.trim();
-        const res = await apiAdmin(`/admin/pty/paquetes?porPagina=100&sesion=${encodeURIComponent(sesion)}${filtro?'&filtro='+encodeURIComponent(filtro):''}`);
-        const data = await res.json();
-        if(!res.ok){ mostrarBanner('#bannerPty','error',data.mensaje||'No se pudo cargar.'); $('#ptyEstado').textContent=''; return; }
-        ptyPaquetesCache = data.paquetes || [];
-        renderPtyTabla(ptyPaquetesCache, data.total);
-        $('#ptyEstado').textContent = '';
-        $('#ptyTabla').style.display = 'block';
-      } catch(e){
-        mostrarBanner('#bannerPty','error','No pudimos conectar con PTY Cargo.');
-        $('#ptyEstado').textContent = '';
-      }
-    } finally { setCargando(btn, false); }
-  }
-  function renderPtyTabla(paquetes, total){
-    const nuevos = paquetes.filter(p => !p.ya_en_nea).length;
-    $('#ptyResumen').textContent = `${total} paquetes en PTY · ${nuevos} nuevos (no están en NEA) · ${paquetes.length - nuevos} ya importados`;
-    $('#btnImportarSeleccionados').style.display = nuevos > 0 ? 'flex' : 'none';
-    const tbody = $('#tbodyPty');
-    tbody.innerHTML = paquetes.map(p => {
-      const color = STATUS_COLOR[p.Status] || 'background:var(--amber-bg);color:var(--accent-dark)';
-      const fecha = p.Fecha ? p.Fecha.slice(0,10) : '—';
-      return `<tr style="${p.ya_en_nea?'opacity:.55;':''}" data-tracking="${escapeHtml(p.TrackingNum||'')}">
-        <td><input type="checkbox" class="pty-check" data-tracking="${escapeHtml(p.TrackingNum||'')}" ${p.ya_en_nea?'disabled':''} style="width:15px;height:15px;accent-color:var(--accent);"></td>
-        <td class="mono" style="font-size:12px;">${escapeHtml(p.TrackingNum||'—')}</td>
-        <td class="mono muted">${escapeHtml(p.WHR||'—')}</td>
-        <td style="font-size:12.5px;">${escapeHtml(p.Referencias||'—')}</td>
-        <td class="mono">${p.Peso||'—'} lb</td>
-        <td><span style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;${color}">${escapeHtml(p.Status||'—')}</span></td>
-        <td class="muted" style="font-size:12px;">${fecha}</td>
-        <td>${p.ya_en_nea
-          ? '<span style="color:var(--cargo-green);font-size:12px;font-weight:600;">✓ En NEA</span>'
-          : '<span style="color:var(--accent-dark);font-size:12px;font-weight:600;">Nuevo</span>'}</td>
-      </tr>`;
-    }).join('');
-    // Checkbox seleccionar todos
-    $('#ptySelAll').addEventListener('change', () => {
-      const checked = $('#ptySelAll').checked;
-      tbody.querySelectorAll('.pty-check:not(:disabled)').forEach(cb => cb.checked = checked);
-    });
-  }
-  async function importarSeleccionados(){
-    const checks = [...$('#tbodyPty').querySelectorAll('.pty-check:checked')];
-    if(checks.length === 0){ mostrarBanner('#bannerPty','error','Selecciona al menos un paquete.'); return; }
-    const trackings = checks.map(cb => cb.dataset.tracking);
-    const paquetes = ptyPaquetesCache.filter(p => trackings.includes(p.TrackingNum));
-    const btn = $('#btnImportarSeleccionados'); setCargando(btn, true);
-    mostrarBanner('#bannerPty','','');
-    try {
-      const res = await apiAdmin('/admin/pty/importar', { method:'POST', body: JSON.stringify({ paquetes }) });
-      const data = await res.json().catch(()=>({}));
-      if(res.ok){
-        mostrarBanner('#bannerPty','success',`✓ ${data.mensaje}`);
-        await cargarPty();
-      } else { mostrarBanner('#bannerPty','error',data.mensaje||'No se pudo importar.'); }
-    } catch(err){ mostrarBanner('#bannerPty','error','No pudimos conectar.'); }
-    finally { setCargando(btn, false); }
-  }
-  // Generar bookmarklet self-contained (sin dependencias externas — evita bloqueo CSP)
-  (function generarBookmarklet(){
-    const base = window.location.origin;
-    // El bookmarklet inyecta BASE y TOKEN como variables globales antes de correr
-    const prefix = `(function(){window.__NEA_BASE='${base}';window.__NEA_TOKEN=localStorage.getItem('nea_cargo_admin_token')||'';`;
-    const suffix = '})();';
-    const inner = '(function(){\nvar BASE=window.__NEA_BASE||\'https://www.neacargoxpress.com\';\nvar TOKEN=window.__NEA_TOKEN||\'\';\nif(document.getElementById(\'nea-importer-panel\')){document.getElementById(\'nea-importer-panel\').remove();return;}\nvar p=document.createElement(\'div\');\np.id=\'nea-importer-panel\';\np.style.cssText=\'position:fixed;top:20px;right:20px;width:400px;max-height:82vh;background:#0c1b33;color:#f1f3f2;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.6);z-index:999999;font-family:Inter,sans-serif;font-size:13px;overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.1);\';\np.innerHTML=\'<div style="padding:14px 18px;background:#ff6a1a;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;"><div style="font-weight:700;font-size:14px;">📦 NEA Cargo — Importador PTY</div><button id="nea-x" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px;">✕</button></div><div id="nea-body" style="padding:16px;overflow-y:auto;flex:1;"><div style="text-align:center;padding:24px;color:rgba(255,255,255,.6);">Leyendo paquetes…</div></div><div id="nea-foot" style="padding:12px 16px;border-top:1px solid rgba(255,255,255,.1);display:none;flex-shrink:0;"><button id="nea-imp" style="width:100%;padding:11px;background:#ff6a1a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">⬇ Importar seleccionados a NEA</button></div>\';\ndocument.body.appendChild(p);\ndocument.getElementById(\'nea-x\').onclick=function(){p.remove();};\nvar items=[];\nvar STATUS_COLOR={\'En Bodega\':\'#3b82f6\',\'En Transito\':\'#f59e0b\',\'En tránsito\':\'#f59e0b\',\'En Panamá\':\'#10b981\',\'En Panama\':\'#10b981\',\'Entregado\':\'#6b7280\'};\nvar body=document.getElementById(\'nea-body\');\nvar foot=document.getElementById(\'nea-foot\');\nfunction setStatus(msg){body.innerHTML=\'<div style="text-align:center;padding:24px;color:rgba(255,255,255,.6);">\'+msg+\'</div>\';}\n// Cargar paquetes\nvar fd=new URLSearchParams({accion:\'tracking\',pagina:\'1\',orderCol:\'Fecha\',orderDir:\'DESC\',porPagina:\'100\',filtro:\'\'});\nfetch(\'/ajax.php\',{method:\'POST\',headers:{\'Content-Type\':\'application/x-www-form-urlencoded; charset=UTF-8\',\'X-Requested-With\':\'XMLHttpRequest\'},body:fd.toString(),credentials:\'same-origin\'})\n.then(function(r){return r.json();})\n.then(function(data){\n  if(!data.success){setStatus(\'❌ Sesión expirada o sin acceso a Tracking.\');return;}\n  items=data.data&&data.data.items?data.data.items:[];\n  if(!items.length){setStatus(\'⚠ No hay paquetes.\');return;}\n  var trackings=items.map(function(i){return i.TrackingNum;}).filter(Boolean);\n  // Verificar cuáles ya están en NEA\n  fetch(BASE+\'/api/admin/pty/verificar\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\',\'Authorization\':\'Bearer \'+TOKEN},body:JSON.stringify({trackings:trackings})})\n  .then(function(r){return r.json().catch(function(){return {en_nea:[]};});})\n  .then(function(chk){\n    var yaEnNea=new Set((chk.en_nea||[]).map(function(t){return t.toLowerCase();}));\n    var nuevos=items.filter(function(i){return !yaEnNea.has((i.TrackingNum||\'\').toLowerCase());});\n    var html=\'<div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">\';\n    html+=\'<span style="color:rgba(255,255,255,.55);font-size:11.5px;">\'+items.length+\' paquetes · <strong style="color:#ff6a1a;">\'+nuevos.length+\' nuevos</strong> · \'+(items.length-nuevos.length)+\' ya en NEA</span>\';\n    html+=\'<label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;"><input type="checkbox" id="nea-all" style="accent-color:#ff6a1a;"> Todos nuevos</label></div>\';\n    html+=\'<div style="display:flex;flex-direction:column;gap:5px;">\';\n    items.forEach(function(pk,idx){\n      var nuevo=!yaEnNea.has((pk.TrackingNum||\'\').toLowerCase());\n      var col=STATUS_COLOR[pk.Status]||\'#ff6a1a\';\n      html+=\'<div style="background:rgba(255,255,255,.05);border-radius:7px;padding:9px 11px;border:1px solid \'+(nuevo?\'rgba(255,106,26,.3)\':\'rgba(255,255,255,.07)\')+\';display:flex;align-items:center;gap:9px;\'+(nuevo?\'\':\'opacity:.45\')+\';">\';\n      html+=\'<input type="checkbox" class="nea-ck" data-idx="\'+idx+\'" \'+(nuevo?\'checked\':\'disabled\')+\' style="accent-color:#ff6a1a;width:14px;height:14px;flex-shrink:0;">\';\n      html+=\'<div style="flex:1;min-width:0;"><div style="font-family:monospace;font-size:11px;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">\'+(pk.TrackingNum||\'—\')+\'</div>\';\n      html+=\'<div style="font-size:10.5px;color:rgba(255,255,255,.4);margin-top:1px;">\'+(pk.Referencias||\'—\')+\' · \'+(pk.Peso||\'?\')+\' lb</div></div>\';\n      html+=\'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:\'+col+\'22;color:\'+col+\';font-weight:600;flex-shrink:0;">\'+(pk.Status||\'—\')+\'</span>\';\n      if(!nuevo) html+=\'<span style="font-size:10px;color:#10b981;flex-shrink:0;">✓</span>\';\n      html+=\'</div>\';\n    });\n    html+=\'</div>\';\n    body.innerHTML=html;\n    if(nuevos.length>0) foot.style.display=\'block\';\n    document.getElementById(\'nea-all\').onchange=function(){\n      document.querySelectorAll(\'.nea-ck:not(:disabled)\').forEach(function(cb){cb.checked=this.checked;}.bind(this));\n    };\n    document.getElementById(\'nea-imp\').onclick=function(){\n      var sel=[].slice.call(document.querySelectorAll(\'.nea-ck:checked\'));\n      if(!sel.length){alert(\'Selecciona al menos un paquete.\');return;}\n      var paquetes=sel.map(function(cb){return items[parseInt(cb.dataset.idx)];}).filter(Boolean);\n      var btn=document.getElementById(\'nea-imp\');\n      btn.textContent=\'⏳ Importando \'+paquetes.length+\' paquetes…\';btn.disabled=true;\n      fetch(BASE+\'/api/admin/pty/importar\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\',\'Authorization\':\'Bearer \'+TOKEN},body:JSON.stringify({paquetes:paquetes})})\n      .then(function(r){return r.json().catch(function(){return {};});})\n      .then(function(d){\n        if(d.importados){btn.textContent=\'✓ \'+d.mensaje;btn.style.background=\'#177a63\';setTimeout(function(){p.remove();},2500);}\n        else{btn.textContent=d.mensaje||\'Error.\';btn.style.background=\'#c0392b\';btn.disabled=false;}\n      }).catch(function(){btn.textContent=\'Error de conexión.\';btn.style.background=\'#c0392b\';btn.disabled=false;});\n    };\n  }).catch(function(){setStatus(\'❌ No se pudo conectar con NEA. ¿Estás logueado en el admin?\');});\n}).catch(function(){setStatus(\'❌ Error leyendo PTY Cargo.\');});\n})();';
-    const full = prefix + inner + suffix;
-    const bm = $('#ptyBookmarklet');
-    if(bm) bm.href = 'javascript:' + encodeURIComponent(full);
-  })();
-
-  $('#btnCargarPty').addEventListener('click', cargarPty);
-  $('#btnImportarSeleccionados').addEventListener('click', importarSeleccionados);
-  $('#ptyFiltro').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); cargarPty(); } });
-
-  // ---- Importar PTY por texto ----
+    // ---- Importar PTY por texto ----
   function parsearTextoPTY(texto){
     var sep = String.fromCharCode(10);
     var lineas = texto.split(sep).map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 5; });
@@ -2778,7 +2570,7 @@
     const texto = $('#ptyTexto').value.trim();
     if(!texto){ $('#ptyTextoResumen').textContent = ''; return; }
     const todos = parsearTextoPTY(texto);
-    const importables = todos.filter(p => p.estado === 'en_bodega_miami' || p.estado === 'en_transito');
+    const importables = todos.filter(p => p.estado === 'en_bodega_miami');
     $('#ptyTextoResumen').textContent = `${todos.length} paquetes detectados · ${importables.length} para importar (bodega/tránsito) · ${todos.length - importables.length} entregados (se omiten)`;
   });
 
@@ -2786,7 +2578,7 @@
     const texto = $('#ptyTexto').value.trim();
     if(!texto){ mostrarBanner('#bannerPtyTexto','error','Pega el texto de PTY primero.'); return; }
     const todos = parsearTextoPTY(texto);
-    const importables = todos.filter(p => p.estado === 'en_bodega_miami' || p.estado === 'en_transito');
+    const importables = todos.filter(p => p.estado === 'en_bodega_miami');
     if(!importables.length){ mostrarBanner('#bannerPtyTexto','error','No hay paquetes en bodega o en tránsito en el texto.'); return; }
     const btn = $('#btnImportarTexto');
     setCargando(btn, true);
