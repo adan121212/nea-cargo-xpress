@@ -1433,7 +1433,7 @@
     $('#saludoNombre').textContent = `Hola, ${usuario.nombre}`;
     $('#pillCasillero').textContent = usuario.numero_casillero;
     const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ''}`.trim();
-    const numCasillero = usuario.numero_casillero;
+    const numCasillero = 'PTY-14981';
     const htmlCasillero = `<span class="suite">${numCasillero}</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
     const textoCasillero = `${numCasillero}  ${nombreCompleto}  NEA CARGO XPRESS\n8610 NW 72 STREET\nMIAMI, FLORIDA 33195\nESTADOS UNIDOS\n1-305-406-3654`;
     const el = document.getElementById('bloqueDireccion');
