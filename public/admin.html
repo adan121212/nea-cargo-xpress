@@ -2747,37 +2747,34 @@
   $('#ptyFiltro').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); cargarPty(); } });
 
   // ---- Importar PTY por texto ----
-  const ESTADOS_IMPORTAR = ['en bodega', 'en tránsito', 'en transito', 'en_bodega', 'en_transito', 'en bodega miami'];
   function parsearTextoPTY(texto){
-    const lineas = texto.split('
-').map(l => l.trim()).filter(l => l.length > 5);
-    const paquetes = [];
-    for(const linea of lineas){
-      // Formato: ▶ TRACKING  WHR  CONSIGNATARIO  REFERENCIAS  PESO  ESTADO  COMENTARIO
-      // Separado por tabs o espacios múltiples
-      const partes = linea.replace(/^[▶►\-\*]\s*/, '').split(/	+/);
+    var sep = String.fromCharCode(10);
+    var lineas = texto.split(sep).map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 5; });
+    var paquetes = [];
+    for(var i=0;i<lineas.length;i++){
+      var linea = lineas[i];
+      var limpia = linea.replace(/^[^a-zA-Z0-9]+/,'');
+      var partes = limpia.split(/	+/);
       if(partes.length < 3) continue;
-      const tracking = partes[0].trim();
-      const whr = partes[1].trim();
-      const consignatario = partes[2].trim();
-      const referencias = partes.length > 3 ? partes[3].trim() : '';
-      // Buscar peso (formato: XX.X lb)
-      const pesoMatch = linea.match(/(\d+\.?\d*)\s*lb/i);
-      const peso = pesoMatch ? parseFloat(pesoMatch[1]) : null;
-      // Buscar estado
-      const lineaLower = linea.toLowerCase();
-      let estado = null;
-      if(lineaLower.includes('en bodega')) estado = 'en_bodega_miami';
-      else if(lineaLower.includes('en tránsito') || lineaLower.includes('en transito')) estado = 'en_transito';
-      else if(lineaLower.includes('entregado')) estado = 'entregado';
-      else if(lineaLower.includes('en panamá') || lineaLower.includes('en panama')) estado = 'en_panama';
+      var tracking = partes[0].trim();
+      var whr = partes[1].trim();
+      var consignatario = partes[2].trim();
+      var referencias = partes.length > 3 ? partes[3].trim() : '';
+      var pesoMatch = linea.match(/(\d+\.?\d*)\s*lb/i);
+      var peso = pesoMatch ? parseFloat(pesoMatch[1]) : null;
+      var ll = linea.toLowerCase();
+      var estado = null;
+      if(ll.indexOf('en bodega') >= 0) estado = 'en_bodega_miami';
+      else if(ll.indexOf('nsito') >= 0) estado = 'en_transito';
+      else if(ll.indexOf('entregado') >= 0) estado = 'entregado';
+      else if(ll.indexOf('panam') >= 0) estado = 'en_panama';
       if(!tracking || tracking.length < 3) continue;
-      paquetes.push({ tracking, whr, consignatario, referencias, peso, estado, linea });
+      paquetes.push({tracking:tracking,whr:whr,consignatario:consignatario,referencias:referencias,peso:peso,estado:estado});
     }
     return paquetes;
   }
 
-  $('#ptyTexto').addEventListener('input', () => {
+    $('#ptyTexto').addEventListener('input', () => {
     const texto = $('#ptyTexto').value.trim();
     if(!texto){ $('#ptyTextoResumen').textContent = ''; return; }
     const todos = parsearTextoPTY(texto);
