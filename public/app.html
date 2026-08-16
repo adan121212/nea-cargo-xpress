@@ -1541,6 +1541,14 @@
   function urlRastreo(tienda, tracking){
     const fn=URLS_RASTREO[tienda]; return fn?fn(encodeURIComponent(tracking)):null;
   }
+  function estimarFecha(estado){
+    const hoy = new Date();
+    const dias = { prealertado: 10, en_bodega_miami: 7, en_transito: 4, en_panama: 2 };
+    const d = dias[estado];
+    if(!d) return '';
+    const est = new Date(hoy.getTime() + d * 24 * 60 * 60 * 1000);
+    return 'Estimado: ' + est.toLocaleDateString('es-PA', {day:'2-digit', month:'short'});
+  }
   function renderPaquetes(){
     const cont = $('#listaPaquetes');
     let lista = paquetesCache;
@@ -1569,6 +1577,12 @@
               <span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span>
               <div class="paquete-valor">$${Number(p.valor_declarado).toFixed(2)}</div>
             </div>
+          </div>
+          <div style="display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;">
+            ${p.peso_real_lb ? `<div style="font-size:12px;color:var(--ink-soft);">⚖️ Peso real: <strong style="color:var(--ink);">${Number(p.peso_real_lb).toFixed(2)} lb</strong></div>` : (p.peso_lb ? `<div style="font-size:12px;color:var(--ink-soft);">⚖️ Peso aprox: ${Number(p.peso_lb).toFixed(2)} lb</div>` : '')}
+            ${p.estado !== 'entregado' && p.estado !== 'listo_para_retiro' ? `<div style="font-size:12px;color:var(--ink-soft);">🗓 ${estimarFecha(p.estado)}</div>` : ''}
+            ${p.estado === 'listo_para_retiro' ? `<div style="font-size:12px;color:var(--cargo-green);font-weight:600;">✓ Listo para retirar</div>` : ''}
+            ${p.fecha_entrega ? `<div style="font-size:12px;color:var(--ink-soft);">📅 Entregado: ${new Date(p.fecha_entrega).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'})}</div>` : ''}
           </div>
           <div class="rail">${rail}</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
