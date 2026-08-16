@@ -2571,7 +2571,7 @@
       var whr = partes[1].trim();
       var consignatario = partes[2].trim();
       var referencias = partes.length > 3 ? partes[3].trim() : '';
-      var pesoMatch = linea.match(/(\d+\.?\d*)\s*lb/i);
+      var pesoMatch = linea.match(/(\d+\.?\d*)\s*lb\b/i);
       var peso = pesoMatch ? parseFloat(pesoMatch[1]) : null;
       var ll = linea.toLowerCase();
       var estado = null;
