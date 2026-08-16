@@ -1028,11 +1028,31 @@
       <p class="card-sub" style="margin:0 0 22px;">Copia la lista de paquetes desde PTY Cargo y égala aquí. Solo se importan los paquetes con estado <strong>EN BODEGA</strong>. Los demás se omiten automáticamente.</p>
       <div class="banner" id="bannerPtyTexto"></div>
       <textarea id="ptyTexto" rows="10" placeholder="Pega aquí la lista de paquetes de PTY Cargo… Solo se importan los EN BODEGA." style="width:100%;padding:14px;border:1.5px solid var(--line);border-radius:10px;font-family:var(--font-mono);font-size:12px;color:var(--ink);background:var(--panel);resize:vertical;line-height:1.7;margin-bottom:12px;"></textarea>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-        <button class="btn-primary" id="btnImportarTexto" style="width:auto;">
-          <span class="spinner"></span><span>&#x2B07; Procesar e importar</span>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn-primary" id="btnProcesarTexto" style="width:auto;">
+          <span class="spinner"></span><span>🔍 Procesar lista</span>
         </button>
         <div id="ptyTextoResumen" style="font-size:12.5px;color:var(--ink-soft);"></div>
+      </div>
+      <!-- Preview de paquetes detectados -->
+      <div id="ptyPreview" style="display:none;">
+        <div style="overflow-x:auto;margin-bottom:14px;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;"><input type="checkbox" id="ptyPreviewSelAll" style="accent-color:var(--accent);width:15px;height:15px;"></th>
+                <th>Tracking</th>
+                <th>Peso</th>
+                <th>Estado PTY</th>
+                <th>NEA</th>
+              </tr>
+            </thead>
+            <tbody id="ptyPreviewBody"></tbody>
+          </table>
+        </div>
+        <button class="btn-primary" id="btnImportarTexto" style="width:auto;display:none;">
+          <span class="spinner"></span><span>⬇ Importar seleccionados</span>
+        </button>
       </div>
     </div>
   </div><!-- /vistaAdmin -->
@@ -2557,53 +2577,90 @@
     return paquetes;
   }
 
-    $('#ptyTexto').addEventListener('input', () => {
+    let ptyParsedCache = [];
+
+  $('#ptyTexto').addEventListener('input', () => {
     const texto = $('#ptyTexto').value.trim();
+    $('#ptyPreview').style.display = 'none';
+    const btnImp = $('#btnImportarTexto');
+    if(btnImp) btnImp.style.display = 'none';
     if(!texto){ $('#ptyTextoResumen').textContent = ''; return; }
     const todos = parsearTextoPTY(texto);
     const importables = todos.filter(p => p.estado === 'en_bodega_miami');
-    $('#ptyTextoResumen').textContent = `${todos.length} paquetes detectados · ${importables.length} para importar (bodega/tránsito) · ${todos.length - importables.length} entregados (se omiten)`;
+    $('#ptyTextoResumen').textContent = todos.length + ' paquetes · ' + importables.length + ' en bodega · ' + (todos.length - importables.length) + ' otros';
   });
 
-  $('#btnImportarTexto').addEventListener('click', async () => {
+  $('#btnProcesarTexto').addEventListener('click', async () => {
     const texto = $('#ptyTexto').value.trim();
     if(!texto){ mostrarBanner('#bannerPtyTexto','error','Pega el texto de PTY primero.'); return; }
     const todos = parsearTextoPTY(texto);
     const importables = todos.filter(p => p.estado === 'en_bodega_miami');
-    if(!importables.length){ mostrarBanner('#bannerPtyTexto','error','No hay paquetes en bodega o en tránsito en el texto.'); return; }
+    if(!importables.length){ mostrarBanner('#bannerPtyTexto','error','No hay paquetes EN BODEGA en el texto.'); return; }
+    const btn = $('#btnProcesarTexto');
+    setCargando(btn, true);
+    mostrarBanner('#bannerPtyTexto','','');
+    try {
+      const trackings = importables.map(p => p.tracking);
+      const chkRes = await apiAdmin('/admin/pty/verificar', { method:'POST', body: JSON.stringify({ trackings }) });
+      const chkData = await chkRes.json().catch(()=>({}));
+      const yaEnNea = new Set((chkData.en_nea || []).map(t => t.toLowerCase()));
+      ptyParsedCache = importables.map(p => ({ ...p, ya_en_nea: yaEnNea.has(p.tracking.toLowerCase()) }));
+      const nuevos = ptyParsedCache.filter(p => !p.ya_en_nea);
+      const tbody = $('#ptyPreviewBody');
+      tbody.innerHTML = ptyParsedCache.map((p, idx) => {
+        const color = p.ya_en_nea ? 'color:var(--cargo-green);font-weight:600;' : 'color:var(--accent-dark);font-weight:600;';
+        return '<tr style="' + (p.ya_en_nea ? 'opacity:.55;' : '') + '">' +
+          '<td><input type="checkbox" class="pty-prev-ck" data-idx="' + idx + '" ' + (p.ya_en_nea ? 'disabled' : 'checked') + ' style="accent-color:var(--accent);width:15px;height:15px;"></td>' +
+          '<td class="mono" style="font-size:12px;">' + escapeHtml(p.tracking) + '</td>' +
+          '<td class="mono">' + (p.peso || '?') + ' lb</td>' +
+          '<td><span class="badge badge-en_bodega_miami">En Bodega</span></td>' +
+          '<td style="' + color + '">' + (p.ya_en_nea ? '✓ Ya en NEA' : 'Nuevo') + '</td>' +
+          '</tr>';
+      }).join('');
+      $('#ptyPreviewSelAll').onchange = function(){ document.querySelectorAll('.pty-prev-ck:not(:disabled)').forEach(cb => cb.checked = this.checked); };
+      $('#ptyPreview').style.display = 'block';
+      const btnImp = $('#btnImportarTexto');
+      if(nuevos.length > 0){
+        if(btnImp) btnImp.style.display = 'flex';
+        mostrarBanner('#bannerPtyTexto','','');
+      } else {
+        if(btnImp) btnImp.style.display = 'none';
+        mostrarBanner('#bannerPtyTexto','success','✓ Todos los paquetes en bodega ya están en NEA.');
+      }
+      $('#ptyTextoResumen').textContent = importables.length + ' en bodega · ' + nuevos.length + ' nuevos · ' + (importables.length - nuevos.length) + ' ya en NEA';
+    } catch(err){
+      mostrarBanner('#bannerPtyTexto','error','No pudimos conectar.');
+    } finally { setCargando(btn, false); }
+  });
+
+  $('#btnImportarTexto').addEventListener('click', async () => {
+    const seleccionados = [...document.querySelectorAll('.pty-prev-ck:checked')];
+    if(!seleccionados.length){ mostrarBanner('#bannerPtyTexto','error','Selecciona al menos un paquete.'); return; }
+    const indices = seleccionados.map(cb => parseInt(cb.dataset.idx));
+    const paquetes = indices.map(i => ptyParsedCache[i]).filter(Boolean).map(p => ({
+      TrackingNum: p.tracking, WHR: p.whr, Consignatario: p.consignatario,
+      Referencias: p.referencias, Peso: p.peso ? String(p.peso) : null,
+      Status: 'En Bodega', Fecha: new Date().toISOString().slice(0,10),
+    }));
     const btn = $('#btnImportarTexto');
     setCargando(btn, true);
     mostrarBanner('#bannerPtyTexto','','');
-    // Convertir al formato que espera el backend
-    const paquetes = importables.map(p => ({
-      TrackingNum: p.tracking,
-      WHR: p.whr,
-      Consignatario: p.consignatario,
-      Referencias: p.referencias,
-      Peso: p.peso ? String(p.peso) : null,
-      Status: p.estado === 'en_bodega_miami' ? 'En Bodega' : 'En Transito',
-      Fecha: new Date().toISOString().slice(0,10),
-    }));
     try {
       const res = await apiAdmin('/admin/pty/importar', { method:'POST', body: JSON.stringify({ paquetes }) });
       const data = await res.json().catch(()=>({}));
       if(res.ok){
-        mostrarBanner('#bannerPtyTexto','success',`✓ ${data.mensaje}`);
+        mostrarBanner('#bannerPtyTexto','success','✓ ' + data.mensaje);
         $('#ptyTexto').value = '';
+        $('#ptyPreview').style.display = 'none';
+        btn.style.display = 'none';
         $('#ptyTextoResumen').textContent = '';
-        // Mostrar detalle
-        if(data.importados?.length){
-          setTimeout(() => mostrarBanner('#bannerPtyTexto','success',
-            `✓ Importados: ${data.importados.join(', ')}`), 100);
-        }
+        ptyParsedCache = [];
       } else {
-        mostrarBanner('#bannerPtyTexto','error', data.mensaje||'No se pudo importar.');
+        mostrarBanner('#bannerPtyTexto','error', data.mensaje || 'No se pudo importar.');
       }
     } catch(err){
-      mostrarBanner('#bannerPtyTexto','error','No pudimos conectar con el servidor.');
-    } finally {
-      setCargando(btn, false);
-    }
+      mostrarBanner('#bannerPtyTexto','error','No pudimos conectar.');
+    } finally { setCargando(btn, false); }
   });
 
   async function iniciarAdmin(){
