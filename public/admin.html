@@ -1783,10 +1783,13 @@
       // Actualizar badge del sidebar
       const sbBadge=$('#sbBadgeMostrador');
       if(sbBadge){ sbBadge.textContent=facturas.length; sbBadge.style.display=facturas.length>0?'inline':'none'; }
+      // Obtener el email del cliente buscado actualmente (si hay)
+      const clienteActual = facturadorCliente ? facturadorCliente.email : null;
       cont.innerHTML=facturas.map(f => {
         const fecha=new Date(f.fecha_creacion).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});
         const yaEntregado=f.paquete_estado==='entregado';
-        return `<div class="fac-grid-row" data-factura-pendiente="${f.id}" data-paquete-id="${f.paquete_id}" data-ya-entregado="${yaEntregado}">
+        const esDelCliente = !clienteActual || f.cliente_email === clienteActual;
+        return `<div class="fac-grid-row" data-factura-pendiente="${f.id}" data-paquete-id="${f.paquete_id}" data-ya-entregado="${yaEntregado}" style="${!esDelCliente?'opacity:.35;pointer-events:none;':''}">
           <div class="fac-num">${escapeHtml(f.numero_factura)}</div>
           <div><div class="fac-cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</div><div class="fac-casillero">${escapeHtml(f.cliente_email)}</div></div>
           <div><div style="font-weight:500;font-size:13px;">${escapeHtml(f.tienda)}</div><div class="fac-tracking">#${escapeHtml(f.numero_tracking)}</div>${!yaEntregado?'<div style="font-size:11px;color:#d97706;margin-top:2px;">📦 pendiente entrega</div>':''}</div>
