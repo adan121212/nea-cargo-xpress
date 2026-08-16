@@ -1512,7 +1512,23 @@
     }).join('');
   }
 
-    const URLS_RASTREO = {
+    const TIENDAS_POR_TRACKING = [
+    { patron: /^1Z/i, tienda: 'UPS' },
+    { patron: /^(940|927|926|925|920)[0-9]+/, tienda: 'USPS' },
+    { patron: /^JD/i, tienda: 'DHL' },
+    { patron: /^(7489|74890|96|61)[0-9]+/, tienda: 'FedEx' },
+    { patron: /^tba/i, tienda: 'Amazon' },
+    { patron: /^UUS/i, tienda: 'UniUni' },
+    { patron: /^LUNA/i, tienda: 'OnTrac' },
+    { patron: /^LP/i, tienda: 'LaserShip' },
+    { patron: /^(LX|RX|CX|RA|RF|CP|LA|RP|UA|UP|UR|US)[A-Z0-9]+/i, tienda: 'USPS International' },
+  ];
+  function detectarTienda(tracking){
+    if(!tracking) return '';
+    for(const {patron,tienda} of TIENDAS_POR_TRACKING){ if(patron.test(tracking.trim())) return tienda; }
+    return '';
+  }
+  const URLS_RASTREO = {
     'UPS': t => `https://www.ups.com/track?tracknum=${t}`,
     'USPS': t => `https://tools.usps.com/go/TrackConfirmAction?tLabels=${t}`,
     'FedEx': t => `https://www.fedex.com/fedextrack/?trknbr=${t}`,
