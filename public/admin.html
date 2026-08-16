@@ -2397,6 +2397,15 @@
   $('#modalF1Clientes').addEventListener('click',(e)=>{ if(e.target===$('#modalF1Clientes')) f1Cerrar(); });
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'&&$('#modalF1Clientes').style.display==='flex') f1Cerrar(); });
   $('#mostradorQ').addEventListener('keydown',(e)=>{ if(e.key==='1'){ e.preventDefault(); f1Abrir('facturador'); } });
+  $('#mostradorQ').addEventListener('input',()=>{
+    if($('#mostradorQ').value.trim()===''){
+      $('#resultadoMostrador').innerHTML='';
+      $('#facturadorResumen').style.display='none';
+      mostrarBanner('#bannerMostrador','','');
+      facturadorCliente=null;
+      cargarPendientesMostrador();
+    }
+  });
   document.addEventListener('keydown',(e)=>{ if(e.key==='1'&&document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); } });
 
   // ---- Dashboard de estadísticas ----
