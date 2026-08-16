@@ -1392,7 +1392,14 @@
     $('#emptyPaquetes').style.display = paquetes.length ? 'none' : 'block';
     tbody.innerHTML = paquetes.map(p => `
       <tr data-id="${p.id}">
-        <td data-label="Cliente">${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}<br><span class="muted">${escapeHtml(p.cliente_email)}</span></td>
+        <td data-label="Cliente">${p.cliente_nombre ? `
+          ${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}<br>
+          <span class="muted">${escapeHtml(p.cliente_email)}</span>` : `
+          <span style="display:inline-flex;align-items:center;gap:5px;background:var(--amber-bg);color:var(--accent-dark);font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid rgba(255,106,26,0.3);">
+            ⚠ Sin cliente
+          </span>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:3px;">Importado de PTY</div>`}
+        </td>
         <td data-label="Casillero" class="mono">${escapeHtml(p.numero_casillero)}</td>
         <td data-label="Tienda / Tracking">${escapeHtml(p.tienda)}<br><span class="mono muted">${escapeHtml(p.numero_tracking)}</span></td>
         <td data-label="Valor" class="mono">$${Number(p.valor_declarado).toFixed(2)}</td>
