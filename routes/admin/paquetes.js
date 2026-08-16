@@ -79,7 +79,7 @@ router.get(
       // Total para la paginación
       const totalRes = await pool.query(
         `SELECT COUNT(*) FROM paquetes p
-         JOIN usuarios u ON u.id = p.usuario_id
+         LEFT JOIN usuarios u ON u.id = p.usuario_id
          ${where}`,
         valores
       );
@@ -92,7 +92,7 @@ router.get(
                 u.email AS cliente_email, u.numero_casillero,
                 f.id AS factura_id, f.numero_factura, f.estado AS factura_estado
          FROM paquetes p
-         JOIN usuarios u ON u.id = p.usuario_id
+         LEFT JOIN usuarios u ON u.id = p.usuario_id
          LEFT JOIN LATERAL (
            SELECT * FROM facturas
            WHERE paquete_id = p.id AND estado <> 'anulada'
