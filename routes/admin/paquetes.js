@@ -9,7 +9,6 @@ const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudi
 const { enviarCorreoCambioEstado, enviarFacturaListaParaRetiro } = require('../../utils/mailer');
 const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
-
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024, files: 5 },
@@ -19,6 +18,13 @@ const upload = multer({
   },
 });
 
+require('dotenv').config();
+
+const ESTADO_LABEL = {
+  prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
+  en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
+};
+
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
@@ -26,76 +32,49 @@ const ESTADOS_VALIDOS = [
   'prealertado','en_bodega_miami','en_transito',
   'en_panama','listo_para_retiro','entregado',
 ];
-
-const PAGE_SIZE = 50; // paquetes por página
+const PAGE_SIZE = 50;
 
 // --- GET /api/admin/paquetes ---
-// Filtros: estado, email, tracking, fecha_desde, fecha_hasta, page
 router.get(
   '/',
   [
     query('estado').optional().isIn(ESTADOS_VALIDOS),
     query('email').optional().trim(),
     query('tracking').optional().trim(),
-    query('fecha_desde').optional().isDate().withMessage('fecha_desde inválida'),
-    query('fecha_hasta').optional().isDate().withMessage('fecha_hasta inválida'),
-    query('page').optional().isInt({ min: 1 }).withMessage('Página inválida'),
+    query('fecha_desde').optional().isDate(),
+    query('fecha_hasta').optional().isDate(),
+    query('page').optional().isInt({ min: 1 }),
   ],
   async (req, res) => {
     const errores = validationResult(req);
     if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
-
     const { estado, email, tracking, fecha_desde, fecha_hasta } = req.query;
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const offset = (page - 1) * PAGE_SIZE;
-
     const condiciones = [];
     const valores = [];
-
-    if (estado) {
-      valores.push(estado);
-      condiciones.push(`p.estado = $${valores.length}`);
-    }
-    if (email) {
-      valores.push(`%${email}%`);
-      condiciones.push(`u.email ILIKE $${valores.length}`);
-    }
-    if (tracking) {
-      valores.push(`%${tracking}%`);
-      condiciones.push(`p.numero_tracking ILIKE $${valores.length}`);
-    }
-    if (fecha_desde) {
-      valores.push(fecha_desde);
-      condiciones.push(`p.fecha_prealerta >= $${valores.length}::date`);
-    }
-    if (fecha_hasta) {
-      valores.push(fecha_hasta);
-      condiciones.push(`p.fecha_prealerta < ($${valores.length}::date + INTERVAL '1 day')`);
-    }
-
+    if (estado) { valores.push(estado); condiciones.push(`p.estado = $${valores.length}`); }
+    if (email) { valores.push(`%${email}%`); condiciones.push(`u.email ILIKE $${valores.length}`); }
+    if (tracking) { valores.push(`%${tracking}%`); condiciones.push(`p.numero_tracking ILIKE $${valores.length}`); }
+    if (fecha_desde) { valores.push(fecha_desde); condiciones.push(`p.fecha_prealerta >= $${valores.length}::date`); }
+    if (fecha_hasta) { valores.push(fecha_hasta); condiciones.push(`p.fecha_prealerta < ($${valores.length}::date + INTERVAL '1 day')`); }
     const where = condiciones.length ? `WHERE ${condiciones.join(' AND ')}` : '';
-
     try {
-      // Total para la paginación
       const totalRes = await pool.query(
-        `SELECT COUNT(*) FROM paquetes p
-         LEFT JOIN usuarios u ON u.id = p.usuario_id
-         ${where}`,
-        valores
+        `SELECT COUNT(*) FROM paquetes p LEFT JOIN usuarios u ON u.id = p.usuario_id ${where}`, valores
       );
       const total = parseInt(totalRes.rows[0].count);
       const totalPaginas = Math.ceil(total / PAGE_SIZE);
-
-      // Paquetes de la página actual
       const resultado = await pool.query(
         `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
                 u.email AS cliente_email, u.numero_casillero,
+                s.nombre AS sucursal_nombre,
                 f.id AS factura_id, f.numero_factura, f.estado AS factura_estado
          FROM paquetes p
          LEFT JOIN usuarios u ON u.id = p.usuario_id
+         LEFT JOIN sucursales s ON s.id = p.sucursal_id
          LEFT JOIN LATERAL (
-           SELECT * FROM facturas
-           WHERE paquete_id = p.id AND estado <> 'anulada'
+           SELECT * FROM facturas WHERE paquete_id = p.id AND estado <> 'anulada'
            ORDER BY fecha_creacion DESC LIMIT 1
          ) f ON TRUE
          ${where}
@@ -103,7 +82,6 @@ router.get(
          LIMIT ${PAGE_SIZE} OFFSET ${offset}`,
         valores
       );
-
       return res.json({
         paquetes: resultado.rows,
         paginacion: { page, total_paginas: totalPaginas, total, page_size: PAGE_SIZE },
@@ -118,10 +96,14 @@ router.get(
 // --- PATCH /api/admin/paquetes/:id/estado ---
 router.patch(
   '/:id/estado',
-  [body('estado').isIn(ESTADOS_VALIDOS).withMessage('Estado inválido')],
+  [
+    body('estado').isIn(ESTADOS_VALIDOS).withMessage('Estado inválido'),
+    body('sucursal_id').optional({ nullable: true }).isInt().withMessage('sucursal_id inválido'),
+  ],
   async (req, res) => {
     const errores = validationResult(req);
     if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
+    const sucursalId = req.body.sucursal_id || null;
     try {
       const actual = await pool.query('SELECT estado FROM paquetes WHERE id = $1', [req.params.id]);
       if (actual.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
@@ -129,8 +111,10 @@ router.patch(
         return res.status(400).json({ mensaje: 'Este paquete ya fue entregado y su estado no se puede modificar.' });
       }
       const resultado = await pool.query(
-        `UPDATE paquetes SET estado = $1, fecha_actualizacion = NOW() WHERE id = $2 RETURNING *`,
-        [req.body.estado, req.params.id]
+        `UPDATE paquetes SET estado = $1, fecha_actualizacion = NOW(),
+         sucursal_id = COALESCE($3::integer, sucursal_id)
+         WHERE id = $2 RETURNING *`,
+        [req.body.estado, req.params.id, sucursalId]
       );
       if (resultado.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       const paquete = resultado.rows[0];
@@ -181,15 +165,14 @@ router.patch(
       );
       let facturaGenerada = null;
       if (facturaExistente.rows.length === 0) {
-        // Usar la tarifa enviada desde el frontend, o la primera activa si no se envió
         let tarifaRows;
-        if(tarifaIdSolicitada){
+        if (tarifaIdSolicitada) {
           const r = await client.query('SELECT * FROM tarifas WHERE id = $1 LIMIT 1', [tarifaIdSolicitada]);
           tarifaRows = r.rows;
         } else {
           const r = await client.query('SELECT * FROM tarifas WHERE activa = TRUE ORDER BY id ASC LIMIT 1');
           tarifaRows = r.rows;
-          if(tarifaRows.length === 0){
+          if (tarifaRows.length === 0) {
             const r2 = await client.query('SELECT * FROM tarifas ORDER BY id ASC LIMIT 1');
             tarifaRows = r2.rows;
           }
@@ -309,7 +292,6 @@ router.get('/:id/fotos', async (req, res) => {
     const r = await pool.query('SELECT * FROM paquete_fotos WHERE paquete_id=$1 ORDER BY fecha_subida ASC', [req.params.id]);
     return res.json({ fotos: r.rows });
   } catch (error) {
-    console.error('Error en GET /admin/paquetes/:id/fotos:', error);
     return res.status(500).json({ mensaje: 'Error interno al listar fotos' });
   }
 });
@@ -323,7 +305,6 @@ router.delete('/:id/fotos/:fotoId', async (req, res) => {
     await pool.query('DELETE FROM paquete_fotos WHERE id=$1', [req.params.fotoId]);
     return res.json({ mensaje: 'Foto eliminada' });
   } catch (error) {
-    console.error('Error en DELETE /admin/paquetes/:id/fotos/:fotoId:', error);
     return res.status(500).json({ mensaje: 'Error interno al eliminar foto' });
   }
 });
