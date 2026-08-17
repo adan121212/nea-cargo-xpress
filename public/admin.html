@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEA Cargo Xpress \u2014 Panel Admin</title>
+<title>NEA Cargo Xpress — Panel Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -116,7 +116,7 @@
     transition: all .15s;
   }
   .sb-logout:hover{ background:rgba(255,0,0,0.1); color:rgba(255,120,120,0.9); }
-  /* ===================== TOPBAR M\u00d3VIL ===================== */
+  /* ===================== TOPBAR MÓVIL ===================== */
   .topbar-movil{
     display:none;
     align-items:center; justify-content:space-between;
@@ -131,7 +131,7 @@
     font-size:22px; cursor:pointer; padding:4px 8px;
     -webkit-tap-highlight-color: transparent;
   }
-  /* Overlay oscuro para m\u00f3vil cuando el sidebar est\u00e1 abierto */
+  /* Overlay oscuro para móvil cuando el sidebar está abierto */
   .sidebar-overlay{
     display:none;
     position:fixed; inset:0; background:rgba(0,0,0,0.5);
@@ -533,65 +533,65 @@
   </div>
   <nav class="sb-nav" id="sbNav" style="display:none;">
     <button class="tab-nav-btn active" data-tab="dashboard">
-      <span class="sb-icon">\ud83d\udcca</span> Dashboard
+      <span class="sb-icon">📊</span> Dashboard
     </button>
     <button class="tab-nav-btn" data-tab="mostrador">
-      <span class="sb-icon">\ud83e\uddfe</span> Facturador
+      <span class="sb-icon">🧾</span> Facturador
       <span class="sb-badge" id="sbBadgeMostrador" style="display:none;">0</span>
     </button>
     <button class="tab-nav-btn" data-tab="recepcion">
-      <span class="sb-icon">\ud83d\udce6</span> Recepci\u00f3n
+      <span class="sb-icon">📦</span> Recepción
     </button>
     <button class="tab-nav-btn" data-tab="paquetes">
-      <span class="sb-icon">\ud83d\udccb</span> Paquetes
+      <span class="sb-icon">📋</span> Paquetes
     </button>
     <button class="tab-nav-btn" data-tab="clientes">
-      <span class="sb-icon">\ud83d\udc65</span> Clientes
+      <span class="sb-icon">👥</span> Clientes
     </button>
     <button class="tab-nav-btn" data-tab="facturas">
-      <span class="sb-icon">\ud83d\uddc2</span> Facturas
+      <span class="sb-icon">🗂</span> Facturas
     </button>
     <button class="tab-nav-btn" data-tab="tarifas">
-      <span class="sb-icon">\ud83d\udcb2</span> Tarifas
+      <span class="sb-icon">💲</span> Tarifas
     </button>
     <button class="tab-nav-btn" data-tab="sucursales">
-      <span class="sb-icon">\ud83c\udfea</span> Sucursales
+      <span class="sb-icon">🏪</span> Sucursales
     </button>
     <button class="tab-nav-btn" data-tab="reportes">
-      <span class="sb-icon">\ud83d\udcca</span> Reportes
+      <span class="sb-icon">📊</span> Reportes
     </button>
     <button class="tab-nav-btn" data-tab="caja">
-      <span class="sb-icon">\ud83c\udfe6</span> Cierre de caja
+      <span class="sb-icon">🏦</span> Cierre de caja
     </button>
     <button class="tab-nav-btn" data-tab="pty">
-      <span class="sb-icon">\ud83d\udea2</span> PTY Cargo
+      <span class="sb-icon">🚢</span> PTY Cargo
     </button>
   </nav>
   <div class="sb-footer" id="sbFooter" style="display:none;">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px;margin-bottom:6px;">
       <button class="notif-btn" id="btnCampana" title="Notificaciones">
-        \ud83d\udd14<span class="notif-badge" id="notifBadge">0</span>
+        🔔<span class="notif-badge" id="notifBadge">0</span>
       </button>
-      <button class="sb-logout" id="btnLogout" style="margin-top:0;">\u2b16 Salir</button>
+      <button class="sb-logout" id="btnLogout" style="margin-top:0;">⬖ Salir</button>
     </div>
     <div class="sb-user">
       <div class="sb-avatar" id="sbAvatarLetra">A</div>
       <div>
-        <div class="sb-uname" id="sbNombreUsuario">\u2014</div>
+        <div class="sb-uname" id="sbNombreUsuario">—</div>
         <div class="sb-urole">Administrador</div>
       </div>
     </div>
   </div>
 </div>
-<!-- Overlay para m\u00f3vil -->
+<!-- Overlay para móvil -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
-<!-- Topbar solo m\u00f3vil -->
+<!-- Topbar solo móvil -->
 <div class="topbar-movil" id="topbarMovil">
   <div class="sb-logo-row">
     <div class="sb-mark">N</div>
     <div class="sb-brand-text" style="font-size:12px;">NEA CARGO XPRESS</div>
   </div>
-  <button class="nav-toggle-admin" id="btnMenuMovil" aria-label="Abrir men\u00fa">\u2630</button>
+  <button class="nav-toggle-admin" id="btnMenuMovil" aria-label="Abrir menú">☰</button>
 </div>
 <!-- ======================= CONTENIDO PRINCIPAL ======================= -->
 <div class="main-content">
@@ -601,16 +601,16 @@
     <div style="position:fixed;inset:0;background:var(--ink);z-index:-2;"></div>
     <div class="login-card">
       <h1>Acceso de staff</h1>
-      <p class="sub">Inicia sesi\u00f3n con tu cuenta de administrador.</p>
+      <p class="sub">Inicia sesión con tu cuenta de administrador.</p>
       <form id="formLogin">
         <label for="loginEmail">Correo</label>
         <input id="loginEmail" type="email" placeholder="admin@neacargo.com">
-        <label for="loginPassword">Contrase\u00f1a</label>
-        <input id="loginPassword" type="password" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022">
+        <label for="loginPassword">Contraseña</label>
+        <input id="loginPassword" type="password" placeholder="••••••••">
         <button class="btn-primary" type="submit" id="btnLogin">
           <span class="spinner"></span><span>Entrar</span>
         </button>
-        <button type="button" id="btnMostrarOlvide" class="link-olvide">\u00bfOlvidaste tu contrase\u00f1a?</button>
+        <button type="button" id="btnMostrarOlvide" class="link-olvide">¿Olvidaste tu contraseña?</button>
         <div class="banner" id="bannerLogin"></div>
       </form>
       <form id="formOlvide" style="display:none;">
@@ -620,7 +620,7 @@
         <button class="btn-primary" type="submit" id="btnOlvide">
           <span class="spinner"></span><span>Enviar enlace</span>
         </button>
-        <button type="button" id="btnVolverLogin" class="link-olvide">\u2190 Volver a iniciar sesi\u00f3n</button>
+        <button type="button" id="btnVolverLogin" class="link-olvide">← Volver a iniciar sesión</button>
         <div class="banner" id="bannerOlvide"></div>
       </form>
     </div>
@@ -635,21 +635,21 @@
     <div class="tab-panel" id="tabDashboard">
       <div class="hero">
         <h1 id="dashFecha">Dashboard</h1>
-        <p>Vista general de operaciones \u2014 actualizado al instante.</p>
+        <p>Vista general de operaciones — actualizado al instante.</p>
       </div>
       <div class="kpi-grid">
-        <div class="kpi-card"><div class="kpi-icon">\ud83d\udc65</div><div class="kpi-label">Clientes totales</div><div class="kpi-num" id="kpiClientes">\u2014</div><div class="kpi-sub" id="kpiClientesSub">registrados</div><div class="kpi-bar"><div class="kpi-bar-fill" id="kpiClientesBar" style="width:0%"></div></div></div>
-        <div class="kpi-card"><div class="kpi-icon">\ud83d\udce6</div><div class="kpi-label">Paquetes este mes</div><div class="kpi-num blue" id="kpiPaquetesMes">\u2014</div><div class="kpi-sub" id="kpiPaquetesMesSub">paquetes nuevos</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:#2563eb;width:0%" id="kpiPaquetesMesBar"></div></div></div>
-        <div class="kpi-card"><div class="kpi-icon">\ud83d\udcb0</div><div class="kpi-label">Ingresos este mes</div><div class="kpi-num green" id="kpiIngresosMes">\u2014</div><div class="kpi-sub" id="kpiIngresosMesSub">cobrados</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:var(--cargo-green);width:0%" id="kpiIngresosMesBar"></div></div></div>
-        <div class="kpi-card"><div class="kpi-icon">\u23f3</div><div class="kpi-label">Por cobrar</div><div class="kpi-num amber" id="kpiPendiente">\u2014</div><div class="kpi-sub" id="kpiPendienteSub">pendientes</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:var(--accent);width:0%" id="kpiPendienteBar"></div></div></div>
+        <div class="kpi-card"><div class="kpi-icon">👥</div><div class="kpi-label">Clientes totales</div><div class="kpi-num" id="kpiClientes">—</div><div class="kpi-sub" id="kpiClientesSub">registrados</div><div class="kpi-bar"><div class="kpi-bar-fill" id="kpiClientesBar" style="width:0%"></div></div></div>
+        <div class="kpi-card"><div class="kpi-icon">📦</div><div class="kpi-label">Paquetes este mes</div><div class="kpi-num blue" id="kpiPaquetesMes">—</div><div class="kpi-sub" id="kpiPaquetesMesSub">paquetes nuevos</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:#2563eb;width:0%" id="kpiPaquetesMesBar"></div></div></div>
+        <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-label">Ingresos este mes</div><div class="kpi-num green" id="kpiIngresosMes">—</div><div class="kpi-sub" id="kpiIngresosMesSub">cobrados</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:var(--cargo-green);width:0%" id="kpiIngresosMesBar"></div></div></div>
+        <div class="kpi-card"><div class="kpi-icon">⏳</div><div class="kpi-label">Por cobrar</div><div class="kpi-num amber" id="kpiPendiente">—</div><div class="kpi-sub" id="kpiPendienteSub">pendientes</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:var(--accent);width:0%" id="kpiPendienteBar"></div></div></div>
       </div>
       <div class="dash-inicio-grid">
-        <div class="dash-inicio-chart"><h3>Ingresos \u2014 \u00faltimos 30 d\u00edas</h3><canvas id="chartDashIngresos"></canvas></div>
+        <div class="dash-inicio-chart"><h3>Ingresos — últimos 30 días</h3><canvas id="chartDashIngresos"></canvas></div>
         <div class="dash-inicio-chart"><h3>Estado de paquetes</h3><canvas id="chartDashEstados"></canvas></div>
       </div>
       <div class="dash-inicio-grid">
         <div class="dash-inicio-chart"><h3>Top 5 clientes este mes</h3><canvas id="chartDashTopClientes"></canvas></div>
-        <div class="dash-inicio-chart"><h3>Resumen del mes</h3><div id="dashResumenMes" style="font-size:13px;color:var(--ink-soft);">Cargando\u2026</div></div>
+        <div class="dash-inicio-chart"><h3>Resumen del mes</h3><div id="dashResumenMes" style="font-size:13px;color:var(--ink-soft);">Cargando…</div></div>
       </div>
     </div>
     <!-- ---- TAB: Mostrador / Facturador ---- -->
@@ -657,11 +657,11 @@
       <div class="fac-header">
         <div>
           <h2 style="margin:0 0 2px;">Facturador</h2>
-          <p class="card-sub" style="margin:0;">Selecciona facturas pendientes y c\u00f3bralas al instante.</p>
+          <p class="card-sub" style="margin:0;">Selecciona facturas pendientes y cóbralas al instante.</p>
         </div>
         <form id="formBuscarMostrador" class="fac-search-form">
           <div style="position:relative;flex:1;">
-            <input type="text" id="mostradorQ" placeholder="Buscar por casillero, nombre, correo o tracking\u2026" autocomplete="off">
+            <input type="text" id="mostradorQ" placeholder="Buscar por casillero, nombre, correo o tracking…" autocomplete="off">
             <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">1 = selector</span>
           </div>
           <button class="btn-primary" type="submit" id="btnBuscarMostrador">
@@ -681,12 +681,12 @@
             <div class="fac-panel-row fac-total"><span>Total (<span id="ftCant">0</span> paq.)</span><span class="mono" id="ftTotal">$0.00</span></div>
           </div>
           <div class="fac-panel-right">
-            <div class="fac-panel-titulo">M\u00e9todo de pago</div>
+            <div class="fac-panel-titulo">Método de pago</div>
             <div class="fac-pago-grid">
-              <button type="button" class="ft-pago-btn" data-metodo="efectivo">\ud83d\udcb5 Efectivo</button>
-              <button type="button" class="ft-pago-btn" data-metodo="tarjeta">\ud83d\udcb3 Tarjeta</button>
-              <button type="button" class="ft-pago-btn" data-metodo="transferencia">\ud83c\udfe6 Transferencia</button>
-              <button type="button" class="ft-pago-btn" data-metodo="yappy">\ud83d\udcf1 Yappy</button>
+              <button type="button" class="ft-pago-btn" data-metodo="efectivo">💵 Efectivo</button>
+              <button type="button" class="ft-pago-btn" data-metodo="tarjeta">💳 Tarjeta</button>
+              <button type="button" class="ft-pago-btn" data-metodo="transferencia">🏦 Transferencia</button>
+              <button type="button" class="ft-pago-btn" data-metodo="yappy">📱 Yappy</button>
             </div>
             <button class="btn-primary" id="btnGenerarFacturas" disabled style="width:100%;margin-top:10px;">
               <span class="spinner"></span><span>Generar y cobrar</span>
@@ -705,64 +705,64 @@
       <div class="fac-grid-table">
         <div class="fac-grid-thead">
           <div>Factura</div><div>Cliente / Casillero</div><div>Paquete</div>
-          <div>Fecha</div><div>Monto</div><div>Acci\u00f3n</div>
+          <div>Fecha</div><div>Monto</div><div>Acción</div>
         </div>
         <div id="pendientesMostrador"></div>
-        <div class="empty" id="emptyPendientesMostrador" style="display:none;">No hay facturas pendientes. \ud83c\udf89</div>
+        <div class="empty" id="emptyPendientesMostrador" style="display:none;">No hay facturas pendientes. 🎉</div>
       </div>
     </div>
-    <!-- ---- TAB: Recepci\u00f3n ---- -->
+    <!-- ---- TAB: Recepción ---- -->
     <div class="card tab-panel" id="tabRecepcion" style="display:none;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
         <div>
-          <h2 style="margin:0 0 2px;">Recepci\u00f3n de paquetes</h2>
-          <p class="card-sub" style="margin:0;">Escanea o escribe el tracking. Si tiene prealerta, confirmas. Si no, creas el paquete aqu\u00ed.</p>
+          <h2 style="margin:0 0 2px;">Recepción de paquetes</h2>
+          <p class="card-sub" style="margin:0;">Escanea o escribe el tracking. Si tiene prealerta, confirmas. Si no, creas el paquete aquí.</p>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <div class="rep-stat" style="padding:10px 16px;text-align:center;">
-            <div class="rep-stat-l">Esta sesi\u00f3n</div>
+            <div class="rep-stat-l">Esta sesión</div>
             <div class="rep-stat-n" id="recepcionContador">0</div>
           </div>
         </div>
       </div>
       <form id="formRecepcion" style="display:flex;gap:8px;margin-bottom:12px;">
         <div style="position:relative;flex:1;">
-          <input type="text" id="recepcionTracking" placeholder="Escanea o escribe el tracking\u2026" autocomplete="off" style="width:100%;padding-right:36px;">
-          <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;">\ud83d\udce6</span>
+          <input type="text" id="recepcionTracking" placeholder="Escanea o escribe el tracking…" autocomplete="off" style="width:100%;padding-right:36px;">
+          <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;">📦</span>
         </div>
         <button class="btn-primary" type="submit" id="btnRecepcion" style="white-space:nowrap;width:auto;">
           <span class="spinner"></span><span>Buscar</span>
         </button>
-        <button type="button" id="btnCamara" style="background:var(--ink);color:#fff;border:none;padding:0 14px;border-radius:8px;cursor:pointer;font-size:18px;" title="Escanear con c\u00e1mara">\ud83d\udcf7</button>
+        <button type="button" id="btnCamara" style="background:var(--ink);color:#fff;border:none;padding:0 14px;border-radius:8px;cursor:pointer;font-size:18px;" title="Escanear con cámara">📷</button>
       </form>
       <div id="camaraRecepcion" style="display:none;margin-bottom:12px;border-radius:12px;overflow:hidden;background:#000;position:relative;aspect-ratio:4/3;max-height:280px;">
         <video id="camaraVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;"></video>
         <div style="position:absolute;left:12%;right:12%;height:2px;background:#ff6a1a;box-shadow:0 0 8px #ff6a1a;animation:scanLine 2s ease-in-out infinite;"></div>
-        <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#fff;font-size:12px;background:rgba(0,0,0,.5);padding:4px;">Apunta al c\u00f3digo de barras de la etiqueta</div>
-        <button onclick="cerrarCamara()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;">\u2715</button>
+        <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#fff;font-size:12px;background:rgba(0,0,0,.5);padding:4px;">Apunta al código de barras de la etiqueta</div>
+        <button onclick="cerrarCamara()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;">✕</button>
       </div>
       <div class="banner" id="bannerRecepcion"></div>
       <div id="recepcionResultado" style="display:none;"></div>
       <div id="recepcionFormNuevo" style="display:none;">
         <div class="card" style="border:2px dashed var(--accent);margin-top:12px;">
-          <h3 style="margin:0 0 4px;color:var(--accent);">\ud83d\udce6 Sin prealerta \u2014 crear paquete</h3>
+          <h3 style="margin:0 0 4px;color:var(--accent);">📦 Sin prealerta — crear paquete</h3>
           <p class="card-sub" style="margin:0 0 14px;">Este tracking no tiene prealerta. Busca al cliente por casillero y completa los datos.</p>
           <div class="form-grid" style="margin-bottom:12px;">
             <div>
               <label for="recNuevoCasillero">Casillero del cliente</label>
               <div style="display:flex;gap:6px;">
                 <div style="position:relative;flex:1;">
-                  <input id="recNuevoCasillero" type="text" placeholder="NEA-00042 \u2014 o presiona 1">
+                  <input id="recNuevoCasillero" type="text" placeholder="NEA-00042 — o presiona 1">
                   <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">1</span>
                 </div>
                 <button type="button" id="btnBuscarClienteRec" class="btn-secondary" style="white-space:nowrap;">Buscar</button>
               </div>
               <div id="recClienteEncontrado" style="display:none;margin-top:6px;padding:8px 12px;background:var(--paper);border-radius:8px;font-size:12.5px;"></div>
             </div>
-            <div><label for="recNuevoTienda">Tienda</label><input id="recNuevoTienda" type="text" placeholder="Amazon, eBay\u2026"></div>
+            <div><label for="recNuevoTienda">Tienda</label><input id="recNuevoTienda" type="text" placeholder="Amazon, eBay…"></div>
             <div><label for="recNuevoValor">Valor declarado (USD)</label><input id="recNuevoValor" type="number" step="0.01" min="0" placeholder="45.99"></div>
             <div><label for="recNuevoPeso">Peso aproximado (lb)</label><input id="recNuevoPeso" type="number" step="0.01" min="0" placeholder="1.5"></div>
-            <div class="full"><label for="recNuevoDesc">Descripci\u00f3n (opcional)</label><input id="recNuevoDesc" type="text" placeholder="Aud\u00edfonos, ropa, electr\u00f3nica\u2026"></div>
+            <div class="full"><label for="recNuevoDesc">Descripción (opcional)</label><input id="recNuevoDesc" type="text" placeholder="Audífonos, ropa, electrónica…"></div>
           </div>
           <button class="btn-primary" id="btnCrearPaquete" disabled>
             <span class="spinner"></span><span>Crear paquete y marcar en bodega</span>
@@ -773,18 +773,18 @@
       </div>
       <div id="pasoFoto" style="display:none;">
         <div class="card" style="border:2px dashed #2563eb;margin-top:12px;">
-          <h3 style="margin:0 0 4px;color:#2563eb;">\ud83d\udcf7 Paso 1 de 2 \u2014 Foto del paquete</h3>
-          <p class="card-sub" style="margin:0 0 14px;" id="pasoFotoSub">Toma una foto de c\u00f3mo lleg\u00f3 el paquete.</p>
+          <h3 style="margin:0 0 4px;color:#2563eb;">📷 Paso 1 de 2 — Foto del paquete</h3>
+          <p class="card-sub" style="margin:0 0 14px;" id="pasoFotoSub">Toma una foto de cómo llegó el paquete.</p>
           <input type="file" id="pasoFotoInput" accept="image/*" capture="environment" style="display:none;">
-          <button class="btn-primary" id="btnAbrirCamaraFoto" style="width:auto;">\ud83d\udcf7 Tomar foto</button>
+          <button class="btn-primary" id="btnAbrirCamaraFoto" style="width:auto;">📷 Tomar foto</button>
           <button type="button" onclick="saltarPasoFoto()" class="btn-secondary" style="margin-left:8px;">Saltar este paso</button>
           <div class="banner" id="bannerPasoFoto"></div>
         </div>
       </div>
       <div id="pasoDimensiones" style="display:none;">
         <div class="card" style="border:2px dashed #7c3aed;margin-top:12px;">
-          <h3 style="margin:0 0 4px;color:#7c3aed;">\ud83d\udcd0 Paso 2 de 2 \u2014 Dimensiones</h3>
-          <p class="card-sub" style="margin:0 0 14px;">Mide el paquete en pulgadas \u2014 se calcula el peso volum\u00e9trico autom\u00e1ticamente.</p>
+          <h3 style="margin:0 0 4px;color:#7c3aed;">📐 Paso 2 de 2 — Dimensiones</h3>
+          <p class="card-sub" style="margin:0 0 14px;">Mide el paquete en pulgadas — se calcula el peso volumétrico automáticamente.</p>
           <div class="form-grid" style="margin-bottom:12px;">
             <div><label for="dimLargo">Largo (in)</label><input id="dimLargo" type="number" step="0.1" min="0" placeholder="12"></div>
             <div><label for="dimAncho">Ancho (in)</label><input id="dimAncho" type="number" step="0.1" min="0" placeholder="8"></div>
@@ -797,13 +797,13 @@
           <div class="banner" id="bannerPasoDimensiones"></div>
         </div>
       </div>
-      <h3 style="margin:20px 0 8px;font-size:14px;">Historial de esta sesi\u00f3n</h3>
-      <div id="recepcionLog"><div class="empty">A\u00fan no has recibido ning\u00fan paquete en esta sesi\u00f3n.</div></div>
+      <h3 style="margin:20px 0 8px;font-size:14px;">Historial de esta sesión</h3>
+      <div id="recepcionLog"><div class="empty">Aún no has recibido ningún paquete en esta sesión.</div></div>
     </div>
     <!-- ---- TAB: Paquetes ---- -->
     <div class="card tab-panel" id="tabPaquetes" style="display:none;">
       <h2>Todos los paquetes</h2>
-      <p class="card-sub">Actualiza el estado a medida que avanzan en la ruta Miami \u2192 Panam\u00e1.</p>
+      <p class="card-sub">Actualiza el estado a medida que avanzan en la ruta Miami → Panamá.</p>
       <div class="filtros">
         <div>
           <label for="filtroEstado">Estado</label>
@@ -811,8 +811,8 @@
             <option value="">Todos</option>
             <option value="prealertado">Prealertado</option>
             <option value="en_bodega_miami">En bodega Miami</option>
-            <option value="en_transito">En tr\u00e1nsito</option>
-            <option value="en_panama">En Panam\u00e1</option>
+            <option value="en_transito">En tránsito</option>
+            <option value="en_panama">En Panamá</option>
             <option value="listo_para_retiro">Listo para retiro</option>
             <option value="entregado">Entregado</option>
           </select>
@@ -839,8 +839,8 @@
       <div id="paginacionPaquetes" style="display:none;margin-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
         <div id="paginacionInfo" style="font-size:12.5px;color:var(--ink-soft);"></div>
         <div style="display:flex;gap:6px;">
-          <button class="btn-secondary" id="btnPagAnterior" style="padding:7px 14px;font-size:12px;">\u2190 Anterior</button>
-          <button class="btn-secondary" id="btnPagSiguiente" style="padding:7px 14px;font-size:12px;">Siguiente \u2192</button>
+          <button class="btn-secondary" id="btnPagAnterior" style="padding:7px 14px;font-size:12px;">← Anterior</button>
+          <button class="btn-secondary" id="btnPagSiguiente" style="padding:7px 14px;font-size:12px;">Siguiente →</button>
         </div>
       </div>
     </div>
@@ -854,7 +854,7 @@
           <tbody id="tbodyClientes"></tbody>
         </table>
       </div>
-      <div class="empty" id="emptyClientes" style="display:none;">A\u00fan no hay clientes registrados.</div>
+      <div class="empty" id="emptyClientes" style="display:none;">Aún no hay clientes registrados.</div>
     </div>
     <!-- ---- TAB: Facturas ---- -->
     <div class="card tab-panel" id="tabFacturas" style="display:none;">
@@ -894,12 +894,12 @@
     </div>
     <!-- ---- TAB: Tarifas ---- -->
     <div class="card tab-panel" id="tabTarifas" style="display:none;">
-      <h2>Tarifas de env\u00edo</h2>
-      <p class="card-sub">Se usan al generar facturas. El costo m\u00ednimo aplica cuando peso \u00d7 precio/lb es menor que el m\u00ednimo.</p>
+      <h2>Tarifas de envío</h2>
+      <p class="card-sub">Se usan al generar facturas. El costo mínimo aplica cuando peso × precio/lb es menor que el mínimo.</p>
       <form id="formTarifa" class="form-inline" style="grid-template-columns: 1.4fr .8fr .8fr .8fr .8fr auto;">
-        <div><label for="tarNombre">Nombre</label><input id="tarNombre" type="text" placeholder="A\u00e9reo est\u00e1ndar"></div>
+        <div><label for="tarNombre">Nombre</label><input id="tarNombre" type="text" placeholder="Aéreo estándar"></div>
         <div><label for="tarPrecioLibra">$/lb</label><input id="tarPrecioLibra" type="number" step="0.01" min="0" placeholder="4.50"></div>
-        <div><label for="tarCargoMinimo">M\u00ednimo</label><input id="tarCargoMinimo" type="number" step="0.01" min="0" placeholder="8.00"></div>
+        <div><label for="tarCargoMinimo">Mínimo</label><input id="tarCargoMinimo" type="number" step="0.01" min="0" placeholder="8.00"></div>
         <div><label for="tarCargoManejo">Manejo</label><input id="tarCargoManejo" type="number" step="0.01" min="0" placeholder="2.00"></div>
         <div><label for="tarPctSeguro">% Seguro</label><input id="tarPctSeguro" type="number" step="0.01" min="0" max="100" placeholder="1.5"></div>
         <div>
@@ -911,20 +911,20 @@
       <div class="banner" id="bannerTarifa"></div>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>Nombre</th><th>$/lb</th><th>M\u00ednimo</th><th>Manejo</th><th>% Seguro</th><th>Activa</th><th></th></tr></thead>
+          <thead><tr><th>Nombre</th><th>$/lb</th><th>Mínimo</th><th>Manejo</th><th>% Seguro</th><th>Activa</th><th></th></tr></thead>
           <tbody id="tbodyTarifas"></tbody>
         </table>
       </div>
-      <div class="empty" id="emptyTarifas" style="display:none;">A\u00fan no hay tarifas creadas.</div>
+      <div class="empty" id="emptyTarifas" style="display:none;">Aún no hay tarifas creadas.</div>
     </div>
     <!-- ---- TAB: Sucursales ---- -->
     <div class="card tab-panel" id="tabSucursales" style="display:none;">
       <h2>Sucursales</h2>
       <p class="card-sub">Agrega o edita los puntos de retiro.</p>
       <form id="formSucursal" class="form-inline">
-        <div><label for="sucNombre">Nombre</label><input id="sucNombre" type="text" placeholder="Sucursal Col\u00f3n Centro"></div>
-        <div><label for="sucDireccion">Direcci\u00f3n</label><input id="sucDireccion" type="text" placeholder="Calle 9, Avenida Bol\u00edvar"></div>
-        <div><label for="sucTelefono">Tel\u00e9fono</label><input id="sucTelefono" type="text" placeholder="6318-5982"></div>
+        <div><label for="sucNombre">Nombre</label><input id="sucNombre" type="text" placeholder="Sucursal Colón Centro"></div>
+        <div><label for="sucDireccion">Dirección</label><input id="sucDireccion" type="text" placeholder="Calle 9, Avenida Bolívar"></div>
+        <div><label for="sucTelefono">Teléfono</label><input id="sucTelefono" type="text" placeholder="6318-5982"></div>
         <div><label for="sucHorario">Horario</label><input id="sucHorario" type="text" placeholder="Lun-Vie 10am-6pm"></div>
         <div>
           <button class="btn-primary" type="submit" id="btnSucursal" style="margin-top:0;">
@@ -935,31 +935,31 @@
       <div class="banner" id="bannerSucursal"></div>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>Nombre</th><th>Direcci\u00f3n</th><th>Tel\u00e9fono</th><th>Horario</th><th>Activa</th><th></th></tr></thead>
+          <thead><tr><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Horario</th><th>Activa</th><th></th></tr></thead>
           <tbody id="tbodySucursales"></tbody>
         </table>
       </div>
-      <div class="empty" id="emptySucursales" style="display:none;">A\u00fan no hay sucursales creadas.</div>
+      <div class="empty" id="emptySucursales" style="display:none;">Aún no hay sucursales creadas.</div>
     </div>
     <!-- ---- TAB: Cierre de caja ---- -->
     <div class="card tab-panel" id="tabCaja" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
         <div>
           <h2 style="margin:0 0 2px;">Cierre de caja</h2>
-          <p class="card-sub" style="margin:0;">Total cobrado en el d\u00eda, desglosado por m\u00e9todo de pago.</p>
+          <p class="card-sub" style="margin:0;">Total cobrado en el día, desglosado por método de pago.</p>
         </div>
         <div style="display:flex;gap:8px;align-items:flex-end;">
           <div><label for="cajaFecha" style="font-size:11px;">Fecha</label><br><input type="date" id="cajaFecha" style="padding:7px 10px;width:auto;"></div>
-          <button class="btn-secondary" id="btnVerCaja" style="height:36px;">Ver d\u00eda</button>
+          <button class="btn-secondary" id="btnVerCaja" style="height:36px;">Ver día</button>
         </div>
       </div>
       <div id="cajaEstadoDia"></div>
       <div id="cajaResumenCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;"></div>
-      <div id="cajaM\u00e9todosGrid" style="display:none;margin-bottom:20px;">
-        <h3 class="dash-section-title">Desglose por m\u00e9todo de pago</h3>
+      <div id="cajaMétodosGrid" style="display:none;margin-bottom:20px;">
+        <h3 class="dash-section-title">Desglose por método de pago</h3>
         <div id="cajaMetodosCards" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
       </div>
-      <div class="empty" id="emptyCajaDetalle" style="display:none;">No hay cobros registrados este d\u00eda.</div>
+      <div class="empty" id="emptyCajaDetalle" style="display:none;">No hay cobros registrados este día.</div>
       <div id="cajaCierreBox" style="margin-top:4px;"></div>
       <div class="banner" id="bannerCaja"></div>
       <div style="margin-top:28px;">
@@ -969,7 +969,7 @@
             <div>Fecha</div><div>Total</div><div>Facturas</div><div>Cerrado por</div><div>Hora</div><div></div>
           </div>
           <div id="tbodyCajaHistorial"></div>
-          <div class="empty" id="emptyCajaHistorial" style="display:none;">A\u00fan no hay cierres registrados.</div>
+          <div class="empty" id="emptyCajaHistorial" style="display:none;">Aún no hay cierres registrados.</div>
         </div>
       </div>
     </div>
@@ -978,23 +978,23 @@
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
         <div>
           <h2 style="margin:0 0 2px;">Dashboard de operaciones</h2>
-          <p class="card-sub" style="margin:0;">Resumen de tu negocio en el per\u00edodo seleccionado.</p>
+          <p class="card-sub" style="margin:0;">Resumen de tu negocio en el período seleccionado.</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
           <div><label for="repDesde" style="font-size:11px;">Desde</label><br><input type="date" id="repDesde" style="padding:7px 10px;"></div>
           <div><label for="repHasta" style="font-size:11px;">Hasta</label><br><input type="date" id="repHasta" style="padding:7px 10px;"></div>
           <button class="btn-secondary" id="btnActualizarReporte" style="height:36px;">Actualizar</button>
-          <button class="btn-secondary" id="btnExportarCsv" style="height:36px;">\u2b07 CSV</button>
+          <button class="btn-secondary" id="btnExportarCsv" style="height:36px;">⬇ CSV</button>
         </div>
       </div>
       <div class="dash-cards">
-        <div class="dash-card green"><div class="dash-icon">\ud83d\udcb0</div><div class="dash-info"><div class="dash-label">Ingresos cobrados</div><div class="dash-num" id="repIngresos">$0.00</div><div class="dash-sub" id="repIngresosCant">0 facturas</div></div></div>
-        <div class="dash-card amber"><div class="dash-icon">\u23f3</div><div class="dash-info"><div class="dash-label">Por cobrar</div><div class="dash-num" id="repPendiente">$0.00</div><div class="dash-sub" id="repPendienteCant">0 facturas</div></div></div>
-        <div class="dash-card blue"><div class="dash-icon">\ud83d\udce6</div><div class="dash-info"><div class="dash-label">Paquetes nuevos</div><div class="dash-num" id="repPaquetesNuevos">0</div><div class="dash-sub">en el per\u00edodo</div></div></div>
-        <div class="dash-card navy"><div class="dash-icon">\ud83d\udc65</div><div class="dash-info"><div class="dash-label">Clientes nuevos</div><div class="dash-num" id="repClientesNuevos">0</div><div class="dash-sub">en el per\u00edodo</div></div></div>
+        <div class="dash-card green"><div class="dash-icon">💰</div><div class="dash-info"><div class="dash-label">Ingresos cobrados</div><div class="dash-num" id="repIngresos">$0.00</div><div class="dash-sub" id="repIngresosCant">0 facturas</div></div></div>
+        <div class="dash-card amber"><div class="dash-icon">⏳</div><div class="dash-info"><div class="dash-label">Por cobrar</div><div class="dash-num" id="repPendiente">$0.00</div><div class="dash-sub" id="repPendienteCant">0 facturas</div></div></div>
+        <div class="dash-card blue"><div class="dash-icon">📦</div><div class="dash-info"><div class="dash-label">Paquetes nuevos</div><div class="dash-num" id="repPaquetesNuevos">0</div><div class="dash-sub">en el período</div></div></div>
+        <div class="dash-card navy"><div class="dash-icon">👥</div><div class="dash-info"><div class="dash-label">Clientes nuevos</div><div class="dash-num" id="repClientesNuevos">0</div><div class="dash-sub">en el período</div></div></div>
       </div>
       <div class="dash-section">
-        <h3 class="dash-section-title">Ingresos por d\u00eda</h3>
+        <h3 class="dash-section-title">Ingresos por día</h3>
         <div class="chart-box"><canvas id="chartIngresos"></canvas></div>
       </div>
       <div class="dash-grid2">
@@ -1004,13 +1004,13 @@
     </div>
     <!-- ---- TAB: PTY Cargo Express ---- -->
     <div class="card tab-panel" id="tabPty" style="display:none;">
-      <h2 style="margin:0 0 4px;">\ud83d\udea2 PTY Cargo Express</h2>
-      <p class="card-sub" style="margin:0 0 22px;">Copia la lista de paquetes desde PTY Cargo y \u00e9gala aqu\u00ed. Solo se importan los paquetes con estado <strong>EN BODEGA</strong>. Los dem\u00e1s se omiten autom\u00e1ticamente.</p>
+      <h2 style="margin:0 0 4px;">🚢 PTY Cargo Express</h2>
+      <p class="card-sub" style="margin:0 0 22px;">Copia la lista de paquetes desde PTY Cargo y égala aquí. Solo se importan los paquetes con estado <strong>EN BODEGA</strong>. Los demás se omiten automáticamente.</p>
       <div class="banner" id="bannerPtyTexto"></div>
-      <textarea id="ptyTexto" rows="10" placeholder="Pega aqu\u00ed la lista de paquetes de PTY Cargo\u2026 Solo se importan los EN BODEGA." style="width:100%;padding:14px;border:1.5px solid var(--line);border-radius:10px;font-family:var(--font-mono);font-size:12px;color:var(--ink);background:var(--panel);resize:vertical;line-height:1.7;margin-bottom:12px;"></textarea>
+      <textarea id="ptyTexto" rows="10" placeholder="Pega aquí la lista de paquetes de PTY Cargo… Solo se importan los EN BODEGA." style="width:100%;padding:14px;border:1.5px solid var(--line);border-radius:10px;font-family:var(--font-mono);font-size:12px;color:var(--ink);background:var(--panel);resize:vertical;line-height:1.7;margin-bottom:12px;"></textarea>
       <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
         <button class="btn-primary" id="btnProcesarTexto" style="width:auto;">
-          <span class="spinner"></span><span>\ud83d\udd0d Procesar lista</span>
+          <span class="spinner"></span><span>🔍 Procesar lista</span>
         </button>
         <div id="ptyTextoResumen" style="font-size:12.5px;color:var(--ink-soft);"></div>
       </div>
@@ -1031,7 +1031,7 @@
           </table>
         </div>
         <button class="btn-primary" id="btnImportarTexto" style="width:auto;display:none;">
-          <span class="spinner"></span><span>\u2b07 Importar seleccionados</span>
+          <span class="spinner"></span><span>⬇ Importar seleccionados</span>
         </button>
       </div>
     </div>
@@ -1042,7 +1042,7 @@
   <div class="modal-box">
     <div class="modal-header">
       <h2 id="modalFotosTitulo">Fotos del paquete</h2>
-      <button class="modal-close" id="btnCerrarModalFotos">\u2715</button>
+      <button class="modal-close" id="btnCerrarModalFotos">✕</button>
     </div>
     <div class="upload-zone">
       <input type="file" id="inputFotos" accept="image/*" multiple>
@@ -1052,16 +1052,16 @@
       <div class="banner" id="bannerFotos"></div>
     </div>
     <div class="galeria" id="galeriaFotos"></div>
-    <div class="empty" id="emptyFotos" style="display:none;">A\u00fan no hay fotos de este paquete.</div>
+    <div class="empty" id="emptyFotos" style="display:none;">Aún no hay fotos de este paquete.</div>
   </div>
 </div>
 <div id="modalDimensiones" class="modal-overlay">
   <div class="modal-box">
     <div class="modal-header">
       <h2>Dimensiones del paquete</h2>
-      <button class="modal-close" id="btnCerrarModalDimensiones">\u2715</button>
+      <button class="modal-close" id="btnCerrarModalDimensiones">✕</button>
     </div>
-    <p class="card-sub">Mide la caja en pulgadas \u2014 se usa para calcular el peso volum\u00e9trico.</p>
+    <p class="card-sub">Mide la caja en pulgadas — se usa para calcular el peso volumétrico.</p>
     <div class="dim-inputs">
       <div><label for="dimLargo">Largo (in)</label><input type="number" id="dimLargo" step="0.1" min="0" placeholder="Ej. 12"></div>
       <div><label for="dimAncho">Ancho (in)</label><input type="number" id="dimAncho" step="0.1" min="0" placeholder="Ej. 10"></div>
@@ -1077,13 +1077,13 @@
 <div id="modalF1Clientes" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-start;justify-content:center;padding-top:80px;">
   <div style="background:#fff;border-radius:14px;width:560px;max-width:calc(100vw - 32px);overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);">
     <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;">
-      <span style="font-size:18px;color:var(--ink-soft);">\ud83d\udd0d</span>
+      <span style="font-size:18px;color:var(--ink-soft);">🔍</span>
       <input type="text" id="f1SearchInput" placeholder="Nombre, casillero o correo..." autocomplete="off" style="flex:1;border:none;background:transparent;font-size:14px;outline:none;color:var(--ink);">
       <kbd style="font-size:11px;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:2px 7px;color:var(--ink-soft);">Esc</kbd>
     </div>
     <div id="f1ClientesList" style="max-height:340px;overflow-y:auto;"></div>
     <div style="padding:8px 16px;border-top:1px solid var(--line);display:flex;gap:16px;font-size:11px;color:var(--ink-soft);">
-      <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">\u2191\u2193</kbd> Navegar</span>
+      <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">↑↓</kbd> Navegar</span>
       <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">Enter</kbd> Seleccionar</span>
       <span><kbd style="background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">Esc</kbd> Cerrar</span>
     </div>
@@ -1092,8 +1092,8 @@
 <div id="modalFacturasDia" class="modal-overlay">
   <div class="modal-box" style="max-width:640px;">
     <div class="modal-header">
-      <h2 id="tituloFacturasDia">Facturas del d\u00eda</h2>
-      <button class="modal-close" id="btnCerrarFacturasDia">\u2715</button>
+      <h2 id="tituloFacturasDia">Facturas del día</h2>
+      <button class="modal-close" id="btnCerrarFacturasDia">✕</button>
     </div>
     <div id="contenidoFacturasDia"></div>
   </div>
@@ -1102,12 +1102,12 @@
   <div class="modal-box">
     <div class="modal-header">
       <h2>Firma de entrega</h2>
-      <button class="modal-close" id="btnCerrarModalFirma">\u2715</button>
+      <button class="modal-close" id="btnCerrarModalFirma">✕</button>
     </div>
-    <p class="card-sub" id="firmaResumen">El cliente debe firmar aqu\u00ed para confirmar que recibi\u00f3 su paquete.</p>
+    <p class="card-sub" id="firmaResumen">El cliente debe firmar aquí para confirmar que recibió su paquete.</p>
     <div class="firma-lienzo-box">
       <canvas id="canvasFirma"></canvas>
-      <div class="firma-placeholder" id="firmaPlaceholder">Firma aqu\u00ed con el dedo o el mouse</div>
+      <div class="firma-placeholder" id="firmaPlaceholder">Firma aquí con el dedo o el mouse</div>
     </div>
     <div class="firma-acciones">
       <button class="btn-secondary" id="btnLimpiarFirma">Limpiar</button>
@@ -1124,10 +1124,10 @@
   const $ = (sel) => document.querySelector(sel);
   const ESTADOS = ['prealertado','en_bodega_miami','en_transito','en_panama','listo_para_retiro','entregado'];
   const ESTADO_LABEL = {
-    prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tr\u00e1nsito',
-    en_panama: 'En Panam\u00e1', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
+    prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
+    en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
   };
-  // ---- Sidebar m\u00f3vil ----
+  // ---- Sidebar móvil ----
   $('#btnMenuMovil').addEventListener('click', (e) => {
     e.stopPropagation();
     $('#sidebar').classList.toggle('open');
@@ -1144,7 +1144,7 @@
   }
   const MESES_CORTOS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   function formatearFechaSolo(fechaStr){
-    if(!fechaStr) return '\u2014';
+    if(!fechaStr) return '—';
     const soloFecha = String(fechaStr).slice(0,10);
     const [anio, mes, dia] = soloFecha.split('-').map(Number);
     if(!anio||!mes||!dia) return fechaStr;
@@ -1160,7 +1160,7 @@
     boton.disabled = cargando;
     boton.classList.toggle('loading', cargando);
   }
-  // ---- Part\u00edculas de login ----
+  // ---- Partículas de login ----
   (function redParticulasLogin(){
     const canvas = document.getElementById('loginNetworkCanvas');
     if (!canvas) return;
@@ -1228,11 +1228,11 @@
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok){ mostrarBanner('#bannerLogin', 'error', data.mensaje || 'Correo o contrase\u00f1a incorrectos.'); return; }
+      if (!res.ok){ mostrarBanner('#bannerLogin', 'error', data.mensaje || 'Correo o contraseña incorrectos.'); return; }
       if (data.usuario.rol !== 'admin'){ mostrarBanner('#bannerLogin', 'error', 'Esta cuenta no tiene permisos de administrador.'); return; }
       localStorage.setItem(TOKEN_KEY, data.token);
       const nombreAdmin = data.usuario.nombre;
-      $('#saludoAdmin').textContent = `Hola, ${nombreAdmin} \u2014 Panel de operaciones`;
+      $('#saludoAdmin').textContent = `Hola, ${nombreAdmin} — Panel de operaciones`;
       $('#sbNombreUsuario').textContent = `${nombreAdmin} ${data.usuario.apellido || ''}`.trim();
       $('#sbAvatarLetra').textContent = nombreAdmin.charAt(0).toUpperCase();
       mostrarBanner('#bannerLogin', '', '');
@@ -1271,7 +1271,7 @@
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
       });
       const data = await res.json().catch(() => ({}));
-      mostrarBanner('#bannerOlvide', 'success', (data.mensaje || 'Si ese correo existe, te enviamos un enlace.') + ' Al abrirlo podr\u00e1s crear tu nueva contrase\u00f1a.');
+      mostrarBanner('#bannerOlvide', 'success', (data.mensaje || 'Si ese correo existe, te enviamos un enlace.') + ' Al abrirlo podrás crear tu nueva contraseña.');
       $('#formOlvide').reset();
     } catch (err) {
       mostrarBanner('#bannerOlvide', 'error', 'No pudimos conectar con el servidor.');
@@ -1285,7 +1285,7 @@
       ...opciones,
       headers: { 'Content-Type': 'application/json', ...(opciones.headers || {}), Authorization: `Bearer ${token}` },
     });
-    if (res.status === 401 || res.status === 403){ localStorage.removeItem(TOKEN_KEY); mostrarAdmin(false); throw new Error('Sesi\u00f3n inv\u00e1lida'); }
+    if (res.status === 401 || res.status === 403){ localStorage.removeItem(TOKEN_KEY); mostrarAdmin(false); throw new Error('Sesión inválida'); }
     return res;
   }
   async function apiAdminFormData(path, formData){
@@ -1293,10 +1293,10 @@
     const res = await fetch(`${API_URL}${path}`, {
       method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData,
     });
-    if (res.status === 401 || res.status === 403){ localStorage.removeItem(TOKEN_KEY); mostrarAdmin(false); throw new Error('Sesi\u00f3n inv\u00e1lida'); }
+    if (res.status === 401 || res.status === 403){ localStorage.removeItem(TOKEN_KEY); mostrarAdmin(false); throw new Error('Sesión inválida'); }
     return res;
   }
-  // ---- Navegaci\u00f3n por tabs (sidebar) ----
+  // ---- Navegación por tabs (sidebar) ----
   document.querySelectorAll('.tab-nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
@@ -1314,7 +1314,7 @@
       if (tab === 'caja'){ $('#tabCaja').style.display = 'block'; cargarCaja(); cargarHistorialCaja(); }
       if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
       if (tab === 'pty'){ $('#tabPty').style.display = 'block'; }
-      // Cierra sidebar en m\u00f3vil al elegir pesta\u00f1a
+      // Cierra sidebar en móvil al elegir pestaña
       if (window.innerWidth <= 760){
         $('#sidebar').classList.remove('open');
         $('#sidebarOverlay').classList.remove('show');
@@ -1324,7 +1324,7 @@
 </script>
 <script>
   // ---- Todo el JavaScript original a partir de "Paquetes" en adelante ----
-  // (id\u00e9ntico al original, sin cambios)
+  // (idéntico al original, sin cambios)
   let paginaActualPaquetes = 1;
   async function cargarPaquetes(page){
     paginaActualPaquetes = page || 1;
@@ -1347,7 +1347,7 @@
     const cont = $('#paginacionPaquetes');
     if(!cont) return;
     cont.style.display = pag.total_paginas > 1 ? 'flex' : 'none';
-    $('#paginacionInfo').textContent = `P\u00e1gina ${pag.page} de ${pag.total_paginas} \u2014 ${pag.total} paquetes`;
+    $('#paginacionInfo').textContent = `Página ${pag.page} de ${pag.total_paginas} — ${pag.total} paquetes`;
     $('#btnPagAnterior').disabled = pag.page <= 1;
     $('#btnPagSiguiente').disabled = pag.page >= pag.total_paginas;
   }
@@ -1360,7 +1360,7 @@
           ${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}<br>
           <span class="muted">${escapeHtml(p.cliente_email)}</span>` : `
           <span style="display:inline-flex;align-items:center;gap:5px;background:var(--amber-bg);color:var(--accent-dark);font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid rgba(255,106,26,0.3);">
-            \u26a0 Sin cliente
+            ⚠ Sin cliente
           </span>
           <div style="font-size:11px;color:var(--ink-soft);margin-top:3px;">Importado de PTY</div>`}
         </td>
@@ -1371,19 +1371,19 @@
           ${p.peso_confirmado ? `
             <div style="display:flex;align-items:center;gap:5px;">
               <span class="mono" style="font-weight:700;">${Number(p.peso_real_lb).toFixed(2)} lb</span>
-              <span title="Peso confirmado \u2014 bloqueado" style="font-size:12px;">\ud83d\udd12</span>
+              <span title="Peso confirmado — bloqueado" style="font-size:12px;">🔒</span>
             </div>
           ` : `
             <div style="display:flex;gap:5px;">
               <input type="number" step="0.01" min="0" class="peso-input" data-id="${p.id}"
-                     value="${p.peso_real_lb ?? ''}" placeholder="${p.peso_lb ?? '\u2014'}" style="width:70px;padding:6px 8px;font-size:12px;">
+                     value="${p.peso_real_lb ?? ''}" placeholder="${p.peso_lb ?? '—'}" style="width:70px;padding:6px 8px;font-size:12px;">
               <button class="btn-secondary btn-guardar-peso" data-id="${p.id}" style="padding:6px 9px;font-size:11px;">OK</button>
             </div>
           `}
         </td>
         <td data-label="Estado"><span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span></td>
         <td data-label="Actualizar">
-          ${p.estado === 'entregado' ? `<span class="estado-bloqueado" title="Ya entregado">\ud83d\udd12 Entregado</span>` : `
+          ${p.estado === 'entregado' ? `<span class="estado-bloqueado" title="Ya entregado">🔒 Entregado</span>` : `
             <select class="estado-select" data-id="${p.id}">
               ${ESTADOS.map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${ESTADO_LABEL[e]}</option>`).join('')}
             </select>
@@ -1391,8 +1391,8 @@
         </td>
         <td data-label="">
           <div class="row-actions">
-            <button class="btn-secondary btn-fotos" data-id="${p.id}">\ud83d\udcf7 Fotos</button>
-            <button class="btn-secondary btn-dimensiones" data-id="${p.id}" data-largo="${p.largo_in || ''}" data-ancho="${p.ancho_in || ''}" data-alto="${p.alto_in || ''}">\ud83d\udcd0 Medidas</button>
+            <button class="btn-secondary btn-fotos" data-id="${p.id}">📷 Fotos</button>
+            <button class="btn-secondary btn-dimensiones" data-id="${p.id}" data-largo="${p.largo_in || ''}" data-ancho="${p.ancho_in || ''}" data-alto="${p.alto_in || ''}">📐 Medidas</button>
           </div>
         </td>
       </tr>
@@ -1404,22 +1404,20 @@
         const id = btn.dataset.id;
         const input = tbody.querySelector(`.peso-input[data-id="${id}"]`);
         const peso = parseFloat(input.value);
-        if (!input.value.trim() || isNaN(peso) || peso <= 0){ mostrarBanner('#bannerPaquetes', 'error', 'El peso no puede quedar en blanco \u2014 ingresa un valor v\u00e1lido antes de guardar.'); return; }
-        const confirmado = window.confirm(`\u00bfEst\u00e1s seguro que el peso correcto de este paquete es ${peso} lb?\
-\
-Una vez confirmado, NO se podr\u00e1 cambiar.`);
-        if (!confirmado){ mostrarBanner('#bannerPaquetes', 'error', '\u26a0 Revisa el peso bien y vuelve pronto cuando est\u00e9s seguro.'); return; }
+        if (!input.value.trim() || isNaN(peso) || peso <= 0){ mostrarBanner('#bannerPaquetes', 'error', 'El peso no puede quedar en blanco — ingresa un valor válido antes de guardar.'); return; }
+        const confirmado = window.confirm(`¿Estás seguro que el peso correcto de este paquete es ${peso} lb?\n\nUna vez confirmado, NO se podrá cambiar.`);
+        if (!confirmado){ mostrarBanner('#bannerPaquetes', 'error', '⚠ Revisa el peso bien y vuelve pronto cuando estés seguro.'); return; }
         // Pedir la tarifa antes de confirmar
         const tarifaId = await pedirTarifa(peso);
-        if(!tarifaId) return; // cancel\u00f3
+        if(!tarifaId) return; // canceló
         btn.disabled = true;
         try {
           const res = await apiAdmin(`/admin/paquetes/${id}/peso`, { method: 'PATCH', body: JSON.stringify({ peso_real_lb: peso, tarifa_id: tarifaId }) });
           const data = await res.json().catch(() => ({}));
           if (res.ok){
-            mostrarBanner('#bannerPaquetes', 'success', '\u2713 Peso confirmado y factura generada.');
+            mostrarBanner('#bannerPaquetes', 'success', '✓ Peso confirmado y factura generada.');
             const celda = btn.closest('td');
-            celda.innerHTML = `<div style="display:flex;align-items:center;gap:5px;"><span class="mono" style="font-weight:700;">${peso.toFixed(2)} lb</span><span style="font-size:12px;">\ud83d\udd12</span></div>`;
+            celda.innerHTML = `<div style="display:flex;align-items:center;gap:5px;"><span class="mono" style="font-weight:700;">${peso.toFixed(2)} lb</span><span style="font-size:12px;">🔒</span></div>`;
           } else if (res.status === 409){ mostrarBanner('#bannerPaquetes', 'error', data.mensaje || 'Este peso ya fue confirmado.'); cargarPaquetes();
           } else { mostrarBanner('#bannerPaquetes', 'error', data.mensaje || 'No se pudo guardar el peso.'); btn.disabled = false; }
         } catch (err) { mostrarBanner('#bannerPaquetes', 'error', 'No pudimos conectar con el servidor.'); btn.disabled = false; }
@@ -1441,13 +1439,13 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
             const sucursales = (dataSuc.sucursales || []).filter(s => s.activa);
             if (sucursales.length > 0) {
               const elegida = await pedirSucursal(sucursales);
-              if (elegida === null) { sel.value = previo; sel.disabled = false; return; }
+              if (elegida === false) { sel.value = previo; sel.disabled = false; return; }
               try {
                 const res = await apiAdmin(`/admin/paquetes/${id}/estado`, {
                   method: 'PATCH',
                   body: JSON.stringify({ estado: nuevoEstado, sucursal_id: elegida })
                 });
-                if (res.ok) { mostrarBanner('#bannerPaquetes', 'success', 'Estado y sucursal actualizados.'); await cargarPaquetes(); }
+                if (res.ok) { mostrarBanner('#bannerPaquetes', 'success', '\u2713 Estado y sucursal actualizados.'); await cargarPaquetes(); }
                 else { const d = await res.json().catch(()=>({})); mostrarBanner('#bannerPaquetes', 'error', d.mensaje || 'No se pudo actualizar el estado.'); sel.value = previo; sel.disabled = false; }
               } catch (err) { mostrarBanner('#bannerPaquetes', 'error', 'No pudimos conectar.'); sel.value = previo; sel.disabled = false; }
               return;
@@ -1465,15 +1463,15 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   }
 
   // Popup para elegir la sucursal donde queda el paquete.
-  // Devuelve el id (o null si el admin canceló, o '' si eligió "sin asignar").
+  // Devuelve el id, null si eligió "sin asignar", o false si canceló.
   function pedirSucursal(sucursales){
     return new Promise(resolve => {
       const popup = document.createElement('div');
       popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
       popup.innerHTML = `
         <div style="background:#fff;border-radius:14px;padding:24px;width:360px;max-width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);">
-          <div style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:6px;">¿En qué sucursal está el paquete?</div>
-          <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;">El cliente verá esta sucursal en su cuenta y en el correo de aviso.</p>
+          <div style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:6px;">\u00bfEn qu\u00e9 sucursal est\u00e1 el paquete?</div>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;">El cliente ver\u00e1 esta sucursal en su cuenta y en el correo de aviso.</p>
           <select id="popSucursalSel" style="margin-bottom:16px;">
             <option value="">Sin sucursal asignada</option>
             ${sucursales.map(s => `<option value="${s.id}">${escapeHtml(s.nombre)}</option>`).join('')}
@@ -1485,8 +1483,8 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
         </div>`;
       document.body.appendChild(popup);
       const cerrar = v => { popup.remove(); resolve(v); };
-      popup.querySelector('#popSucCancelar').addEventListener('click', () => cerrar(null));
-      popup.addEventListener('click', e => { if (e.target === popup) cerrar(null); });
+      popup.querySelector('#popSucCancelar').addEventListener('click', () => cerrar(false));
+      popup.addEventListener('click', e => { if (e.target === popup) cerrar(false); });
       popup.querySelector('#popSucConfirmar').addEventListener('click', () => {
         const v = popup.querySelector('#popSucursalSel').value;
         cerrar(v ? parseInt(v) : null);
@@ -1510,11 +1508,11 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
         return `<tr data-uid="${u.id}">
           <td data-label="Nombre">${escapeHtml(u.nombre)} ${escapeHtml(u.apellido)}</td>
           <td data-label="Correo">${escapeHtml(u.email)}</td>
-          <td data-label="Casillero" class="mono">${escapeHtml(u.numero_casillero || '\u2014')}</td>
-          <td data-label="Verificado">${u.verificado ? '\u2713' : '\u2014'}</td>
+          <td data-label="Casillero" class="mono">${escapeHtml(u.numero_casillero || '—')}</td>
+          <td data-label="Verificado">${u.verificado ? '✓' : '—'}</td>
           <td data-label="Paquetes">${u.total_paquetes}</td>
           <td data-label="Registrado" class="muted">${fecha}</td>
-          <td><button class="btn-secondary btn-editar-cliente" data-id="${u.id}" style="font-size:12px;padding:5px 10px;">\u270f Editar</button></td>
+          <td><button class="btn-secondary btn-editar-cliente" data-id="${u.id}" style="font-size:12px;padding:5px 10px;">✏ Editar</button></td>
         </tr>`;
       }).join('');
       $('#tbodyClientes').querySelectorAll('.btn-editar-cliente').forEach(btn=>{
@@ -1532,10 +1530,10 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       $('#tbodySucursales').innerHTML = sucursales.map(s => `
         <tr data-id="${s.id}">
           <td data-label="Nombre">${escapeHtml(s.nombre)}</td>
-          <td data-label="Direcci\u00f3n">${escapeHtml(s.direccion)}</td>
-          <td data-label="Tel\u00e9fono">${escapeHtml(s.telefono || '\u2014')}</td>
-          <td data-label="Horario">${escapeHtml(s.horario || '\u2014')}</td>
-          <td data-label="Activa">${s.activa ? '\u2713' : '\u2014'}</td>
+          <td data-label="Dirección">${escapeHtml(s.direccion)}</td>
+          <td data-label="Teléfono">${escapeHtml(s.telefono || '—')}</td>
+          <td data-label="Horario">${escapeHtml(s.horario || '—')}</td>
+          <td data-label="Activa">${s.activa ? '✓' : '—'}</td>
           <td data-label=""><div class="row-actions"><button class="btn-secondary btn-editar-suc" data-id="${s.id}">Editar</button><button class="btn-secondary btn-danger btn-eliminar-suc" data-id="${s.id}">Eliminar</button></div></td>
         </tr>`).join('');
       $('#tbodySucursales').querySelectorAll('.btn-editar-suc').forEach(btn => {
@@ -1550,7 +1548,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       });
       $('#tbodySucursales').querySelectorAll('.btn-eliminar-suc').forEach(btn => {
         btn.addEventListener('click', async () => {
-          if (!confirm('\u00bfEliminar esta sucursal?')) return;
+          if (!confirm('¿Eliminar esta sucursal?')) return;
           try { const res = await apiAdmin(`/admin/sucursales/${btn.dataset.id}`, { method: 'DELETE' }); if (res.ok) await cargarSucursales(); } catch (err) {}
         });
       });
@@ -1560,7 +1558,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     e.preventDefault();
     const btn = $('#btnSucursal');
     const payload = { nombre: $('#sucNombre').value.trim(), direccion: $('#sucDireccion').value.trim(), telefono: $('#sucTelefono').value.trim(), horario: $('#sucHorario').value.trim() };
-    if (!payload.nombre || !payload.direccion){ mostrarBanner('#bannerSucursal', 'error', 'Nombre y direcci\u00f3n son obligatorios.'); return; }
+    if (!payload.nombre || !payload.direccion){ mostrarBanner('#bannerSucursal', 'error', 'Nombre y dirección son obligatorios.'); return; }
     setCargando(btn, true);
     try {
       const url = sucursalEditando ? `/admin/sucursales/${sucursalEditando}` : '/admin/sucursales';
@@ -1582,10 +1580,10 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
         <tr data-id="${t.id}">
           <td data-label="Nombre">${escapeHtml(t.nombre)}</td>
           <td data-label="$/lb" class="mono">$${Number(t.precio_libra).toFixed(2)}</td>
-          <td data-label="M\u00ednimo" class="mono">$${Number(t.cargo_minimo).toFixed(2)}</td>
+          <td data-label="Mínimo" class="mono">$${Number(t.cargo_minimo).toFixed(2)}</td>
           <td data-label="Manejo" class="mono">$${Number(t.cargo_manejo).toFixed(2)}</td>
           <td data-label="% Seguro" class="mono">${Number(t.pct_seguro).toFixed(2)}%</td>
-          <td data-label="Activa">${t.activa ? '\u2713' : '\u2014'}</td>
+          <td data-label="Activa">${t.activa ? '✓' : '—'}</td>
           <td data-label=""><div class="row-actions"><button class="btn-secondary btn-editar-tar" data-id="${t.id}">Editar</button><button class="btn-secondary btn-danger btn-eliminar-tar" data-id="${t.id}">Eliminar</button></div></td>
         </tr>`).join('');
       $('#tbodyTarifas').querySelectorAll('.btn-editar-tar').forEach(btn => {
@@ -1600,7 +1598,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       });
       $('#tbodyTarifas').querySelectorAll('.btn-eliminar-tar').forEach(btn => {
         btn.addEventListener('click', async () => {
-          if (!confirm('\u00bfEliminar esta tarifa?')) return;
+          if (!confirm('¿Eliminar esta tarifa?')) return;
           try {
             const res = await apiAdmin(`/admin/tarifas/${btn.dataset.id}`, { method: 'DELETE' });
             const data = await res.json().catch(() => ({}));
@@ -1611,7 +1609,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       const select = $('#facturaTarifa');
       if (select){
         select.innerHTML = tarifas.filter(t => t.activa).map(t =>
-          `<option value="${t.id}">${escapeHtml(t.nombre)} \u2014 $${Number(t.precio_libra).toFixed(2)}/lb</option>`
+          `<option value="${t.id}">${escapeHtml(t.nombre)} — $${Number(t.precio_libra).toFixed(2)}/lb</option>`
         ).join('') || '<option value="">No hay tarifas activas</option>';
       }
     } catch (err) {}
@@ -1638,7 +1636,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       const data = await res.json();
       const elegibles = (data.paquetes || []).filter(p => p.peso_real_lb && !p.factura_id);
       const select = $('#facturaPaquete');
-      select.innerHTML = elegibles.length ? elegibles.map(p => `<option value="${p.id}">${escapeHtml(p.cliente_nombre)} \u2014 ${escapeHtml(p.tienda)} (${escapeHtml(p.numero_tracking)}) \u2014 ${p.peso_real_lb} lb</option>`).join('') : '<option value="">No hay paquetes pendientes de facturar</option>';
+      select.innerHTML = elegibles.length ? elegibles.map(p => `<option value="${p.id}">${escapeHtml(p.cliente_nombre)} — ${escapeHtml(p.tienda)} (${escapeHtml(p.numero_tracking)}) — ${p.peso_real_lb} lb</option>`).join('') : '<option value="">No hay paquetes pendientes de facturar</option>';
       await cargarTarifas();
     } catch (err) {}
   }
@@ -1653,7 +1651,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       const data = await res.json().catch(() => ({}));
       if (res.status === 201){
         const envios = data.envios || {};
-        mostrarBanner('#bannerFactura', envios.correo_enviado ? 'success' : 'error', `Factura ${data.factura.numero_factura} generada. ${envios.correo_enviado ? 'Correo \u2713' : 'Correo \u2717'}`);
+        mostrarBanner('#bannerFactura', envios.correo_enviado ? 'success' : 'error', `Factura ${data.factura.numero_factura} generada. ${envios.correo_enviado ? 'Correo ✓' : 'Correo ✗'}`);
         await cargarOpcionesFactura(); await cargarFacturas();
       } else { mostrarBanner('#bannerFactura', 'error', data.mensaje || 'No se pudo generar la factura.'); }
     } catch (err) { mostrarBanner('#bannerFactura', 'error', 'No pudimos conectar.'); }
@@ -1844,8 +1842,8 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     const largo=$('#dimLargo').value, ancho=$('#dimAncho').value, alto=$('#dimAlto').value;
     const peso=calcularPesoVolumetricoPreview(largo,ancho,alto);
     const resultado=$('#dimResultado');
-    if(peso==null){ resultado.innerHTML='Completa las tres medidas para calcular el peso volum\u00e9trico.'; return; }
-    resultado.innerHTML=`Peso volum\u00e9trico estimado: <strong>${peso} lb</strong><br><span style="font-size:11.5px;">Al facturar, se usa el <span class="volumetrico-mayor">mayor</span> entre este y el peso real confirmado.</span>`;
+    if(peso==null){ resultado.innerHTML='Completa las tres medidas para calcular el peso volumétrico.'; return; }
+    resultado.innerHTML=`Peso volumétrico estimado: <strong>${peso} lb</strong><br><span style="font-size:11.5px;">Al facturar, se usa el <span class="volumetrico-mayor">mayor</span> entre este y el peso real confirmado.</span>`;
   }
   ['dimLargo','dimAncho','dimAlto'].forEach(id => { document.getElementById(id)?.addEventListener('input', actualizarPreviewDimensiones); });
   function abrirModalDimensiones(paqueteId, largo, ancho, alto){
@@ -1864,7 +1862,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     try {
       const res=await apiAdmin(`/admin/paquetes/${paqueteDimensionesActual}/dimensiones`,{ method:'PATCH', body:JSON.stringify({largo_in:largo,ancho_in:ancho,alto_in:alto}) });
       const data=await res.json().catch(()=>({}));
-      if(res.ok){ mostrarBanner('#bannerDimensiones','success','\u2713 Dimensiones guardadas.'); setTimeout(cerrarModalDimensiones,700); cargarPaquetes(); }
+      if(res.ok){ mostrarBanner('#bannerDimensiones','success','✓ Dimensiones guardadas.'); setTimeout(cerrarModalDimensiones,700); cargarPaquetes(); }
       else { mostrarBanner('#bannerDimensiones','error',data.mensaje||'No se pudieron guardar.'); }
     } catch(err){ mostrarBanner('#bannerDimensiones','error','No pudimos conectar.'); }
     finally { setCargando(btn,false); }
@@ -1878,11 +1876,11 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   function renderGaleriaFotos(fotos){
     const galeria=$('#galeriaFotos');
     $('#emptyFotos').style.display=fotos.length?'none':'block';
-    galeria.innerHTML=fotos.map(f=>`<div class="foto-item"><img src="${f.url}" alt="Foto del paquete" data-url="${f.url}"><button class="btn-eliminar-foto" data-id="${f.id}" title="Eliminar">\u2715</button></div>`).join('');
+    galeria.innerHTML=fotos.map(f=>`<div class="foto-item"><img src="${f.url}" alt="Foto del paquete" data-url="${f.url}"><button class="btn-eliminar-foto" data-id="${f.id}" title="Eliminar">✕</button></div>`).join('');
     galeria.querySelectorAll('img').forEach(img => img.addEventListener('click', () => window.open(img.dataset.url, '_blank')));
     galeria.querySelectorAll('.btn-eliminar-foto').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if(!confirm('\u00bfEliminar esta foto?')) return;
+        if(!confirm('¿Eliminar esta foto?')) return;
         try { const res=await apiAdmin(`/admin/paquetes/${paqueteFotosActual}/fotos/${btn.dataset.id}`,{method:'DELETE'}); if(res.ok) await cargarFotosPaquete(paqueteFotosActual); } catch(err){}
       });
     });
@@ -1902,7 +1900,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     } catch(err){ mostrarBanner('#bannerFotos','error','No pudimos conectar.'); }
     finally { setCargando(btn,false); }
   });
-  const ESTADO_LABEL_MOSTRADOR = { prealertado:'Prealertado', en_bodega_miami:'En bodega Miami', en_transito:'En tr\u00e1nsito', en_panama:'En Panam\u00e1', listo_para_retiro:'Listo para retiro', entregado:'Entregado' };
+  const ESTADO_LABEL_MOSTRADOR = { prealertado:'Prealertado', en_bodega_miami:'En bodega Miami', en_transito:'En tránsito', en_panama:'En Panamá', listo_para_retiro:'Listo para retiro', entregado:'Entregado' };
   $('#formBuscarMostrador').addEventListener('submit', async (e) => {
     e.preventDefault();
     const q=$('#mostradorQ').value.trim();
@@ -1912,9 +1910,9 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     try {
       const res=await apiAdmin(`/admin/mostrador/buscar?q=${encodeURIComponent(q)}`);
       const data=await res.json().catch(()=>({}));
-      if(!res.ok){ mostrarBanner('#bannerMostrador','error',data.mensaje||'No se encontr\u00f3 nada.'); return; }
+      if(!res.ok){ mostrarBanner('#bannerMostrador','error',data.mensaje||'No se encontró nada.'); return; }
       if(data.multiples){
-        $('#resultadoMostrador').innerHTML=`<p class="card-sub">Encontramos varios clientes, elige uno:</p><div class="cliente-multiples">${data.clientes.map(c=>`<button data-casillero="${escapeHtml(c.numero_casillero)}">${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)} \u2014 ${escapeHtml(c.email)} (${escapeHtml(c.numero_casillero)})</button>`).join('')}</div>`;
+        $('#resultadoMostrador').innerHTML=`<p class="card-sub">Encontramos varios clientes, elige uno:</p><div class="cliente-multiples">${data.clientes.map(c=>`<button data-casillero="${escapeHtml(c.numero_casillero)}">${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)} — ${escapeHtml(c.email)} (${escapeHtml(c.numero_casillero)})</button>`).join('')}</div>`;
         document.querySelectorAll('.cliente-multiples button').forEach(b => { b.addEventListener('click', () => { $('#mostradorQ').value=b.dataset.casillero; $('#formBuscarMostrador').dispatchEvent(new Event('submit')); }); });
         return;
       }
@@ -1944,7 +1942,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
         return `<div class="fac-grid-row" data-factura-pendiente="${f.id}" data-paquete-id="${f.paquete_id}" data-ya-entregado="${yaEntregado}" style="${!esDelCliente?'opacity:.35;pointer-events:none;':''}">
           <div class="fac-num">${escapeHtml(f.numero_factura)}</div>
           <div><div class="fac-cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</div><div class="fac-casillero">${escapeHtml(f.cliente_email)}</div></div>
-          <div><div style="font-weight:500;font-size:13px;">${escapeHtml(f.tienda)}</div><div class="fac-tracking">#${escapeHtml(f.numero_tracking)}</div>${!yaEntregado?'<div style="font-size:11px;color:#d97706;margin-top:2px;">\ud83d\udce6 pendiente entrega</div>':''}</div>
+          <div><div style="font-weight:500;font-size:13px;">${escapeHtml(f.tienda)}</div><div class="fac-tracking">#${escapeHtml(f.numero_tracking)}</div>${!yaEntregado?'<div style="font-size:11px;color:#d97706;margin-top:2px;">📦 pendiente entrega</div>':''}</div>
           <div class="fac-fecha">${fecha}</div>
           <div class="fac-monto">$${Number(f.total).toFixed(2)}</div>
           <div><button class="${yaEntregado?'btn-cobrar':'btn-cobrar-entrega'}">${yaEntregado?'Cobrar':'Cobrar y entregar'}</button></div>
@@ -1958,11 +1956,11 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
           const metodoPago=await pedirMetodoPago(btn);
           if(!metodoPago) return;
           if(!yaEntregado){ abrirModalFirma({paqueteId,facturaId,metodoPago,item,btnOriginal:btn,textoOriginal:'Cobrar y entregar'}); return; }
-          btn.disabled=true; btn.textContent='Procesando\u2026';
+          btn.disabled=true; btn.textContent='Procesando…';
           try {
             const res=await apiAdmin('/admin/mostrador/cobrar',{method:'POST',body:JSON.stringify({factura_id:facturaId,metodo_pago:metodoPago})});
             const data=await res.json().catch(()=>({}));
-            if(res.ok){ mostrarBanner('#bannerMostrador','success','\u2713 Factura cobrada.'); item.remove(); if($('#pendientesMostrador').children.length===0) $('#emptyPendientesMostrador').style.display='block'; }
+            if(res.ok){ mostrarBanner('#bannerMostrador','success','✓ Factura cobrada.'); item.remove(); if($('#pendientesMostrador').children.length===0) $('#emptyPendientesMostrador').style.display='block'; }
             else { mostrarBanner('#bannerMostrador','error',data.mensaje||'No se pudo cobrar.'); btn.disabled=false; btn.textContent='Cobrar'; }
           } catch(err){ mostrarBanner('#bannerMostrador','error','No pudimos conectar.'); btn.disabled=false; }
         });
@@ -1973,18 +1971,18 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   function renderResultadoMostrador(cliente, paquetes, facturasPendientes, autorizados){
     const cont=$('#resultadoMostrador');
     facturadorCliente=cliente; facturadorMetodoPago='';
-    let html=`<div class="cliente-card" style="display:flex;justify-content:space-between;align-items:center;"><div><div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div><div class="detalle">${escapeHtml(cliente.email)} \u00b7 Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono?' \u00b7 '+escapeHtml(cliente.telefono):''}</div></div><div class="stats">${paquetes.length}<small>paquetes</small></div></div>`;
+    let html=`<div class="cliente-card" style="display:flex;justify-content:space-between;align-items:center;"><div><div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div><div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono?' · '+escapeHtml(cliente.telefono):''}</div></div><div class="stats">${paquetes.length}<small>paquetes</small></div></div>`;
     const sinFacturaTodos=paquetes.filter(p=>!p.factura_id||p.factura_estado==='anulada');
     const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||p.peso_lb||0)>0&&Number(p.valor_declarado||0)>0);
     const noListos=sinFacturaTodos.length-sinFactura.length;
     if(sinFacturaTodos.length===0){ html+='<div class="empty">Este cliente no tiene paquetes pendientes de facturar.</div>'; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
-    if(sinFactura.length===0){ html+=`<div class="empty">\u26a0 Este cliente tiene ${noListos} paquete(s) sin peso o valor declarado.</div>`; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
+    if(sinFactura.length===0){ html+=`<div class="empty">⚠ Este cliente tiene ${noListos} paquete(s) sin peso o valor declarado.</div>`; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
     html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-weight:600;font-size:13px;">Paquetes listos para facturar</div><button class="ft-select-all" id="btnSelectAll">Seleccionar todos</button></div>`;
-    if(noListos>0) html+=`<div class="empty" style="margin-bottom:10px;padding:10px 14px;">\u26a0 ${noListos} paquete(s) m\u00e1s sin peso o valor declarado.</div>`;
+    if(noListos>0) html+=`<div class="empty" style="margin-bottom:10px;padding:10px 14px;">⚠ ${noListos} paquete(s) más sin peso o valor declarado.</div>`;
     html+=sinFactura.map((p,i)=>{
       const peso=Number(p.peso_real_lb||p.peso_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
       const statusClass=p.estado==='listo_para_retiro'?'listo':p.estado==='en_transito'?'transito':'bodega';
-      return `<div class="ft-pkg" data-idx="${i}" data-paquete-id="${p.id}" data-peso="${peso}" data-valor="${valor}" data-envio="0" data-manejo="0" data-seguro="0" data-calc-total="0" data-tarifa-id=""><input type="checkbox"><div class="ft-pkg-info"><div class="ft-pkg-store">${escapeHtml(p.tienda)}</div><div class="ft-pkg-track">#${escapeHtml(p.numero_tracking)}</div><div class="ft-pkg-details">${peso} lb \u00b7 Declarado $${valor}</div></div><div class="ft-pkg-right"><span class="ft-status ${statusClass}">${ESTADO_LABEL_MOSTRADOR[p.estado]||p.estado}</span><div class="ft-pkg-price">\u2026</div></div></div>`;
+      return `<div class="ft-pkg" data-idx="${i}" data-paquete-id="${p.id}" data-peso="${peso}" data-valor="${valor}" data-envio="0" data-manejo="0" data-seguro="0" data-calc-total="0" data-tarifa-id=""><input type="checkbox"><div class="ft-pkg-info"><div class="ft-pkg-store">${escapeHtml(p.tienda)}</div><div class="ft-pkg-track">#${escapeHtml(p.numero_tracking)}</div><div class="ft-pkg-details">${peso} lb · Declarado $${valor}</div></div><div class="ft-pkg-right"><span class="ft-status ${statusClass}">${ESTADO_LABEL_MOSTRADOR[p.estado]||p.estado}</span><div class="ft-pkg-price">…</div></div></div>`;
     }).join('');
     cont.innerHTML=html;
     cargarTarifasParaFacturador();
@@ -2008,7 +2006,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
         const seguro=valor*Number(tarifa.pct_seguro)/100, manejo=Number(tarifa.cargo_manejo), total=envio+manejo+seguro;
         pkg.dataset.envio=envio.toFixed(2); pkg.dataset.manejo=manejo.toFixed(2); pkg.dataset.seguro=seguro.toFixed(2); pkg.dataset.calcTotal=total.toFixed(2); pkg.dataset.tarifaId=tarifa.id;
         pkg.querySelector('.ft-pkg-price').textContent='$'+total.toFixed(2);
-        pkg.querySelector('.ft-pkg-details').textContent=`${peso} lb \u00b7 Declarado $${valor.toFixed(2)} \u00b7 $${Number(tarifa.precio_libra).toFixed(2)}/lb`;
+        pkg.querySelector('.ft-pkg-details').textContent=`${peso} lb · Declarado $${valor.toFixed(2)} · $${Number(tarifa.precio_libra).toFixed(2)}/lb`;
       });
       recalcularTotales();
     } catch(e){}
@@ -2036,7 +2034,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     setCargando(btn,false);
     if(resultados.length>0){
       const totalCobrado=$('#ftTotal').textContent;
-      mostrarBanner('#bannerMostrador','success',`\u2713 ${resultados.map(f=>f.numero_factura).join(', ')} \u00b7 ${totalCobrado} \u00b7 ${facturadorMetodoPago}`);
+      mostrarBanner('#bannerMostrador','success',`✓ ${resultados.map(f=>f.numero_factura).join(', ')} · ${totalCobrado} · ${facturadorMetodoPago}`);
       setTimeout(()=>{ $('#resultadoMostrador').innerHTML=''; $('#facturadorResumen').style.display='none'; $('#facturadorResultado').style.display='none'; $('#bannerMostrador').innerHTML=''; $('#mostradorQ').value=''; facturadorMetodoPago=''; document.querySelectorAll('.ft-pago-btn').forEach(b=>b.classList.remove('selected')); $('#mostradorQ').focus(); }, 3000);
       cargarPendientesMostrador();
     }
@@ -2045,7 +2043,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   // Cache de tarifas para el popup
   let _tarifasCache = [];
   async function pedirTarifa(pesoLb){
-    // Cargar tarifas si no las tenemos en cach\u00e9
+    // Cargar tarifas si no las tenemos en caché
     if(_tarifasCache.length === 0){
       try {
         const res = await apiAdmin('/admin/tarifas');
@@ -2054,7 +2052,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       } catch(e){ _tarifasCache = []; }
     }
     if(_tarifasCache.length === 0){
-      alert('No hay tarifas activas. Ve a la pesta\u00f1a Tarifas y activa una primero.');
+      alert('No hay tarifas activas. Ve a la pestaña Tarifas y activa una primero.');
       return null;
     }
     // Si solo hay una tarifa, usarla directamente sin popup
@@ -2069,13 +2067,13 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
         return `<button class="pop-tarifa" data-id="${t.id}"
           style="padding:14px 16px;border-radius:10px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;text-align:left;transition:border-color .15s,background .15s;">
           <div style="font-weight:700;font-size:14px;margin-bottom:4px;">${escapeHtml(t.nombre)}</div>
-          <div style="font-size:12px;color:#6b7280;">$${Number(t.precio_libra).toFixed(2)}/lb \u00b7 m\u00edn $${Number(t.cargo_minimo).toFixed(2)} \u00b7 manejo $${Number(t.cargo_manejo).toFixed(2)}</div>
+          <div style="font-size:12px;color:#6b7280;">$${Number(t.precio_libra).toFixed(2)}/lb · mín $${Number(t.cargo_minimo).toFixed(2)} · manejo $${Number(t.cargo_manejo).toFixed(2)}</div>
           <div style="font-size:15px;font-weight:700;color:#ff6a1a;margin-top:6px;">Estimado: $${total.toFixed(2)}</div>
         </button>`;
       }).join('');
       popup.innerHTML = `<div style="background:#fff;border-radius:16px;padding:24px;width:380px;max-width:calc(100vw - 32px);box-shadow:0 24px 60px rgba(0,0,0,.3);">
         <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px;">Selecciona la tarifa</div>
-        <div style="font-size:12.5px;color:#6b7280;margin-bottom:16px;">Peso: <strong>${pesoLb} lb</strong> \u2014 el estimado puede variar por seguro.</div>
+        <div style="font-size:12.5px;color:#6b7280;margin-bottom:16px;">Peso: <strong>${pesoLb} lb</strong> — el estimado puede variar por seguro.</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">${opciones}</div>
         <button id="popTarifaCancelar" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:13px;color:#6b7280;">Cancelar</button>
       </div>`;
@@ -2092,7 +2090,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     return new Promise(resolve=>{
       const popup=document.createElement('div');
       popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;';
-      popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px 24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,.25);"><div style="font-weight:700;font-size:15px;margin-bottom:14px;">M\u00e9todo de pago</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;"><button class="pop-pay" data-m="efectivo" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">\ud83d\udcb5 Efectivo</button><button class="pop-pay" data-m="tarjeta" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">\ud83d\udcb3 Tarjeta</button><button class="pop-pay" data-m="transferencia" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">\ud83c\udfe6 Transferencia</button><button class="pop-pay" data-m="yappy" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">\ud83d\udcf1 Yappy</button></div><button id="popCancelar" style="width:100%;padding:9px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:13px;color:#6b7280;">Cancelar</button></div>`;
+      popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px 24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,.25);"><div style="font-weight:700;font-size:15px;margin-bottom:14px;">Método de pago</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;"><button class="pop-pay" data-m="efectivo" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">💵 Efectivo</button><button class="pop-pay" data-m="tarjeta" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">💳 Tarjeta</button><button class="pop-pay" data-m="transferencia" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">🏦 Transferencia</button><button class="pop-pay" data-m="yappy" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">📱 Yappy</button></div><button id="popCancelar" style="width:100%;padding:9px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:13px;color:#6b7280;">Cancelar</button></div>`;
       document.body.appendChild(popup);
       popup.querySelectorAll('.pop-pay').forEach(b=>{ b.addEventListener('click',()=>{ popup.remove(); resolve(b.dataset.m); }); });
       popup.querySelector('#popCancelar').addEventListener('click',()=>{ popup.remove(); resolve(null); });
@@ -2109,7 +2107,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   canvasFirma.addEventListener('mousedown',iniciarTrazo); canvasFirma.addEventListener('mousemove',continuarTrazo); window.addEventListener('mouseup',terminarTrazo);
   canvasFirma.addEventListener('touchstart',iniciarTrazo,{passive:false}); canvasFirma.addEventListener('touchmove',continuarTrazo,{passive:false}); canvasFirma.addEventListener('touchend',terminarTrazo);
   function limpiarCanvasFirma(){ ajustarTamanoCanvas(); ctxFirma.clearRect(0,0,canvasFirma.width,canvasFirma.height); firmaTieneTrazo=false; $('#firmaPlaceholder').classList.remove('oculto'); }
-  function abrirModalFirma(contexto){ entregaPendiente=contexto; $('#firmaResumen').textContent='El cliente firma aqu\u00ed para confirmar que recibi\u00f3 su paquete.'; mostrarBanner('#bannerFirma','',''); $('#modalFirma').classList.add('show'); setTimeout(limpiarCanvasFirma,50); }
+  function abrirModalFirma(contexto){ entregaPendiente=contexto; $('#firmaResumen').textContent='El cliente firma aquí para confirmar que recibió su paquete.'; mostrarBanner('#bannerFirma','',''); $('#modalFirma').classList.add('show'); setTimeout(limpiarCanvasFirma,50); }
   function cerrarModalFirma(){ $('#modalFirma').classList.remove('show'); entregaPendiente=null; }
   $('#btnCerrarModalFirma').addEventListener('click',cerrarModalFirma);
   $('#modalFirma').addEventListener('click',(e)=>{ if(e.target.id==='modalFirma') cerrarModalFirma(); });
@@ -2123,7 +2121,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     try {
       const res=await apiAdmin('/admin/mostrador/entregar',{method:'POST',body:JSON.stringify({paquete_id:paqueteId,factura_id:facturaId||undefined,metodo_pago:metodoPago||undefined,firma:firmaDataUrl})});
       const data=await res.json().catch(()=>({}));
-      if(res.ok){ cerrarModalFirma(); mostrarBanner('#bannerMostrador','success','\u2713 Paquete entregado y factura cobrada. Firma guardada.'); item.remove(); if(metodoPago) cargarPendientesMostrador(); }
+      if(res.ok){ cerrarModalFirma(); mostrarBanner('#bannerMostrador','success','✓ Paquete entregado y factura cobrada. Firma guardada.'); item.remove(); if(metodoPago) cargarPendientesMostrador(); }
       else { mostrarBanner('#bannerFirma','error',data.mensaje||'No se pudo procesar.'); if(btnOriginal){ btnOriginal.disabled=false; btnOriginal.textContent=textoOriginal; } }
     } catch(err){ mostrarBanner('#bannerFirma','error','No pudimos conectar.'); }
     finally { setCargando(btnConfirmar,false); }
@@ -2143,26 +2141,26 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       if(res.status===404){
         $('#recepcionFormNuevo').style.display='block';
         $('#recNuevoTienda').value=''; $('#recNuevoValor').value=''; $('#recNuevoPeso').value=''; $('#recNuevoDesc').value=''; $('#recNuevoCasillero').value=''; $('#recClienteEncontrado').style.display='none'; clienteRecepcionId=null; $('#btnCrearPaquete').disabled=true;
-        mostrarBanner('#bannerRecepcion','error',`\u26a0 "${tracking}" no tiene prealerta \u2014 completa los datos para crearlo manualmente.`);
+        mostrarBanner('#bannerRecepcion','error',`⚠ "${tracking}" no tiene prealerta — completa los datos para crearlo manualmente.`);
       } else if(res.ok&&data.ya_recibido){ mostrarBanner('#bannerRecepcion','error',`Este paquete ya fue recibido (estado: ${data.paquete.estado}).`);
       } else if(res.ok&&data.sin_cliente){
         const p=data.paquete;
         $('#recepcionResultado').style.display='block';
         $('#recepcionResultado').innerHTML=`<div style="background:var(--amber-bg);border-radius:10px;padding:16px 18px;border:1.5px solid rgba(255,106,26,0.4);">
-          <div style="font-weight:700;font-size:15px;margin-bottom:4px;">\ud83d\udce6 Paquete PTY \u2014 sin cliente asignado</div>
-          <div style="font-size:13px;color:var(--ink-soft);">${escapeHtml(p.numero_tracking)} \u00b7 ${p.peso_lb||'?'} lb</div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px;">📦 Paquete PTY — sin cliente asignado</div>
+          <div style="font-size:13px;color:var(--ink-soft);">${escapeHtml(p.numero_tracking)} · ${p.peso_lb||'?'} lb</div>
           <div style="margin-top:14px;">
             <label style="font-size:12.5px;font-weight:600;margin-bottom:6px;display:block;">Buscar cliente por casillero</label>
             <div style="display:flex;gap:8px;">
               <div style="position:relative;flex:1;">
-                <input type="text" id="ptyClienteCasillero" placeholder="PTY-00042 \u2014 o presiona 1" style="width:100%;padding-right:32px;">
+                <input type="text" id="ptyClienteCasillero" placeholder="PTY-00042 — o presiona 1" style="width:100%;padding-right:32px;">
                 <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">1</span>
               </div>
               <button type="button" id="btnBuscarClientePty" class="btn-secondary">Buscar</button>
             </div>
             <div id="ptyClienteEncontrado" style="margin-top:8px;font-size:12.5px;display:none;padding:8px 12px;background:var(--paper);border-radius:8px;"></div>
             <button class="btn-primary" id="btnAsignarClientePty" data-paquete-id="${p.id}" style="margin-top:12px;display:none;">
-              <span class="spinner"></span><span>\u2713 Asignar y marcar listo para retiro</span>
+              <span class="spinner"></span><span>✓ Asignar y marcar listo para retiro</span>
             </button>
           </div>
         </div>`;
@@ -2178,8 +2176,8 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
             const r2=await apiAdmin(`/admin/usuarios?q=${encodeURIComponent(cas)}`);
             const d2=await r2.json().catch(()=>({}));
             const cl=(d2.usuarios||[]).find(u=>u.numero_casillero.toLowerCase()===cas.toLowerCase());
-            if(cl){ clientePtyId=cl.id; $('#ptyClienteEncontrado').style.display='block'; $('#ptyClienteEncontrado').innerHTML=`\u2713 <strong>${escapeHtml(cl.nombre)} ${escapeHtml(cl.apellido)}</strong> \u00b7 ${escapeHtml(cl.email)}`; $('#btnAsignarClientePty').style.display='flex'; }
-            else { clientePtyId=null; $('#ptyClienteEncontrado').style.display='block'; $('#ptyClienteEncontrado').innerHTML='<span style="color:#dc2626;">No se encontr\u00f3 ning\u00fan cliente con ese casillero.</span>'; $('#btnAsignarClientePty').style.display='none'; }
+            if(cl){ clientePtyId=cl.id; $('#ptyClienteEncontrado').style.display='block'; $('#ptyClienteEncontrado').innerHTML=`✓ <strong>${escapeHtml(cl.nombre)} ${escapeHtml(cl.apellido)}</strong> · ${escapeHtml(cl.email)}`; $('#btnAsignarClientePty').style.display='flex'; }
+            else { clientePtyId=null; $('#ptyClienteEncontrado').style.display='block'; $('#ptyClienteEncontrado').innerHTML='<span style="color:#dc2626;">No se encontró ningún cliente con ese casillero.</span>'; $('#btnAsignarClientePty').style.display='none'; }
           } catch(e){}
         });
         $('#btnAsignarClientePty').addEventListener('click',async()=>{
@@ -2188,20 +2186,20 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
           try {
             const r3=await apiAdmin('/admin/recepcion/asignar-cliente',{method:'POST',body:JSON.stringify({paquete_id:parseInt(btn.dataset.paqueteId),usuario_id:clientePtyId})});
             const d3=await r3.json().catch(()=>({}));
-            if(r3.ok){ recepcionContador++; $('#recepcionContador').textContent=recepcionContador; agregarAlLogRecepcion({tipo:'ok',tracking:p.numero_tracking,detalle:'PTY \u2192 cliente asignado',hora:horaActual()}); $('#recepcionResultado').style.display='none'; mostrarBanner('#bannerRecepcion','success','\u2713 Cliente asignado. Listo para retiro.'); $('#recepcionTracking').value=''; iniciarFlujoFotoDimensiones(p.id,p.numero_tracking); }
+            if(r3.ok){ recepcionContador++; $('#recepcionContador').textContent=recepcionContador; agregarAlLogRecepcion({tipo:'ok',tracking:p.numero_tracking,detalle:'PTY → cliente asignado',hora:horaActual()}); $('#recepcionResultado').style.display='none'; mostrarBanner('#bannerRecepcion','success','✓ Cliente asignado. Listo para retiro.'); $('#recepcionTracking').value=''; iniciarFlujoFotoDimensiones(p.id,p.numero_tracking); }
             else { mostrarBanner('#bannerRecepcion','error',d3.mensaje||'No se pudo asignar.'); setCargando(btn,false); }
           } catch(e){ mostrarBanner('#bannerRecepcion','error','No pudimos conectar.'); setCargando(btn,false); }
         });
       } else if(res.ok){
         const p=data.paquete;
         $('#recepcionResultado').style.display='block';
-        $('#recepcionResultado').innerHTML=`<div style="background:var(--paper);border-radius:10px;padding:16px 18px;border:1.5px solid #b8e3d1;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;"><div><div style="font-weight:700;font-size:15px;">\u2713 Prealerta encontrada</div><div style="font-size:13px;color:var(--ink-soft);">${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)} \u00b7 ${escapeHtml(p.numero_casillero)}</div><div style="font-size:12.5px;color:var(--ink-soft);">${escapeHtml(p.tienda)} \u00b7 #${escapeHtml(p.numero_tracking)}</div>${p.valor_declarado?`<div style="font-size:12px;color:var(--ink-soft);">Valor declarado: $${Number(p.valor_declarado).toFixed(2)}</div>`:''}</div><button class="btn-primary" id="btnConfirmarRecepcion" data-id="${p.id}" data-tracking="${escapeHtml(p.numero_tracking)}" data-cliente="${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}"><span class="spinner"></span><span>Confirmar recepci\u00f3n</span></button></div></div>`;
+        $('#recepcionResultado').innerHTML=`<div style="background:var(--paper);border-radius:10px;padding:16px 18px;border:1.5px solid #b8e3d1;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;"><div><div style="font-weight:700;font-size:15px;">✓ Prealerta encontrada</div><div style="font-size:13px;color:var(--ink-soft);">${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)} · ${escapeHtml(p.numero_casillero)}</div><div style="font-size:12.5px;color:var(--ink-soft);">${escapeHtml(p.tienda)} · #${escapeHtml(p.numero_tracking)}</div>${p.valor_declarado?`<div style="font-size:12px;color:var(--ink-soft);">Valor declarado: $${Number(p.valor_declarado).toFixed(2)}</div>`:''}</div><button class="btn-primary" id="btnConfirmarRecepcion" data-id="${p.id}" data-tracking="${escapeHtml(p.numero_tracking)}" data-cliente="${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}"><span class="spinner"></span><span>Confirmar recepción</span></button></div></div>`;
         $('#btnConfirmarRecepcion').addEventListener('click', async ()=>{
           const btn2=$('#btnConfirmarRecepcion'); setCargando(btn2,true);
           try {
             const r=await apiAdmin('/admin/recepcion/confirmar',{method:'POST',body:JSON.stringify({paquete_id:parseInt(btn2.dataset.id)})});
             const d=await r.json().catch(()=>({}));
-            if(r.ok){ recepcionContador++; $('#recepcionContador').textContent=recepcionContador; agregarAlLogRecepcion({tipo:'ok',tracking:btn2.dataset.tracking,detalle:`${btn2.dataset.cliente} \u2014 listo para retiro`,hora:horaActual()}); $('#recepcionResultado').style.display='none'; mostrarBanner('#bannerRecepcion','success',`\u2713 Paquete ${btn2.dataset.tracking} recibido.`); input.value=''; iniciarFlujoFotoDimensiones(parseInt(btn2.dataset.id),btn2.dataset.tracking); }
+            if(r.ok){ recepcionContador++; $('#recepcionContador').textContent=recepcionContador; agregarAlLogRecepcion({tipo:'ok',tracking:btn2.dataset.tracking,detalle:`${btn2.dataset.cliente} — listo para retiro`,hora:horaActual()}); $('#recepcionResultado').style.display='none'; mostrarBanner('#bannerRecepcion','success',`✓ Paquete ${btn2.dataset.tracking} recibido.`); input.value=''; iniciarFlujoFotoDimensiones(parseInt(btn2.dataset.id),btn2.dataset.tracking); }
             else { mostrarBanner('#bannerRecepcion','error',d.mensaje||'No se pudo confirmar.'); setCargando(btn2,false); }
           } catch(err){ mostrarBanner('#bannerRecepcion','error','No pudimos conectar.'); setCargando(btn2,false); }
         });
@@ -2216,8 +2214,8 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       const data=await res.json().catch(()=>({}));
       const usuarios=data.usuarios||[];
       const cliente=usuarios.find(u=>u.numero_casillero.toLowerCase()===casillero.toLowerCase());
-      if(cliente){ clienteRecepcionId=cliente.id; $('#recClienteEncontrado').style.display='block'; $('#recClienteEncontrado').innerHTML=`\u2713 <strong>${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</strong> \u00b7 ${escapeHtml(cliente.email)}`; $('#btnCrearPaquete').disabled=false; }
-      else { clienteRecepcionId=null; $('#recClienteEncontrado').style.display='block'; $('#recClienteEncontrado').innerHTML='<span style="color:#dc2626;">No se encontr\u00f3 ning\u00fan cliente con ese casillero.</span>'; $('#btnCrearPaquete').disabled=true; }
+      if(cliente){ clienteRecepcionId=cliente.id; $('#recClienteEncontrado').style.display='block'; $('#recClienteEncontrado').innerHTML=`✓ <strong>${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</strong> · ${escapeHtml(cliente.email)}`; $('#btnCrearPaquete').disabled=false; }
+      else { clienteRecepcionId=null; $('#recClienteEncontrado').style.display='block'; $('#recClienteEncontrado').innerHTML='<span style="color:#dc2626;">No se encontró ningún cliente con ese casillero.</span>'; $('#btnCrearPaquete').disabled=true; }
     } catch(e){}
   });
   $('#btnCrearPaquete').addEventListener('click', async ()=>{
@@ -2228,7 +2226,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     try {
       const res=await apiAdmin('/admin/recepcion/crear',{method:'POST',body:JSON.stringify({usuario_id:clienteRecepcionId,numero_tracking:tracking,tienda,valor_declarado:parseFloat(valor),peso_lb:peso?parseFloat(peso):null,descripcion:desc||null})});
       const data=await res.json().catch(()=>({}));
-      if(res.ok){ recepcionContador++; $('#recepcionContador').textContent=recepcionContador; agregarAlLogRecepcion({tipo:'ok',tracking,detalle:'Creado sin prealerta \u2014 listo para retiro',hora:horaActual()}); $('#recepcionFormNuevo').style.display='none'; $('#bannerRecepcion').innerHTML=''; mostrarBanner('#bannerRecepcion','success',`\u2713 Paquete ${tracking} creado.`); $('#recepcionTracking').value=''; iniciarFlujoFotoDimensiones(data.paquete.id,tracking); }
+      if(res.ok){ recepcionContador++; $('#recepcionContador').textContent=recepcionContador; agregarAlLogRecepcion({tipo:'ok',tracking,detalle:'Creado sin prealerta — listo para retiro',hora:horaActual()}); $('#recepcionFormNuevo').style.display='none'; $('#bannerRecepcion').innerHTML=''; mostrarBanner('#bannerRecepcion','success',`✓ Paquete ${tracking} creado.`); $('#recepcionTracking').value=''; iniciarFlujoFotoDimensiones(data.paquete.id,tracking); }
       else { mostrarBanner('#bannerRecepcionNuevo','error',data.mensaje||'No se pudo crear el paquete.'); }
     } catch(e){ mostrarBanner('#bannerRecepcionNuevo','error','No pudimos conectar.'); }
     finally { setCargando(btn,false); }
@@ -2238,11 +2236,11 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     const camaraBox=$('#camaraRecepcion');
     if(camaraBox.style.display==='block'){ cerrarCamara(); return; }
     try { camaraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); $('#camaraVideo').srcObject=camaraStream; camaraBox.style.display='block'; }
-    catch(e){ mostrarBanner('#bannerRecepcion','error','No se pudo acceder a la c\u00e1mara.'); }
+    catch(e){ mostrarBanner('#bannerRecepcion','error','No se pudo acceder a la cámara.'); }
   });
   window.cerrarCamara=function(){ if(camaraStream){ camaraStream.getTracks().forEach(t=>t.stop()); camaraStream=null; } $('#camaraRecepcion').style.display='none'; };
   let flujoFotoDimPaqueteId=null, flujoFotoDimTracking='';
-  function iniciarFlujoFotoDimensiones(paqueteId,tracking){ flujoFotoDimPaqueteId=paqueteId; flujoFotoDimTracking=tracking; $('#recepcionFormNuevo').style.display='none'; $('#recepcionResultado').style.display='none'; $('#pasoFotoSub').textContent=`Toma una foto de "${tracking}" reci\u00e9n recibido.`; $('#pasoFoto').style.display='block'; $('#pasoDimensiones').style.display='none'; $('#bannerPasoFoto').innerHTML=''; }
+  function iniciarFlujoFotoDimensiones(paqueteId,tracking){ flujoFotoDimPaqueteId=paqueteId; flujoFotoDimTracking=tracking; $('#recepcionFormNuevo').style.display='none'; $('#recepcionResultado').style.display='none'; $('#pasoFotoSub').textContent=`Toma una foto de "${tracking}" recién recibido.`; $('#pasoFoto').style.display='block'; $('#pasoDimensiones').style.display='none'; $('#bannerPasoFoto').innerHTML=''; }
   $('#btnAbrirCamaraFoto').addEventListener('click',()=>{ $('#pasoFotoInput').value=''; $('#pasoFotoInput').click(); });
   $('#btnGuardarDimensionesRecepcion').addEventListener('click', async () => {
     const largo=$('#dimLargo').value, ancho=$('#dimAncho').value, alto=$('#dimAlto').value;
@@ -2253,15 +2251,15 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
         method:'PATCH', body:JSON.stringify({largo_in:parseFloat(largo),ancho_in:parseFloat(ancho),alto_in:parseFloat(alto)})
       });
       const data=await res.json().catch(()=>({}));
-      if(res.ok){ mostrarBanner('#bannerPasoDimensiones','success',`\u2713 Guardado \u2014 peso volum\u00e9trico: ${data.paquete.peso_volumetrico_lb} lb`); setTimeout(terminarFlujoRecepcion,900); }
+      if(res.ok){ mostrarBanner('#bannerPasoDimensiones','success',`✓ Guardado — peso volumétrico: ${data.paquete.peso_volumetrico_lb} lb`); setTimeout(terminarFlujoRecepcion,900); }
       else { mostrarBanner('#bannerPasoDimensiones','error',data.mensaje||'No se pudieron guardar.'); setCargando(btn,false); }
     } catch(e){ mostrarBanner('#bannerPasoDimensiones','error','No pudimos conectar.'); setCargando(btn,false); }
   });
   $('#pasoFotoInput').addEventListener('change', async ()=>{
     const input=$('#pasoFotoInput'); if(!input.files||input.files.length===0) return;
     const formData=new FormData(); formData.append('fotos',input.files[0]);
-    mostrarBanner('#bannerPasoFoto','','Subiendo foto\u2026');
-    try { const res=await apiAdminFormData(`/admin/paquetes/${flujoFotoDimPaqueteId}/fotos`,formData); const data=await res.json().catch(()=>({})); if(res.status===201) mostrarBanner('#bannerPasoFoto','success','\u2713 Foto guardada.'); else mostrarBanner('#bannerPasoFoto','error',data.mensaje||'No se pudo subir la foto.'); }
+    mostrarBanner('#bannerPasoFoto','','Subiendo foto…');
+    try { const res=await apiAdminFormData(`/admin/paquetes/${flujoFotoDimPaqueteId}/fotos`,formData); const data=await res.json().catch(()=>({})); if(res.status===201) mostrarBanner('#bannerPasoFoto','success','✓ Foto guardada.'); else mostrarBanner('#bannerPasoFoto','error',data.mensaje||'No se pudo subir la foto.'); }
     catch(e){ mostrarBanner('#bannerPasoFoto','error','No pudimos conectar.'); }
     finally { setTimeout(pasarADimensiones,600); }
   });
@@ -2270,9 +2268,9 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   function saltarPasoDimensiones(){ terminarFlujoRecepcion(); }
   function terminarFlujoRecepcion(){ $('#pasoFoto').style.display='none'; $('#pasoDimensiones').style.display='none'; $('#btnGuardarDimensionesRecepcion').disabled=false; setCargando($('#btnGuardarDimensionesRecepcion'),false); flujoFotoDimPaqueteId=null; $('#recepcionTracking').focus(); }
   // Convierte una fecha a "YYYY-MM-DD" usando la hora LOCAL del navegador,
-  // no UTC. toISOString() convert\u00eda a UTC primero, y como Panam\u00e1 es UTC-5,
-  // cerrar caja despu\u00e9s de las 7:00 PM local ya ca\u00eda en el d\u00eda siguiente
-  // en UTC \u2014 por eso la caja se cerraba con la fecha equivocada.
+  // no UTC. toISOString() convertía a UTC primero, y como Panamá es UTC-5,
+  // cerrar caja después de las 7:00 PM local ya caía en el día siguiente
+  // en UTC — por eso la caja se cerraba con la fecha equivocada.
   function fechaISOCaja(d){
     const anio = d.getFullYear();
     const mes = String(d.getMonth()+1).padStart(2,'0');
@@ -2281,7 +2279,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   }
   function inicializarFechaCaja(){ if($('#cajaFecha').value) return; $('#cajaFecha').value=fechaISOCaja(new Date()); }
   async function cargarCaja(){ inicializarFechaCaja(); const fecha=$('#cajaFecha').value; try { const res=await apiAdmin(`/admin/caja/dia?fecha=${fecha}`); const data=await res.json(); renderCaja(data); } catch(err){} }
-  const METODO_ICONO = { efectivo:'\ud83d\udcb5', tarjeta:'\ud83d\udcb3', transferencia:'\ud83c\udfe6', yappy:'\ud83d\udcf1' };
+  const METODO_ICONO = { efectivo:'💵', tarjeta:'💳', transferencia:'🏦', yappy:'📱' };
   const METODO_COLOR = { efectivo:'green', tarjeta:'blue', transferencia:'navy', yappy:'amber' };
   function renderCaja(data){
     // Tarjetas de resumen
@@ -2290,32 +2288,32 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     const metodos = data.detalle_por_metodo || [];
    $('#cajaResumenCards').innerHTML = `
       <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;">\ud83d\udcb0</div>
+        <div style="font-size:20px;">💰</div>
         <div class="dash-label">Total cobrado</div>
         <div class="dash-num" style="font-size:18px;">$${total.toFixed(2)}</div>
         <div class="dash-sub">${facturas} fact.</div>
       </div>
       <div class="dash-card blue" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;">\ud83d\udccb</div>
-        <div class="dash-label">M\u00e9todos</div>
+        <div style="font-size:20px;">📋</div>
+        <div class="dash-label">Métodos</div>
         <div class="dash-num" style="font-size:18px;">${metodos.length}</div>
         <div class="dash-sub">usados</div>
       </div>
       <div class="dash-card ${data.cerrado?'navy':'amber'}" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;">${data.cerrado?'\ud83d\udd12':'\u23f3'}</div>
+        <div style="font-size:20px;">${data.cerrado?'🔒':'⏳'}</div>
         <div class="dash-label">Estado</div>
         <div class="dash-num" style="font-size:15px;">${data.cerrado?'Cerrado':'Abierto'}</div>
         <div class="dash-sub">${data.cerrado?'cerrada':'pendiente'}</div>
       </div>
     `;
-    // Cards por m\u00e9todo de pago
-    const metodosGrid = $('#cajaM\u00e9todosGrid');
+    // Cards por método de pago
+    const metodosGrid = $('#cajaMétodosGrid');
     if(metodos.length > 0){
       metodosGrid.style.display = 'block';
       $('#cajaMetodosCards').innerHTML = metodos.map(m => {
         const clave = (m.metodo_pago||'').toLowerCase();
         const color = METODO_COLOR[clave] || 'navy';
-        const icono = METODO_ICONO[clave] || '\ud83d\udcb3';
+        const icono = METODO_ICONO[clave] || '💳';
         return `<div class="dash-card ${color}" style="flex-direction:column;align-items:flex-start;gap:4px;padding:16px 14px;">
           <div style="font-size:22px;">${icono}</div>
           <div class="dash-label">${escapeHtml(m.etiqueta||clave)}</div>
@@ -2332,23 +2330,23 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     if(data.cerrado){
       const c=data.cierre;
       const hora=new Date(c.fecha_cierre).toLocaleString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      estadoDiv.innerHTML=`<div class="banner show success" style="margin-bottom:16px;">\ud83d\udd12 Caja cerrada el ${hora} por ${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}.</div>`;
+      estadoDiv.innerHTML=`<div class="banner show success" style="margin-bottom:16px;">🔒 Caja cerrada el ${hora} por ${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}.</div>`;
       cierreBox.innerHTML='';
     } else {
       estadoDiv.innerHTML='';
       cierreBox.innerHTML=`
         <div style="background:var(--paper);border-radius:12px;padding:18px;border:1px solid var(--line);margin-top:4px;">
-          <div style="font-family:var(--font-display);font-size:14px;font-weight:600;margin-bottom:12px;">Cerrar caja del d\u00eda</div>
+          <div style="font-family:var(--font-display);font-size:14px;font-weight:600;margin-bottom:12px;">Cerrar caja del día</div>
           <label for="cajaNotas">Notas (opcional)</label>
           <input id="cajaNotas" type="text" placeholder="Ej. Faltaron $2 en efectivo, cuadrado con cliente X">
           <button class="btn-primary" id="btnCerrarCaja" style="margin-top:14px;max-width:280px;">
-            <span class="spinner"></span><span>Cerrar caja de este d\u00eda</span>
+            <span class="spinner"></span><span>Cerrar caja de este día</span>
           </button>
         </div>`;
       $('#btnCerrarCaja').addEventListener('click',()=>cerrarCaja(data.fecha));
     }
   }
-  async function cerrarCaja(fecha){ if(!confirm(`\u00bfConfirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','\u2713 Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
+  async function cerrarCaja(fecha){ if(!confirm(`¿Confirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','✓ Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
   async function cargarHistorialCaja(){
     try {
       const res=await apiAdmin('/admin/caja/historial');
@@ -2366,8 +2364,8 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
           <div data-label="Cerrado por" class="chr-cerrado">${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</div>
           <div data-label="Hora" class="chr-hora muted">${hora}</div>
           <div class="chr-acciones">
-            <button class="btn-secondary btn-ver-facturas-dia" data-fecha="${fechaCruda(c)}" title="Ver facturas del d\u00eda">\ud83e\uddfe</button>
-            <button class="btn-secondary btn-reenviar-cierre" data-fecha="${fechaCruda(c)}" title="Reenviar cierre por correo">\ud83d\udce7</button>
+            <button class="btn-secondary btn-ver-facturas-dia" data-fecha="${fechaCruda(c)}" title="Ver facturas del día">🧾</button>
+            <button class="btn-secondary btn-reenviar-cierre" data-fecha="${fechaCruda(c)}" title="Reenviar cierre por correo">📧</button>
           </div>
         </div>`;
       }).join('');
@@ -2381,7 +2379,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   }
   async function abrirFacturasDelDia(fecha){
     $('#tituloFacturasDia').textContent = `Facturas del ${formatearFechaSolo(fecha)}`;
-    $('#contenidoFacturasDia').innerHTML = '<div class="empty">Cargando\u2026</div>';
+    $('#contenidoFacturasDia').innerHTML = '<div class="empty">Cargando…</div>';
     $('#modalFacturasDia').classList.add('show');
     try {
       const res = await apiAdmin(`/admin/caja/dia?fecha=${fecha}`);
@@ -2393,26 +2391,26 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
         return String(f.fecha_pago).slice(0,10) === fecha;
       });
       if(delDia.length === 0){
-        $('#contenidoFacturasDia').innerHTML = '<div class="empty">No hay facturas registradas ese d\u00eda.</div>';
+        $('#contenidoFacturasDia').innerHTML = '<div class="empty">No hay facturas registradas ese día.</div>';
         return;
       }
       $('#contenidoFacturasDia').innerHTML = `
         <div style="overflow-x:auto;">
           <table>
-            <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>M\u00e9todo</th><th>Total</th></tr></thead>
+            <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Método</th><th>Total</th></tr></thead>
             <tbody>
               ${delDia.map(f => `<tr>
                 <td class="mono">${escapeHtml(f.numero_factura)}</td>
                 <td>${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</td>
                 <td>${escapeHtml(f.tienda)}<br><span class="mono muted">${escapeHtml(f.numero_tracking)}</span></td>
-                <td>${escapeHtml(f.metodo_pago || '\u2014')}</td>
+                <td>${escapeHtml(f.metodo_pago || '—')}</td>
                 <td class="mono" style="font-weight:700;">$${Number(f.total).toFixed(2)}</td>
               </tr>`).join('')}
             </tbody>
           </table>
         </div>
         <div style="margin-top:14px;padding:10px 14px;background:var(--paper);border-radius:8px;font-size:13px;font-weight:700;text-align:right;">
-          Total: $${Number(data.total_general).toFixed(2)} \u2014 ${delDia.length} factura${delDia.length===1?'':'s'}
+          Total: $${Number(data.total_general).toFixed(2)} — ${delDia.length} factura${delDia.length===1?'':'s'}
         </div>`;
     } catch(err){
       $('#contenidoFacturasDia').innerHTML = '<div class="empty">No se pudieron cargar las facturas.</div>';
@@ -2441,7 +2439,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     popup.querySelector('#btnCajaCorreoEnviar').addEventListener('click', async()=>{
       const correo = popup.querySelector('#cajaCorreoDestino').value.trim();
       const errorDiv = popup.querySelector('#cajaCorreoError');
-      if(!correo||!correo.includes('@')){ errorDiv.textContent='Ingresa un correo v\u00e1lido.'; errorDiv.style.display='block'; return; }
+      if(!correo||!correo.includes('@')){ errorDiv.textContent='Ingresa un correo válido.'; errorDiv.style.display='block'; return; }
       const btn = popup.querySelector('#btnCajaCorreoEnviar');
       setCargando(btn,true);
       try {
@@ -2450,7 +2448,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
           body: JSON.stringify({ fecha: data.fecha||data.cierre?.fecha, correo })
         });
         const d = await res.json().catch(()=>({}));
-        if(res.ok){ popup.remove(); mostrarBanner('#bannerCaja','success',`\u2713 Cierre enviado a ${correo}.`); }
+        if(res.ok){ popup.remove(); mostrarBanner('#bannerCaja','success',`✓ Cierre enviado a ${correo}.`); }
         else { errorDiv.textContent = d.mensaje||'No se pudo enviar.'; errorDiv.style.display='block'; setCargando(btn,false); }
       } catch(e){ errorDiv.textContent='No pudimos conectar.'; errorDiv.style.display='block'; setCargando(btn,false); }
     });
@@ -2467,7 +2465,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     }
   }
   $('#btnVerCaja').addEventListener('click',(e)=>{ e.preventDefault(); cargarCaja(); });
-  const ESTADO_LABEL_REPORTE={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tr\u00e1nsito',en_panama:'En Panam\u00e1',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
+  const ESTADO_LABEL_REPORTE={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
   let ultimoReporte=null;
   function fechaISO(d){
     const anio = d.getFullYear();
@@ -2496,26 +2494,24 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   $('#btnExportarCsv').addEventListener('click',()=>{
     if(!ultimoReporte){ alert('Primero carga un reporte.'); return; }
     const desde=$('#repDesde').value, hasta=$('#repHasta').value;
-    const fmtFecha=(d)=>d?new Date(d).toLocaleDateString('es-PA',{day:'2-digit',month:'2-digit',year:'numeric'}):'\u2014';
+    const fmtFecha=(d)=>d?new Date(d).toLocaleDateString('es-PA',{day:'2-digit',month:'2-digit',year:'numeric'}):'—';
     const fmtNum=(n)=>`$${Number(n||0).toFixed(2)}`;
-    const esc=(v)=>{ const s=String(v??''); return s.includes(',')||s.includes('"')||s.includes('\
-')?`"${s.replace(/"/g,'""')}"`:`${s}`; };
+    const esc=(v)=>{ const s=String(v??''); return s.includes(',')||s.includes('"')||s.includes('\n')?`"${s.replace(/"/g,'""')}"`:`${s}`; };
     const seccion=(titulo)=>['',`=== ${titulo} ===`];
     const filas=[
-      [`NEA CARGO XPRESS \u2014 REPORTE DE OPERACIONES`],[`Per\u00edodo: ${fmtFecha(desde)} al ${fmtFecha(hasta)}`],[`Generado: ${fmtFecha(new Date().toISOString())}`],[],
+      [`NEA CARGO XPRESS — REPORTE DE OPERACIONES`],[`Período: ${fmtFecha(desde)} al ${fmtFecha(hasta)}`],[`Generado: ${fmtFecha(new Date().toISOString())}`],[],
       ...seccion('RESUMEN GENERAL'),['Concepto','Cantidad','Monto'],
       ['Ingresos cobrados',ultimoReporte.ingresos?.cantidad??'0',fmtNum(ultimoReporte.ingresos?.total)],
       ['Facturas pendientes',ultimoReporte.pendientes?.cantidad??'0',fmtNum(ultimoReporte.pendientes?.total)],
       ['Paquetes nuevos',ultimoReporte.paquetes_nuevos??'0',''],['Clientes nuevos',ultimoReporte.clientes_nuevos??'0',''],
-      [],...seccion('INGRESOS POR D\u00cdA'),['Fecha','Total cobrado'],
+      [],...seccion('INGRESOS POR DÍA'),['Fecha','Total cobrado'],
       ...(ultimoReporte.ingresos_por_dia||[]).map(d=>[fmtFecha(d.dia),fmtNum(d.total)]),
       [],...seccion('PAQUETES POR ESTADO'),['Estado','Cantidad'],
-      ...(ultimoReporte.paquetes_por_estado||[]).map(e=>[e.estado?.replace(/_/g,' ')||'\u2014',e.cantidad]),
+      ...(ultimoReporte.paquetes_por_estado||[]).map(e=>[e.estado?.replace(/_/g,' ')||'—',e.cantidad]),
       [],...seccion('TOP 5 CLIENTES'),['Cliente','Correo','Total paquetes'],
       ...(ultimoReporte.top_clientes||[]).map(c=>[`${c.nombre} ${c.apellido}`,c.email,c.total_paquetes]),
     ];
-    const csv='\uFEFF'+filas.map(f=>f.map(esc).join(',')).join('\r\
-');
+    const csv='\uFEFF'+filas.map(f=>f.map(esc).join(',')).join('\r\n');
     const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}), url=window.URL.createObjectURL(blob), a=document.createElement('a');
     a.href=url; a.download=`NEA-Reporte-${desde}-a-${hasta}.csv`; a.click(); window.URL.revokeObjectURL(url);
   });
@@ -2540,15 +2536,15 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'&&$('#modalF1Clientes').style.display==='flex') f1Cerrar(); });
   $('#mostradorQ').addEventListener('keydown',(e)=>{ if(e.key==='1'){ e.preventDefault(); f1Abrir('facturador'); } });
   document.addEventListener('keydown',(e)=>{ if(e.key==='1'&&document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); } });
-  // ---- Dashboard de estad\u00edsticas ----
+  // ---- Dashboard de estadísticas ----
   let chartDashI=null, chartDashE=null, chartDashT=null;
   const ESTADO_COLORES_DASH={prealertado:'#ff6a1a',en_bodega_miami:'#2563eb',en_transito:'#7c3aed',en_panama:'#0891b2',listo_para_retiro:'#177a63',entregado:'#6b7280'};
-  const ESTADO_LABEL_DASH={prealertado:'Prealertado',en_bodega_miami:'Bodega MIA',en_transito:'En tr\u00e1nsito',en_panama:'En Panam\u00e1',listo_para_retiro:'Listo retiro',entregado:'Entregado'};
+  const ESTADO_LABEL_DASH={prealertado:'Prealertado',en_bodega_miami:'Bodega MIA',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo retiro',entregado:'Entregado'};
   function animarKpi(el,valor,prefijo='',sufijo=''){const dur=900,ini=performance.now();function tick(t){const p=Math.min((t-ini)/dur,1),e=1-Math.pow(1-p,3);el.textContent=prefijo+(valor*e).toFixed(valor%1!==0?2:0)+sufijo;if(p<1)requestAnimationFrame(tick);}requestAnimationFrame(tick);}
   async function cargarDashboard(){
     const hoy=new Date(),primerDiaMes=new Date(hoy.getFullYear(),hoy.getMonth(),1);
     const desde=fechaISO(primerDiaMes),hasta=fechaISO(hoy),hace30=new Date(hoy.getTime()-29*24*60*60*1000);
-    if($('#dashFecha')) $('#dashFecha').textContent='Dashboard \u00b7 '+hoy.toLocaleDateString('es-PA',{day:'2-digit',month:'long',year:'numeric'});
+    if($('#dashFecha')) $('#dashFecha').textContent='Dashboard · '+hoy.toLocaleDateString('es-PA',{day:'2-digit',month:'long',year:'numeric'});
     try {
       const [resM,res30,resC]=await Promise.all([apiAdmin(`/admin/reportes?desde=${desde}&hasta=${hasta}`),apiAdmin(`/admin/reportes?desde=${fechaISO(hace30)}&hasta=${hasta}`),apiAdmin('/admin/usuarios')]);
       const dataMes=await resM.json(),data30=await res30.json(),dataC=await resC.json();
@@ -2598,11 +2594,11 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     $('#autorizadosAdminLista').innerHTML = slots.map((p,i) => `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;padding:12px;background:var(--paper);border-radius:8px;">
         <div>
-          <label style="margin:0 0 5px;">Persona ${i+1} \u2014 Nombre</label>
+          <label style="margin:0 0 5px;">Persona ${i+1} — Nombre</label>
           <input class="aut-admin-nombre" data-idx="${i}" type="text" value="${escapeHtml(p.nombre)}" placeholder="Nombre completo">
         </div>
         <div>
-          <label style="margin:0 0 5px;">C\u00e9dula</label>
+          <label style="margin:0 0 5px;">Cédula</label>
           <input class="aut-admin-cedula" data-idx="${i}" type="text" value="${escapeHtml(p.cedula)}" placeholder="8-123-4567">
         </div>
       </div>`).join('');
@@ -2624,12 +2620,12 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
         cedula: ($('.aut-admin-cedula[data-idx="'+i+'"]')?.value||'').trim(),
       })).filter(p=>p.nombre||p.cedula);
       const incompleto=autorizados.find(p=>!p.nombre||!p.cedula);
-      if(incompleto){ mostrarBanner('#bannerAutorizadosAdmin','error','Completa nombre y c\u00e9dula de cada persona.'); return; }
+      if(incompleto){ mostrarBanner('#bannerAutorizadosAdmin','error','Completa nombre y cédula de cada persona.'); return; }
       setCargando(btn,true);
       try {
         const res=await apiAdmin(`/admin/usuarios/${clienteEditandoId}/autorizados`,{method:'PUT',body:JSON.stringify({autorizados})});
         const data=await res.json().catch(()=>({}));
-        if(res.ok){ mostrarBanner('#bannerAutorizadosAdmin','success','\u2713 Autorizados guardados.'); }
+        if(res.ok){ mostrarBanner('#bannerAutorizadosAdmin','success','✓ Autorizados guardados.'); }
         else { mostrarBanner('#bannerAutorizadosAdmin','error',data.mensaje||'No se pudo guardar.'); }
       } catch(err){ mostrarBanner('#bannerAutorizadosAdmin','error','No pudimos conectar.'); }
       finally { setCargando(btn,false); }
@@ -2650,7 +2646,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       const res=await apiAdmin(`/admin/usuarios/${clienteEditandoId}`,{method:'PUT',body:JSON.stringify(payload)});
       const data=await res.json().catch(()=>({}));
       if(res.ok){
-        mostrarBanner('#bannerEditCliente','success','\u2713 Cliente actualizado correctamente.');
+        mostrarBanner('#bannerEditCliente','success','✓ Cliente actualizado correctamente.');
         f1ClientesCache=[];
         setTimeout(()=>{ cerrarEditCliente(); cargarClientes(); },900);
       } else { mostrarBanner('#bannerEditCliente','error',data.mensaje||'No se pudo guardar.'); }
@@ -2715,7 +2711,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     for(var i=0;i<lineas.length;i++){
       var linea = lineas[i];
       var limpia = linea.replace(/^[^a-zA-Z0-9]+/,'');
-      var partes = limpia.split(/\t+/);
+      var partes = limpia.split(/	+/);
       if(partes.length < 3) continue;
       var tracking = partes[0].trim();
       var whr = partes[1].trim();
@@ -2743,7 +2739,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
     if(!texto){ $('#ptyTextoResumen').textContent = ''; return; }
     const todos = parsearTextoPTY(texto);
     const importables = todos.filter(p => p.estado === 'en_bodega_miami');
-    $('#ptyTextoResumen').textContent = todos.length + ' paquetes \u00b7 ' + importables.length + ' en bodega \u00b7 ' + (todos.length - importables.length) + ' otros';
+    $('#ptyTextoResumen').textContent = todos.length + ' paquetes · ' + importables.length + ' en bodega · ' + (todos.length - importables.length) + ' otros';
   });
   $('#btnProcesarTexto').addEventListener('click', async () => {
     const texto = $('#ptyTexto').value.trim();
@@ -2769,7 +2765,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
           '<td class="mono" style="font-size:12px;">' + escapeHtml(p.tracking) + '</td>' +
           '<td class="mono">' + (p.peso || '?') + ' lb</td>' +
           '<td><span class="badge badge-en_bodega_miami">En Bodega</span></td>' +
-          '<td style="' + color + '">' + (p.ya_en_nea ? '\u2713 Ya en NEA' : 'Nuevo') + '</td>' +
+          '<td style="' + color + '">' + (p.ya_en_nea ? '✓ Ya en NEA' : 'Nuevo') + '</td>' +
           '</tr>';
       }).join('');
       $('#ptyPreviewSelAll').onchange = function(){ document.querySelectorAll('.pty-prev-ck:not(:disabled)').forEach(cb => cb.checked = this.checked); };
@@ -2780,9 +2776,9 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
         mostrarBanner('#bannerPtyTexto','','');
       } else {
         if(btnImp) btnImp.style.display = 'none';
-        mostrarBanner('#bannerPtyTexto','success','\u2713 Todos los paquetes en bodega ya est\u00e1n en NEA.');
+        mostrarBanner('#bannerPtyTexto','success','✓ Todos los paquetes en bodega ya están en NEA.');
       }
-      $('#ptyTextoResumen').textContent = importables.length + ' en bodega \u00b7 ' + nuevos.length + ' nuevos \u00b7 ' + (importables.length - nuevos.length) + ' ya en NEA';
+      $('#ptyTextoResumen').textContent = importables.length + ' en bodega · ' + nuevos.length + ' nuevos · ' + (importables.length - nuevos.length) + ' ya en NEA';
     } catch(err){
       mostrarBanner('#bannerPtyTexto','error','No pudimos conectar.');
     } finally { setCargando(btn, false); }
@@ -2803,7 +2799,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
       const res = await apiAdmin('/admin/pty/importar', { method:'POST', body: JSON.stringify({ paquetes }) });
       const data = await res.json().catch(()=>({}));
       if(res.ok){
-        mostrarBanner('#bannerPtyTexto','success','\u2713 ' + data.mensaje);
+        mostrarBanner('#bannerPtyTexto','success','✓ ' + data.mensaje);
         $('#ptyTexto').value = '';
         $('#ptyPreview').style.display = 'none';
         btn.style.display = 'none';
@@ -2826,10 +2822,10 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
 <!-- Panel de notificaciones -->
 <div class="notif-panel" id="notifPanel">
   <div class="notif-panel-head">
-    <span>\ud83d\udd14 Notificaciones</span>
+    <span>🔔 Notificaciones</span>
     <div style="display:flex;gap:6px;">
-      <button id="btnMarcarTodasLeidas" title="Marcar todas como le\u00eddas">\u2713 Todo le\u00eddo</button>
-      <button id="btnCerrarNotif">\u2715</button>
+      <button id="btnMarcarTodasLeidas" title="Marcar todas como leídas">✓ Todo leído</button>
+      <button id="btnCerrarNotif">✕</button>
     </div>
   </div>
   <div class="notif-lista" id="notifLista">
@@ -2842,19 +2838,19 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
   <div class="modal-box">
     <div class="modal-header">
       <h2>Editar datos del cliente</h2>
-      <button class="modal-close" id="btnCerrarEditCliente">\u2715</button>
+      <button class="modal-close" id="btnCerrarEditCliente">✕</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div><label for="editClienteNombre">Nombre</label><input id="editClienteNombre" type="text" placeholder="Ana"></div>
-      <div><label for="editClienteApellido">Apellido</label><input id="editClienteApellido" type="text" placeholder="P\u00e9rez"></div>
+      <div><label for="editClienteApellido">Apellido</label><input id="editClienteApellido" type="text" placeholder="Pérez"></div>
     </div>
-    <label for="editClienteEmail">Correo electr\u00f3nico</label>
+    <label for="editClienteEmail">Correo electrónico</label>
     <input id="editClienteEmail" type="email" placeholder="ana@ejemplo.com">
-    <label for="editClienteTelefono">Tel\u00e9fono</label>
+    <label for="editClienteTelefono">Teléfono</label>
     <input id="editClienteTelefono" type="tel" placeholder="6123-4567">
-    <label for="editClienteCasillero">N\u00famero de casillero</label>
+    <label for="editClienteCasillero">Número de casillero</label>
     <input id="editClienteCasillero" type="text" placeholder="PTY-00042" style="font-family:var(--font-mono);">
-    <p style="font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;">\u26a0 Cambiar el casillero actualiza la direcci\u00f3n que el cliente usa para sus compras.</p>
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;">⚠ Cambiar el casillero actualiza la dirección que el cliente usa para sus compras.</p>
     <button class="btn-primary" id="btnGuardarEditCliente" style="margin-top:18px;">
       <span class="spinner"></span><span>Guardar cambios</span>
     </button>
@@ -2865,7 +2861,7 @@ Una vez confirmado, NO se podr\u00e1 cambiar.`);
           <div style="font-family:var(--font-display);font-size:14px;font-weight:600;">Personas autorizadas</div>
           <div style="font-size:12px;color:var(--ink-soft);">Pueden retirar paquetes en nombre del cliente.</div>
         </div>
-        <div id="autorizadosLoadingIndicator" style="font-size:12px;color:var(--ink-soft);display:none;">Cargando\u2026</div>
+        <div id="autorizadosLoadingIndicator" style="font-size:12px;color:var(--ink-soft);display:none;">Cargando…</div>
       </div>
       <div id="autorizadosAdminLista"></div>
       <button class="btn-primary" id="btnGuardarAutorizadosAdmin" style="margin-top:14px;max-width:220px;display:none;">
