@@ -593,6 +593,10 @@
   .btn-eliminar-prealerta:hover{ background:rgba(220,38,38,0.12); border-color:#dc2626; }
   .btn-rastrear{ padding:6px 12px; border-radius:7px; border:1px solid var(--line); background:#fff; color:var(--ink-soft); font-size:12px; font-weight:600; cursor:pointer; transition:all .15s ease; text-decoration:none; display:inline-block; }
   .btn-rastrear:hover{ border-color:var(--accent); color:var(--accent-dark); }
+  .bloque-sucursal{ background:var(--cargo-green-bg); border-left:3px solid var(--cargo-green); border-radius:8px; padding:11px 14px; margin-top:10px; }
+  .bs-titulo{ font-size:13px; font-weight:700; color:var(--cargo-green); margin-bottom:4px; }
+  .bs-linea{ font-size:12.5px; color:var(--ink-soft); line-height:1.55; }
+  .bs-nota{ font-size:11.5px; color:var(--ink-soft); margin-top:6px; opacity:.85; }
 </style>
 </head>
 <body>
@@ -1434,7 +1438,7 @@
     $('#pillCasillero').textContent = usuario.numero_casillero;
     const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ''}`.trim();
     const numCasillero = 'PTY-14981';
-    const htmlCasillero = `<span class="suite">${numCasillero}</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
+    const htmlCasillero = `<span class="suite">PTY-14981</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
     const textoCasillero = `${numCasillero}  ${nombreCompleto}  NEA CARGO XPRESS\n8610 NW 72 STREET\nMIAMI, FLORIDA 33195\nESTADOS UNIDOS\n1-305-406-3654`;
     const el = document.getElementById('bloqueDireccion');
     if(el) el.innerHTML = htmlCasillero;
@@ -1452,9 +1456,9 @@
     const btnCop2 = document.getElementById('btnCopiarCasillero');
     if(btnCop2) btnCop2.onclick = () => copiarDireccion(btnCop2);
     // Llenar casilleros aéreo y marítimo
-    const htmlAereo = `<span class="suite">${numCasillero}</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
+    const htmlAereo = `<span class="suite">PTY-14981</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
     const textoAereo = `${numCasillero}  ${nombreCompleto}  NEA CARGO XPRESS\n8610 NW 72 STREET\nMIAMI, FLORIDA 33195\nESTADOS UNIDOS\n1-305-406-3654`;
-    const htmlMaritimo = `<span class="suite">${numCasillero}</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS OCEAN<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
+    const htmlMaritimo = `<span class="suite">PTY-14981</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS OCEAN<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
     const elAereo = document.getElementById('bloqueDireccionAereo');
     if(elAereo) elAereo.innerHTML = htmlAereo;
     const elMaritimo = document.getElementById('bloqueDireccionMaritimo');
@@ -1607,7 +1611,20 @@
               <div class="paquete-valor">$${Number(p.valor_declarado).toFixed(2)}</div>
             </div>
           </div>
+          <div style="display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;">
+            ${p.peso_real_lb ? `<div style="font-size:12px;color:var(--ink-soft);">⚖️ Peso real: <strong style="color:var(--ink);">${Number(p.peso_real_lb).toFixed(2)} lb</strong></div>` : (p.peso_lb ? `<div style="font-size:12px;color:var(--ink-soft);">⚖️ Peso aprox: ${Number(p.peso_lb).toFixed(2)} lb</div>` : '')}
+            ${p.estado !== 'entregado' && p.estado !== 'listo_para_retiro' ? `<div style="font-size:12px;color:var(--ink-soft);">🗓 ${estimarFecha(p.estado)}</div>` : ''}
+            ${p.fecha_entrega ? `<div style="font-size:12px;color:var(--ink-soft);">📅 Entregado: ${new Date(p.fecha_entrega).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'})}</div>` : ''}
+          </div>
           <div class="rail">${rail}</div>
+          ${p.estado === 'listo_para_retiro' ? `
+            <div class="bloque-sucursal">
+              <div class="bs-titulo">📍 Retíralo en: ${p.sucursal_nombre ? escapeHtml(p.sucursal_nombre) : 'cualquiera de nuestras sucursales'}</div>
+              ${p.sucursal_direccion ? `<div class="bs-linea">${escapeHtml(p.sucursal_direccion)}</div>` : ''}
+              ${p.sucursal_telefono ? `<div class="bs-linea">📞 ${escapeHtml(p.sucursal_telefono)}</div>` : ''}
+              ${p.sucursal_horario ? `<div class="bs-linea">🕐 ${escapeHtml(p.sucursal_horario)}</div>` : ''}
+              <div class="bs-nota">Recuerda llevar tu cédula de identidad.</div>
+            </div>` : ''}
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
           <button class="btn-ver-fotos" data-id="${p.id}" style="flex:1;margin-top:0;">📷 Ver fotos</button>
           ${(()=>{ const td=detectarTienda(p.numero_tracking)||p.tienda; const ur=urlRastreo(td,p.numero_tracking); return ur?`<a href="${ur}" target="_blank" rel="noopener" class="btn-rastrear">🔍 Rastrear</a>`:''; })()}
@@ -1990,7 +2007,23 @@
     if(!banner) return;
     if(listos.length>0){
       const nombres=listos.map(p=>escapeHtml(p.tienda)+' (#'+escapeHtml(p.numero_tracking)+')').join(', ');
-      document.getElementById('bannerListoTexto').innerHTML='<strong>'+listos.length+' paquete'+(listos.length>1?'s':'')+' listo'+(listos.length>1?'s':'')+' para retiro:</strong> '+nombres+'.<br>Visita nuestra sucursal con tu cédula de identidad para recogerlos.';
+      // Sucursales distintas donde hay paquetes esperando
+      const sucs=[...new Set(listos.filter(p=>p.sucursal_nombre).map(p=>p.sucursal_nombre))];
+      let bloqueSuc='';
+      if(sucs.length===1){
+        const p=listos.find(x=>x.sucursal_nombre===sucs[0]);
+        bloqueSuc='<div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px;margin-top:12px;">'
+          +'<div style="font-weight:700;font-size:13.5px;margin-bottom:4px;">📍 '+escapeHtml(p.sucursal_nombre)+'</div>'
+          +(p.sucursal_direccion?'<div style="font-size:12.5px;opacity:.9;">'+escapeHtml(p.sucursal_direccion)+'</div>':'')
+          +(p.sucursal_telefono?'<div style="font-size:12.5px;opacity:.8;margin-top:2px;">📞 '+escapeHtml(p.sucursal_telefono)+'</div>':'')
+          +(p.sucursal_horario?'<div style="font-size:12.5px;opacity:.8;">🕐 '+escapeHtml(p.sucursal_horario)+'</div>':'')
+          +'</div>';
+      } else if(sucs.length>1){
+        bloqueSuc='<div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:12.5px;">'
+          +'📍 Tus paquetes están en: <strong>'+sucs.map(escapeHtml).join(' · ')+'</strong><br>'
+          +'Revisa cada paquete en la sección "Paquetes" para ver dónde retirar cada uno.</div>';
+      }
+      document.getElementById('bannerListoTexto').innerHTML='<strong>'+listos.length+' paquete'+(listos.length>1?'s':'')+' listo'+(listos.length>1?'s':'')+' para retiro:</strong> '+nombres+'.<br>Lleva tu cédula de identidad para recogerlos.'+bloqueSuc;
       banner.classList.add('show');
     } else { banner.classList.remove('show'); }
   }
