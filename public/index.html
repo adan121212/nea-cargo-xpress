@@ -473,7 +473,7 @@
         <h3>Tu casillero se ve así</h3>
         <p class="small">Lo usas como tu dirección de envío en cualquier tienda de EE.UU.</p>
         <div class="casillero-mock">
-          PTY-14981 &nbsp;<span class="suite">TU NOMBRE </span>&nbsp; NEA CARGO XPRESS<br>
+          <span class="suite">PTY-14981</span> &nbsp; Tu Nombre &nbsp; NEA CARGO XPRESS<br>
           8610 NW 72 STREET<br>
           MIAMI, FLORIDA 33195<br>
           ESTADOS UNIDOS<br>
@@ -807,8 +807,16 @@
     document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
   }
 
-  // Los contadores del hero arrancan solos apenas carga (siempre visibles al inicio)
-  document.querySelectorAll('[data-count-to]').forEach(animarContador);
+  // Contadores: arrancan cuando el elemento entra al viewport
+  const countObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting){
+        animarContador(entry.target);
+        countObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count-to]').forEach(el => countObs.observe(el));
 
   // ---------- Dropdowns del nav ----------
   function cerrarTodosLosDropdowns(){
