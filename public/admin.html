@@ -1465,7 +1465,7 @@
         const nuevoEstado = sel.value;
         const id = sel.dataset.id;
         sel.disabled = true;
-        if (['en_panama', 'listo_para_retiro'].includes(nuevoEstado)) {
+        if (nuevoEstado === 'listo_para_retiro') {
           try {
             const resSuc = await apiAdmin('/admin/sucursales');
             const dataSuc = await resSuc.json();
