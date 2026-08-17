@@ -1462,10 +1462,48 @@
     });
     tbody.querySelectorAll('.estado-select').forEach(sel => {
       sel.addEventListener('change', async () => {
+        const nuevoEstado = sel.value;
+        const id = sel.dataset.id;
         sel.disabled = true;
+        if (['en_panama', 'listo_para_retiro'].includes(nuevoEstado)) {
+          try {
+            const resSuc = await apiAdmin('/admin/sucursales');
+            const dataSuc = await resSuc.json();
+            const sucursales = (dataSuc.sucursales || []).filter(s => s.activa);
+            if (sucursales.length > 0) {
+              const popup = document.createElement('div');
+              popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;';
+              popup.innerHTML = `<div style="background:#fff;border-radius:14px;padding:24px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+                <div style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:6px;">¿En qué sucursal está el paquete?</div>
+                <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;">Selecciona la sucursal donde el cliente podrá retirar.</p>
+                <select id="popSucursalSel" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);font-size:13px;margin-bottom:16px;">
+                  <option value="">Sin sucursal asignada</option>
+                  ${sucursales.map(s => `<option value="${s.id}">${escapeHtml(s.nombre)}</option>`).join('')}
+                </select>
+                <div style="display:flex;gap:8px;">
+                  <button id="popSucCancelar" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--line);background:none;cursor:pointer;font-size:13px;">Cancelar</button>
+                  <button id="popSucConfirmar" style="flex:1;padding:10px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:13px;cursor:pointer;">Confirmar</button>
+                </div>
+              </div>`;
+              document.body.appendChild(popup);
+              popup.querySelector('#popSucCancelar').addEventListener('click', () => { popup.remove(); sel.value = sel.dataset.estadoAnterior || sel.value; sel.disabled = false; });
+              popup.querySelector('#popSucConfirmar').addEventListener('click', async () => {
+                const sucursalId = popup.querySelector('#popSucursalSel').value || null;
+                popup.remove();
+                try {
+                  const res = await apiAdmin(`/admin/paquetes/${id}/estado`, { method: 'PATCH', body: JSON.stringify({ estado: nuevoEstado, sucursal_id: sucursalId ? parseInt(sucursalId) : null }) });
+                  if (res.ok) { mostrarBanner('#bannerPaquetes', 'success', 'Estado y sucursal actualizados.'); await cargarPaquetes(); }
+                  else { mostrarBanner('#bannerPaquetes', 'error', 'No se pudo actualizar el estado.'); }
+                } catch (err) { mostrarBanner('#bannerPaquetes', 'error', 'No pudimos conectar.'); }
+                finally { sel.disabled = false; }
+              });
+              return;
+            }
+          } catch(e) { console.error('Error cargando sucursales:', e); }
+        }
         try {
-          const res = await apiAdmin(`/admin/paquetes/${sel.dataset.id}/estado`, { method: 'PATCH', body: JSON.stringify({ estado: sel.value }) });
-          if (res.ok){ mostrarBanner('#bannerPaquetes', 'success', 'Estado actualizado.'); await cargarPaquetes(); }
+          const res = await apiAdmin(`/admin/paquetes/${id}/estado`, { method: 'PATCH', body: JSON.stringify({ estado: nuevoEstado }) });
+          if (res.ok) { mostrarBanner('#bannerPaquetes', 'success', 'Estado actualizado.'); await cargarPaquetes(); }
           else { mostrarBanner('#bannerPaquetes', 'error', 'No se pudo actualizar el estado.'); }
         } catch (err) {} finally { sel.disabled = false; }
       });
