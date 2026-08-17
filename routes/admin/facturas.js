@@ -11,6 +11,20 @@ const { enviarFacturaPorWhatsapp } = require('../../utils/whatsapp');
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
+// Código para autorizar anulaciones. Se puede cambiar en Render
+// con la variable de entorno CODIGO_ANULACION sin tocar el código.
+const CODIGO_ANULACION = process.env.CODIGO_ANULACION || '1234';
+
+// Motivos válidos de anulación
+const MOTIVOS_ANULACION = [
+  'error_facturacion',
+  'devolucion',
+  'paquete_perdido',
+  'paquete_danado',
+  'cliente_desistio',
+  'otro',
+];
+
 // --- POST /api/admin/facturas ---
 router.post(
   '/',
@@ -96,15 +110,30 @@ router.post(
 );
 
 // --- GET /api/admin/facturas ---
-router.get('/', [query('estado').optional().isIn(['pendiente','pagada','anulada']), query('email').optional().trim()], async (req, res) => {
-  const { estado, email } = req.query;
+// Devuelve también los datos de anulación (motivo, quién y cuándo)
+router.get('/', [
+  query('estado').optional().isIn(['pendiente','pagada','anulada']),
+  query('email').optional().trim(),
+  query('motivo').optional().trim(),
+], async (req, res) => {
+  const { estado, email, motivo } = req.query;
   const condiciones = [], valores = [];
   if (estado) { valores.push(estado); condiciones.push(`f.estado = $${valores.length}`); }
   if (email) { valores.push(`%${email}%`); condiciones.push(`u.email ILIKE $${valores.length}`); }
+  if (motivo) { valores.push(motivo); condiciones.push(`f.motivo_anulacion = $${valores.length}`); }
   const where = condiciones.length ? `WHERE ${condiciones.join(' AND ')}` : '';
   try {
     const resultado = await pool.query(
-      `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido, u.email AS cliente_email, p.id AS paquete_id, p.tienda, p.numero_tracking, p.estado AS paquete_estado FROM facturas f JOIN usuarios u ON u.id = f.usuario_id JOIN paquetes p ON p.id = f.paquete_id ${where} ORDER BY f.fecha_creacion DESC LIMIT 200`,
+      `SELECT f.*,
+              u.nombre AS cliente_nombre, u.apellido AS cliente_apellido, u.email AS cliente_email,
+              p.id AS paquete_id, p.tienda, p.numero_tracking, p.estado AS paquete_estado,
+              a.nombre AS anulada_por_nombre, a.apellido AS anulada_por_apellido
+       FROM facturas f
+       JOIN usuarios u ON u.id = f.usuario_id
+       JOIN paquetes p ON p.id = f.paquete_id
+       LEFT JOIN usuarios a ON a.id = f.anulada_por
+       ${where}
+       ORDER BY f.fecha_creacion DESC LIMIT 200`,
       valores
     );
     return res.json({ facturas: resultado.rows });
@@ -115,40 +144,85 @@ router.get('/', [query('estado').optional().isIn(['pendiente','pagada','anulada'
 });
 
 // --- PATCH /api/admin/facturas/:id/estado ---
-// Al anular requiere codigo_anulacion = '1234'.
-// Si estaba pagada y la caja está cerrada, crea nota de ajuste.
+// Al anular exige codigo_anulacion + motivo obligatorio.
+// Guarda motivo, quién anuló y cuándo. Conserva la fecha_pago original.
+// Si estaba pagada y la caja ya cerró, agrega nota de ajuste al cierre.
 // Libera el paquete para poder refacturarlo.
-router.patch('/:id/estado', [body('estado').isIn(['pendiente','pagada','anulada']).withMessage('Estado inválido')], async (req, res) => {
+router.patch('/:id/estado', [
+  body('estado').isIn(['pendiente','pagada','anulada']).withMessage('Estado inválido'),
+  body('motivo').optional().isIn(MOTIVOS_ANULACION).withMessage('Motivo de anulación inválido'),
+  body('motivo_detalle').optional({ checkFalsy: true }).trim().isLength({ max: 300 }),
+], async (req, res) => {
   const errores = validationResult(req);
   if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
-  if (req.body.estado === 'anulada' && req.body.codigo_anulacion !== '1234') {
-    return res.status(403).json({ mensaje: 'Código de anulación incorrecto.' });
+
+  const esAnulacion = req.body.estado === 'anulada';
+
+  if (esAnulacion) {
+    if (req.body.codigo_anulacion !== CODIGO_ANULACION) {
+      return res.status(403).json({ mensaje: 'Código de anulación incorrecto.' });
+    }
+    if (!req.body.motivo) {
+      return res.status(400).json({ mensaje: 'Debes indicar el motivo de la anulación.' });
+    }
+    if (req.body.motivo === 'otro' && !(req.body.motivo_detalle || '').trim()) {
+      return res.status(400).json({ mensaje: 'Cuando el motivo es "Otro" debes escribir una explicación.' });
+    }
   }
-  const fechaPago = req.body.estado === 'pagada' ? 'NOW()' : 'NULL';
+
   try {
-    const facturaActual = await pool.query(
-      `SELECT f.*, p.fecha_actualizacion AS fecha_pago_real FROM facturas f JOIN paquetes p ON p.id = f.paquete_id WHERE f.id = $1`,
-      [req.params.id]
-    );
+    const facturaActual = await pool.query('SELECT * FROM facturas WHERE id = $1', [req.params.id]);
     if (facturaActual.rows.length === 0) return res.status(404).json({ mensaje: 'Factura no encontrada' });
     const facturaAntes = facturaActual.rows[0];
-    const resultado = await pool.query(`UPDATE facturas SET estado = $1, fecha_pago = ${fechaPago} WHERE id = $2 RETURNING *`, [req.body.estado, req.params.id]);
-    let nota_ajuste = null;
-    if (req.body.estado === 'anulada') {
-      await pool.query(
-        `UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW() WHERE id = (SELECT paquete_id FROM facturas WHERE id = $1) AND estado NOT IN ('entregado')`,
-        [req.params.id]
+
+    if (facturaAntes.estado === 'anulada' && esAnulacion) {
+      return res.status(409).json({ mensaje: 'Esta factura ya está anulada.' });
+    }
+
+    let resultado;
+    if (esAnulacion) {
+      // Conserva la fecha_pago original — no la borra
+      resultado = await pool.query(
+        `UPDATE facturas
+         SET estado = 'anulada',
+             motivo_anulacion = $1,
+             motivo_anulacion_detalle = $2,
+             anulada_por = $3,
+             fecha_anulacion = NOW()
+         WHERE id = $4 RETURNING *`,
+        [req.body.motivo, (req.body.motivo_detalle || '').trim() || null, req.usuario.id, req.params.id]
       );
+    } else {
+      const fechaPago = req.body.estado === 'pagada' ? 'NOW()' : 'NULL';
+      resultado = await pool.query(
+        `UPDATE facturas SET estado = $1, fecha_pago = ${fechaPago} WHERE id = $2 RETURNING *`,
+        [req.body.estado, req.params.id]
+      );
+    }
+
+    let nota_ajuste = null;
+    if (esAnulacion) {
+      await pool.query(
+        `UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW()
+         WHERE id = $1 AND estado NOT IN ('entregado')`,
+        [facturaAntes.paquete_id]
+      );
+
       if (facturaAntes.estado === 'pagada' && facturaAntes.fecha_pago) {
         const fechaPagoStr = new Date(facturaAntes.fecha_pago).toISOString().slice(0, 10);
         const cierreDia = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [fechaPagoStr]);
         if (cierreDia.rows.length > 0) {
-          const textoNota = `AJUSTE: Factura ${facturaAntes.numero_factura} anulada (−$${Number(facturaAntes.total).toFixed(2)}) — ${req.body.motivo || 'sin motivo especificado'}`;
-          await pool.query(`UPDATE cierres_caja SET notas = COALESCE(notas || E'\\n', '') || $1 WHERE fecha = $2`, [textoNota, fechaPagoStr]);
+          const detalle = (req.body.motivo_detalle || '').trim();
+          const textoNota = `AJUSTE: Factura ${facturaAntes.numero_factura} anulada (−$${Number(facturaAntes.total).toFixed(2)}) — motivo: ${req.body.motivo}${detalle ? ' · ' + detalle : ''}`;
+          await pool.query(
+            `UPDATE cierres_caja SET notas = COALESCE(notas || E'\\n', '') || $1 WHERE fecha = $2`,
+            [textoNota, fechaPagoStr]
+          );
           nota_ajuste = { fecha: fechaPagoStr, texto: textoNota };
         }
       }
     }
+
     return res.json({ mensaje: 'Estado de factura actualizado', factura: resultado.rows[0], nota_ajuste });
   } catch (error) {
     console.error('Error en PATCH /admin/facturas/:id/estado:', error);
@@ -183,6 +257,9 @@ router.post('/:id/reenviar', async (req, res) => {
     );
     if (resultado.rows.length === 0) return res.status(404).json({ mensaje: 'Factura no encontrada' });
     const factura = resultado.rows[0];
+    if (factura.estado === 'anulada') {
+      return res.status(400).json({ mensaje: 'No se puede reenviar una factura anulada.' });
+    }
     if (!factura.token_pdf) {
       const nuevoToken = crypto.randomBytes(24).toString('hex');
       await pool.query('UPDATE facturas SET token_pdf = $1 WHERE id = $2', [nuevoToken, factura.id]);
