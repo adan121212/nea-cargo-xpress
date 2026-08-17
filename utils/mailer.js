@@ -1,5 +1,35 @@
 require('dotenv').config();
 
+const ESTADO_LABEL = {
+  prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
+  en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
+};
+const ESTADO_MENSAJE = {
+  en_bodega_miami: 'Tu paquete ya llegó a nuestra bodega en Miami. Pronto lo preparamos para su viaje a Panamá.',
+  en_transito: 'Tu paquete ya salió de Miami y está en camino a Panamá.',
+  en_panama: 'Tu paquete ya llegó a Panamá y está en proceso de clasificación/aduana.',
+  listo_para_retiro: '¡Tu paquete ya está listo para que lo retires!',
+  entregado: 'Tu paquete fue entregado. Gracias por confiar en nosotros.',
+};
+
+/**
+ * Bloque HTML con los datos de la sucursal donde retirar.
+ * Si no hay sucursal asignada, devuelve un texto genérico.
+ */
+function bloqueSucursal(suc) {
+  if (!suc || !suc.sucursal_nombre) {
+    return `<p style="margin:0 0 18px;">Puedes retirarlo en cualquiera de nuestras sucursales presentando tu cédula.</p>`;
+  }
+  return `
+    <div style="background:#e8f5f1;border-left:4px solid #177a63;border-radius:8px;padding:16px;margin:20px 0;">
+      <p style="margin:0 0 8px;font-weight:bold;color:#0f6b4f;">📍 Retíralo en: ${suc.sucursal_nombre}</p>
+      <p style="margin:0 0 5px;color:#374151;">${suc.sucursal_direccion || ''}</p>
+      ${suc.sucursal_telefono ? `<p style="margin:0 0 5px;color:#6b7280;">📞 ${suc.sucursal_telefono}</p>` : ''}
+      ${suc.sucursal_horario ? `<p style="margin:0;color:#6b7280;">🕐 ${suc.sucursal_horario}</p>` : ''}
+    </div>
+    <p style="margin:0 0 18px;font-size:13px;color:#6b7280;">Recuerda llevar tu cédula de identidad.</p>`;
+}
+
 async function enviarCorreoConfirmacion(destinatario, nombre, tokenVerificacion) {
   const enlaceVerificacion = `${process.env.BASE_URL}/api/auth/verificar/${tokenVerificacion}`;
   const html = `
@@ -24,38 +54,15 @@ async function enviarFacturaPorCorreo(destinatario, nombre, factura, pdfBuffer) 
       <p><strong>Total a pagar: $${Number(factura.total).toFixed(2)}</strong></p>
       <p>Si tienes alguna duda, contáctanos respondiendo este correo.</p>
     </div>`;
-  const respuesta = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: process.env.EMAIL_FROM || 'NEA Cargo Xpress <onboarding@resend.dev>',
-      to: destinatario,
-      subject: `Factura ${factura.numero_factura} — NEA Cargo Xpress`,
-      html,
-      attachments: [{ filename: `${factura.numero_factura}.pdf`, content: pdfBuffer.toString('base64') }],
-    }),
-  });
-  if (!respuesta.ok) { const d = await respuesta.text(); throw new Error(`Resend respondió ${respuesta.status}: ${d}`); }
-  return respuesta.json();
+  return enviarConAdjunto(destinatario, `Factura ${factura.numero_factura} — NEA Cargo Xpress`, html, factura.numero_factura, pdfBuffer);
 }
-
-const ESTADO_LABEL = {
-  prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
-  en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
-};
-const ESTADO_MENSAJE = {
-  en_bodega_miami: 'Tu paquete ya llegó a nuestra bodega en Miami. Pronto lo preparamos para su viaje a Panamá.',
-  en_transito: 'Tu paquete ya salió de Miami y está en camino a Panamá.',
-  en_panama: 'Tu paquete ya llegó a Panamá y está en proceso de clasificación/aduana.',
-  listo_para_retiro: '¡Tu paquete ya está listo para que lo retires en tu sucursal más cercana!',
-  entregado: 'Tu paquete fue entregado. Gracias por confiar en nosotros.',
-};
 
 async function enviarCorreoCambioEstado(destinatario, nombre, paquete) {
   const ESTADOS_QUE_NOTIFICAN = ['en_bodega_miami', 'listo_para_retiro'];
   if (!ESTADOS_QUE_NOTIFICAN.includes(paquete.estado)) return;
   const etiqueta = ESTADO_LABEL[paquete.estado] || paquete.estado;
   const mensaje = ESTADO_MENSAJE[paquete.estado] || `Tu paquete cambió de estado a: ${etiqueta}.`;
+  const esRetiro = paquete.estado === 'listo_para_retiro';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
       <h2>¡Hola, ${nombre}!</h2>
@@ -65,6 +72,7 @@ async function enviarCorreoCambioEstado(destinatario, nombre, paquete) {
         <p style="margin:0 0 6px;color:#6b7280;">Tracking: ${paquete.numero_tracking}</p>
         <p style="margin:0;"><span style="background:#ff6a1a;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;">${etiqueta}</span></p>
       </div>
+      ${esRetiro ? bloqueSucursal(paquete) : ''}
       <p>Puedes ver el detalle completo iniciando sesión en tu cuenta.</p>
     </div>`;
   return enviarCorreoGenerico(destinatario, `Tu paquete está: ${etiqueta} — NEA Cargo Xpress`, html);
@@ -106,35 +114,42 @@ async function enviarFacturaListaParaRetiro(destinatario, nombre, factura, pdfBu
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
       <h2>¡Hola, ${nombre}!</h2>
-      <p>¡Tu paquete ya está listo para que lo retires en tu sucursal más cercana! 🎉</p>
+      <p>¡Tu paquete ya está listo para que lo retires! 🎉</p>
       <div style="background:#f5f6f8;border-radius:8px;padding:16px;margin:20px 0;">
         <p style="margin:0 0 6px;"><strong>${factura.tienda}</strong></p>
         <p style="margin:0 0 6px;color:#6b7280;">Tracking: ${factura.numero_tracking}</p>
         <p style="margin:0;"><span style="background:#ff6a1a;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;">Listo para retiro</span></p>
       </div>
+      ${bloqueSucursal(factura)}
       <p>Adjunto encontrarás la factura <strong>${factura.numero_factura}</strong> — está <strong>pendiente de pago</strong>, la puedes cancelar directamente al momento de retirar tu paquete.</p>
       <p><strong>Total a pagar: $${Number(factura.total).toFixed(2)}</strong></p>
       <p>Te esperamos. Si tienes alguna duda, contáctanos respondiendo este correo.</p>
     </div>`;
+  return enviarConAdjunto(
+    destinatario,
+    `Tu paquete está listo para retiro — Factura ${factura.numero_factura} — NEA Cargo Xpress`,
+    html, factura.numero_factura, pdfBuffer
+  );
+}
+
+/** Envío con PDF adjunto */
+async function enviarConAdjunto(destinatario, asunto, html, nombreArchivo, pdfBuffer) {
   const respuesta = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: process.env.EMAIL_FROM || 'NEA Cargo Xpress <onboarding@resend.dev>',
       to: destinatario,
-      subject: `Tu paquete está listo para retiro — Factura ${factura.numero_factura} — NEA Cargo Xpress`,
+      subject: asunto,
       html,
-      attachments: [{ filename: `${factura.numero_factura}.pdf`, content: pdfBuffer.toString('base64') }],
+      attachments: [{ filename: `${nombreArchivo}.pdf`, content: pdfBuffer.toString('base64') }],
     }),
   });
   if (!respuesta.ok) { const d = await respuesta.text(); throw new Error(`Resend respondió ${respuesta.status}: ${d}`); }
   return respuesta.json();
 }
 
-/**
- * Función genérica para enviar cualquier correo HTML sin adjuntos.
- * Usada internamente y también por caja.js para el reporte de cierre.
- */
+/** Envío genérico sin adjuntos */
 async function enviarCorreoGenerico(destinatario, asunto, html) {
   const respuesta = await fetch('https://api.resend.com/emails', {
     method: 'POST',
