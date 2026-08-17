@@ -120,6 +120,14 @@ router.patch(
       const paquete = resultado.rows[0];
       const envios = { correo_enviado: false };
       try {
+        // Traemos los datos de la sucursal para incluirlos en el correo
+        const sucRes = await pool.query(
+          `SELECT s.nombre AS sucursal_nombre, s.direccion AS sucursal_direccion,
+                  s.telefono AS sucursal_telefono, s.horario AS sucursal_horario
+           FROM sucursales s WHERE s.id = $1`, [paquete.sucursal_id]
+        );
+        if (sucRes.rows.length > 0) Object.assign(paquete, sucRes.rows[0]);
+
         const clienteRes = await pool.query('SELECT nombre, email FROM usuarios WHERE id = $1', [paquete.usuario_id]);
         const cliente = clienteRes.rows[0];
         if (cliente) {
@@ -211,8 +219,13 @@ router.patch(
           const datosCompletos = await pool.query(
             `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
                     u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero,
-                    p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega
-             FROM facturas f JOIN usuarios u ON u.id = f.usuario_id JOIN paquetes p ON p.id = f.paquete_id
+                    p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega,
+                    s.nombre AS sucursal_nombre, s.direccion AS sucursal_direccion,
+                    s.telefono AS sucursal_telefono, s.horario AS sucursal_horario
+             FROM facturas f
+             JOIN usuarios u ON u.id = f.usuario_id
+             JOIN paquetes p ON p.id = f.paquete_id
+             LEFT JOIN sucursales s ON s.id = p.sucursal_id
              WHERE f.id = $1`, [facturaGenerada.id]
           );
           const fd = datosCompletos.rows[0];
