@@ -738,7 +738,7 @@
       <div id="camaraRecepcion" style="display:none;margin-bottom:12px;border-radius:12px;overflow:hidden;background:#000;position:relative;aspect-ratio:4/3;max-height:280px;">
         <video id="camaraVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;"></video>
         <div style="position:absolute;left:12%;right:12%;height:2px;background:#ff6a1a;box-shadow:0 0 8px #ff6a1a;animation:scanLine 2s ease-in-out infinite;"></div>
-        <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#fff;font-size:12px;background:rgba(0,0,0,.5);padding:4px;">Apunta al código de barras de la etiqueta</div>
+        <div id="camaraEstado" style="position:absolute;bottom:10px;left:0;right:0;text-align:center;color:#fff;font-size:12px;font-weight:600;background:rgba(0,0,0,.6);padding:6px;">Apunta al código de barras de la etiqueta</div>
         <button onclick="cerrarCamara()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;">✕</button>
       </div>
       <div class="banner" id="bannerRecepcion"></div>
@@ -1806,7 +1806,10 @@
               sel.disabled = false;
             }
           } catch (err) {
-            mostrarBanner('#bannerFactura', 'error', 'No pudimos conectar con el servidor.');
+            // apiAdmin lanza en 401/403 (sesión). Cualquier otro fallo es de red.
+            mostrarBanner('#bannerFactura', 'error', err.message === 'Sesión inválida'
+              ? 'Tu sesión expiró. Vuelve a iniciar sesión.'
+              : 'No pudimos conectar con el servidor.');
             sel.value = previo;
             sel.disabled = false;
           }
@@ -2232,13 +2235,135 @@
     finally { setCargando(btn,false); }
   });
   function cancelarNuevo(){ $('#recepcionFormNuevo').style.display='none'; $('#bannerRecepcion').innerHTML=''; $('#recepcionTracking').value=''; $('#recepcionTracking').focus(); clienteRecepcionId=null; }
+  // ============ ESCÁNER DE CÓDIGO DE BARRAS ============
+  // Usa ZXing, que sí lee Code128 / Code39 / ITF (los de UPS, FedEx, USPS).
+  // La librería se carga solo cuando se abre la cámara, no al cargar la página.
+  let zxingControls = null;
+  let zxingReader = null;
+  let cargandoZXing = null;
+
+  function cargarZXing(){
+    if (window.ZXingBrowser) return Promise.resolve();
+    if (cargandoZXing) return cargandoZXing;
+    // Dos CDN: si unpkg falla, se intenta jsDelivr
+    const FUENTES = [
+      'https://unpkg.com/@zxing/browser@0.1.5',
+      'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5',
+    ];
+    cargandoZXing = new Promise((resolve, reject) => {
+      let i = 0;
+      const intentar = () => {
+        if (i >= FUENTES.length) {
+          cargandoZXing = null;
+          reject(new Error('No se pudo cargar el lector de códigos.'));
+          return;
+        }
+        const s = document.createElement('script');
+        s.src = FUENTES[i++];
+        s.onload = () => window.ZXingBrowser ? resolve() : intentar();
+        s.onerror = () => intentar();
+        document.head.appendChild(s);
+      };
+      intentar();
+    });
+    return cargandoZXing;
+  }
+
+  function estadoCamara(texto, color){
+    const el = document.getElementById('camaraEstado');
+    if(el){ el.textContent = texto; el.style.color = color || '#fff'; }
+  }
+
+  // Pitido corto al leer, para saber que capturó sin mirar la pantalla
+  function pitido(){
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880; gain.gain.value = 0.25;
+      osc.start(); osc.stop(ctx.currentTime + 0.13);
+      setTimeout(() => ctx.close(), 400);
+    } catch(e){}
+  }
+
+  function construirHints(){
+    try {
+      const BF = window.ZXingBrowser?.BarcodeFormat || window.ZXing?.BarcodeFormat;
+      const DHT = window.ZXingBrowser?.DecodeHintType || window.ZXing?.DecodeHintType;
+      if(!BF || !DHT) return undefined;
+      const hints = new Map();
+      hints.set(DHT.POSSIBLE_FORMATS, [
+        BF.CODE_128, BF.CODE_39, BF.ITF, BF.CODABAR,
+        BF.EAN_13, BF.UPC_A, BF.QR_CODE, BF.DATA_MATRIX,
+      ]);
+      hints.set(DHT.TRY_HARDER, true);
+      return hints;
+    } catch(e){ return undefined; }
+  }
+
+  // Limpia lo que devuelve el lector: sin espacios y en mayúsculas
+  function limpiarTracking(texto){
+    return String(texto || '').replace(/\s+/g, '').toUpperCase();
+  }
+
+  async function abrirCamara(){
+    const camaraBox = $('#camaraRecepcion');
+    camaraBox.style.display = 'block';
+    estadoCamara('Cargando lector…');
+    try {
+      await cargarZXing();
+    } catch(e){
+      estadoCamara('No se pudo cargar el lector', '#ffb4b4');
+      mostrarBanner('#bannerRecepcion','error','No se pudo cargar el lector de códigos. Revisa tu conexión.');
+      return;
+    }
+    estadoCamara('Apunta al código de barras de la etiqueta');
+    try {
+      zxingReader = new ZXingBrowser.BrowserMultiFormatReader(construirHints(), { delayBetweenScanAttempts: 120 });
+      zxingControls = await zxingReader.decodeFromConstraints(
+        { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+        document.getElementById('camaraVideo'),
+        (resultado, error) => {
+          if(!resultado) return;
+          const codigo = limpiarTracking(resultado.getText ? resultado.getText() : resultado.text);
+          if(!codigo || codigo.length < 5) return;
+          pitido();
+          estadoCamara('✓ ' + codigo, '#7cf5c4');
+          $('#recepcionTracking').value = codigo;
+          setTimeout(() => {
+            cerrarCamara();
+            $('#formRecepcion').dispatchEvent(new Event('submit', { cancelable: true }));
+          }, 350);
+        }
+      );
+      // Guardamos el stream para poder apagarlo aunque falle el control
+      const v = document.getElementById('camaraVideo');
+      if(v && v.srcObject) camaraStream = v.srcObject;
+    } catch(e){
+      console.error('Error abriendo cámara:', e);
+      camaraBox.style.display = 'none';
+      const msg = (e && e.name === 'NotAllowedError')
+        ? 'Diste permiso denegado a la cámara. Actívalo en los ajustes del navegador.'
+        : 'No se pudo acceder a la cámara.';
+      mostrarBanner('#bannerRecepcion','error', msg);
+    }
+  }
+
   $('#btnCamara').addEventListener('click', async ()=>{
-    const camaraBox=$('#camaraRecepcion');
-    if(camaraBox.style.display==='block'){ cerrarCamara(); return; }
-    try { camaraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); $('#camaraVideo').srcObject=camaraStream; camaraBox.style.display='block'; }
-    catch(e){ mostrarBanner('#bannerRecepcion','error','No se pudo acceder a la cámara.'); }
+    const camaraBox = $('#camaraRecepcion');
+    if(camaraBox.style.display === 'block'){ cerrarCamara(); return; }
+    await abrirCamara();
   });
-  window.cerrarCamara=function(){ if(camaraStream){ camaraStream.getTracks().forEach(t=>t.stop()); camaraStream=null; } $('#camaraRecepcion').style.display='none'; };
+
+  window.cerrarCamara = function(){
+    try { if(zxingControls) zxingControls.stop(); } catch(e){}
+    zxingControls = null;
+    try { if(zxingReader && zxingReader.reset) zxingReader.reset(); } catch(e){}
+    const v = document.getElementById('camaraVideo');
+    if(v && v.srcObject){ v.srcObject.getTracks().forEach(t => t.stop()); v.srcObject = null; }
+    if(camaraStream){ camaraStream.getTracks().forEach(t => t.stop()); camaraStream = null; }
+    $('#camaraRecepcion').style.display = 'none';
+  };
   let flujoFotoDimPaqueteId=null, flujoFotoDimTracking='';
   function iniciarFlujoFotoDimensiones(paqueteId,tracking){ flujoFotoDimPaqueteId=paqueteId; flujoFotoDimTracking=tracking; $('#recepcionFormNuevo').style.display='none'; $('#recepcionResultado').style.display='none'; $('#pasoFotoSub').textContent=`Toma una foto de "${tracking}" recién recibido.`; $('#pasoFoto').style.display='block'; $('#pasoDimensiones').style.display='none'; $('#bannerPasoFoto').innerHTML=''; }
   $('#btnAbrirCamaraFoto').addEventListener('click',()=>{ $('#pasoFotoInput').value=''; $('#pasoFotoInput').click(); });
