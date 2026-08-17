@@ -4,6 +4,16 @@ const pool = require('../db');
 const { requiereAutenticacion } = require('../middleware/auth');
 const router = express.Router();
 
+// Columnas que se devuelven al cliente (nunca firma_base64: rompe el JSON)
+const COLS = `p.id, p.usuario_id, p.tienda, p.numero_tracking, p.descripcion, p.valor_declarado,
+              p.peso_lb, p.peso_real_lb, p.peso_confirmado, p.estado,
+              p.largo_in, p.ancho_in, p.alto_in, p.peso_volumetrico_lb,
+              p.fecha_prealerta, p.fecha_actualizacion, p.fecha_entrega,
+              p.firma_url, p.retirado_por_nombre, p.retirado_por_cedula,
+              p.sucursal_id,
+              s.nombre AS sucursal_nombre, s.direccion AS sucursal_direccion,
+              s.telefono AS sucursal_telefono, s.horario AS sucursal_horario`;
+
 // --- POST /api/paquetes/prealertar ---
 router.post(
   '/prealertar',
@@ -40,12 +50,11 @@ router.post(
 router.get('/', requiereAutenticacion, async (req, res) => {
   try {
     const resultado = await pool.query(
-      `SELECT id, usuario_id, tienda, numero_tracking, descripcion, valor_declarado,
-              peso_lb, peso_real_lb, peso_confirmado, estado,
-              largo_in, ancho_in, alto_in, peso_volumetrico_lb,
-              fecha_prealerta, fecha_actualizacion, fecha_entrega,
-              firma_url, retirado_por_nombre, retirado_por_cedula
-       FROM paquetes WHERE usuario_id = $1 ORDER BY fecha_prealerta DESC`,
+      `SELECT ${COLS}
+       FROM paquetes p
+       LEFT JOIN sucursales s ON s.id = p.sucursal_id
+       WHERE p.usuario_id = $1
+       ORDER BY p.fecha_prealerta DESC`,
       [req.usuario.id]
     );
     return res.json({ paquetes: resultado.rows });
@@ -55,8 +64,7 @@ router.get('/', requiereAutenticacion, async (req, res) => {
   }
 });
 
-// --- DELETE /api/paquetes/:id ---
-// Solo permite borrar prealertados (no recibidos aún)
+// --- DELETE /api/paquetes/:id --- (solo prealertados)
 router.delete('/:id', requiereAutenticacion, async (req, res) => {
   try {
     const resultado = await pool.query(
@@ -77,12 +85,10 @@ router.delete('/:id', requiereAutenticacion, async (req, res) => {
 router.get('/:id', requiereAutenticacion, async (req, res) => {
   try {
     const resultado = await pool.query(
-      `SELECT id, usuario_id, tienda, numero_tracking, descripcion, valor_declarado,
-              peso_lb, peso_real_lb, peso_confirmado, estado,
-              largo_in, ancho_in, alto_in, peso_volumetrico_lb,
-              fecha_prealerta, fecha_actualizacion, fecha_entrega,
-              firma_url, retirado_por_nombre, retirado_por_cedula
-       FROM paquetes WHERE id = $1 AND usuario_id = $2`,
+      `SELECT ${COLS}
+       FROM paquetes p
+       LEFT JOIN sucursales s ON s.id = p.sucursal_id
+       WHERE p.id = $1 AND p.usuario_id = $2`,
       [req.params.id, req.usuario.id]
     );
     if (resultado.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
