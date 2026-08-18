@@ -249,6 +249,65 @@ router.patch(
   }
 );
 
+// --- PATCH /api/admin/paquetes/:id/cliente ---
+// Reasigna un paquete a otro cliente. Si ya tiene factura activa,
+// la mueve también, para que no quede a nombre de quien no es.
+router.patch(
+  '/:id/cliente',
+  [body('usuario_id').isInt().withMessage('usuario_id es obligatorio')],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
+    const client = await pool.connect();
+    try {
+      const paqueteRes = await client.query('SELECT * FROM paquetes WHERE id = $1', [req.params.id]);
+      if (paqueteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+      const paquete = paqueteRes.rows[0];
+
+      if (paquete.estado === 'entregado') {
+        return res.status(409).json({ mensaje: 'Este paquete ya fue entregado. No se puede cambiar de cliente.' });
+      }
+
+      const clienteRes = await client.query(
+        'SELECT id, nombre, apellido, email, numero_casillero FROM usuarios WHERE id = $1',
+        [req.body.usuario_id]
+      );
+      if (clienteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Cliente no encontrado' });
+      const nuevoCliente = clienteRes.rows[0];
+
+      if (paquete.usuario_id === nuevoCliente.id) {
+        return res.status(409).json({ mensaje: 'El paquete ya está a nombre de ese cliente.' });
+      }
+
+      await client.query('BEGIN');
+      await client.query(
+        'UPDATE paquetes SET usuario_id = $1, fecha_actualizacion = NOW() WHERE id = $2',
+        [nuevoCliente.id, req.params.id]
+      );
+      // Mueve también las facturas no anuladas del paquete
+      const facturas = await client.query(
+        `UPDATE facturas SET usuario_id = $1
+         WHERE paquete_id = $2 AND estado <> 'anulada'
+         RETURNING numero_factura`,
+        [nuevoCliente.id, req.params.id]
+      );
+      await client.query('COMMIT');
+
+      return res.json({
+        mensaje: `Paquete reasignado a ${nuevoCliente.nombre} ${nuevoCliente.apellido}.`,
+        cliente: nuevoCliente,
+        facturas_movidas: facturas.rows.map(f => f.numero_factura),
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Error en PATCH /admin/paquetes/:id/cliente:', error);
+      return res.status(500).json({ mensaje: 'Error interno al reasignar el paquete' });
+    } finally {
+      client.release();
+    }
+  }
+);
+
 // --- PATCH /api/admin/paquetes/:id/dimensiones ---
 router.patch(
   '/:id/dimensiones',
