@@ -72,6 +72,7 @@ async function enviarCorreoConfirmacion(destinatario, nombre, tokenVerificacion)
 async function enviarFacturaPorCorreo(destinatario, nombre, factura, pdfBuffer) {
   return enviarConTemplate(
     destinatario,
+    `Factura ${factura.numero_factura} — NEA Cargo Xpress`,
     TEMPLATE_FACTURA,
     variablesFactura(nombre, factura),
     factura.numero_factura,
@@ -135,6 +136,7 @@ async function enviarCorreoNuevoRegistroAdmin(usuario) {
 async function enviarFacturaListaParaRetiro(destinatario, nombre, factura, pdfBuffer) {
   return enviarConTemplate(
     destinatario,
+    `Tu paquete está listo para retiro — Factura ${factura.numero_factura} — NEA Cargo Xpress`,
     TEMPLATE_FACTURA,
     variablesFactura(nombre, factura),
     factura.numero_factura,
@@ -142,7 +144,7 @@ async function enviarFacturaListaParaRetiro(destinatario, nombre, factura, pdfBu
   );
 }
 
-/** Envío usando un template publicado en Resend (el asunto sale del template) */
+/** Envío usando un template publicado en Resend, con PDF adjunto opcional */
 async function enviarConTemplate(destinatario, asunto, templateId, variables, nombreArchivo, pdfBuffer) {
   const cuerpo = {
     from: process.env.EMAIL_FROM || 'NEA Cargo Xpress <onboarding@resend.dev>',
@@ -150,6 +152,9 @@ async function enviarConTemplate(destinatario, asunto, templateId, variables, no
     subject: asunto,
     template: { id: templateId, variables },
   };
+  if (pdfBuffer) {
+    cuerpo.attachments = [{ filename: `${nombreArchivo}.pdf`, content: pdfBuffer.toString('base64') }];
+  }
   const respuesta = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
