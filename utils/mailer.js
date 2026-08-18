@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const TEMPLATE_FACTURA = 'invoice-attached';
+
 const ESTADO_LABEL = {
   prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
   en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
@@ -30,6 +32,27 @@ function bloqueSucursal(suc) {
     <p style="margin:0 0 18px;font-size:13px;color:#6b7280;">Recuerda llevar tu cédula de identidad.</p>`;
 }
 
+/**
+ * Arma las variables que espera el template "invoice-attached" en Resend.
+ * Ninguna puede ir vacía o nula: si falta un dato, Resend rechaza el envío.
+ */
+function variablesFactura(nombre, factura) {
+  const tieneSucursal = !!(factura && factura.sucursal_nombre);
+  return {
+    NOMBRE: nombre || 'Cliente',
+    FACTURA: factura.numero_factura || '-',
+    TIENDA: factura.tienda || '-',
+    TRACKING: factura.numero_tracking || '-',
+    MONTO: Number(factura.total || 0).toFixed(2),
+    SUCURSAL_NOMBRE: tieneSucursal ? factura.sucursal_nombre : 'Cualquiera de nuestras sucursales',
+    SUCURSAL_DIRECCION: tieneSucursal
+      ? (factura.sucursal_direccion || '-')
+      : 'Escríbenos y te indicamos la más cercana.',
+    SUCURSAL_HORARIO: tieneSucursal ? (factura.sucursal_horario || '-') : 'Lun a Vie',
+    SUCURSAL_TELEFONO: tieneSucursal ? (factura.sucursal_telefono || '-') : '-',
+  };
+}
+
 async function enviarCorreoConfirmacion(destinatario, nombre, tokenVerificacion) {
   const enlaceVerificacion = `${process.env.BASE_URL}/api/auth/verificar/${tokenVerificacion}`;
   const html = `
@@ -47,14 +70,13 @@ async function enviarCorreoConfirmacion(destinatario, nombre, tokenVerificacion)
 }
 
 async function enviarFacturaPorCorreo(destinatario, nombre, factura, pdfBuffer) {
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
-      <h2>¡Hola, ${nombre}!</h2>
-      <p>Adjunto encontrarás la factura <strong>${factura.numero_factura}</strong> de tu paquete (${factura.tienda} — tracking ${factura.numero_tracking}).</p>
-      <p><strong>Total a pagar: $${Number(factura.total).toFixed(2)}</strong></p>
-      <p>Si tienes alguna duda, contáctanos respondiendo este correo.</p>
-    </div>`;
-  return enviarConAdjunto(destinatario, `Factura ${factura.numero_factura} — NEA Cargo Xpress`, html, factura.numero_factura, pdfBuffer);
+  return enviarConTemplate(
+    destinatario,
+    TEMPLATE_FACTURA,
+    variablesFactura(nombre, factura),
+    factura.numero_factura,
+    pdfBuffer
+  );
 }
 
 async function enviarCorreoCambioEstado(destinatario, nombre, paquete) {
@@ -111,28 +133,35 @@ async function enviarCorreoNuevoRegistroAdmin(usuario) {
 }
 
 async function enviarFacturaListaParaRetiro(destinatario, nombre, factura, pdfBuffer) {
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto;">
-      <h2>¡Hola, ${nombre}!</h2>
-      <p>¡Tu paquete ya está listo para que lo retires! 🎉</p>
-      <div style="background:#f5f6f8;border-radius:8px;padding:16px;margin:20px 0;">
-        <p style="margin:0 0 6px;"><strong>${factura.tienda}</strong></p>
-        <p style="margin:0 0 6px;color:#6b7280;">Tracking: ${factura.numero_tracking}</p>
-        <p style="margin:0;"><span style="background:#ff6a1a;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;">Listo para retiro</span></p>
-      </div>
-      ${bloqueSucursal(factura)}
-      <p>Adjunto encontrarás la factura <strong>${factura.numero_factura}</strong> — está <strong>pendiente de pago</strong>, la puedes cancelar directamente al momento de retirar tu paquete.</p>
-      <p><strong>Total a pagar: $${Number(factura.total).toFixed(2)}</strong></p>
-      <p>Te esperamos. Si tienes alguna duda, contáctanos respondiendo este correo.</p>
-    </div>`;
-  return enviarConAdjunto(
+  return enviarConTemplate(
     destinatario,
-    `Tu paquete está listo para retiro — Factura ${factura.numero_factura} — NEA Cargo Xpress`,
-    html, factura.numero_factura, pdfBuffer
+    TEMPLATE_FACTURA,
+    variablesFactura(nombre, factura),
+    factura.numero_factura,
+    pdfBuffer
   );
 }
 
-/** Envío con PDF adjunto */
+/** Envío usando un template publicado en Resend (el asunto sale del template) */
+async function enviarConTemplate(destinatario, templateId, variables, nombreArchivo, pdfBuffer) {
+  const cuerpo = {
+    from: process.env.EMAIL_FROM || 'NEA Cargo Xpress <onboarding@resend.dev>',
+    to: destinatario,
+    template: { id: templateId, variables },
+  };
+  if (pdfBuffer) {
+    cuerpo.attachments = [{ filename: `${nombreArchivo}.pdf`, content: pdfBuffer.toString('base64') }];
+  }
+  const respuesta = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(cuerpo),
+  });
+  if (!respuesta.ok) { const d = await respuesta.text(); throw new Error(`Resend respondió ${respuesta.status}: ${d}`); }
+  return respuesta.json();
+}
+
+/** Envío con PDF adjunto (HTML directo, sin template) */
 async function enviarConAdjunto(destinatario, asunto, html, nombreArchivo, pdfBuffer) {
   const respuesta = await fetch('https://api.resend.com/emails', {
     method: 'POST',
