@@ -143,15 +143,13 @@ async function enviarFacturaListaParaRetiro(destinatario, nombre, factura, pdfBu
 }
 
 /** Envío usando un template publicado en Resend (el asunto sale del template) */
-async function enviarConTemplate(destinatario, templateId, variables, nombreArchivo, pdfBuffer) {
+async function enviarConTemplate(destinatario, asunto, templateId, variables, nombreArchivo, pdfBuffer) {
   const cuerpo = {
     from: process.env.EMAIL_FROM || 'NEA Cargo Xpress <onboarding@resend.dev>',
     to: destinatario,
+    subject: asunto,
     template: { id: templateId, variables },
   };
-  if (pdfBuffer) {
-    cuerpo.attachments = [{ filename: `${nombreArchivo}.pdf`, content: pdfBuffer.toString('base64') }];
-  }
   const respuesta = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
