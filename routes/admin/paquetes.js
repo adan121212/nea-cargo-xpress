@@ -75,6 +75,7 @@ router.get(
         `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
                 u.email AS cliente_email, u.numero_casillero,
                 (NOW()::date - p.fecha_prealerta::date) AS dias_transcurridos,
+                (p.fecha_entrega::date - p.fecha_prealerta::date) AS dias_hasta_entrega,
                 s.nombre AS sucursal_nombre,
                 f.id AS factura_id, f.numero_factura, f.estado AS factura_estado
          FROM paquetes p
