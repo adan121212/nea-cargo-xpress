@@ -44,11 +44,12 @@ router.get(
     query('fecha_desde').optional().isDate(),
     query('fecha_hasta').optional().isDate(),
     query('page').optional().isInt({ min: 1 }),
+    query('antiguedad').optional().isInt({ min: 1 }),
   ],
   async (req, res) => {
     const errores = validationResult(req);
     if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
-    const { estado, email, tracking, fecha_desde, fecha_hasta } = req.query;
+    const { estado, email, tracking, fecha_desde, fecha_hasta, antiguedad } = req.query;
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const offset = (page - 1) * PAGE_SIZE;
     const condiciones = [];
@@ -58,6 +59,11 @@ router.get(
     if (tracking) { valores.push(`%${tracking}%`); condiciones.push(`p.numero_tracking ILIKE $${valores.length}`); }
     if (fecha_desde) { valores.push(fecha_desde); condiciones.push(`p.fecha_prealerta >= $${valores.length}::date`); }
     if (fecha_hasta) { valores.push(fecha_hasta); condiciones.push(`p.fecha_prealerta < ($${valores.length}::date + INTERVAL '1 day')`); }
+    if (antiguedad) {
+      valores.push(parseInt(antiguedad));
+      // Paquetes que llevan N días o más sin retirarse (los entregados no cuentan)
+      condiciones.push(`(NOW()::date - p.fecha_prealerta::date) >= $${valores.length} AND p.estado <> 'entregado'`);
+    }
     const where = condiciones.length ? `WHERE ${condiciones.join(' AND ')}` : '';
     try {
       const totalRes = await pool.query(
@@ -68,6 +74,7 @@ router.get(
       const resultado = await pool.query(
         `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
                 u.email AS cliente_email, u.numero_casillero,
+                (NOW()::date - p.fecha_prealerta::date) AS dias_transcurridos,
                 s.nombre AS sucursal_nombre,
                 f.id AS factura_id, f.numero_factura, f.estado AS factura_estado
          FROM paquetes p
