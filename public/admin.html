@@ -149,7 +149,7 @@
   }
   /* ===================== LOGIN ===================== */
   #vistaLogin{
-    display:flex; justify-content:center; padding-top: 60px;
+    display:flex; justify-content:center; align-items:center; padding: 20px;
     position: relative; min-height: 100vh;
     margin-left: 0 !important;
   }
@@ -530,7 +530,7 @@
 <!-- ======================= SIDEBAR ======================= -->
 <div class="sidebar" id="sidebar">
   <div class="sb-logo">
-    <div class="sb-logo-row">
+    <div class="sb-logo-row" onclick="localStorage.removeItem('nea_cargo_admin_token'); window.location.replace('index.html');" style="cursor:pointer;" title="Ir al inicio">
       <div class="sb-mark">N</div>
       <div>
         <div class="sb-brand-text">NEA CARGO XPRESS</div>
@@ -595,7 +595,7 @@
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 <!-- Topbar solo móvil -->
 <div class="topbar-movil" id="topbarMovil">
-  <div class="sb-logo-row">
+  <div class="sb-logo-row" onclick="localStorage.removeItem('nea_cargo_admin_token'); window.location.replace('index.html');" style="cursor:pointer;">
     <div class="sb-mark">N</div>
     <div class="sb-brand-text" style="font-size:12px;">NEA CARGO XPRESS</div>
   </div>
@@ -604,7 +604,7 @@
 <!-- ======================= CONTENIDO PRINCIPAL ======================= -->
 <div class="main-content">
   <!-- ======================= LOGIN ======================= -->
-  <div id="vistaLogin" style="display:flex; justify-content:center; padding-top:60px; min-height:100vh; position:relative;">
+  <div id="vistaLogin" style="display:flex; justify-content:center; align-items:center; min-height:100vh; position:relative;">
     <canvas id="loginNetworkCanvas" style="position:fixed;inset:0;z-index:-1;"></canvas>
     <div style="position:fixed;inset:0;background:var(--ink);z-index:-2;"></div>
     <div class="login-card">
