@@ -6,8 +6,10 @@ const multer = require('multer');
 const { body, validationResult } = require('express-validator');
 const pool = require('../db');
 const { enviarCorreoConfirmacion, enviarCorreoRecuperacion, enviarCorreoNuevoRegistroAdmin } = require('../utils/mailer');
+const { enviarCorreoCasillero } = require('../utils/correoCasillero');
 const { generarNumeroCasillero } = require('../utils/casillero');
 const cloudinary = require('../utils/cloudinary');
+
 const router = express.Router();
 
 // Hash señuelo para evitar timing attacks en el login
@@ -43,7 +45,6 @@ router.post(
     if (!req.body.password || req.body.password.length < 8) {
       erroresBase.push({ msg: 'La contraseña debe tener al menos 8 caracteres' });
     }
-
     if (tipo_cuenta === 'personal') {
       if (!req.body.nombre?.trim()) erroresBase.push({ msg: 'El nombre es obligatorio' });
       if (!req.body.apellido?.trim()) erroresBase.push({ msg: 'El apellido es obligatorio' });
@@ -53,7 +54,6 @@ router.post(
       if (!req.body.nombre_contacto?.trim()) erroresBase.push({ msg: 'El nombre del contacto es obligatorio' });
       if (!req.file) erroresBase.push({ msg: 'El aviso de operación en PDF es obligatorio para cuentas de empresa' });
     }
-
     if (erroresBase.length > 0) {
       return res.status(400).json({ errores: erroresBase });
     }
@@ -62,6 +62,7 @@ router.post(
       nombre, apellido, email, telefono, password,
       razon_social, ruc, nombre_contacto,
     } = req.body;
+
     const emailNorm = email.trim().toLowerCase();
 
     const client = await pool.connect();
@@ -104,6 +105,7 @@ router.post(
       const apellidoDB  = tipo_cuenta === 'empresa' ? ruc.trim()          : apellido.trim();
 
       await client.query('BEGIN');
+
       const insercion = await client.query(
         `INSERT INTO usuarios
            (nombre, apellido, email, telefono, password_hash, token_verificacion,
@@ -124,14 +126,29 @@ router.post(
 
       const nuevoUsuario = insercion.rows[0];
       const numeroCasillero = generarNumeroCasillero(nuevoUsuario.id);
+
       await client.query('UPDATE usuarios SET numero_casillero = $1 WHERE id = $2', [
         numeroCasillero, nuevoUsuario.id,
       ]);
+
       await client.query('COMMIT');
 
-      // Correo de confirmación: para empresas usamos la razón social como nombre
+      // ------------------------------------------------------------------
+      // A partir de aquí el usuario YA existe en la base de datos.
+      // NINGÚN correo lleva await: si Resend falla, queda en el log pero el
+      // cliente recibe su 201 normal. Antes esto tumbaba el registro completo
+      // con un 500 aunque el usuario ya estaba creado.
+      // ------------------------------------------------------------------
       const nombreParaCorreo = tipo_cuenta === 'empresa' ? razon_social.trim() : nombre.trim();
-      await enviarCorreoConfirmacion(emailNorm, nombreParaCorreo, tokenVerificacion);
+      const nombreCompleto = tipo_cuenta === 'empresa'
+        ? razon_social.trim()
+        : `${nombre.trim()} ${apellido.trim()}`;
+
+      enviarCorreoConfirmacion(emailNorm, nombreParaCorreo, tokenVerificacion)
+        .catch(err => console.error('Correo confirmación:', err));
+
+      enviarCorreoCasillero(emailNorm, nombreCompleto, numeroCasillero)
+        .catch(err => console.error('Correo casillero:', err));
 
       enviarCorreoNuevoRegistroAdmin({
         ...nuevoUsuario,
@@ -147,7 +164,9 @@ router.post(
         usuario: { ...nuevoUsuario, numero_casillero: numeroCasillero, tipo_cuenta },
       });
     } catch (error) {
-      await client.query('ROLLBACK');
+      // El ROLLBACK va protegido: si el error ocurrió después del COMMIT,
+      // este rollback ya no aplica y no debe tapar el error real en los logs.
+      try { await client.query('ROLLBACK'); } catch (e) { /* ya se había hecho COMMIT */ }
       console.error('Error en /registro:', error);
       return res.status(500).json({ mensaje: 'Error interno al registrar el usuario' });
     } finally {
@@ -167,12 +186,17 @@ router.get('/verificar/:token', async (req, res) => {
        RETURNING id, nombre, email, numero_casillero`,
       [token]
     );
+
     if (resultado.rows.length === 0) {
       return res.status(400).send('Token inválido o cuenta ya verificada.');
     }
+
     const usuario = resultado.rows[0];
+    // Ojo: numero_casillero es el CÓDIGO DE CLIENTE, no la dirección de envío.
+    // La dirección va en el correo de bienvenida (utils/correoCasillero.js).
     return res.send(
-      `¡Tu cuenta ha sido verificada! Tu número de casillero es ${usuario.numero_casillero}. Ya puedes iniciar sesión.`
+      `¡Tu cuenta ha sido verificada! Tu código de cliente es ${usuario.numero_casillero}. ` +
+      `Tu dirección de envío en Miami te llegó por correo. Ya puedes iniciar sesión.`
     );
   } catch (error) {
     console.error('Error en /verificar:', error);
@@ -192,7 +216,9 @@ router.post(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
+
     const { email, password } = req.body;
+
     try {
       const resultado = await pool.query(
         `SELECT id, nombre, apellido, email, password_hash, verificado,
@@ -200,6 +226,7 @@ router.post(
          FROM usuarios WHERE email = $1`,
         [email]
       );
+
       const usuario = resultado.rows[0];
       const hashParaComparar = usuario ? usuario.password_hash : HASH_SENUELO;
       const coincide = await bcrypt.compare(password, hashParaComparar);
@@ -207,6 +234,7 @@ router.post(
       if (!usuario || !coincide) {
         return res.status(401).json({ mensaje: 'Correo o contraseña incorrectos' });
       }
+
       if (!usuario.verificado) {
         return res.status(403).json({
           mensaje: 'Debes confirmar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.',
@@ -248,25 +276,32 @@ router.post(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
+
     const mensajeGenerico = {
       mensaje: 'Si ese correo tiene una cuenta con nosotros, te enviamos un enlace para restablecer tu contraseña.',
     };
+
     try {
       const resultado = await pool.query(
         'SELECT id, nombre, email, verificado FROM usuarios WHERE email = $1',
         [req.body.email]
       );
+
       if (resultado.rows.length === 0 || !resultado.rows[0].verificado) {
         return res.json(mensajeGenerico);
       }
+
       const usuario = resultado.rows[0];
       const token = crypto.randomBytes(32).toString('hex');
       const expira = new Date(Date.now() + 60 * 60 * 1000);
+
       await pool.query(
         'UPDATE usuarios SET token_reset_password = $1, token_reset_expira = $2 WHERE id = $3',
         [token, expira, usuario.id]
       );
+
       await enviarCorreoRecuperacion(usuario.email, usuario.nombre, token);
+
       return res.json(mensajeGenerico);
     } catch (error) {
       console.error('Error en /olvide-password:', error);
@@ -287,19 +322,24 @@ router.post(
     if (!errores.isEmpty()) {
       return res.status(400).json({ errores: errores.array() });
     }
+
     const { token, password } = req.body;
+
     try {
       const resultado = await pool.query(
         `SELECT id FROM usuarios
          WHERE token_reset_password = $1 AND token_reset_expira > NOW()`,
         [token]
       );
+
       if (resultado.rows.length === 0) {
         return res.status(400).json({
           mensaje: 'Este enlace ya expiró o no es válido. Solicita uno nuevo.',
         });
       }
+
       const passwordHash = await bcrypt.hash(password, 10);
+
       await pool.query(
         `UPDATE usuarios
          SET password_hash = $1, token_reset_password = NULL, token_reset_expira = NULL,
@@ -307,6 +347,7 @@ router.post(
          WHERE id = $2`,
         [passwordHash, resultado.rows[0].id]
       );
+
       return res.json({ mensaje: 'Tu contraseña se actualizó correctamente. Ya puedes iniciar sesión.' });
     } catch (error) {
       console.error('Error en /restablecer-password:', error);
