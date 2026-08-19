@@ -242,6 +242,13 @@
   .badge-listo_para_retiro{ background: var(--cargo-green-bg); color: var(--cargo-green); box-shadow: 0 0 8px rgba(23,122,99,0.25); }
   .badge-entregado{ background: rgba(12,27,51,0.08); color: var(--ink-soft); }
   .badge-anulada{ background: rgba(192,57,43,0.10); color:#c0392b; }
+  .dias-chip{ display:inline-block; padding:3px 10px; border-radius:20px; font-family:var(--font-mono);
+              font-size:12px; font-weight:600; white-space:nowrap; }
+  .dias-normal{ background:rgba(12,27,51,0.06); color:var(--ink-soft); }
+  .dias-ok{ background:rgba(12,27,51,0.05); color:rgba(12,27,51,0.35); }
+  .dias-alerta{ background:var(--amber-bg); color:var(--accent-dark); }
+  .dias-vencido{ background:rgba(192,57,43,0.12); color:#c0392b; box-shadow:0 0 0 1px rgba(192,57,43,0.25); }
+  .dias-nota{ font-size:10.5px; color:var(--ink-soft); margin-top:3px; white-space:nowrap; }
   .badge-pendiente{ background: var(--amber-bg); color: var(--accent-dark); }
   .badge-pagada{ background: var(--cargo-green-bg); color: var(--cargo-green); }
   select.estado-select{ font-size:12px; padding:6px 8px; width:auto; }
@@ -821,6 +828,15 @@
         <div><label for="filtroTracking"># de tracking</label><input id="filtroTracking" type="text" placeholder="1Z999..."></div>
         <div><label for="filtroFechaDesde">Desde</label><input id="filtroFechaDesde" type="date"></div>
         <div><label for="filtroFechaHasta">Hasta</label><input id="filtroFechaHasta" type="date"></div>
+        <div>
+          <label for="filtroAntiguedad">Antigüedad</label>
+          <select id="filtroAntiguedad">
+            <option value="">Todos</option>
+            <option value="15">15 días o más</option>
+            <option value="23">Por vencer (23+)</option>
+            <option value="30">Vencidos (30+)</option>
+          </select>
+        </div>
         <div style="flex:0;"><label>&nbsp;</label><button class="btn-secondary" id="btnFiltrar">Filtrar</button></div>
       </div>
       <div id="bannerPaquetes" class="banner"></div>
@@ -829,7 +845,7 @@
           <thead>
             <tr>
               <th>Cliente</th><th>Casillero</th><th>Tienda / Tracking</th>
-              <th>Valor</th><th>Peso real (lb)</th><th>Estado</th><th>Actualizar</th><th></th>
+              <th>Valor</th><th>Peso real (lb)</th><th>Días</th><th>Estado</th><th>Actualizar</th><th></th>
             </tr>
           </thead>
           <tbody id="tbodyPaquetes"></tbody>
@@ -1334,6 +1350,7 @@
     if ($('#filtroTracking').value.trim()) params.set('tracking', $('#filtroTracking').value.trim());
     if ($('#filtroFechaDesde').value) params.set('fecha_desde', $('#filtroFechaDesde').value);
     if ($('#filtroFechaHasta').value) params.set('fecha_hasta', $('#filtroFechaHasta').value);
+    if ($('#filtroAntiguedad').value) params.set('antiguedad', $('#filtroAntiguedad').value);
     params.set('page', paginaActualPaquetes);
     try {
       const res = await apiAdmin(`/admin/paquetes?${params.toString()}`);
@@ -1351,6 +1368,25 @@
     $('#btnPagAnterior').disabled = pag.page <= 1;
     $('#btnPagSiguiente').disabled = pag.page >= pag.total_paginas;
   }
+  // Días que lleva el paquete desde que entró al sistema.
+  // Pasados 30 días ya no hay reclamo, así que se marca en rojo.
+  const DIAS_LIMITE_RECLAMO = 30;
+  function celdaDias(p){
+    const d = Number(p.dias_transcurridos ?? 0);
+    if (p.estado === 'entregado') {
+      return `<span class="dias-chip dias-ok">${d} d</span>`;
+    }
+    let clase = 'dias-normal', nota = '';
+    if (d >= DIAS_LIMITE_RECLAMO) {
+      clase = 'dias-vencido';
+      nota = '<div class="dias-nota">Sin reclamo</div>';
+    } else if (d >= DIAS_LIMITE_RECLAMO - 7) {
+      clase = 'dias-alerta';
+      nota = `<div class="dias-nota">Faltan ${DIAS_LIMITE_RECLAMO - d} d</div>`;
+    }
+    return `<span class="dias-chip ${clase}">${d} d</span>${nota}`;
+  }
+
   function renderPaquetes(paquetes){
     const tbody = $('#tbodyPaquetes');
     $('#emptyPaquetes').style.display = paquetes.length ? 'none' : 'block';
@@ -1381,6 +1417,7 @@
             </div>
           `}
         </td>
+        <td data-label="Días">${celdaDias(p)}</td>
         <td data-label="Estado"><span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span></td>
         <td data-label="Actualizar">
           ${p.estado === 'entregado' ? `<span class="estado-bloqueado" title="Ya entregado">🔒 Entregado</span>` : `
