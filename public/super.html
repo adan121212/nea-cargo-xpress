@@ -4,397 +4,397 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Súper">
-<meta name="theme-color" content="#1A1A17">
+<meta name="theme-color" content="#0E1512">
 <title>Cuenta del súper</title>
 <style>
 :root{
-  --ink:#16150F;
-  --paper:#F2F2EF;
-  --card:#FFFFFF;
-  --line:#D8D8D2;
-  --muted:#6E6E66;
-  --display:#1A1A17;
-  --led:#FFB000;
-  --over:#FF4A3D;
-  --ok:#2E7D5B;
-  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --bg:#0E1512;
+  --bg2:#16201C;
+  --paper:#F7F4EA;
+  --ink:#191913;
+  --ink2:#7A7767;
+  --line:#CFC9B6;
+  --gold:#F2B01D;
+  --alert:#E4553A;
+  --display:"Avenir Next Condensed","Avenir Next",-apple-system,"Helvetica Neue",sans-serif;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0}
+html{background:var(--bg)}
 body{
-  font-family:var(--sans);
-  background:var(--paper);
-  color:var(--ink);
-  font-size:16px;
-  line-height:1.4;
-  padding-bottom:env(safe-area-inset-bottom);
+  margin:0;background:var(--bg);color:var(--paper);
+  font-family:var(--sans);font-size:16px;line-height:1.4;
+  padding:0 0 calc(28px + env(safe-area-inset-bottom));
 }
-.wrap{max-width:640px;margin:0 auto;padding:0 12px 120px}
+.wrap{max-width:560px;margin:0 auto;padding:0 14px}
+.eyebrow{
+  font-family:var(--display);text-transform:uppercase;
+  letter-spacing:.16em;font-size:11px;font-weight:600;
+}
 
-/* ---------- display ---------- */
-.display{
-  background:var(--display);
-  border-radius:14px;
-  padding:18px 18px 14px;
-  margin:12px 0;
+/* ===== panel del total ===== */
+.panel{
   position:sticky;top:0;z-index:40;
-  box-shadow:0 4px 14px rgba(0,0,0,.18);
+  background:var(--bg2);
+  margin:0 -14px 16px;padding:calc(14px + env(safe-area-inset-top)) 20px 16px;
+  border-bottom:1px solid rgba(242,176,29,.28);
 }
-.display .eyebrow{
-  font-family:var(--mono);font-size:11px;letter-spacing:.14em;
-  text-transform:uppercase;color:#8A8A80;margin:0 0 2px;
+.panel .eyebrow{color:var(--gold);opacity:.75;margin:0 0 6px}
+.amount{
+  font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:15px;color:var(--gold);margin:0;font-weight:500;
+  display:flex;align-items:baseline;gap:6px;
 }
-.total{
-  font-family:var(--mono);
+.amount b{font-size:50px;line-height:.95;font-weight:600;letter-spacing:-.03em}
+.amount.over{color:var(--alert)}
+.pulse{animation:pop .28s ease-out}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.045)}100%{transform:scale(1)}}
+.meta{
+  display:flex;justify-content:space-between;gap:10px;margin-top:12px;
+  font-family:var(--mono);font-size:11.5px;color:#8C9A92;
   font-variant-numeric:tabular-nums;
-  font-size:52px;line-height:1;font-weight:600;
-  color:var(--led);margin:0;letter-spacing:-.02em;
-  transition:color .15s;
 }
-.total.over{color:var(--over)}
-.subline{
-  display:flex;justify-content:space-between;gap:8px;
-  font-family:var(--mono);font-size:12px;color:#8A8A80;
-  margin-top:10px;padding-top:10px;border-top:1px solid #33332D;
-  font-variant-numeric:tabular-nums;
-}
-.budgetbar{height:4px;background:#33332D;border-radius:2px;margin-top:10px;overflow:hidden}
-.budgetbar i{display:block;height:100%;background:var(--led);width:0;transition:width .2s}
-.budgetbar i.over{background:var(--over)}
+.bar{height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:11px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .25s ease-out}
+.bar i.over{background:var(--alert)}
 
-/* ---------- buttons ---------- */
-.row{display:flex;gap:8px;margin-bottom:12px}
-button{
-  font-family:var(--sans);font-size:16px;
-  border:1px solid var(--line);background:var(--card);color:var(--ink);
-  border-radius:12px;padding:14px 12px;cursor:pointer;
-  flex:1;font-weight:500;
+/* ===== botones ===== */
+.acts{display:flex;gap:10px;margin-bottom:20px}
+button{font-family:var(--sans);font-size:16px;cursor:pointer;border-radius:11px}
+.act{
+  flex:1;padding:15px 10px;font-weight:600;border:1.5px solid var(--gold);
+  background:transparent;color:var(--gold);
 }
-button:active{transform:scale(.98)}
-button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
-button.ghost{background:transparent;border-color:transparent;color:var(--muted);font-size:14px;padding:8px}
-button.danger{color:var(--over);border-color:var(--line)}
+.act.fill{background:var(--gold);color:#12100A;border-color:var(--gold)}
+.act:active{transform:scale(.985)}
+.mini{
+  background:none;border:0;color:#8C9A92;font-size:13px;padding:10px 4px;
+  font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;font-weight:600;
+}
+.mini.warn{color:#B8705F}
 
-/* ---------- lista ---------- */
-.item{
-  background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:12px 14px;margin-bottom:8px;
-  display:flex;align-items:center;gap:12px;
+/* ===== ticket ===== */
+.ticket{background:var(--paper);color:var(--ink);border-radius:3px 3px 0 0;padding:18px 16px 6px}
+.tear{display:block;width:100%;height:11px;margin-bottom:22px}
+.thead{
+  text-align:center;border-bottom:1.5px dashed var(--line);padding-bottom:12px;margin-bottom:6px;
 }
-.item .info{flex:1;min-width:0}
-.item .nm{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.item .det{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px}
-.item .amt{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600;font-size:17px}
-.qty{display:flex;align-items:center;gap:6px}
-.qty button{flex:0 0 34px;width:34px;height:34px;padding:0;font-size:19px;line-height:1;border-radius:9px}
-.qty span{font-family:var(--mono);min-width:22px;text-align:center;font-weight:600}
-.tag{
-  display:inline-block;font-family:var(--mono);font-size:10px;
-  padding:1px 5px;border-radius:4px;background:#E7E7E1;color:var(--muted);
-  margin-left:6px;vertical-align:1px;
-}
-.empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:15px}
+.thead h1{font-family:var(--display);text-transform:uppercase;letter-spacing:.2em;
+  font-size:14px;font-weight:600;margin:0 0 3px}
+.thead p{font-family:var(--mono);font-size:11px;color:var(--ink2);margin:0}
 
-/* ---------- cámara ---------- */
+.ln{padding:11px 0;border-bottom:1px solid rgba(207,201,182,.5)}
+.ln .top{display:flex;align-items:baseline;gap:0}
+.ln .nm{font-weight:500;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:58%}
+.ln .dots{flex:1;border-bottom:1.5px dotted var(--line);margin:0 7px 4px}
+.ln .pz{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600;font-size:15.5px}
+.ln .bot{display:flex;align-items:center;gap:10px;margin-top:7px}
+.ln .det{font-family:var(--mono);font-size:11.5px;color:var(--ink2);flex:1}
+.itbms{font-family:var(--display);font-size:9.5px;letter-spacing:.1em;font-weight:600;
+  border:1px solid var(--line);border-radius:3px;padding:1px 4px;color:var(--ink2);margin-left:6px;vertical-align:2px}
+.qty{display:flex;align-items:center;gap:2px}
+.qty button{width:31px;height:31px;padding:0;font-size:18px;line-height:1;
+  border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px}
+.qty span{font-family:var(--mono);font-weight:600;min-width:26px;text-align:center;font-size:14px}
+.rm{border:0;background:none;color:var(--ink2);font-size:13px;padding:6px 2px;text-decoration:underline}
+
+.sums{border-top:1.5px dashed var(--line);margin-top:8px;padding-top:12px}
+.sums div{display:flex;justify-content:space-between;font-family:var(--mono);
+  font-size:13px;color:var(--ink2);padding:3px 0;font-variant-numeric:tabular-nums}
+.sums div.big{color:var(--ink);font-size:17px;font-weight:600;padding-top:9px}
+.code{height:34px;margin:16px 0 4px;background:repeating-linear-gradient(90deg,
+  var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 10px,
+  var(--ink) 10px 13px,transparent 13px 15px,var(--ink) 15px 16px,transparent 16px 21px)}
+.codetxt{text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.35em;color:var(--ink2);margin:0 0 4px}
+.blank{text-align:center;padding:34px 16px;color:var(--ink2);font-size:14.5px;line-height:1.6}
+
+/* ===== cámara ===== */
 #cam{position:fixed;inset:0;background:#000;z-index:100;display:none}
 #cam video{width:100%;height:100%;object-fit:cover}
-#cam .frame{
-  position:absolute;top:50%;left:8%;width:84%;height:120px;margin-top:-60px;
-  border:2px solid var(--led);border-radius:10px;box-shadow:0 0 0 2000px rgba(0,0,0,.45);
-}
-#cam .close{
-  position:absolute;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
-  background:#fff;color:#000;border:0;border-radius:30px;padding:14px 34px;font-size:16px;font-weight:600;flex:0;
-}
-#cam .hint{
-  position:absolute;top:calc(20px + env(safe-area-inset-top));left:0;right:0;text-align:center;
-  color:#fff;font-size:14px;padding:0 20px;
-}
+#cam .box{position:absolute;top:50%;left:9%;width:82%;height:130px;margin-top:-65px;
+  box-shadow:0 0 0 2000px rgba(6,10,8,.55);border-radius:8px}
+#cam .box i{position:absolute;width:26px;height:26px;border:2.5px solid var(--gold)}
+#cam .box i:nth-child(1){top:-2px;left:-2px;border-right:0;border-bottom:0;border-radius:8px 0 0 0}
+#cam .box i:nth-child(2){top:-2px;right:-2px;border-left:0;border-bottom:0;border-radius:0 8px 0 0}
+#cam .box i:nth-child(3){bottom:-2px;left:-2px;border-right:0;border-top:0;border-radius:0 0 0 8px}
+#cam .box i:nth-child(4){bottom:-2px;right:-2px;border-left:0;border-top:0;border-radius:0 0 8px 0}
+#cam .scan{position:absolute;left:6px;right:6px;height:2px;background:var(--gold);
+  top:14px;opacity:.85;animation:sweep 2s ease-in-out infinite}
+@keyframes sweep{0%,100%{transform:translateY(0)}50%{transform:translateY(98px)}}
+#cam .hint{position:absolute;top:calc(26px + env(safe-area-inset-top));left:0;right:0;
+  text-align:center;color:#fff;font-size:14.5px;padding:0 24px}
+#cam .close{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom));left:50%;
+  transform:translateX(-50%);background:var(--gold);color:#12100A;border:0;
+  border-radius:30px;padding:15px 40px;font-size:16px;font-weight:600}
 
-/* ---------- modal ---------- */
-#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:120;display:none;align-items:flex-end}
-#modal .sheet{
-  background:var(--paper);width:100%;border-radius:18px 18px 0 0;padding:20px 16px;
-  padding-bottom:calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;
-}
-#modal h3{margin:0 0 4px;font-size:19px}
-#modal .code{font-family:var(--mono);font-size:12px;color:var(--muted);margin:0 0 16px}
-label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px;font-weight:500}
-input[type=text],input[type=number]{
-  width:100%;font-size:16px;font-family:var(--sans);
-  padding:13px 12px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--ink);
-}
+/* ===== hoja ===== */
+#modal{position:fixed;inset:0;background:rgba(6,10,8,.62);z-index:120;display:none;align-items:flex-end}
+#modal .sheet{background:var(--paper);color:var(--ink);width:100%;max-width:560px;margin:0 auto;
+  border-radius:16px 16px 0 0;padding:22px 18px;max-height:93vh;overflow:auto;
+  padding-bottom:calc(22px + env(safe-area-inset-bottom))}
+#modal h2{font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;
+  font-size:15px;font-weight:600;margin:0 0 3px}
+#modal .sub{font-family:var(--mono);font-size:11.5px;color:var(--ink2);margin:0 0 18px}
+label{display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.1em;
+  font-size:10.5px;font-weight:600;color:var(--ink2);margin:15px 0 6px}
+input[type=text],input[type=number]{width:100%;font-size:16px;padding:13px 12px;
+  border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-family:var(--sans)}
 input[type=number]{font-family:var(--mono);font-weight:600}
-.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--card)}
-.seg button{border:0;border-radius:0;background:transparent;font-size:15px;padding:12px}
-.seg button.on{background:var(--ink);color:#fff}
-.check{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:15px}
-.check input{width:22px;height:22px;accent-color:var(--ink)}
-.err{color:var(--over);font-size:13px;margin-top:6px;display:none}
+input:focus{outline:2px solid var(--ink);outline-offset:-1px}
+.seg{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.seg button{flex:1;border:0;border-radius:0;background:transparent;color:var(--ink2);
+  padding:13px 8px;font-size:15px;font-weight:500}
+.seg button.on{background:var(--ink);color:var(--paper)}
+.chk{display:flex;align-items:center;gap:11px;margin-top:18px}
+.chk input{width:23px;height:23px;accent-color:var(--ink);flex:0 0 auto}
+.chk label{margin:0;font-family:var(--sans);text-transform:none;letter-spacing:0;
+  font-size:15px;color:var(--ink);font-weight:400}
+.err{color:var(--alert);font-size:13.5px;margin:10px 0 0;display:none}
+.sheet .acts{margin:20px 0 0}
+.sheet .act{border-color:var(--ink);color:var(--ink)}
+.sheet .act.fill{background:var(--ink);color:var(--paper)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+
+<div class="panel">
+  <p class="eyebrow" id="eyebrow">Total a pagar</p>
+  <p class="amount" id="amount"><span>B/.</span><b id="total">0.00</b></p>
+  <div class="meta">
+    <span id="cnt">0 artículos</span>
+    <span id="left"></span>
+  </div>
+  <div class="bar" id="bar" style="display:none"><i id="fill"></i></div>
+</div>
+
 <div class="wrap">
-
-  <div class="display">
-    <p class="eyebrow" id="eyebrow">Total a pagar</p>
-    <p class="total" id="total">B/. 0.00</p>
-    <div class="subline">
-      <span id="cnt">0 artículos</span>
-      <span id="tax">ITBMS B/. 0.00</span>
-    </div>
-    <div class="budgetbar" id="bar" style="display:none"><i id="barfill"></i></div>
+  <div class="acts">
+    <button class="act fill" id="btnScan">Escanear</button>
+    <button class="act" id="btnManual">Sin código</button>
   </div>
 
-  <div class="row">
-    <button class="primary" id="btnScan">Escanear</button>
-    <button id="btnManual">Sin código</button>
-  </div>
+  <div class="ticket" id="ticket"></div>
+  <svg class="tear" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
+    <polygon points="0,0 100,0 100,0 97.5,6 95,0 92.5,6 90,0 87.5,6 85,0 82.5,6 80,0 77.5,6 75,0 72.5,6 70,0 67.5,6 65,0 62.5,6 60,0 57.5,6 55,0 52.5,6 50,0 47.5,6 45,0 42.5,6 40,0 37.5,6 35,0 32.5,6 30,0 27.5,6 25,0 22.5,6 20,0 17.5,6 15,0 12.5,6 10,0 7.5,6 5,0 2.5,6 0,0" fill="#F7F4EA"/>
+  </svg>
 
-  <div id="lista"></div>
-
-  <div class="row" style="margin-top:16px">
-    <button class="ghost" id="btnBudget">Presupuesto</button>
-    <button class="ghost danger" id="btnClear">Nueva compra</button>
+  <div class="acts">
+    <button class="mini" id="btnBudget">Presupuesto</button>
+    <button class="mini warn" id="btnClear">Nueva compra</button>
   </div>
 </div>
 
 <div id="cam">
   <video id="video" playsinline muted></video>
-  <div class="frame"></div>
+  <div class="box"><i></i><i></i><i></i><i></i><div class="scan"></div></div>
   <p class="hint" id="camhint">Apunta al código de barras</p>
   <button class="close" id="btnCamClose">Cerrar</button>
 </div>
 
 <div id="modal">
   <div class="sheet">
-    <h3 id="mTitle">Producto nuevo</h3>
-    <p class="code" id="mCode"></p>
-
+    <h2 id="mTitle">Producto nuevo</h2>
+    <p class="sub" id="mCode"></p>
     <label for="mName">Nombre</label>
     <input type="text" id="mName" placeholder="Leche 1L" autocomplete="off">
-
     <label>Se cobra por</label>
-    <div class="seg">
-      <button id="segUnit" class="on">Unidad</button>
-      <button id="segWeight">Peso (libra)</button>
-    </div>
-
+    <div class="seg"><button id="segUnit" class="on">Unidad</button><button id="segWeight">Peso (libra)</button></div>
     <label for="mPrice" id="mPriceLbl">Precio</label>
     <input type="number" id="mPrice" inputmode="decimal" step="0.01" placeholder="0.00">
-
     <div id="wBox" style="display:none">
       <label for="mWeight">Libras en la etiqueta</label>
       <input type="number" id="mWeight" inputmode="decimal" step="0.01" placeholder="0.00">
     </div>
-
-    <div class="check">
-      <input type="checkbox" id="mTax">
-      <label for="mTax" style="margin:0;color:var(--ink);font-size:15px">Paga ITBMS (7%)</label>
-    </div>
-
+    <div class="chk"><input type="checkbox" id="mTax"><label for="mTax">Paga ITBMS (7%)</label></div>
     <p class="err" id="mErr"></p>
-
-    <div class="row" style="margin-top:18px">
-      <button id="mCancel">Cancelar</button>
-      <button class="primary" id="mSave">Guardar</button>
+    <div class="acts">
+      <button class="act" id="mCancel">Cancelar</button>
+      <button class="act fill" id="mSave">Guardar</button>
     </div>
   </div>
 </div>
 
 <script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js"></script>
 <script>
-var ITBMS = 0.07;
-var cat = {}, cart = [], budget = 0;
-var mode = 'unit', editIndex = -1, pendingCode = '';
-var reader = null, controls = null, lastCode = '', lastTime = 0, zxingTried = false;
+var ITBMS=0.07, cat={}, cart=[], budget=0;
+var mode='unit', editIndex=-1, pendingCode='', prevTotal=0;
+var reader=null, controls=null, lastCode='', lastTime=0, zxingTried=false;
 
 function load(){
   try{
-    cat  = JSON.parse(localStorage.getItem('super_cat')  || '{}');
-    cart = JSON.parse(localStorage.getItem('super_cart') || '[]');
-    budget = parseFloat(localStorage.getItem('super_budget') || '0') || 0;
-  }catch(e){ cat={}; cart=[]; budget=0; }
+    cat=JSON.parse(localStorage.getItem('super_cat')||'{}');
+    cart=JSON.parse(localStorage.getItem('super_cart')||'[]');
+    budget=parseFloat(localStorage.getItem('super_budget')||'0')||0;
+  }catch(e){cat={};cart=[];budget=0;}
 }
 function save(){
   try{
-    localStorage.setItem('super_cat', JSON.stringify(cat));
-    localStorage.setItem('super_cart', JSON.stringify(cart));
-    localStorage.setItem('super_budget', String(budget));
+    localStorage.setItem('super_cat',JSON.stringify(cat));
+    localStorage.setItem('super_cart',JSON.stringify(cart));
+    localStorage.setItem('super_budget',String(budget));
   }catch(e){}
 }
-function money(n){ return 'B/. ' + (Math.round(n*100)/100).toFixed(2); }
+function n2(n){return (Math.round(n*100)/100).toFixed(2);}
+function esc(s){return String(s).replace(/[<>&"]/g,function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+function lineOf(it){return Math.round((it.tipo==='peso'?it.precio*it.peso:it.precio*it.cant)*100)/100;}
 
 function totals(){
-  var sub=0, tax=0;
-  for(var i=0;i<cart.length;i++){
-    var it=cart[i];
-    var line = it.tipo==='peso' ? it.precio*it.peso : it.precio*it.cant;
-    line = Math.round(line*100)/100;
-    sub += line;
-    if(it.itbms) tax += line*ITBMS;
-  }
-  return {sub:sub, tax:Math.round(tax*100)/100, total:sub+Math.round(tax*100)/100};
+  var sub=0,tax=0;
+  for(var i=0;i<cart.length;i++){var L=lineOf(cart[i]);sub+=L;if(cart[i].itbms)tax+=L*ITBMS;}
+  tax=Math.round(tax*100)/100;
+  return {sub:sub,tax:tax,total:sub+tax};
 }
 
 function render(){
-  var t = totals();
-  var over = budget>0 && t.total>budget;
-  document.getElementById('total').textContent = money(t.total);
-  document.getElementById('total').className = 'total' + (over?' over':'');
-  document.getElementById('eyebrow').textContent = over ? 'Pasaste el presupuesto' : 'Total a pagar';
-
-  var n=0; for(var i=0;i<cart.length;i++) n += cart[i].tipo==='peso' ? 1 : cart[i].cant;
-  document.getElementById('cnt').textContent = n + (n===1?' artículo':' artículos');
-  document.getElementById('tax').textContent = 'ITBMS ' + money(t.tax);
-
+  var t=totals(), over=budget>0&&t.total>budget;
+  document.getElementById('total').textContent=n2(t.total);
+  document.getElementById('amount').className='amount'+(over?' over':'');
+  document.getElementById('eyebrow').textContent=over?'Pasaste el presupuesto':'Total a pagar';
+  if(t.total!==prevTotal){
+    var a=document.getElementById('amount');
+    a.classList.remove('pulse'); void a.offsetWidth; a.classList.add('pulse');
+    prevTotal=t.total;
+  }
+  var n=0;for(var i=0;i<cart.length;i++)n+=cart[i].tipo==='peso'?1:cart[i].cant;
+  document.getElementById('cnt').textContent=n+(n===1?' artículo':' artículos');
+  document.getElementById('left').textContent = budget>0
+    ? (over?'te pasaste B/. '+n2(t.total-budget):'te quedan B/. '+n2(budget-t.total))
+    : '';
   var bar=document.getElementById('bar');
   if(budget>0){
     bar.style.display='block';
-    var pct=Math.min(100,(t.total/budget)*100);
-    var f=document.getElementById('barfill');
-    f.style.width=pct+'%';
-    f.className = over?'over':'';
+    var f=document.getElementById('fill');
+    f.style.width=Math.min(100,(t.total/budget)*100)+'%';
+    f.className=over?'over':'';
   } else bar.style.display='none';
 
-  var L=document.getElementById('lista');
+  var d=new Date();
+  var h='<div class="thead"><h1>Cuenta del súper</h1><p>'
+      + String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()
+      + ' · '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'</p></div>';
+
   if(!cart.length){
-    L.innerHTML='<div class="empty">Escanea el primer producto.<br>La app te pregunta el precio una sola vez y lo recuerda.</div>';
-    save(); return;
-  }
-  var h='';
-  for(var i=0;i<cart.length;i++){
-    var it=cart[i];
-    var line = it.tipo==='peso' ? it.precio*it.peso : it.precio*it.cant;
-    var det = it.tipo==='peso'
-      ? money(it.precio)+' × '+it.peso.toFixed(2)+' lb'
-      : money(it.precio)+' c/u';
-    h += '<div class="item">'
-       +   '<div class="info" onclick="editar('+i+')">'
-       +     '<div class="nm">'+esc(it.nombre)+(it.itbms?'<span class="tag">ITBMS</span>':'')+'</div>'
-       +     '<div class="det">'+det+'</div>'
-       +   '</div>';
-    if(it.tipo==='peso'){
-      h +=  '<div class="amt">'+money(line)+'</div>'
-       +    '<div class="qty"><button onclick="quitar('+i+')">×</button></div>';
-    } else {
-      h +=  '<div class="qty">'
-       +      '<button onclick="menos('+i+')">−</button>'
-       +      '<span>'+it.cant+'</span>'
-       +      '<button onclick="mas('+i+')">+</button>'
-       +    '</div>'
-       +    '<div class="amt">'+money(line)+'</div>';
+    h+='<div class="blank">El ticket está en blanco.<br>Escanea el primer producto — la app te pregunta el precio una sola vez y lo recuerda.</div>';
+  } else {
+    for(var i=0;i<cart.length;i++){
+      var it=cart[i];
+      var det=it.tipo==='peso' ? 'B/. '+n2(it.precio)+' × '+it.peso.toFixed(2)+' lb'
+                               : 'B/. '+n2(it.precio)+' c/u';
+      h+='<div class="ln">'
+       +  '<div class="top" onclick="editar('+i+')">'
+       +    '<span class="nm">'+esc(it.nombre)+'</span>'
+       +    (it.itbms?'<span class="itbms">ITBMS</span>':'')
+       +    '<span class="dots"></span><span class="pz">'+n2(lineOf(it))+'</span>'
+       +  '</div><div class="bot">';
+      if(it.tipo==='peso'){
+        h+= '<span class="det">'+det+'</span><button class="rm" onclick="quitar('+i+')">quitar</button>';
+      } else {
+        h+= '<div class="qty"><button onclick="menos('+i+')" aria-label="Quitar uno">−</button>'
+          + '<span>'+it.cant+'</span>'
+          + '<button onclick="mas('+i+')" aria-label="Agregar uno">+</button></div>'
+          + '<span class="det">'+det+'</span>';
+      }
+      h+='</div></div>';
     }
-    h += '</div>';
+    h+='<div class="sums">'
+     + '<div><span>Subtotal</span><span>'+n2(t.sub)+'</span></div>'
+     + '<div><span>ITBMS 7%</span><span>'+n2(t.tax)+'</span></div>'
+     + '<div class="big"><span>Total</span><span>B/. '+n2(t.total)+'</span></div></div>'
+     + '<div class="code"></div><p class="codetxt">'+String(n).padStart(3,'0')+' ITEMS</p>';
   }
-  L.innerHTML=h;
+  document.getElementById('ticket').innerHTML=h;
   save();
 }
-function esc(s){ return String(s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); }
 
-function mas(i){ cart[i].cant++; render(); }
-function menos(i){ cart[i].cant--; if(cart[i].cant<=0) cart.splice(i,1); render(); }
-function quitar(i){ cart.splice(i,1); render(); }
-
-function editar(i){
-  editIndex=i; pendingCode=cart[i].codigo;
-  var it=cart[i];
-  document.getElementById('mTitle').textContent='Editar producto';
-  document.getElementById('mCode').textContent = it.codigo.indexOf('MAN-')===0 ? 'Sin código de barras' : it.codigo;
-  document.getElementById('mName').value=it.nombre;
-  document.getElementById('mPrice').value=it.precio;
-  document.getElementById('mTax').checked=!!it.itbms;
-  setMode(it.tipo==='peso'?'weight':'unit');
-  document.getElementById('mWeight').value = it.tipo==='peso' ? it.peso : '';
-  openModal();
-}
+function mas(i){cart[i].cant++;render();}
+function menos(i){cart[i].cant--;if(cart[i].cant<=0)cart.splice(i,1);render();}
+function quitar(i){cart.splice(i,1);render();}
 
 function setMode(m){
   mode=m;
-  document.getElementById('segUnit').className = m==='unit'?'on':'';
-  document.getElementById('segWeight').className = m==='weight'?'on':'';
-  document.getElementById('wBox').style.display = m==='weight'?'block':'none';
-  document.getElementById('mPriceLbl').textContent = m==='weight'?'Precio por libra':'Precio';
+  document.getElementById('segUnit').className=m==='unit'?'on':'';
+  document.getElementById('segWeight').className=m==='weight'?'on':'';
+  document.getElementById('wBox').style.display=m==='weight'?'block':'none';
+  document.getElementById('mPriceLbl').textContent=m==='weight'?'Precio por libra':'Precio';
 }
 function openModal(){
   document.getElementById('mErr').style.display='none';
   document.getElementById('modal').style.display='flex';
-  setTimeout(function(){ document.getElementById('mName').focus(); },120);
+  setTimeout(function(){document.getElementById('mName').focus();},120);
 }
-function closeModal(){
-  document.getElementById('modal').style.display='none';
-  editIndex=-1; pendingCode='';
-}
+function closeModal(){document.getElementById('modal').style.display='none';editIndex=-1;pendingCode='';}
 
+function editar(i){
+  var it=cart[i];editIndex=i;pendingCode=it.codigo;
+  document.getElementById('mTitle').textContent='Editar producto';
+  document.getElementById('mCode').textContent=it.codigo.indexOf('MAN-')===0?'Sin código de barras':it.codigo;
+  document.getElementById('mName').value=it.nombre;
+  document.getElementById('mPrice').value=it.precio;
+  document.getElementById('mTax').checked=!!it.itbms;
+  setMode(it.tipo==='peso'?'weight':'unit');
+  document.getElementById('mWeight').value=it.tipo==='peso'?it.peso:'';
+  openModal();
+}
 function nuevoProducto(codigo){
-  editIndex=-1; pendingCode=codigo;
-  var prev = cat[codigo];
-  document.getElementById('mTitle').textContent = prev?'Confirmar precio':'Producto nuevo';
-  document.getElementById('mCode').textContent = codigo.indexOf('MAN-')===0 ? 'Sin código de barras' : codigo;
-  document.getElementById('mName').value = prev?prev.nombre:'';
-  document.getElementById('mPrice').value = prev?prev.precio:'';
-  document.getElementById('mTax').checked = prev?!!prev.itbms:false;
-  setMode(prev && prev.tipo==='peso' ? 'weight':'unit');
+  editIndex=-1;pendingCode=codigo;
+  var p=cat[codigo];
+  document.getElementById('mTitle').textContent=p?'Confirmar precio':'Producto nuevo';
+  document.getElementById('mCode').textContent=codigo.indexOf('MAN-')===0?'Sin código de barras':codigo;
+  document.getElementById('mName').value=p?p.nombre:'';
+  document.getElementById('mPrice').value=p?p.precio:'';
+  document.getElementById('mTax').checked=p?!!p.itbms:false;
+  setMode(p&&p.tipo==='peso'?'weight':'unit');
   document.getElementById('mWeight').value='';
   openModal();
 }
-
 function guardar(){
   var nombre=document.getElementById('mName').value.trim();
   var precio=parseFloat(document.getElementById('mPrice').value);
   var itbms=document.getElementById('mTax').checked;
   var peso=parseFloat(document.getElementById('mWeight').value);
   var err=document.getElementById('mErr');
-
-  if(!nombre){ err.textContent='Ponle un nombre al producto.'; err.style.display='block'; return; }
-  if(!(precio>0)){ err.textContent='Escribe un precio mayor que cero.'; err.style.display='block'; return; }
-  if(mode==='weight' && !(peso>0)){ err.textContent='Escribe las libras de la etiqueta.'; err.style.display='block'; return; }
-
-  var tipo = mode==='weight'?'peso':'unidad';
+  if(!nombre){err.textContent='Ponle un nombre al producto.';err.style.display='block';return;}
+  if(!(precio>0)){err.textContent='Escribe un precio mayor que cero.';err.style.display='block';return;}
+  if(mode==='weight'&&!(peso>0)){err.textContent='Escribe las libras de la etiqueta.';err.style.display='block';return;}
+  var tipo=mode==='weight'?'peso':'unidad';
   cat[pendingCode]={nombre:nombre,precio:precio,tipo:tipo,itbms:itbms};
-
   if(editIndex>=0){
     var it=cart[editIndex];
-    it.nombre=nombre; it.precio=precio; it.itbms=itbms; it.tipo=tipo;
-    if(tipo==='peso'){ it.peso=peso; it.cant=1; }
+    it.nombre=nombre;it.precio=precio;it.itbms=itbms;it.tipo=tipo;
+    if(tipo==='peso'){it.peso=peso;it.cant=1;}
+  } else if(tipo==='peso'){
+    cart.push({codigo:pendingCode,nombre:nombre,precio:precio,itbms:itbms,tipo:'peso',peso:peso,cant:1});
   } else {
-    if(tipo==='peso'){
-      cart.push({codigo:pendingCode,nombre:nombre,precio:precio,itbms:itbms,tipo:'peso',peso:peso,cant:1});
-    } else {
-      var found=-1;
-      for(var i=0;i<cart.length;i++) if(cart[i].codigo===pendingCode && cart[i].tipo==='unidad') found=i;
-      if(found>=0) cart[found].cant++;
-      else cart.push({codigo:pendingCode,nombre:nombre,precio:precio,itbms:itbms,tipo:'unidad',cant:1});
-    }
+    var f=-1;
+    for(var i=0;i<cart.length;i++) if(cart[i].codigo===pendingCode&&cart[i].tipo==='unidad') f=i;
+    if(f>=0) cart[f].cant++;
+    else cart.push({codigo:pendingCode,nombre:nombre,precio:precio,itbms:itbms,tipo:'unidad',cant:1});
   }
-  closeModal(); render();
+  closeModal();render();
 }
-
 function agregarPorCodigo(codigo){
   var p=cat[codigo];
-  if(!p){ nuevoProducto(codigo); return; }
-  if(p.tipo==='peso'){ nuevoProducto(codigo); return; }
-  var found=-1;
-  for(var i=0;i<cart.length;i++) if(cart[i].codigo===codigo && cart[i].tipo==='unidad') found=i;
-  if(found>=0) cart[found].cant++;
+  if(!p||p.tipo==='peso'){nuevoProducto(codigo);return;}
+  var f=-1;
+  for(var i=0;i<cart.length;i++) if(cart[i].codigo===codigo&&cart[i].tipo==='unidad') f=i;
+  if(f>=0) cart[f].cant++;
   else cart.push({codigo:codigo,nombre:p.nombre,precio:p.precio,itbms:p.itbms,tipo:'unidad',cant:1});
   render();
 }
-
 function beep(){
   try{
-    var C=window.AudioContext||window.webkitAudioContext; if(!C) return;
-    var c=new C(); var o=c.createOscillator(); var g=c.createGain();
-    o.connect(g); g.connect(c.destination); o.frequency.value=1100; o.type='square';
+    var C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+    var c=new C(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);o.type='square';o.frequency.value=1150;
     g.gain.setValueAtTime(.12,c.currentTime);
-    o.start(); o.stop(c.currentTime+.09);
-    setTimeout(function(){ try{c.close();}catch(e){} },300);
+    o.start();o.stop(c.currentTime+.09);
+    setTimeout(function(){try{c.close();}catch(e){}},300);
   }catch(e){}
 }
-
 function abrirCamara(){
   if(typeof ZXingBrowser==='undefined'){
     if(!zxingTried){
@@ -402,71 +402,58 @@ function abrirCamara(){
       var s=document.createElement('script');
       s.src='https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js';
       s.onload=abrirCamara;
-      s.onerror=function(){ alert('No se pudo cargar el lector. Conéctate a internet una vez y vuelve a abrir la app.'); };
-      document.head.appendChild(s);
-      return;
+      s.onerror=function(){alert('No se pudo cargar el lector. Ábrela una vez con internet y vuelve a intentar.');};
+      document.head.appendChild(s);return;
     }
-    alert('El lector no está disponible sin internet. Usa el botón "Sin código".');
-    return;
+    alert('El lector no está disponible sin internet. Usa el botón "Sin código".');return;
   }
   document.getElementById('cam').style.display='block';
   document.getElementById('camhint').textContent='Apunta al código de barras';
   if(!reader) reader=new ZXingBrowser.BrowserMultiFormatReader();
-  reader.decodeFromConstraints(
-    {video:{facingMode:{ideal:'environment'}}},
-    document.getElementById('video'),
+  reader.decodeFromConstraints({video:{facingMode:{ideal:'environment'}}},document.getElementById('video'),
     function(result,err,ctrl){
-      if(ctrl) controls=ctrl;
-      if(!result) return;
-      var code=result.getText();
-      var now=Date.now();
-      if(code===lastCode && now-lastTime<2500) return;
-      lastCode=code; lastTime=now;
-      beep();
-      if(navigator.vibrate) navigator.vibrate(60);
-      if(cat[code] && cat[code].tipo!=='peso'){
+      if(ctrl)controls=ctrl;
+      if(!result)return;
+      var code=result.getText(),now=Date.now();
+      if(code===lastCode&&now-lastTime<2500)return;
+      lastCode=code;lastTime=now;beep();
+      if(navigator.vibrate)navigator.vibrate(60);
+      if(cat[code]&&cat[code].tipo!=='peso'){
         agregarPorCodigo(code);
         document.getElementById('camhint').textContent='Agregado: '+cat[code].nombre;
-      } else {
-        cerrarCamara();
-        agregarPorCodigo(code);
-      }
+      } else { cerrarCamara(); agregarPorCodigo(code); }
     }
   ).catch(function(){
     cerrarCamara();
-    alert('No se pudo abrir la cámara. Revisa que le diste permiso a Safari y que la página abra con https.');
+    alert('No se pudo abrir la cámara. Revisa el permiso de Safari y que la página abra con https.');
   });
 }
 function cerrarCamara(){
-  try{ if(controls) controls.stop(); }catch(e){}
-  controls=null;
-  document.getElementById('cam').style.display='none';
+  try{if(controls)controls.stop();}catch(e){}
+  controls=null;document.getElementById('cam').style.display='none';
 }
 
 document.getElementById('btnScan').onclick=abrirCamara;
 document.getElementById('btnCamClose').onclick=cerrarCamara;
-document.getElementById('btnManual').onclick=function(){ nuevoProducto('MAN-'+Date.now()); };
-document.getElementById('segUnit').onclick=function(){ setMode('unit'); };
-document.getElementById('segWeight').onclick=function(){ setMode('weight'); };
+document.getElementById('btnManual').onclick=function(){nuevoProducto('MAN-'+Date.now());};
+document.getElementById('segUnit').onclick=function(){setMode('unit');};
+document.getElementById('segWeight').onclick=function(){setMode('weight');};
 document.getElementById('mSave').onclick=guardar;
 document.getElementById('mCancel').onclick=closeModal;
-document.getElementById('mName').oninput=function(){ document.getElementById('mErr').style.display='none'; };
-document.getElementById('mPrice').oninput=function(){ document.getElementById('mErr').style.display='none'; };
-document.getElementById('mWeight').oninput=function(){ document.getElementById('mErr').style.display='none'; };
-
+['mName','mPrice','mWeight'].forEach(function(id){
+  document.getElementById(id).oninput=function(){document.getElementById('mErr').style.display='none';};
+});
 document.getElementById('btnClear').onclick=function(){
-  if(!cart.length) return;
-  if(confirm('¿Vaciar la lista? Los precios guardados se quedan.')){ cart=[]; render(); }
+  if(!cart.length)return;
+  if(confirm('¿Vaciar el ticket? Los precios guardados se quedan.')){cart=[];render();}
 };
 document.getElementById('btnBudget').onclick=function(){
-  var v=prompt('¿Cuánto quieres gastar como máximo? (0 para quitarlo)', budget||'');
-  if(v===null) return;
-  var n=parseFloat(v);
-  budget=(n>0)?n:0;
-  render();
+  var v=prompt('¿Cuánto quieres gastar como máximo? (0 para quitarlo)',budget||'');
+  if(v===null)return;
+  var n=parseFloat(v);budget=(n>0)?n:0;render();
 };
 
-load(); render();
+load();prevTotal=totals().total;render();
 </script>
 </body>
 </html>
