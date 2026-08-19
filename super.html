@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Súper">
+<meta name="theme-color" content="#1A1A17">
+<title>Cuenta del súper</title>
+<style>
+:root{
+  --ink:#16150F;
+  --paper:#F2F2EF;
+  --card:#FFFFFF;
+  --line:#D8D8D2;
+  --muted:#6E6E66;
+  --display:#1A1A17;
+  --led:#FFB000;
+  --over:#FF4A3D;
+  --ok:#2E7D5B;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans);
+  background:var(--paper);
+  color:var(--ink);
+  font-size:16px;
+  line-height:1.4;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.wrap{max-width:640px;margin:0 auto;padding:0 12px 120px}
+
+/* ---------- display ---------- */
+.display{
+  background:var(--display);
+  border-radius:14px;
+  padding:18px 18px 14px;
+  margin:12px 0;
+  position:sticky;top:0;z-index:40;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+.display .eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:#8A8A80;margin:0 0 2px;
+}
+.total{
+  font-family:var(--mono);
+  font-variant-numeric:tabular-nums;
+  font-size:52px;line-height:1;font-weight:600;
+  color:var(--led);margin:0;letter-spacing:-.02em;
+  transition:color .15s;
+}
+.total.over{color:var(--over)}
+.subline{
+  display:flex;justify-content:space-between;gap:8px;
+  font-family:var(--mono);font-size:12px;color:#8A8A80;
+  margin-top:10px;padding-top:10px;border-top:1px solid #33332D;
+  font-variant-numeric:tabular-nums;
+}
+.budgetbar{height:4px;background:#33332D;border-radius:2px;margin-top:10px;overflow:hidden}
+.budgetbar i{display:block;height:100%;background:var(--led);width:0;transition:width .2s}
+.budgetbar i.over{background:var(--over)}
+
+/* ---------- buttons ---------- */
+.row{display:flex;gap:8px;margin-bottom:12px}
+button{
+  font-family:var(--sans);font-size:16px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:12px;padding:14px 12px;cursor:pointer;
+  flex:1;font-weight:500;
+}
+button:active{transform:scale(.98)}
+button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+button.ghost{background:transparent;border-color:transparent;color:var(--muted);font-size:14px;padding:8px}
+button.danger{color:var(--over);border-color:var(--line)}
+
+/* ---------- lista ---------- */
+.item{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;
+}
+.item .info{flex:1;min-width:0}
+.item .nm{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .det{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px}
+.item .amt{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600;font-size:17px}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{flex:0 0 34px;width:34px;height:34px;padding:0;font-size:19px;line-height:1;border-radius:9px}
+.qty span{font-family:var(--mono);min-width:22px;text-align:center;font-weight:600}
+.tag{
+  display:inline-block;font-family:var(--mono);font-size:10px;
+  padding:1px 5px;border-radius:4px;background:#E7E7E1;color:var(--muted);
+  margin-left:6px;vertical-align:1px;
+}
+.empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:15px}
+
+/* ---------- cámara ---------- */
+#cam{position:fixed;inset:0;background:#000;z-index:100;display:none}
+#cam video{width:100%;height:100%;object-fit:cover}
+#cam .frame{
+  position:absolute;top:50%;left:8%;width:84%;height:120px;margin-top:-60px;
+  border:2px solid var(--led);border-radius:10px;box-shadow:0 0 0 2000px rgba(0,0,0,.45);
+}
+#cam .close{
+  position:absolute;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+  background:#fff;color:#000;border:0;border-radius:30px;padding:14px 34px;font-size:16px;font-weight:600;flex:0;
+}
+#cam .hint{
+  position:absolute;top:calc(20px + env(safe-area-inset-top));left:0;right:0;text-align:center;
+  color:#fff;font-size:14px;padding:0 20px;
+}
+
+/* ---------- modal ---------- */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:120;display:none;align-items:flex-end}
+#modal .sheet{
+  background:var(--paper);width:100%;border-radius:18px 18px 0 0;padding:20px 16px;
+  padding-bottom:calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;
+}
+#modal h3{margin:0 0 4px;font-size:19px}
+#modal .code{font-family:var(--mono);font-size:12px;color:var(--muted);margin:0 0 16px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px;font-weight:500}
+input[type=text],input[type=number]{
+  width:100%;font-size:16px;font-family:var(--sans);
+  padding:13px 12px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--ink);
+}
+input[type=number]{font-family:var(--mono);font-weight:600}
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--card)}
+.seg button{border:0;border-radius:0;background:transparent;font-size:15px;padding:12px}
+.seg button.on{background:var(--ink);color:#fff}
+.check{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:15px}
+.check input{width:22px;height:22px;accent-color:var(--ink)}
+.err{color:var(--over);font-size:13px;margin-top:6px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="display">
+    <p class="eyebrow" id="eyebrow">Total a pagar</p>
+    <p class="total" id="total">B/. 0.00</p>
+    <div class="subline">
+      <span id="cnt">0 artículos</span>
+      <span id="tax">ITBMS B/. 0.00</span>
+    </div>
+    <div class="budgetbar" id="bar" style="display:none"><i id="barfill"></i></div>
+  </div>
+
+  <div class="row">
+    <button class="primary" id="btnScan">Escanear</button>
+    <button id="btnManual">Sin código</button>
+  </div>
+
+  <div id="lista"></div>
+
+  <div class="row" style="margin-top:16px">
+    <button class="ghost" id="btnBudget">Presupuesto</button>
+    <button class="ghost danger" id="btnClear">Nueva compra</button>
+  </div>
+</div>
+
+<div id="cam">
+  <video id="video" playsinline muted></video>
+  <div class="frame"></div>
+  <p class="hint" id="camhint">Apunta al código de barras</p>
+  <button class="close" id="btnCamClose">Cerrar</button>
+</div>
+
+<div id="modal">
+  <div class="sheet">
+    <h3 id="mTitle">Producto nuevo</h3>
+    <p class="code" id="mCode"></p>
+
+    <label for="mName">Nombre</label>
+    <input type="text" id="mName" placeholder="Leche 1L" autocomplete="off">
+
+    <label>Se cobra por</label>
+    <div class="seg">
+      <button id="segUnit" class="on">Unidad</button>
+      <button id="segWeight">Peso (libra)</button>
+    </div>
+
+    <label for="mPrice" id="mPriceLbl">Precio</label>
+    <input type="number" id="mPrice" inputmode="decimal" step="0.01" placeholder="0.00">
+
+    <div id="wBox" style="display:none">
+      <label for="mWeight">Libras en la etiqueta</label>
+      <input type="number" id="mWeight" inputmode="decimal" step="0.01" placeholder="0.00">
+    </div>
+
+    <div class="check">
+      <input type="checkbox" id="mTax">
+      <label for="mTax" style="margin:0;color:var(--ink);font-size:15px">Paga ITBMS (7%)</label>
+    </div>
+
+    <p class="err" id="mErr"></p>
+
+    <div class="row" style="margin-top:18px">
+      <button id="mCancel">Cancelar</button>
+      <button class="primary" id="mSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js"></script>
+<script>
+var ITBMS = 0.07;
+var cat = {}, cart = [], budget = 0;
+var mode = 'unit', editIndex = -1, pendingCode = '';
+var reader = null, controls = null, lastCode = '', lastTime = 0, zxingTried = false;
+
+function load(){
+  try{
+    cat  = JSON.parse(localStorage.getItem('super_cat')  || '{}');
+    cart = JSON.parse(localStorage.getItem('super_cart') || '[]');
+    budget = parseFloat(localStorage.getItem('super_budget') || '0') || 0;
+  }catch(e){ cat={}; cart=[]; budget=0; }
+}
+function save(){
+  try{
+    localStorage.setItem('super_cat', JSON.stringify(cat));
+    localStorage.setItem('super_cart', JSON.stringify(cart));
+    localStorage.setItem('super_budget', String(budget));
+  }catch(e){}
+}
+function money(n){ return 'B/. ' + (Math.round(n*100)/100).toFixed(2); }
+
+function totals(){
+  var sub=0, tax=0;
+  for(var i=0;i<cart.length;i++){
+    var it=cart[i];
+    var line = it.tipo==='peso' ? it.precio*it.peso : it.precio*it.cant;
+    line = Math.round(line*100)/100;
+    sub += line;
+    if(it.itbms) tax += line*ITBMS;
+  }
+  return {sub:sub, tax:Math.round(tax*100)/100, total:sub+Math.round(tax*100)/100};
+}
+
+function render(){
+  var t = totals();
+  var over = budget>0 && t.total>budget;
+  document.getElementById('total').textContent = money(t.total);
+  document.getElementById('total').className = 'total' + (over?' over':'');
+  document.getElementById('eyebrow').textContent = over ? 'Pasaste el presupuesto' : 'Total a pagar';
+
+  var n=0; for(var i=0;i<cart.length;i++) n += cart[i].tipo==='peso' ? 1 : cart[i].cant;
+  document.getElementById('cnt').textContent = n + (n===1?' artículo':' artículos');
+  document.getElementById('tax').textContent = 'ITBMS ' + money(t.tax);
+
+  var bar=document.getElementById('bar');
+  if(budget>0){
+    bar.style.display='block';
+    var pct=Math.min(100,(t.total/budget)*100);
+    var f=document.getElementById('barfill');
+    f.style.width=pct+'%';
+    f.className = over?'over':'';
+  } else bar.style.display='none';
+
+  var L=document.getElementById('lista');
+  if(!cart.length){
+    L.innerHTML='<div class="empty">Escanea el primer producto.<br>La app te pregunta el precio una sola vez y lo recuerda.</div>';
+    save(); return;
+  }
+  var h='';
+  for(var i=0;i<cart.length;i++){
+    var it=cart[i];
+    var line = it.tipo==='peso' ? it.precio*it.peso : it.precio*it.cant;
+    var det = it.tipo==='peso'
+      ? money(it.precio)+' × '+it.peso.toFixed(2)+' lb'
+      : money(it.precio)+' c/u';
+    h += '<div class="item">'
+       +   '<div class="info" onclick="editar('+i+')">'
+       +     '<div class="nm">'+esc(it.nombre)+(it.itbms?'<span class="tag">ITBMS</span>':'')+'</div>'
+       +     '<div class="det">'+det+'</div>'
+       +   '</div>';
+    if(it.tipo==='peso'){
+      h +=  '<div class="amt">'+money(line)+'</div>'
+       +    '<div class="qty"><button onclick="quitar('+i+')">×</button></div>';
+    } else {
+      h +=  '<div class="qty">'
+       +      '<button onclick="menos('+i+')">−</button>'
+       +      '<span>'+it.cant+'</span>'
+       +      '<button onclick="mas('+i+')">+</button>'
+       +    '</div>'
+       +    '<div class="amt">'+money(line)+'</div>';
+    }
+    h += '</div>';
+  }
+  L.innerHTML=h;
+  save();
+}
+function esc(s){ return String(s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); }
+
+function mas(i){ cart[i].cant++; render(); }
+function menos(i){ cart[i].cant--; if(cart[i].cant<=0) cart.splice(i,1); render(); }
+function quitar(i){ cart.splice(i,1); render(); }
+
+function editar(i){
+  editIndex=i; pendingCode=cart[i].codigo;
+  var it=cart[i];
+  document.getElementById('mTitle').textContent='Editar producto';
+  document.getElementById('mCode').textContent = it.codigo.indexOf('MAN-')===0 ? 'Sin código de barras' : it.codigo;
+  document.getElementById('mName').value=it.nombre;
+  document.getElementById('mPrice').value=it.precio;
+  document.getElementById('mTax').checked=!!it.itbms;
+  setMode(it.tipo==='peso'?'weight':'unit');
+  document.getElementById('mWeight').value = it.tipo==='peso' ? it.peso : '';
+  openModal();
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('segUnit').className = m==='unit'?'on':'';
+  document.getElementById('segWeight').className = m==='weight'?'on':'';
+  document.getElementById('wBox').style.display = m==='weight'?'block':'none';
+  document.getElementById('mPriceLbl').textContent = m==='weight'?'Precio por libra':'Precio';
+}
+function openModal(){
+  document.getElementById('mErr').style.display='none';
+  document.getElementById('modal').style.display='flex';
+  setTimeout(function(){ document.getElementById('mName').focus(); },120);
+}
+function closeModal(){
+  document.getElementById('modal').style.display='none';
+  editIndex=-1; pendingCode='';
+}
+
+function nuevoProducto(codigo){
+  editIndex=-1; pendingCode=codigo;
+  var prev = cat[codigo];
+  document.getElementById('mTitle').textContent = prev?'Confirmar precio':'Producto nuevo';
+  document.getElementById('mCode').textContent = codigo.indexOf('MAN-')===0 ? 'Sin código de barras' : codigo;
+  document.getElementById('mName').value = prev?prev.nombre:'';
+  document.getElementById('mPrice').value = prev?prev.precio:'';
+  document.getElementById('mTax').checked = prev?!!prev.itbms:false;
+  setMode(prev && prev.tipo==='peso' ? 'weight':'unit');
+  document.getElementById('mWeight').value='';
+  openModal();
+}
+
+function guardar(){
+  var nombre=document.getElementById('mName').value.trim();
+  var precio=parseFloat(document.getElementById('mPrice').value);
+  var itbms=document.getElementById('mTax').checked;
+  var peso=parseFloat(document.getElementById('mWeight').value);
+  var err=document.getElementById('mErr');
+
+  if(!nombre){ err.textContent='Ponle un nombre al producto.'; err.style.display='block'; return; }
+  if(!(precio>0)){ err.textContent='Escribe un precio mayor que cero.'; err.style.display='block'; return; }
+  if(mode==='weight' && !(peso>0)){ err.textContent='Escribe las libras de la etiqueta.'; err.style.display='block'; return; }
+
+  var tipo = mode==='weight'?'peso':'unidad';
+  cat[pendingCode]={nombre:nombre,precio:precio,tipo:tipo,itbms:itbms};
+
+  if(editIndex>=0){
+    var it=cart[editIndex];
+    it.nombre=nombre; it.precio=precio; it.itbms=itbms; it.tipo=tipo;
+    if(tipo==='peso'){ it.peso=peso; it.cant=1; }
+  } else {
+    if(tipo==='peso'){
+      cart.push({codigo:pendingCode,nombre:nombre,precio:precio,itbms:itbms,tipo:'peso',peso:peso,cant:1});
+    } else {
+      var found=-1;
+      for(var i=0;i<cart.length;i++) if(cart[i].codigo===pendingCode && cart[i].tipo==='unidad') found=i;
+      if(found>=0) cart[found].cant++;
+      else cart.push({codigo:pendingCode,nombre:nombre,precio:precio,itbms:itbms,tipo:'unidad',cant:1});
+    }
+  }
+  closeModal(); render();
+}
+
+function agregarPorCodigo(codigo){
+  var p=cat[codigo];
+  if(!p){ nuevoProducto(codigo); return; }
+  if(p.tipo==='peso'){ nuevoProducto(codigo); return; }
+  var found=-1;
+  for(var i=0;i<cart.length;i++) if(cart[i].codigo===codigo && cart[i].tipo==='unidad') found=i;
+  if(found>=0) cart[found].cant++;
+  else cart.push({codigo:codigo,nombre:p.nombre,precio:p.precio,itbms:p.itbms,tipo:'unidad',cant:1});
+  render();
+}
+
+function beep(){
+  try{
+    var C=window.AudioContext||window.webkitAudioContext; if(!C) return;
+    var c=new C(); var o=c.createOscillator(); var g=c.createGain();
+    o.connect(g); g.connect(c.destination); o.frequency.value=1100; o.type='square';
+    g.gain.setValueAtTime(.12,c.currentTime);
+    o.start(); o.stop(c.currentTime+.09);
+    setTimeout(function(){ try{c.close();}catch(e){} },300);
+  }catch(e){}
+}
+
+function abrirCamara(){
+  if(typeof ZXingBrowser==='undefined'){
+    if(!zxingTried){
+      zxingTried=true;
+      var s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js';
+      s.onload=abrirCamara;
+      s.onerror=function(){ alert('No se pudo cargar el lector. Conéctate a internet una vez y vuelve a abrir la app.'); };
+      document.head.appendChild(s);
+      return;
+    }
+    alert('El lector no está disponible sin internet. Usa el botón "Sin código".');
+    return;
+  }
+  document.getElementById('cam').style.display='block';
+  document.getElementById('camhint').textContent='Apunta al código de barras';
+  if(!reader) reader=new ZXingBrowser.BrowserMultiFormatReader();
+  reader.decodeFromConstraints(
+    {video:{facingMode:{ideal:'environment'}}},
+    document.getElementById('video'),
+    function(result,err,ctrl){
+      if(ctrl) controls=ctrl;
+      if(!result) return;
+      var code=result.getText();
+      var now=Date.now();
+      if(code===lastCode && now-lastTime<2500) return;
+      lastCode=code; lastTime=now;
+      beep();
+      if(navigator.vibrate) navigator.vibrate(60);
+      if(cat[code] && cat[code].tipo!=='peso'){
+        agregarPorCodigo(code);
+        document.getElementById('camhint').textContent='Agregado: '+cat[code].nombre;
+      } else {
+        cerrarCamara();
+        agregarPorCodigo(code);
+      }
+    }
+  ).catch(function(){
+    cerrarCamara();
+    alert('No se pudo abrir la cámara. Revisa que le diste permiso a Safari y que la página abra con https.');
+  });
+}
+function cerrarCamara(){
+  try{ if(controls) controls.stop(); }catch(e){}
+  controls=null;
+  document.getElementById('cam').style.display='none';
+}
+
+document.getElementById('btnScan').onclick=abrirCamara;
+document.getElementById('btnCamClose').onclick=cerrarCamara;
+document.getElementById('btnManual').onclick=function(){ nuevoProducto('MAN-'+Date.now()); };
+document.getElementById('segUnit').onclick=function(){ setMode('unit'); };
+document.getElementById('segWeight').onclick=function(){ setMode('weight'); };
+document.getElementById('mSave').onclick=guardar;
+document.getElementById('mCancel').onclick=closeModal;
+document.getElementById('mName').oninput=function(){ document.getElementById('mErr').style.display='none'; };
+document.getElementById('mPrice').oninput=function(){ document.getElementById('mErr').style.display='none'; };
+document.getElementById('mWeight').oninput=function(){ document.getElementById('mErr').style.display='none'; };
+
+document.getElementById('btnClear').onclick=function(){
+  if(!cart.length) return;
+  if(confirm('¿Vaciar la lista? Los precios guardados se quedan.')){ cart=[]; render(); }
+};
+document.getElementById('btnBudget').onclick=function(){
+  var v=prompt('¿Cuánto quieres gastar como máximo? (0 para quitarlo)', budget||'');
+  if(v===null) return;
+  var n=parseFloat(v);
+  budget=(n>0)?n:0;
+  render();
+};
+
+load(); render();
+</script>
+</body>
+</html>
