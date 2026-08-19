@@ -794,9 +794,9 @@
           <h3 style="margin:0 0 4px;color:#7c3aed;">📐 Paso 2 de 2 — Dimensiones</h3>
           <p class="card-sub" style="margin:0 0 14px;">Mide el paquete en pulgadas — se calcula el peso volumétrico automáticamente.</p>
           <div class="form-grid" style="margin-bottom:12px;">
-            <div><label for="dimLargo">Largo (in)</label><input id="dimLargo" type="number" step="0.1" min="0" placeholder="12"></div>
-            <div><label for="dimAncho">Ancho (in)</label><input id="dimAncho" type="number" step="0.1" min="0" placeholder="8"></div>
-            <div><label for="dimAlto">Alto (in)</label><input id="dimAlto" type="number" step="0.1" min="0" placeholder="6"></div>
+            <div><label for="recDimLargo">Largo (in)</label><input id="recDimLargo" type="number" step="0.1" min="0" placeholder="12"></div>
+            <div><label for="recDimAncho">Ancho (in)</label><input id="recDimAncho" type="number" step="0.1" min="0" placeholder="8"></div>
+            <div><label for="recDimAlto">Alto (in)</label><input id="recDimAlto" type="number" step="0.1" min="0" placeholder="6"></div>
           </div>
           <button class="btn-primary" id="btnGuardarDimensionesRecepcion" style="width:auto;">
             <span class="spinner"></span><span>Guardar y continuar</span>
@@ -2411,7 +2411,7 @@
   function iniciarFlujoFotoDimensiones(paqueteId,tracking){ flujoFotoDimPaqueteId=paqueteId; flujoFotoDimTracking=tracking; $('#recepcionFormNuevo').style.display='none'; $('#recepcionResultado').style.display='none'; $('#pasoFotoSub').textContent=`Toma una foto de "${tracking}" recién recibido.`; $('#pasoFoto').style.display='block'; $('#pasoDimensiones').style.display='none'; $('#bannerPasoFoto').innerHTML=''; }
   $('#btnAbrirCamaraFoto').addEventListener('click',()=>{ $('#pasoFotoInput').value=''; $('#pasoFotoInput').click(); });
   $('#btnGuardarDimensionesRecepcion').addEventListener('click', async () => {
-    const largo=$('#dimLargo').value, ancho=$('#dimAncho').value, alto=$('#dimAlto').value;
+    const largo=$('#recDimLargo').value, ancho=$('#recDimAncho').value, alto=$('#recDimAlto').value;
     if(!largo||!ancho||!alto){ mostrarBanner('#bannerPasoDimensiones','error','Completa largo, ancho y alto.'); return; }
     const btn=$('#btnGuardarDimensionesRecepcion'); setCargando(btn,true);
     try {
@@ -2432,7 +2432,7 @@
     finally { setTimeout(pasarADimensiones,600); }
   });
   function saltarPasoFoto(){ pasarADimensiones(); }
-  function pasarADimensiones(){ $('#pasoFoto').style.display='none'; $('#dimLargo').value=''; $('#dimAncho').value=''; $('#dimAlto').value=''; $('#bannerPasoDimensiones').innerHTML=''; $('#pasoDimensiones').style.display='block'; }
+  function pasarADimensiones(){ $('#pasoFoto').style.display='none'; $('#recDimLargo').value=''; $('#recDimAncho').value=''; $('#recDimAlto').value=''; $('#bannerPasoDimensiones').innerHTML=''; $('#pasoDimensiones').style.display='block'; }
   function saltarPasoDimensiones(){ terminarFlujoRecepcion(); }
   function terminarFlujoRecepcion(){ $('#pasoFoto').style.display='none'; $('#pasoDimensiones').style.display='none'; $('#btnGuardarDimensionesRecepcion').disabled=false; setCargando($('#btnGuardarDimensionesRecepcion'),false); flujoFotoDimPaqueteId=null; $('#recepcionTracking').focus(); }
   // Convierte una fecha a "YYYY-MM-DD" usando la hora LOCAL del navegador,
