@@ -246,6 +246,7 @@
               font-size:12px; font-weight:600; white-space:nowrap; }
   .dias-normal{ background:rgba(12,27,51,0.06); color:var(--ink-soft); }
   .dias-ok{ background:rgba(12,27,51,0.05); color:rgba(12,27,51,0.35); }
+  .dias-entregado{ background:var(--cargo-green-bg); color:var(--cargo-green); }
   .dias-alerta{ background:var(--amber-bg); color:var(--accent-dark); }
   .dias-vencido{ background:rgba(192,57,43,0.12); color:#c0392b; box-shadow:0 0 0 1px rgba(192,57,43,0.25); }
   .dias-nota{ font-size:10.5px; color:var(--ink-soft); margin-top:3px; white-space:nowrap; }
@@ -1372,10 +1373,14 @@
   // Pasados 30 días ya no hay reclamo, así que se marca en rojo.
   const DIAS_LIMITE_RECLAMO = 30;
   function celdaDias(p){
-    const d = Number(p.dias_transcurridos ?? 0);
+    // Ya entregado: mostramos lo que TARDÓ, no los días que han pasado.
+    // Ese número se congela y sirve para medir el tiempo real de servicio.
     if (p.estado === 'entregado') {
-      return `<span class="dias-chip dias-ok">${d} d</span>`;
+      const t = p.dias_hasta_entrega;
+      if (t === null || t === undefined) return '<span class="dias-chip dias-ok">—</span>';
+      return `<span class="dias-chip dias-entregado" title="Tardó ${t} días en entregarse">✓ ${t} d</span>`;
     }
+    const d = Number(p.dias_transcurridos ?? 0);
     let clase = 'dias-normal', nota = '';
     if (d >= DIAS_LIMITE_RECLAMO) {
       clase = 'dias-vencido';
