@@ -3158,5 +3158,31 @@ function copiarCasillero(btn){
   }
 }
 </script>
+  <script>
+(function(){
+  function inyectarBotones(){
+    if (typeof verCasillero !== 'function') return;
+    var celdas = document.querySelectorAll('td');
+    for (var i = 0; i < celdas.length; i++){
+      var td = celdas[i];
+      if (!/PTY-\d{4,6}-\d+/.test(td.textContent)) continue;
+      var fila = td.parentElement;
+      if (!fila || fila.querySelector('.btn-casillero')) continue;
+      var nombre = fila.cells[0] ? fila.cells[0].textContent.trim() : '';
+      if (!nombre) continue;
+      var destino = fila.cells[fila.cells.length - 1];
+      var b = document.createElement('button');
+      b.className = 'btn-casillero';
+      b.type = 'button';
+      b.textContent = '📮 Casillero';
+      b.style.cssText = 'margin-left:6px;background:#0c1b33;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;';
+      (function(n){ b.onclick = function(){ verCasillero(n); }; })(nombre);
+      destino.appendChild(b);
+    }
+  }
+  setInterval(inyectarBotones, 800);
+  inyectarBotones();
+})();
+</script>
 </body>
 </html>
