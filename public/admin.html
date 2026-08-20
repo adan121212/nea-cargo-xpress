@@ -1447,17 +1447,14 @@
         const input = tbody.querySelector(`.peso-input[data-id="${id}"]`);
         const peso = parseFloat(input.value);
         const pesoVol = parseFloat(input.dataset.pesoVol) || 0;
-        const pesoParaCobrar = Math.max(peso || 0, pesoVol);
         if (!input.value.trim() || isNaN(peso) || peso <= 0){ mostrarBanner('#bannerPaquetes', 'error', 'El peso no puede quedar en blanco — ingresa un valor válido antes de guardar.'); return; }
-        const avisoVolumetrico = pesoVol > peso ? `\n\nEste paquete mide más de lo que pesa: se facturará por su peso volumétrico (${pesoVol} lb), no por el real.` : '';
-        const confirmado = window.confirm(`¿Estás seguro que el peso correcto de este paquete es ${peso} lb?${avisoVolumetrico}\n\nUna vez confirmado, NO se podrá cambiar.`);
-        if (!confirmado){ mostrarBanner('#bannerPaquetes', 'error', '⚠ Revisa el peso bien y vuelve pronto cuando estés seguro.'); return; }
-        // Pedir la tarifa antes de confirmar — el estimado se calcula sobre el mayor entre peso real y volumétrico
-        const tarifaId = await pedirTarifa(pesoParaCobrar);
-        if(!tarifaId) return; // canceló
+        // El modal muestra ambas opciones (real y volumétrico, si aplica) para que elijas por cuál facturar.
+        const eleccion = await pedirTarifa(peso, pesoVol);
+        if(!eleccion) return; // canceló
+        const { tarifaId, pesoElegido } = eleccion;
         btn.disabled = true;
         try {
-          const res = await apiAdmin(`/admin/paquetes/${id}/peso`, { method: 'PATCH', body: JSON.stringify({ peso_real_lb: peso, tarifa_id: tarifaId }) });
+          const res = await apiAdmin(`/admin/paquetes/${id}/peso`, { method: 'PATCH', body: JSON.stringify({ peso_real_lb: peso, tarifa_id: tarifaId, peso_facturar_lb: pesoElegido }) });
           const data = await res.json().catch(() => ({}));
           if (res.ok){
             mostrarBanner('#bannerPaquetes', 'success', '✓ Peso confirmado y factura generada.');
@@ -2090,7 +2087,12 @@
   }
   // Cache de tarifas para el popup
   let _tarifasCache = [];
-  async function pedirTarifa(pesoLb){
+  // pesoReal: peso de la balanza (obligatorio). pesoVol: peso volumétrico calculado (0 si no aplica).
+  // Devuelve { tarifaId, pesoElegido } o null si se cancela.
+  async function pedirTarifa(pesoReal, pesoVol){
+    pesoVol = Number(pesoVol) || 0;
+    // Solo se ofrece elegir volumétrico si existe y es mayor que el real — si no, no hay nada que elegir.
+    const hayOpcionVolumetrica = pesoVol > pesoReal;
     // Cargar tarifas si no las tenemos en caché
     if(_tarifasCache.length === 0){
       try {
@@ -2103,33 +2105,52 @@
       alert('No hay tarifas activas. Ve a la pestaña Tarifas y activa una primero.');
       return null;
     }
-    // Si solo hay una tarifa, usarla directamente sin popup
-    if(_tarifasCache.length === 1) return _tarifasCache[0].id;
-    // Calcular precios para mostrarlos
     return new Promise(resolve => {
       const popup = document.createElement('div');
-      popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;';
-      const opciones = _tarifasCache.map(t => {
-        const costo = Math.max(pesoLb * Number(t.precio_libra), Number(t.cargo_minimo));
-        const total = costo + Number(t.cargo_manejo);
-        return `<button class="pop-tarifa" data-id="${t.id}"
-          style="padding:14px 16px;border-radius:10px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;text-align:left;transition:border-color .15s,background .15s;">
-          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">${escapeHtml(t.nombre)}</div>
-          <div style="font-size:12px;color:#6b7280;">$${Number(t.precio_libra).toFixed(2)}/lb · mín $${Number(t.cargo_minimo).toFixed(2)} · manejo $${Number(t.cargo_manejo).toFixed(2)}</div>
-          <div style="font-size:15px;font-weight:700;color:#ff6a1a;margin-top:6px;">Estimado: $${total.toFixed(2)}</div>
+      popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
+      const calcular = (peso, t) => {
+        const costo = Math.max(peso * Number(t.precio_libra), Number(t.cargo_minimo));
+        return costo + Number(t.cargo_manejo);
+      };
+      const filaTarifa = (t) => {
+        const totalReal = calcular(pesoReal, t);
+        const totalVol = hayOpcionVolumetrica ? calcular(pesoVol, t) : null;
+        const botonReal = `<button class="pop-peso-opcion" data-id="${t.id}" data-peso="${pesoReal}"
+          style="flex:1;padding:10px 12px;border-radius:9px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;text-align:left;transition:border-color .15s,background .15s;">
+          <div style="font-size:11px;color:#6b7280;">Por peso real (${pesoReal} lb)</div>
+          <div style="font-size:15px;font-weight:700;color:#0c1b33;">$${totalReal.toFixed(2)}</div>
         </button>`;
-      }).join('');
-      popup.innerHTML = `<div style="background:#fff;border-radius:16px;padding:24px;width:380px;max-width:calc(100vw - 32px);box-shadow:0 24px 60px rgba(0,0,0,.3);">
-        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px;">Selecciona la tarifa</div>
-        <div style="font-size:12.5px;color:#6b7280;margin-bottom:16px;">Peso a facturar: <strong>${pesoLb} lb</strong> — el estimado puede variar por seguro.</div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">${opciones}</div>
+        const botonVol = hayOpcionVolumetrica ? `<button class="pop-peso-opcion" data-id="${t.id}" data-peso="${pesoVol}"
+          style="flex:1;padding:10px 12px;border-radius:9px;border:1.5px solid #ff6a1a;background:#fff8f3;cursor:pointer;text-align:left;transition:border-color .15s,background .15s;">
+          <div style="font-size:11px;color:#c2410c;">Por peso volumétrico (${pesoVol} lb)</div>
+          <div style="font-size:15px;font-weight:700;color:#ff6a1a;">$${totalVol.toFixed(2)}</div>
+        </button>` : '';
+        return `<div style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;">
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:2px;">${escapeHtml(t.nombre)}</div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:8px;">$${Number(t.precio_libra).toFixed(2)}/lb · mín $${Number(t.cargo_minimo).toFixed(2)} · manejo $${Number(t.cargo_manejo).toFixed(2)}</div>
+          <div style="display:flex;gap:8px;">${botonReal}${botonVol}</div>
+        </div>`;
+      };
+      const opciones = _tarifasCache.map(filaTarifa).join('');
+      const avisoVolumetrico = hayOpcionVolumetrica
+        ? `<div style="background:#fff8f3;border:1px solid #ffddc2;border-radius:8px;padding:9px 11px;font-size:11.5px;color:#c2410c;margin-bottom:14px;">Este paquete mide más de lo que pesa (volumétrico ${pesoVol} lb vs. real ${pesoReal} lb). Elige por cuál peso facturar.</div>`
+        : '';
+      popup.innerHTML = `<div style="background:#fff;border-radius:16px;padding:24px;width:420px;max-width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);">
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px;">Selecciona la tarifa y el peso</div>
+        <div style="font-size:12.5px;color:#6b7280;margin-bottom:12px;">Una vez confirmado no se podrá cambiar. El estimado puede variar por seguro.</div>
+        ${avisoVolumetrico}
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">${opciones}</div>
         <button id="popTarifaCancelar" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:13px;color:#6b7280;">Cancelar</button>
       </div>`;
       document.body.appendChild(popup);
-      popup.querySelectorAll('.pop-tarifa').forEach(b => {
-        b.addEventListener('mouseenter', () => { b.style.borderColor='#ff6a1a'; b.style.background='#fff8f3'; });
-        b.addEventListener('mouseleave', () => { b.style.borderColor='#e5e7eb'; b.style.background='#fff'; });
-        b.addEventListener('click', () => { popup.remove(); resolve(parseInt(b.dataset.id)); });
+      popup.querySelectorAll('.pop-peso-opcion').forEach(b => {
+        const esVolumetrico = b.style.background === 'rgb(255, 248, 243)';
+        b.addEventListener('mouseenter', () => { b.style.borderColor='#ff6a1a'; });
+        b.addEventListener('mouseleave', () => { b.style.borderColor = esVolumetrico ? '#ff6a1a' : '#e5e7eb'; });
+        b.addEventListener('click', () => {
+          popup.remove();
+          resolve({ tarifaId: parseInt(b.dataset.id), pesoElegido: parseFloat(b.dataset.peso) });
+        });
       });
       popup.querySelector('#popTarifaCancelar').addEventListener('click', () => { popup.remove(); resolve(null); });
     });
