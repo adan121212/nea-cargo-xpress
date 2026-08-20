@@ -7,6 +7,34 @@ const { enviarCorreoGenerico } = require('../../utils/mailer');
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
+const ZONA = 'America/Panama';
+
+/**
+ * Fecha de hoy en Panamá (YYYY-MM-DD).
+ * No se puede usar toISOString() porque devuelve UTC, y Panamá va 5 horas
+ * atrás: después de las 7:00 PM local el UTC ya cambió de día.
+ */
+function fechaPanama(d = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(d);
+}
+
+/** Hora legible (11:03 p. m.) de un timestamp, en hora de Panamá. */
+function horaPanama(valor) {
+  if (!valor) return '—';
+  return new Date(valor).toLocaleTimeString('es-PA', {
+    timeZone: ZONA, hour: '2-digit', minute: '2-digit',
+  });
+}
+
+/** "19 de agosto de 2026" a partir de un YYYY-MM-DD, sin depender de zonas. */
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function fechaLarga(fechaISO) {
+  const [anio, mes, dia] = String(fechaISO).slice(0, 10).split('-');
+  return `${Number(dia)} de ${MESES[Number(mes) - 1]} de ${anio}`;
+}
+
 const METODO_LABEL = {
   efectivo: 'Efectivo',
   tarjeta: 'Tarjeta',
@@ -14,12 +42,22 @@ const METODO_LABEL = {
   yappy: 'Yappy',
 };
 
+/**
+ * Resumen de lo cobrado en un día.
+ *
+ * fecha_pago es "timestamp without time zone" y guarda la hora UTC.
+ * Para saber a qué día de Panamá pertenece hay que interpretarlo como UTC
+ * y después pasarlo a hora local. Usar DATE(fecha_pago) directo mandaba
+ * todo lo cobrado después de las 7:00 PM al día siguiente.
+ */
 async function calcularResumenDia(fecha) {
   const porMetodo = await pool.query(
     `SELECT COALESCE(metodo_pago, 'sin_especificar') AS metodo_pago,
             SUM(total) AS total, COUNT(*) AS cantidad
      FROM facturas
-     WHERE estado = 'pagada' AND DATE(fecha_pago) = $1
+     WHERE estado = 'pagada'
+       AND fecha_pago IS NOT NULL
+       AND (fecha_pago AT TIME ZONE 'UTC' AT TIME ZONE '${ZONA}')::date = $1::date
      GROUP BY metodo_pago
      ORDER BY total DESC`,
     [fecha]
@@ -35,14 +73,14 @@ async function calcularResumenDia(fecha) {
   return { detalle, totalGeneral, cantidadFacturas };
 }
 
-// --- GET /api/admin/caja/dia?fecha=2026-08-04 ---
+// --- GET /api/admin/caja/dia?fecha=2026-08-19 ---
 router.get(
   '/dia',
   [query('fecha').optional().isISO8601().withMessage('Fecha inválida')],
   async (req, res) => {
     const errores = validationResult(req);
     if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
-    const fecha = req.query.fecha || new Date().toISOString().slice(0, 10);
+    const fecha = req.query.fecha || fechaPanama();
     try {
       const { detalle, totalGeneral, cantidadFacturas } = await calcularResumenDia(fecha);
       const cierreExistente = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [fecha]);
@@ -110,8 +148,37 @@ router.get('/historial', async (req, res) => {
   }
 });
 
+// --- GET /api/admin/caja/facturas-dia?fecha=2026-08-19 ---
+// Las facturas cobradas ese día, ya filtradas en hora de Panamá.
+router.get(
+  '/facturas-dia',
+  [query('fecha').isISO8601().withMessage('Fecha inválida')],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
+    try {
+      const resultado = await pool.query(
+        `SELECT f.id, f.numero_factura, f.total, f.metodo_pago, f.fecha_pago,
+                u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
+                p.tienda, p.numero_tracking
+         FROM facturas f
+         JOIN usuarios u ON u.id = f.usuario_id
+         JOIN paquetes p ON p.id = f.paquete_id
+         WHERE f.estado = 'pagada'
+           AND f.fecha_pago IS NOT NULL
+           AND (f.fecha_pago AT TIME ZONE 'UTC' AT TIME ZONE '${ZONA}')::date = $1::date
+         ORDER BY f.fecha_pago ASC`,
+        [req.query.fecha]
+      );
+      return res.json({ facturas: resultado.rows });
+    } catch (error) {
+      console.error('Error en GET /admin/caja/facturas-dia:', error);
+      return res.status(500).json({ mensaje: 'Error interno al listar las facturas del día' });
+    }
+  }
+);
+
 // --- POST /api/admin/caja/enviar-reporte ---
-// Envía el resumen del cierre de caja a un correo indicado.
 router.post(
   '/enviar-reporte',
   [
@@ -130,22 +197,20 @@ router.post(
         [fecha]
       );
       const cierre = cierreRes.rows[0];
-      const fechaLegible = new Date(fecha).toLocaleDateString('es-PA', { day: '2-digit', month: 'long', year: 'numeric' });
-      const horaLegible = cierre ? new Date(cierre.fecha_cierre).toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit' }) : '—';
+      const fechaLegible = fechaLarga(fecha);
+      const horaLegible = cierre ? horaPanama(cierre.fecha_cierre) : '—';
       const cerradoPor = cierre ? `${cierre.cerrado_por_nombre || ''} ${cierre.cerrado_por_apellido || ''}`.trim() : '—';
-
       const filasMetodos = detalle.map(m => `
         <tr>
           <td style="padding:8px 14px;border-bottom:1px solid #e5e7eb;">${m.etiqueta}</td>
           <td style="padding:8px 14px;border-bottom:1px solid #e5e7eb;text-align:center;">${m.cantidad}</td>
           <td style="padding:8px 14px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:700;">$${m.total.toFixed(2)}</td>
         </tr>`).join('');
-
       const html = `
         <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
           <div style="background:#0c1b33;color:#fff;padding:20px 24px;text-align:center;">
             <div style="font-size:20px;font-weight:700;letter-spacing:.02em;">NEA CARGO XPRESS</div>
-            <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;">Miami → Panamá</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;">Miami &rarr; Panam&aacute;</div>
           </div>
           <div style="padding:24px;">
             <h2 style="font-size:16px;margin:0 0 16px;color:#0c1b33;border-bottom:2px solid #0c1b33;padding-bottom:8px;">CIERRE DE CAJA — ${fechaLegible}</h2>
@@ -158,7 +223,7 @@ router.post(
             <table style="width:100%;border-collapse:collapse;font-size:13px;">
               <thead>
                 <tr style="background:#0c1b33;color:#fff;">
-                  <th style="padding:10px 14px;text-align:left;">Método de pago</th>
+                  <th style="padding:10px 14px;text-align:left;">M&eacute;todo de pago</th>
                   <th style="padding:10px 14px;text-align:center;">Facturas</th>
                   <th style="padding:10px 14px;text-align:right;">Total</th>
                 </tr>
@@ -174,10 +239,9 @@ router.post(
             ${cierre?.notas ? `<div style="margin-top:16px;padding:12px 14px;background:#f9fafb;border-radius:8px;font-size:12px;"><strong>Notas:</strong><br>${cierre.notas}</div>` : ''}
           </div>
           <div style="background:#f9fafb;padding:14px 24px;text-align:center;font-size:11px;color:#999;border-top:1px solid #e5e7eb;">
-            NEA Cargo Xpress — Sistema de casillero · Generado automáticamente
+            NEA Cargo Xpress — Sistema de casillero &middot; Generado autom&aacute;ticamente
           </div>
         </div>`;
-
       await enviarCorreoGenerico(correo, `Cierre de caja — ${fechaLegible}`, html);
       return res.json({ mensaje: 'Reporte enviado correctamente.' });
     } catch (error) {
