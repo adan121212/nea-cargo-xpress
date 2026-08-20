@@ -686,7 +686,7 @@
         </form>
 
         <!-- Registro -->
-        <form id="formRegistro" style="display:none;">
+        <form id="formRegistro" style="display:none;" autocomplete="off">
           <!-- Selector Personal / Empresa -->
           <div class="reg-tipo-tabs">
             <button type="button" class="reg-tipo-btn active" data-tipo="personal">👤 Personal</button>
@@ -723,11 +723,11 @@
 
           <!-- Campos comunes -->
           <label for="regEmail">Correo electrónico</label>
-          <input id="regEmail" type="email" placeholder="ana@ejemplo.com">
+          <input id="regEmail" type="email" placeholder="ana@ejemplo.com" autocomplete="off">
           <label for="regTelefono">Teléfono (opcional)</label>
           <input id="regTelefono" type="tel" placeholder="6123-4567">
           <label for="regPassword">Contraseña</label>
-          <input id="regPassword" type="password" placeholder="Mínimo 8 caracteres">
+          <input id="regPassword" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
           <button class="btn-primary" type="submit" id="btnRegistro">
             <span class="spinner"></span><span>Crear mi casillero</span>
           </button>
