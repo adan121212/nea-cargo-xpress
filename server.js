@@ -73,6 +73,29 @@ app.get('/pty-importer.js', (req, res) => {
 });
 app.disable('x-powered-by');
 app.use(express.json({ limit: '2mb' }));
+const CAMPOS_SIN_ESPACIOS = ['casillero','numero_casillero','tracking','numero_tracking','ruc','cedula','codigo','correo','email'];
+const CAMPOS_INTOCABLES = ['password','contrasena','contraseña','clave','token','firma_base64','foto_base64','imagen'];
+
+function limpiarCampos(valor, clave){
+  const k = String(clave || '').toLowerCase();
+  if (CAMPOS_INTOCABLES.includes(k)) return valor;
+  if (typeof valor === 'string'){
+    return CAMPOS_SIN_ESPACIOS.includes(k)
+      ? valor.replace(/\s+/g, '')
+      : valor.trim().replace(/\s{2,}/g, ' ');
+  }
+  if (Array.isArray(valor)) return valor.map(v => limpiarCampos(v, clave));
+  if (valor && typeof valor === 'object'){
+    Object.keys(valor).forEach(k2 => { valor[k2] = limpiarCampos(valor[k2], k2); });
+    return valor;
+  }
+  return valor;
+}
+
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === 'object') req.body = limpiarCampos(req.body, '');
+  next();
+});
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 const limiteGeneral = rateLimit({
   windowMs: 15 * 60 * 1000, max: 300,
