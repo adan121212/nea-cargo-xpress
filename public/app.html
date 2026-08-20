@@ -1464,15 +1464,13 @@
     const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ''}`.trim();
     const CAS = 'PTY-14981';
     const textoCasillero = [
-      `${CAS} ${nombreCompleto}`,
-      'NEA CARGO XPRESS',
+      `${CAS} ${nombreCompleto} NEA CARGO XPRESS`,
       '8610 NW 72 STREET',
-      CAS,
       'MIAMI, FLORIDA 33195',
       'ESTADOS UNIDOS',
       'TEL: 1-305-406-3654'
     ].join('\n');
-    const htmlCasillero = `<span class="suite">${CAS}</span> ${escapeHtml(nombreCompleto)}<br>NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>TEL: 1-305-406-3654`;
+    const htmlCasillero = `<span class="suite">${CAS}</span> ${escapeHtml(nombreCompleto)} NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>TEL: 1-305-406-3654`;
 
     ['bloqueDireccion','bloqueDireccionAereo'].forEach(id => {
       const el = document.getElementById(id);
