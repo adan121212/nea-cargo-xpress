@@ -240,7 +240,7 @@ router.patch(
                     u.email AS cliente_email, u.telefono AS cliente_telefono,
                     u.ruc AS cliente_ruc, u.numero_casillero,
                     p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega,
-                    p.largo_in, p.ancho_in, p.alto_in, p.peso_volumetrico_lb,
+                    p.largo_in, p.ancho_in, p.alto_in, p.peso_volumetrico_lb, p.peso_real_lb,
                     s.nombre AS sucursal_nombre, s.direccion AS sucursal_direccion,
                     s.telefono AS sucursal_telefono, s.horario AS sucursal_horario
              FROM facturas f
