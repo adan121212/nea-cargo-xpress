@@ -1470,25 +1470,49 @@
     } else respaldo();
   }
    async function cargarPerfil(){
-    const res = await apiAutenticado('/casillero/perfil');
-    const data = await res.json();
-    const { usuario } = data;
-    nombreUsuarioActual = usuario.nombre;
-    $('#saludoNombre').textContent = `Hola, ${usuario.nombre}`;
-    $('#pillCasillero').textContent = usuario.numero_casillero;
-    const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ''}`.trim();
-    const numCasillero = 'PTY-14981';
-    const htmlCasillero = `<span class="suite">PTY-14981</span> &nbsp; ${nombreCompleto} &nbsp; NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>1-305-406-3654`;
-    const textoCasillero = `${numCasillero}  ${nombreCompleto}  NEA CARGO XPRESS\n8610 NW 72 STREET\nMIAMI, FLORIDA 33195\nESTADOS UNIDOS\n1-305-406-3654`;
-    const el = document.getElementById('bloqueDireccion');
-    if(el) el.innerHTML = htmlCasillero;
-    const el2 = document.getElementById('bloqueDireccionCasillero');
-    if(el2) el2.innerHTML = htmlCasillero;
-    function copiarDireccion(btn){
-      navigator.clipboard.writeText(textoCasillero).then(() => {
-        const textoOriginal = btn.textContent;
-        btn.textContent = 'Copiada ✓';
-        setTimeout(() => { btn.textContent = textoOriginal; }, 1800);
+        const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ''}`.trim();
+    const CAS = 'PTY-14981';
+    const textoCasillero = [
+      `${CAS} ${nombreCompleto}`,
+      'NEA CARGO XPRESS',
+      '8610 NW 72 STREET',
+      CAS,
+      'MIAMI, FLORIDA 33195',
+      'ESTADOS UNIDOS',
+      'TEL: 1-305-406-3654'
+    ].join('\n');
+    const htmlCasillero = `<span class="suite">${CAS}</span> ${escapeHtml(nombreCompleto)}<br>NEA CARGO XPRESS<br>8610 NW 72 STREET<br><span class="suite">${CAS}</span><br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>TEL: 1-305-406-3654`;
+
+    ['bloqueDireccion','bloqueDireccionAereo'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = htmlCasillero;
+    });
+
+    const btnInicio = document.getElementById('btnCopiar');
+    if (btnInicio) btnInicio.onclick = () => copiarTexto(textoCasillero, btnInicio, 'Copiar dirección');
+    const btnAereo = document.getElementById('btnCopiarAereo');
+    if (btnAereo) btnAereo.onclick = () => copiarTexto(textoCasillero, btnAereo, '📋 Copiar dirección completa');
+
+    const CAMPOS = [
+      ['Nombre / Name', `${CAS} ${nombreCompleto}`],
+      ['Dirección 1 / Address 1', '8610 NW 72 STREET'],
+      ['Dirección 2 / Address 2', CAS],
+      ['Ciudad / City', 'MIAMI'],
+      ['Estado / State', 'FL'],
+      ['ZIP code', '33195'],
+      ['País / Country', 'UNITED STATES'],
+      ['Teléfono / Phone', '1-305-406-3654']
+    ];
+    const contCampos = document.getElementById('camposCasillero');
+    if (contCampos){
+      contCampos.innerHTML = CAMPOS.map(([l, v], i) => `
+        <div class="campo-row">
+          <div class="campo-l">${l}</div>
+          <div class="campo-v">${escapeHtml(v)}</div>
+          <button class="campo-b" data-i="${i}">Copiar</button>
+        </div>`).join('');
+      contCampos.querySelectorAll('.campo-b').forEach(b => {
+        b.onclick = () => copiarTexto(CAMPOS[b.dataset.i][1], b, 'Copiar');
       });
     }
     const btnCop = document.getElementById('btnCopiar');
