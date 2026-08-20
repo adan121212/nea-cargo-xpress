@@ -3067,5 +3067,44 @@
     </div>
   </div>
 </div>
+  <!-- FIX: centrar tarjeta de login en toda la pantalla -->
+<style>
+  .nea-login-centrado{
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    width: min(380px, calc(100vw - 40px)) !important;
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    z-index: 9999;
+  }
+</style>
+<script>
+(function(){
+  function centrarLogin(){
+    var todos = document.querySelectorAll('h1,h2,h3,h4,div,span,p');
+    var titulo = null;
+    for (var i = 0; i < todos.length; i++){
+      if (todos[i].children.length === 0 && /acceso de staff/i.test(todos[i].textContent)){
+        titulo = todos[i];
+        break;
+      }
+    }
+    if (!titulo) return;
+    var tarjeta = titulo.parentElement;
+    while (tarjeta && !tarjeta.querySelector('button, input[type=submit]')){
+      tarjeta = tarjeta.parentElement;
+    }
+    if (tarjeta) tarjeta.classList.add('nea-login-centrado');
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', centrarLogin);
+  } else {
+    centrarLogin();
+  }
+})();
+</script>
 </body>
 </html>
