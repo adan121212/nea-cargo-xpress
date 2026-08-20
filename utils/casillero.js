@@ -5,7 +5,9 @@ require('dotenv').config();
  * Ejemplo: id 42 -> "PN-00042"
  */
 function generarNumeroCasillero(id) {
-  const prefijo = process.env.CASILLERO_PREFIJO || 'PN';
+  const prefijo = String(process.env.CASILLERO_PREFIJO || 'PTY-14981')
+    .replace(/\s+/g, '')
+    .toUpperCase();
   return `${prefijo}-${String(id).padStart(5, '0')}`;
 }
 
