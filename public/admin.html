@@ -3106,5 +3106,57 @@
   }
 })();
 </script>
+  <!-- CASILLERO DEL CLIENTE -->
+<div id="modalCasillero" style="display:none;position:fixed;inset:0;background:rgba(12,27,51,.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:14px;max-width:420px;width:100%;padding:22px;font-family:Inter,sans-serif;">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;color:#0c1b33;">Dirección de casillero</div>
+    <div style="font-size:13px;color:#64748b;margin:3px 0 14px;">Cópiala y mándasela al cliente tal cual.</div>
+    <pre id="casilleroTexto" style="background:#f1f5f9;border-radius:10px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;white-space:pre-wrap;margin:0 0 10px;color:#0c1b33;"></pre>
+    <div style="background:#fef3c7;border-radius:8px;padding:10px 12px;font-size:12px;color:#854f0b;line-height:1.5;margin:0 0 14px;">
+      El casillero PTY-14981 es igual para todos. Lo que identifica al cliente es su nombre en la primera línea.
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="copiarCasillero(this)" style="flex:1;background:#ff6a1a;color:#fff;border:0;border-radius:10px;padding:11px;font-weight:600;font-size:14px;cursor:pointer;">📋 Copiar</button>
+      <button onclick="cerrarCasillero()" style="flex:1;background:#e2e8f0;color:#0c1b33;border:0;border-radius:10px;padding:11px;font-weight:600;font-size:14px;cursor:pointer;">Cerrar</button>
+    </div>
+  </div>
+</div>
+<script>
+function verCasillero(nombreCliente){
+  document.getElementById('casilleroTexto').textContent =
+    'PTY-14981 ' + nombreCliente + '\n' +
+    'NEA CARGO XPRESS\n' +
+    '8610 NW 72 Street\n' +
+    'PTY-14981\n' +
+    'Miami, FL 33195\n' +
+    'Tel: 1-305-406-3654';
+  document.getElementById('modalCasillero').style.display = 'flex';
+}
+function cerrarCasillero(){
+  document.getElementById('modalCasillero').style.display = 'none';
+  var b = document.querySelector('#modalCasillero button');
+  if (b) b.textContent = '📋 Copiar';
+}
+function copiarCasillero(btn){
+  var t = document.getElementById('casilleroTexto').textContent;
+  function ok(){ btn.textContent = '✓ Copiado'; }
+  if (navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(t).then(ok).catch(function(){ respaldo(); });
+  } else { respaldo(); }
+  function respaldo(){
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = t;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok();
+    } catch(e){ btn.textContent = 'Selecciona el texto'; }
+  }
+}
+</script>
 </body>
 </html>
