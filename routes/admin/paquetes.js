@@ -9,6 +9,7 @@ const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudi
 const { enviarCorreoCambioEstado, enviarFacturaListaParaRetiro } = require('../../utils/mailer');
 const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024, files: 5 },
@@ -32,6 +33,7 @@ const ESTADOS_VALIDOS = [
   'prealertado','en_bodega_miami','en_transito',
   'en_panama','listo_para_retiro','entregado',
 ];
+
 const PAGE_SIZE = 50;
 
 // --- GET /api/admin/paquetes ---
@@ -135,7 +137,6 @@ router.patch(
            FROM sucursales s WHERE s.id = $1`, [paquete.sucursal_id]
         );
         if (sucRes.rows.length > 0) Object.assign(paquete, sucRes.rows[0]);
-
         const clienteRes = await pool.query('SELECT nombre, email FROM usuarios WHERE id = $1', [paquete.usuario_id]);
         const cliente = clienteRes.rows[0];
         if (cliente) {
@@ -152,6 +153,9 @@ router.patch(
 );
 
 // --- PATCH /api/admin/paquetes/:id/peso ---
+// Confirma el peso real (balanza) y genera la factura automáticamente.
+// La factura se cobra sobre el MAYOR entre el peso real y el peso volumétrico
+// (calculado a partir de las medidas, si el paquete las tiene guardadas).
 router.patch(
   '/:id/peso',
   [
@@ -175,6 +179,7 @@ router.patch(
         `SELECT id FROM facturas WHERE paquete_id = $1 AND estado <> 'anulada'`, [req.params.id]
       );
       await client.query('BEGIN');
+      // El peso real de la balanza SIEMPRE se guarda tal cual, sin tocar.
       await client.query(
         `UPDATE paquetes SET peso_real_lb = $1, peso_confirmado = TRUE, fecha_actualizacion = NOW() WHERE id = $2`,
         [pesoConfirmado, req.params.id]
@@ -198,7 +203,9 @@ router.patch(
           return res.status(400).json({ mensaje: 'No hay ninguna tarifa configurada.' });
         }
         const tarifa = tarifaRows[0];
-        const costoEnvio = Math.max(Number(pesoConfirmado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
+        // Se factura sobre el MAYOR entre el peso real y el volumétrico (si el paquete tiene medidas).
+        const pesoParaCobrar = Math.max(Number(pesoConfirmado), Number(paquete.peso_volumetrico_lb || 0));
+        const costoEnvio = Math.max(Number(pesoParaCobrar) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
         const seguro = paquete.valor_declarado ? (Number(paquete.valor_declarado) * Number(tarifa.pct_seguro)) / 100 : 0;
         const cargoManejo = Number(tarifa.cargo_manejo);
         const total = costoEnvio + cargoManejo + seguro;
@@ -206,7 +213,7 @@ router.patch(
           `INSERT INTO facturas (paquete_id, usuario_id, tarifa_id, peso_facturado_lb, precio_libra,
              costo_envio, cargo_manejo, seguro, total, token_pdf, estado)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'pendiente') RETURNING *`,
-          [req.params.id, paquete.usuario_id, tarifa.id, pesoConfirmado, tarifa.precio_libra,
+          [req.params.id, paquete.usuario_id, tarifa.id, pesoParaCobrar, tarifa.precio_libra,
            costoEnvio.toFixed(2), cargoManejo.toFixed(2), seguro.toFixed(2), total.toFixed(2),
            crypto.randomBytes(24).toString('hex')]
         );
@@ -226,8 +233,10 @@ router.patch(
         try {
           const datosCompletos = await pool.query(
             `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
-                    u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero,
+                    u.email AS cliente_email, u.telefono AS cliente_telefono,
+                    u.ruc AS cliente_ruc, u.numero_casillero,
                     p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega,
+                    p.largo_in, p.ancho_in, p.alto_in, p.peso_volumetrico_lb,
                     s.nombre AS sucursal_nombre, s.direccion AS sucursal_direccion,
                     s.telefono AS sucursal_telefono, s.horario AS sucursal_horario
              FROM facturas f
@@ -271,22 +280,18 @@ router.patch(
       const paqueteRes = await client.query('SELECT * FROM paquetes WHERE id = $1', [req.params.id]);
       if (paqueteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       const paquete = paqueteRes.rows[0];
-
       if (paquete.estado === 'entregado') {
         return res.status(409).json({ mensaje: 'Este paquete ya fue entregado. No se puede cambiar de cliente.' });
       }
-
       const clienteRes = await client.query(
         'SELECT id, nombre, apellido, email, numero_casillero FROM usuarios WHERE id = $1',
         [req.body.usuario_id]
       );
       if (clienteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Cliente no encontrado' });
       const nuevoCliente = clienteRes.rows[0];
-
       if (paquete.usuario_id === nuevoCliente.id) {
         return res.status(409).json({ mensaje: 'El paquete ya está a nombre de ese cliente.' });
       }
-
       await client.query('BEGIN');
       await client.query(
         'UPDATE paquetes SET usuario_id = $1, fecha_actualizacion = NOW() WHERE id = $2',
@@ -300,7 +305,6 @@ router.patch(
         [nuevoCliente.id, req.params.id]
       );
       await client.query('COMMIT');
-
       return res.json({
         mensaje: `Paquete reasignado a ${nuevoCliente.nombre} ${nuevoCliente.apellido}.`,
         cliente: nuevoCliente,
