@@ -161,7 +161,6 @@ router.patch(
   [
     body('peso_real_lb').isFloat({ min: 0.01 }).withMessage('Ingresa un peso válido en libras'),
     body('tarifa_id').optional().isInt().withMessage('tarifa_id debe ser un número entero'),
-    body('peso_facturar_lb').optional().isFloat({ min: 0.01 }).withMessage('peso_facturar_lb inválido'),
   ],
   async (req, res) => {
     const errores = validationResult(req);
@@ -204,15 +203,12 @@ router.patch(
           return res.status(400).json({ mensaje: 'No hay ninguna tarifa configurada.' });
         }
         const tarifa = tarifaRows[0];
-        // Se factura sobre el MAYOR entre el peso real y el volumétrico (si el paquete tiene medidas).
-        // El admin puede elegir explícitamente por cuál peso facturar (real o volumétrico),
-        // pero NUNCA se permite cobrar por menos del peso real de la balanza — es el piso de seguridad.
-        // Si no elige nada (llamadas viejas o automáticas), se usa el mayor entre real y volumétrico, como antes.
+        // Cada tarifa cobra por SU propio peso: si su nombre dice "volumen", se cobra el peso
+        // volumétrico; cualquier otra tarifa cobra el peso real. La tarifa que se elija es la
+        // que decide qué peso se factura — no hay comparación automática entre los dos.
         const pesoVolumetrico = Number(paquete.peso_volumetrico_lb || 0);
-        const pesoElegido = req.body.peso_facturar_lb ? Number(req.body.peso_facturar_lb) : null;
-        const pesoParaCobrar = pesoElegido
-          ? Math.max(pesoElegido, Number(pesoConfirmado))
-          : Math.max(Number(pesoConfirmado), pesoVolumetrico);
+        const esTarifaVolumetrica = /volum/i.test(tarifa.nombre || '');
+        const pesoParaCobrar = (esTarifaVolumetrica && pesoVolumetrico > 0) ? pesoVolumetrico : Number(pesoConfirmado);
         const costoEnvio = Math.max(Number(pesoParaCobrar) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
         const seguro = paquete.valor_declarado ? (Number(paquete.valor_declarado) * Number(tarifa.pct_seguro)) / 100 : 0;
         const cargoManejo = Number(tarifa.cargo_manejo);

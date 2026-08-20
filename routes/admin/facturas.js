@@ -26,14 +26,17 @@ const MOTIVOS_ANULACION = [
   'otro',
 ];
 
-// Se factura sobre el MAYOR entre el peso real (balanza) y el peso volumétrico
-// (calculado del tamaño de la caja). Así las cajas grandes y livianas se cobran
-// correctamente. Si el paquete no tiene medidas, peso_volumetrico_lb es null y
-// se cobra solo el peso real, como antes.
-function calcularPesoFacturado(paquete) {
+// Cada tarifa cobra por SU propio peso: si su nombre contiene "volumen", se cobra el peso
+// volumétrico (calculado del tamaño de la caja); cualquier otra tarifa cobra el peso real
+// (balanza). La tarifa elegida es la que decide qué peso se factura — no hay comparación
+// automática entre los dos. Si la tarifa es de volumen pero el paquete no tiene medidas,
+// se usa el peso real para no facturar en $0.
+function calcularPesoFacturado(paquete, tarifa) {
   const pesoReal = Number(paquete.peso_real_lb ?? paquete.peso_lb ?? 0);
   const pesoVol = Number(paquete.peso_volumetrico_lb ?? 0);
-  return Math.max(pesoReal, pesoVol) || null;
+  const esTarifaVolumetrica = /volum/i.test((tarifa && tarifa.nombre) || '');
+  const peso = (esTarifaVolumetrica && pesoVol > 0) ? pesoVol : pesoReal;
+  return peso || null;
 }
 
 // SELECT reutilizable para armar el objeto factura que va al PDF.
@@ -76,11 +79,11 @@ router.post(
       const paqueteRes = await client.query('SELECT * FROM paquetes WHERE id = $1', [paquete_id]);
       if (paqueteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       const paquete = paqueteRes.rows[0];
-      const pesoFacturado = calcularPesoFacturado(paquete);
-      if (!pesoFacturado) return res.status(400).json({ mensaje: 'Este paquete no tiene un peso registrado.' });
       const tarifaRes = await client.query('SELECT * FROM tarifas WHERE id = $1', [tarifa_id]);
       if (tarifaRes.rows.length === 0) return res.status(404).json({ mensaje: 'Tarifa no encontrada' });
       const tarifa = tarifaRes.rows[0];
+      const pesoFacturado = calcularPesoFacturado(paquete, tarifa);
+      if (!pesoFacturado) return res.status(400).json({ mensaje: 'Este paquete no tiene un peso registrado.' });
       const yaFacturado = await client.query(`SELECT id FROM facturas WHERE paquete_id = $1 AND estado <> 'anulada'`, [paquete_id]);
       if (yaFacturado.rows.length > 0) return res.status(409).json({ mensaje: 'Este paquete ya tiene una factura activa.' });
       const costoEnvio = Math.max(Number(pesoFacturado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
@@ -319,11 +322,11 @@ router.post(
       const paqueteRes = await client.query('SELECT * FROM paquetes WHERE id = $1', [paquete_id]);
       if (paqueteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       const paquete = paqueteRes.rows[0];
-      const pesoFacturado = calcularPesoFacturado(paquete);
-      if (!pesoFacturado || Number(pesoFacturado) === 0) return res.status(400).json({ mensaje: 'El paquete no tiene peso registrado.' });
       const tarifaRes = await client.query('SELECT * FROM tarifas WHERE id = $1', [tarifa_id]);
       if (tarifaRes.rows.length === 0) return res.status(404).json({ mensaje: 'Tarifa no encontrada' });
       const tarifa = tarifaRes.rows[0];
+      const pesoFacturado = calcularPesoFacturado(paquete, tarifa);
+      if (!pesoFacturado || Number(pesoFacturado) === 0) return res.status(400).json({ mensaje: 'El paquete no tiene peso registrado.' });
       const yaFacturado = await client.query(`SELECT id FROM facturas WHERE paquete_id = $1 AND estado <> 'anulada'`, [paquete_id]);
       if (yaFacturado.rows.length > 0) return res.status(409).json({ mensaje: 'Este paquete ya tiene una factura activa.' });
       const costoEnvio = Math.max(Number(pesoFacturado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
