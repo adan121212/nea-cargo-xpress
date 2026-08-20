@@ -792,6 +792,11 @@
           </div>
         </div>
 
+        <div class="banner-listo" id="bannerListoRetiro">
+          <h3>📦 ¡Tienes paquetes listos para retirar!</h3>
+          <p id="bannerListoTexto"></p>
+        </div>
+
         <!-- ---- Sección: Inicio ---- -->
         <div class="seccion-app" id="seccionInicio">
           <div class="grid2">
@@ -1459,7 +1464,7 @@
     const { usuario } = data;
     nombreUsuarioActual = usuario.nombre;
     $('#saludoNombre').textContent = `Hola, ${usuario.nombre}`;
-    $('#pillCasillero').textContent = usuario.numero_casillero;
+    $('#pillCasillero').textContent = 'Cliente ' + usuario.numero_casillero;
 
     const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ''}`.trim();
     const CAS = 'PTY-14981';
