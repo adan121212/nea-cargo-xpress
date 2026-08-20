@@ -114,6 +114,10 @@ app.use('/api/admin/mostrador', adminMostradorRoutes);
 app.use('/api/admin/caja', adminCajaRoutes);
 app.use('/api/admin/recepcion', adminRecepcionRoutes);
 app.use('/api/admin/pty', adminPtyRoutes);
+// Redirección de la URL bonita del flyer al registro real
+app.get('/casillero', (req, res) => {
+  res.redirect('/app.html?registro');
+});
 app.use(express.static(path.join(__dirname, 'public')));
 app.use((err, req, res, next) => {
   console.error('Error no controlado:', err);
