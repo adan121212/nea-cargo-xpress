@@ -1454,7 +1454,22 @@
   }
 
   // ---------- Cargar perfil / casillero ----------
-  async function cargarPerfil(){
+  function copiarTexto(texto, btn, textoBoton){
+    const listo = () => { btn.textContent = '✓ Copiado'; setTimeout(() => { btn.textContent = textoBoton; }, 1800); };
+    function respaldo(){
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = texto; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        listo();
+      } catch(e){ btn.textContent = 'No se pudo copiar'; setTimeout(() => { btn.textContent = textoBoton; }, 1800); }
+    }
+    if (navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(texto).then(listo).catch(respaldo);
+    } else respaldo();
+  }
+   async function cargarPerfil(){
     const res = await apiAutenticado('/casillero/perfil');
     const data = await res.json();
     const { usuario } = data;
