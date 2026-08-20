@@ -149,8 +149,8 @@
   }
   /* ===================== LOGIN ===================== */
   #vistaLogin{
-    display:flex; justify-content:center; align-items:center; padding: 20px;
-    position: fixed; inset: 0; z-index: 60;
+    display:flex; justify-content:center; padding-top: 60px;
+    position: relative; min-height: 100vh;
     margin-left: 0 !important;
   }
   #vistaLogin::before{
@@ -530,7 +530,7 @@
 <!-- ======================= SIDEBAR ======================= -->
 <div class="sidebar" id="sidebar">
   <div class="sb-logo">
-    <div class="sb-logo-row" onclick="localStorage.removeItem('nea_cargo_admin_token'); window.location.replace('index.html');" style="cursor:pointer;" title="Ir al inicio">
+    <div class="sb-logo-row">
       <div class="sb-mark">N</div>
       <div>
         <div class="sb-brand-text">NEA CARGO XPRESS</div>
@@ -595,7 +595,7 @@
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 <!-- Topbar solo móvil -->
 <div class="topbar-movil" id="topbarMovil">
-  <div class="sb-logo-row" onclick="localStorage.removeItem('nea_cargo_admin_token'); window.location.replace('index.html');" style="cursor:pointer;">
+  <div class="sb-logo-row">
     <div class="sb-mark">N</div>
     <div class="sb-brand-text" style="font-size:12px;">NEA CARGO XPRESS</div>
   </div>
@@ -604,7 +604,7 @@
 <!-- ======================= CONTENIDO PRINCIPAL ======================= -->
 <div class="main-content">
   <!-- ======================= LOGIN ======================= -->
-  <div id="vistaLogin">
+  <div id="vistaLogin" style="display:flex; justify-content:center; padding-top:60px; min-height:100vh; position:relative;">
     <canvas id="loginNetworkCanvas" style="position:fixed;inset:0;z-index:-1;"></canvas>
     <div style="position:fixed;inset:0;background:var(--ink);z-index:-2;"></div>
     <div class="login-card">
@@ -794,9 +794,9 @@
           <h3 style="margin:0 0 4px;color:#7c3aed;">📐 Paso 2 de 2 — Dimensiones</h3>
           <p class="card-sub" style="margin:0 0 14px;">Mide el paquete en pulgadas — se calcula el peso volumétrico automáticamente.</p>
           <div class="form-grid" style="margin-bottom:12px;">
-            <div><label for="recDimLargo">Largo (in)</label><input id="recDimLargo" type="number" step="0.1" min="0" placeholder="12"></div>
-            <div><label for="recDimAncho">Ancho (in)</label><input id="recDimAncho" type="number" step="0.1" min="0" placeholder="8"></div>
-            <div><label for="recDimAlto">Alto (in)</label><input id="recDimAlto" type="number" step="0.1" min="0" placeholder="6"></div>
+            <div><label for="dimLargo">Largo (in)</label><input id="dimLargo" type="number" step="0.1" min="0" placeholder="12"></div>
+            <div><label for="dimAncho">Ancho (in)</label><input id="dimAncho" type="number" step="0.1" min="0" placeholder="8"></div>
+            <div><label for="dimAlto">Alto (in)</label><input id="dimAlto" type="number" step="0.1" min="0" placeholder="6"></div>
           </div>
           <button class="btn-primary" id="btnGuardarDimensionesRecepcion" style="width:auto;">
             <span class="spinner"></span><span>Guardar y continuar</span>
@@ -2411,7 +2411,7 @@
   function iniciarFlujoFotoDimensiones(paqueteId,tracking){ flujoFotoDimPaqueteId=paqueteId; flujoFotoDimTracking=tracking; $('#recepcionFormNuevo').style.display='none'; $('#recepcionResultado').style.display='none'; $('#pasoFotoSub').textContent=`Toma una foto de "${tracking}" recién recibido.`; $('#pasoFoto').style.display='block'; $('#pasoDimensiones').style.display='none'; $('#bannerPasoFoto').innerHTML=''; }
   $('#btnAbrirCamaraFoto').addEventListener('click',()=>{ $('#pasoFotoInput').value=''; $('#pasoFotoInput').click(); });
   $('#btnGuardarDimensionesRecepcion').addEventListener('click', async () => {
-    const largo=$('#recDimLargo').value, ancho=$('#recDimAncho').value, alto=$('#recDimAlto').value;
+    const largo=$('#dimLargo').value, ancho=$('#dimAncho').value, alto=$('#dimAlto').value;
     if(!largo||!ancho||!alto){ mostrarBanner('#bannerPasoDimensiones','error','Completa largo, ancho y alto.'); return; }
     const btn=$('#btnGuardarDimensionesRecepcion'); setCargando(btn,true);
     try {
@@ -2432,7 +2432,7 @@
     finally { setTimeout(pasarADimensiones,600); }
   });
   function saltarPasoFoto(){ pasarADimensiones(); }
-  function pasarADimensiones(){ $('#pasoFoto').style.display='none'; $('#recDimLargo').value=''; $('#recDimAncho').value=''; $('#recDimAlto').value=''; $('#bannerPasoDimensiones').innerHTML=''; $('#pasoDimensiones').style.display='block'; }
+  function pasarADimensiones(){ $('#pasoFoto').style.display='none'; $('#dimLargo').value=''; $('#dimAncho').value=''; $('#dimAlto').value=''; $('#bannerPasoDimensiones').innerHTML=''; $('#pasoDimensiones').style.display='block'; }
   function saltarPasoDimensiones(){ terminarFlujoRecepcion(); }
   function terminarFlujoRecepcion(){ $('#pasoFoto').style.display='none'; $('#pasoDimensiones').style.display='none'; $('#btnGuardarDimensionesRecepcion').disabled=false; setCargando($('#btnGuardarDimensionesRecepcion'),false); flujoFotoDimPaqueteId=null; $('#recepcionTracking').focus(); }
   // Convierte una fecha a "YYYY-MM-DD" usando la hora LOCAL del navegador,
@@ -2552,12 +2552,11 @@
     try {
       const res = await apiAdmin(`/admin/caja/dia?fecha=${fecha}`);
       const data = await res.json();
-      const facturasRes = await apiAdmin(`/admin/facturas?estado=pagada`);
-      const todas = (await facturasRes.json()).facturas || [];
-      const delDia = todas.filter(f => {
-        if(!f.fecha_pago) return false;
-        return String(f.fecha_pago).slice(0,10) === fecha;
-      });
+      // Pedimos las facturas ya filtradas por el servidor en hora de Panamá.
+      // Antes se filtraba aquí cortando la fecha UTC, y lo cobrado después
+      // de las 7:00 PM no aparecía en su día.
+      const facturasRes = await apiAdmin(`/admin/caja/facturas-dia?fecha=${fecha}`);
+      const delDia = (await facturasRes.json()).facturas || [];
       if(delDia.length === 0){
         $('#contenidoFacturasDia').innerHTML = '<div class="empty">No hay facturas registradas ese día.</div>';
         return;
@@ -3069,161 +3068,4 @@
   </div>
 </div>
 </body>
-  <!-- ===== PEGAR ESTO JUSTO ANTES DE </body> EN admin.html ===== -->
-<script>
-  // Eliminar / desactivar cuentas de clientes + arreglo del nombre del admin.
-  // Este bloque va al final y reemplaza solo lo que necesita. No hay que
-  // borrar nada del código de arriba.
-
-  function pedirConfirmacionEliminar(u){
-    return new Promise(resolve => {
-      const nombreCompleto = `${u.nombre} ${u.apellido}`.trim();
-      const tieneHistorial = Number(u.total_paquetes) > 0;
-      const popup = document.createElement('div');
-      popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
-      popup.innerHTML = `
-        <div style="background:#fff;border-radius:14px;padding:24px;width:400px;max-width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);">
-          <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px;color:#c0392b;">
-            ${tieneHistorial ? '&#9888; Desactivar cuenta' : '&#9888; Eliminar cuenta'}
-          </div>
-          <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 10px;line-height:1.6;">
-            <strong>${escapeHtml(nombreCompleto)}</strong><br>${escapeHtml(u.email)}
-          </p>
-          <div style="font-size:12.5px;line-height:1.6;background:var(--paper);border-radius:8px;padding:10px 12px;margin-bottom:16px;">
-            ${tieneHistorial
-              ? `Este cliente tiene <strong>${u.total_paquetes} paquete(s)</strong>, as&iacute; que la cuenta se <strong>desactiva</strong>: no podr&aacute; iniciar sesi&oacute;n, pero sus paquetes y facturas se conservan. Puedes reactivarla despu&eacute;s.`
-              : `Este cliente no tiene paquetes ni facturas, as&iacute; que la cuenta se <strong>borra por completo</strong>. Esto no se puede deshacer.`}
-          </div>
-          <label style="margin:0 0 5px;">Escribe <strong>${escapeHtml(nombreCompleto)}</strong> para confirmar</label>
-          <input id="elimNombre" type="text" autocomplete="off" placeholder="${escapeHtml(nombreCompleto)}">
-          <div id="elimError" style="display:none;color:#c0392b;font-size:12px;margin-top:8px;"></div>
-          <div style="display:flex;gap:8px;margin-top:16px;">
-            <button id="elimCancelar" class="btn-secondary" style="flex:1;">Cancelar</button>
-            <button id="elimConfirmar" style="flex:1;padding:10px;border-radius:8px;border:none;background:#c0392b;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">
-              ${tieneHistorial ? 'Desactivar' : 'Eliminar'}
-            </button>
-          </div>
-        </div>`;
-      document.body.appendChild(popup);
-      const input = popup.querySelector('#elimNombre');
-      const errorDiv = popup.querySelector('#elimError');
-      const cerrar = v => { popup.remove(); resolve(v); };
-      input.addEventListener('input', () => { errorDiv.style.display = 'none'; });
-      popup.querySelector('#elimCancelar').addEventListener('click', () => cerrar(false));
-      popup.addEventListener('click', e => { if (e.target === popup) cerrar(false); });
-      popup.querySelector('#elimConfirmar').addEventListener('click', () => {
-        if (input.value.trim().toLowerCase() !== nombreCompleto.toLowerCase()) {
-          errorDiv.textContent = 'El nombre no coincide.';
-          errorDiv.style.display = 'block';
-          return;
-        }
-        cerrar(true);
-      });
-      input.addEventListener('keydown', e => { if (e.key === 'Enter') popup.querySelector('#elimConfirmar').click(); });
-      setTimeout(() => input.focus(), 50);
-    });
-  }
-
-  // Esta versión reemplaza a la de arriba porque se define después.
-  cargarClientes = async function(){
-    try {
-      const res = await apiAdmin('/admin/usuarios');
-      const data = await res.json();
-      const usuarios = data.usuarios || [];
-      $('#emptyClientes').style.display = usuarios.length ? 'none' : 'block';
-
-      $('#tbodyClientes').innerHTML = usuarios.map(u => {
-        const fecha = new Date(u.fecha_registro).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
-        const inactivo = u.activo === false;
-        const etiqueta = inactivo
-          ? ' <span class="badge" style="background:rgba(192,57,43,.10);color:#c0392b;">Inactivo</span>'
-          : '';
-        const botonBorrar = inactivo
-          ? `<button class="btn-secondary btn-activar-cliente" data-id="${u.id}" style="font-size:12px;padding:5px 10px;">&#8634; Reactivar</button>`
-          : `<button class="btn-secondary btn-danger btn-eliminar-cliente" data-id="${u.id}" style="font-size:12px;padding:5px 10px;">&#128465; Eliminar</button>`;
-        return `<tr data-uid="${u.id}"${inactivo ? ' style="opacity:.55;"' : ''}>
-          <td data-label="Nombre">${escapeHtml(u.nombre)} ${escapeHtml(u.apellido)}${etiqueta}</td>
-          <td data-label="Correo">${escapeHtml(u.email)}</td>
-          <td data-label="Casillero" class="mono">${escapeHtml(u.numero_casillero || '—')}</td>
-          <td data-label="Verificado">${u.verificado ? '&#10003;' : '—'}</td>
-          <td data-label="Paquetes">${u.total_paquetes}</td>
-          <td data-label="Registrado" class="muted">${fecha}</td>
-          <td data-label="">
-            <div class="row-actions">
-              <button class="btn-secondary btn-editar-cliente" data-id="${u.id}" style="font-size:12px;padding:5px 10px;">&#9998; Editar</button>
-              ${botonBorrar}
-            </div>
-          </td>
-        </tr>`;
-      }).join('');
-
-      $('#tbodyClientes').querySelectorAll('.btn-editar-cliente').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const u = usuarios.find(x => x.id == btn.dataset.id);
-          if (u) abrirEditCliente(u);
-        });
-      });
-
-      $('#tbodyClientes').querySelectorAll('.btn-eliminar-cliente').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const u = usuarios.find(x => x.id == btn.dataset.id);
-          if (!u) return;
-          if (!(await pedirConfirmacionEliminar(u))) return;
-          btn.disabled = true; btn.textContent = '…';
-          try {
-            const r = await apiAdmin(`/admin/usuarios/${u.id}`, { method: 'DELETE' });
-            const d = await r.json().catch(() => ({}));
-            if (r.ok) { alert(d.mensaje || 'Listo.'); f1ClientesCache = []; await cargarClientes(); }
-            else { alert(d.mensaje || 'No se pudo eliminar la cuenta.'); btn.disabled = false; btn.innerHTML = '&#128465; Eliminar'; }
-          } catch (err) {
-            alert('No pudimos conectar con el servidor.');
-            btn.disabled = false; btn.innerHTML = '&#128465; Eliminar';
-          }
-        });
-      });
-
-      $('#tbodyClientes').querySelectorAll('.btn-activar-cliente').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const u = usuarios.find(x => x.id == btn.dataset.id);
-          if (!u) return;
-          if (!confirm(`¿Reactivar la cuenta de ${u.nombre} ${u.apellido}?`)) return;
-          btn.disabled = true; btn.textContent = '…';
-          try {
-            const r = await apiAdmin(`/admin/usuarios/${u.id}/activar`, { method: 'PATCH' });
-            const d = await r.json().catch(() => ({}));
-            if (r.ok) { f1ClientesCache = []; await cargarClientes(); }
-            else { alert(d.mensaje || 'No se pudo reactivar.'); btn.disabled = false; btn.innerHTML = '&#8634; Reactivar'; }
-          } catch (err) {
-            alert('No pudimos conectar con el servidor.');
-            btn.disabled = false; btn.innerHTML = '&#8634; Reactivar';
-          }
-        });
-      });
-    } catch (err) {}
-  };
-
-  // Arreglo del nombre: al recargar la página con la sesión ya guardada,
-  // el saludo quedaba vacío porque solo se pintaba al iniciar sesión.
-  // Sacamos el id del token y pedimos el nombre al servidor.
-  (async function pintarNombreAdmin(){
-    let id = null;
-    try {
-      const t = localStorage.getItem(TOKEN_KEY);
-      if (!t) return;
-      const payload = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-      id = payload.id;
-    } catch (e) { return; }
-    if (!id) return;
-    try {
-      const r = await apiAdmin(`/admin/usuarios/${id}`);
-      const d = await r.json();
-      const u = d.usuario;
-      if (!u || !u.nombre) return;
-      $('#saludoAdmin').textContent = `Hola, ${u.nombre} — Panel de operaciones`;
-      $('#sbNombreUsuario').textContent = `${u.nombre} ${u.apellido || ''}`.trim();
-      $('#sbAvatarLetra').textContent = u.nombre.charAt(0).toUpperCase();
-    } catch (e) {}
-  })();
-</script>
-
 </html>
