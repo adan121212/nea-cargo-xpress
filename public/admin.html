@@ -1080,9 +1080,9 @@
     </div>
     <p class="card-sub">Mide la caja en pulgadas — se usa para calcular el peso volumétrico.</p>
     <div class="dim-inputs">
-      <div><label for="dimLargo">Largo (in)</label><input type="number" id="dimLargo" step="0.1" min="0" placeholder="Ej. 12"></div>
-      <div><label for="dimAncho">Ancho (in)</label><input type="number" id="dimAncho" step="0.1" min="0" placeholder="Ej. 10"></div>
-      <div><label for="dimAlto">Alto (in)</label><input type="number" id="dimAlto" step="0.1" min="0" placeholder="Ej. 8"></div>
+      <div><label for="mdlDimLargo">Largo (in)</label><input type="number" id="mdlDimLargo" step="0.1" min="0" placeholder="Ej. 12"></div>
+      <div><label for="mdlDimAncho">Ancho (in)</label><input type="number" id="mdlDimAncho" step="0.1" min="0" placeholder="Ej. 10"></div>
+      <div><label for="mdlDimAlto">Alto (in)</label><input type="number" id="mdlDimAlto" step="0.1" min="0" placeholder="Ej. 8"></div>
     </div>
     <div class="dim-resultado" id="dimResultado"></div>
     <button class="btn-primary" id="btnGuardarDimensiones" style="margin-top:14px;">
@@ -1884,16 +1884,16 @@
     return Math.ceil(((l*a*h)/166)*2)/2;
   }
   function actualizarPreviewDimensiones(){
-    const largo=$('#dimLargo').value, ancho=$('#dimAncho').value, alto=$('#dimAlto').value;
+    const largo=$('#mdlDimLargo').value, ancho=$('#mdlDimAncho').value, alto=$('#mdlDimAlto').value;
     const peso=calcularPesoVolumetricoPreview(largo,ancho,alto);
     const resultado=$('#dimResultado');
     if(peso==null){ resultado.innerHTML='Completa las tres medidas para calcular el peso volumétrico.'; return; }
     resultado.innerHTML=`Peso volumétrico estimado: <strong>${peso} lb</strong><br><span style="font-size:11.5px;">Al facturar, se usa el <span class="volumetrico-mayor">mayor</span> entre este y el peso real confirmado.</span>`;
   }
-  ['dimLargo','dimAncho','dimAlto'].forEach(id => { document.getElementById(id)?.addEventListener('input', actualizarPreviewDimensiones); });
+  ['mdlDimLargo','mdlDimAncho','mdlDimAlto'].forEach(id => { document.getElementById(id)?.addEventListener('input', actualizarPreviewDimensiones); });
   function abrirModalDimensiones(paqueteId, largo, ancho, alto){
     paqueteDimensionesActual=paqueteId;
-    $('#dimLargo').value=largo||''; $('#dimAncho').value=ancho||''; $('#dimAlto').value=alto||'';
+    $('#mdlDimLargo').value=largo||''; $('#mdlDimAncho').value=ancho||''; $('#mdlDimAlto').value=alto||'';
     mostrarBanner('#bannerDimensiones','',''); actualizarPreviewDimensiones();
     $('#modalDimensiones').classList.add('show');
   }
@@ -1901,7 +1901,7 @@
   $('#btnCerrarModalDimensiones').addEventListener('click', cerrarModalDimensiones);
   $('#modalDimensiones').addEventListener('click', (e) => { if(e.target.id==='modalDimensiones') cerrarModalDimensiones(); });
   $('#btnGuardarDimensiones').addEventListener('click', async () => {
-    const largo=$('#dimLargo').value, ancho=$('#dimAncho').value, alto=$('#dimAlto').value;
+    const largo=$('#mdlDimLargo').value, ancho=$('#mdlDimAncho').value, alto=$('#mdlDimAlto').value;
     if(!largo||!ancho||!alto){ mostrarBanner('#bannerDimensiones','error','Completa las tres medidas.'); return; }
     const btn=$('#btnGuardarDimensiones'); setCargando(btn,true);
     try {
