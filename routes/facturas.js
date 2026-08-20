@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../db');
 const { requiereAutenticacion } = require('../middleware/auth');
 const { generarPdfFactura } = require('../utils/facturaPdf');
+
 const router = express.Router();
 
 // Todas las rutas de este archivo son del CLIENTE.
@@ -69,8 +70,10 @@ router.get('/:id/pdf', async (req, res) => {
   try {
     const resultado = await pool.query(
       `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
-              u.email AS cliente_email, u.numero_casillero,
-              p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega
+              u.email AS cliente_email, u.telefono AS cliente_telefono,
+              u.ruc AS cliente_ruc, u.numero_casillero,
+              p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega,
+              p.largo_in, p.ancho_in, p.alto_in, p.peso_volumetrico_lb, p.peso_real_lb
        FROM facturas f
        JOIN usuarios u ON u.id = f.usuario_id
        JOIN paquetes p ON p.id = f.paquete_id
