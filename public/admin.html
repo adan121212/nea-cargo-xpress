@@ -3162,7 +3162,9 @@ function copiarCasillero(btn){
 (function(){
   function inyectarBotones(){
     if (typeof verCasillero !== 'function') return;
-    var celdas = document.querySelectorAll('td');
+    var tbody = document.getElementById('tbodyClientes');
+    if (!tbody) return;
+    var celdas = tbody.querySelectorAll('td');
     for (var i = 0; i < celdas.length; i++){
       var td = celdas[i];
       if (!/PTY-\d{4,6}-\d+/.test(td.textContent)) continue;
