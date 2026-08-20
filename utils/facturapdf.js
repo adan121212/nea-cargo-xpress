@@ -45,7 +45,7 @@ async function generarPdfFactura(factura) {
       doc.font('Helvetica-Bold').fontSize(15).fillColor(WHITE)
          .text('NEA CARGO XPRESS', LM + 58, 18);
       doc.font('Helvetica').fontSize(8.5).fillColor('#94a3b8')
-         .text('Miami → Panamá · Casillero Virtual', LM + 58, 36);
+         .text('Miami a Panamá · Casillero Virtual', LM + 58, 36);
 
       const estado = factura.estado || 'pendiente';
       const colorBadge = estado === 'pagada' ? '#22c55e' : estado === 'anulada' ? '#6b7280' : ORANGE;
@@ -246,7 +246,7 @@ async function generarPdfFactura(factura) {
       doc.font('Helvetica-Bold').fontSize(8).fillColor(NAVY)
          .text('NEA CARGO XPRESS', LM, doc.y);
       doc.font('Helvetica').fontSize(7).fillColor(GRAY)
-         .text('Miami → Panamá · +507 6293-7497 · info@neacargoxpress.com', LM, doc.y + 10)
+         .text('Miami a Panamá · +507 6293-7497 · info@neacargoxpress.com', LM, doc.y + 10)
          .text('Comprobante interno — no es una factura fiscal electrónica DGI.', LM, doc.y + 20);
 
       doc.end();
