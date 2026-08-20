@@ -8,6 +8,7 @@ const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
 const { enviarFacturaPorWhatsapp } = require('../../utils/whatsapp');
+
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
@@ -24,6 +25,30 @@ const MOTIVOS_ANULACION = [
   'cliente_desistio',
   'otro',
 ];
+
+// Se factura sobre el MAYOR entre el peso real (balanza) y el peso volumétrico
+// (calculado del tamaño de la caja). Así las cajas grandes y livianas se cobran
+// correctamente. Si el paquete no tiene medidas, peso_volumetrico_lb es null y
+// se cobra solo el peso real, como antes.
+function calcularPesoFacturado(paquete) {
+  const pesoReal = Number(paquete.peso_real_lb ?? paquete.peso_lb ?? 0);
+  const pesoVol = Number(paquete.peso_volumetrico_lb ?? 0);
+  return Math.max(pesoReal, pesoVol) || null;
+}
+
+// SELECT reutilizable para armar el objeto factura que va al PDF.
+// Incluye teléfono, RUC y medidas + peso volumétrico para el diseño nuevo.
+const SELECT_FACTURA_PDF = `
+  SELECT f.*,
+         u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
+         u.email AS cliente_email, u.telefono AS cliente_telefono,
+         u.ruc AS cliente_ruc, u.numero_casillero,
+         p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega,
+         p.largo_in, p.ancho_in, p.alto_in, p.peso_volumetrico_lb
+  FROM facturas f
+  JOIN usuarios u ON u.id = f.usuario_id
+  JOIN paquetes p ON p.id = f.paquete_id
+  WHERE f.id = $1`;
 
 // --- POST /api/admin/facturas ---
 router.post(
@@ -51,7 +76,7 @@ router.post(
       const paqueteRes = await client.query('SELECT * FROM paquetes WHERE id = $1', [paquete_id]);
       if (paqueteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       const paquete = paqueteRes.rows[0];
-      const pesoFacturado = paquete.peso_real_lb ?? paquete.peso_lb;
+      const pesoFacturado = calcularPesoFacturado(paquete);
       if (!pesoFacturado) return res.status(400).json({ mensaje: 'Este paquete no tiene un peso registrado.' });
       const tarifaRes = await client.query('SELECT * FROM tarifas WHERE id = $1', [tarifa_id]);
       if (tarifaRes.rows.length === 0) return res.status(404).json({ mensaje: 'Tarifa no encontrada' });
@@ -74,10 +99,7 @@ router.post(
       await client.query(`UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW() WHERE id = $1 AND estado NOT IN ('entregado','listo_para_retiro')`, [paquete_id]);
       await client.query('COMMIT');
       const facturaCompleta = { ...factura, numero_factura: numeroFactura };
-      const datosCompletos = await pool.query(
-        `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido, u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero, p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega FROM facturas f JOIN usuarios u ON u.id = f.usuario_id JOIN paquetes p ON p.id = f.paquete_id WHERE f.id = $1`,
-        [factura.id]
-      );
+      const datosCompletos = await pool.query(SELECT_FACTURA_PDF, [factura.id]);
       const facturaParaEnvio = datosCompletos.rows[0];
       const envios = { correo_enviado: false, whatsapp_enviado: false, errores_envio: [] };
       try {
@@ -155,9 +177,7 @@ router.patch('/:id/estado', [
 ], async (req, res) => {
   const errores = validationResult(req);
   if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
-
   const esAnulacion = req.body.estado === 'anulada';
-
   if (esAnulacion) {
     if (req.body.codigo_anulacion !== CODIGO_ANULACION) {
       return res.status(403).json({ mensaje: 'Código de anulación incorrecto.' });
@@ -169,16 +189,13 @@ router.patch('/:id/estado', [
       return res.status(400).json({ mensaje: 'Cuando el motivo es "Otro" debes escribir una explicación.' });
     }
   }
-
   try {
     const facturaActual = await pool.query('SELECT * FROM facturas WHERE id = $1', [req.params.id]);
     if (facturaActual.rows.length === 0) return res.status(404).json({ mensaje: 'Factura no encontrada' });
     const facturaAntes = facturaActual.rows[0];
-
     if (facturaAntes.estado === 'anulada' && esAnulacion) {
       return res.status(409).json({ mensaje: 'Esta factura ya está anulada.' });
     }
-
     let resultado;
     if (esAnulacion) {
       // Conserva la fecha_pago original — no la borra
@@ -199,7 +216,6 @@ router.patch('/:id/estado', [
         [req.body.estado, req.params.id]
       );
     }
-
     let nota_ajuste = null;
     if (esAnulacion) {
       await pool.query(
@@ -207,7 +223,6 @@ router.patch('/:id/estado', [
          WHERE id = $1 AND estado NOT IN ('entregado')`,
         [facturaAntes.paquete_id]
       );
-
       if (facturaAntes.estado === 'pagada' && facturaAntes.fecha_pago) {
         const fechaPagoStr = new Date(facturaAntes.fecha_pago).toISOString().slice(0, 10);
         const cierreDia = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [fechaPagoStr]);
@@ -222,7 +237,6 @@ router.patch('/:id/estado', [
         }
       }
     }
-
     return res.json({ mensaje: 'Estado de factura actualizado', factura: resultado.rows[0], nota_ajuste });
   } catch (error) {
     console.error('Error en PATCH /admin/facturas/:id/estado:', error);
@@ -233,10 +247,7 @@ router.patch('/:id/estado', [
 // --- GET /api/admin/facturas/:id/pdf ---
 router.get('/:id/pdf', async (req, res) => {
   try {
-    const resultado = await pool.query(
-      `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido, u.email AS cliente_email, u.numero_casillero, p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega FROM facturas f JOIN usuarios u ON u.id = f.usuario_id JOIN paquetes p ON p.id = f.paquete_id WHERE f.id = $1`,
-      [req.params.id]
-    );
+    const resultado = await pool.query(SELECT_FACTURA_PDF, [req.params.id]);
     if (resultado.rows.length === 0) return res.status(404).json({ mensaje: 'Factura no encontrada' });
     const pdfBuffer = await generarPdfFactura(resultado.rows[0]);
     res.setHeader('Content-Type', 'application/pdf');
@@ -251,10 +262,7 @@ router.get('/:id/pdf', async (req, res) => {
 // --- POST /api/admin/facturas/:id/reenviar ---
 router.post('/:id/reenviar', async (req, res) => {
   try {
-    const resultado = await pool.query(
-      `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido, u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero, p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega FROM facturas f JOIN usuarios u ON u.id = f.usuario_id JOIN paquetes p ON p.id = f.paquete_id WHERE f.id = $1`,
-      [req.params.id]
-    );
+    const resultado = await pool.query(SELECT_FACTURA_PDF, [req.params.id]);
     if (resultado.rows.length === 0) return res.status(404).json({ mensaje: 'Factura no encontrada' });
     const factura = resultado.rows[0];
     if (factura.estado === 'anulada') {
@@ -311,7 +319,7 @@ router.post(
       const paqueteRes = await client.query('SELECT * FROM paquetes WHERE id = $1', [paquete_id]);
       if (paqueteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       const paquete = paqueteRes.rows[0];
-      const pesoFacturado = paquete.peso_real_lb ?? paquete.peso_lb;
+      const pesoFacturado = calcularPesoFacturado(paquete);
       if (!pesoFacturado || Number(pesoFacturado) === 0) return res.status(400).json({ mensaje: 'El paquete no tiene peso registrado.' });
       const tarifaRes = await client.query('SELECT * FROM tarifas WHERE id = $1', [tarifa_id]);
       if (tarifaRes.rows.length === 0) return res.status(404).json({ mensaje: 'Tarifa no encontrada' });
@@ -336,10 +344,7 @@ router.post(
       const facturaCompleta = { ...factura, numero_factura: numeroFactura };
       const envios = { correo_enviado: false };
       try {
-        const datosCompletos = await pool.query(
-          `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido, u.email AS cliente_email, u.telefono AS cliente_telefono, u.numero_casillero, p.tienda, p.numero_tracking, p.firma_base64, p.fecha_entrega FROM facturas f JOIN usuarios u ON u.id = f.usuario_id JOIN paquetes p ON p.id = f.paquete_id WHERE f.id = $1`,
-          [factura.id]
-        );
+        const datosCompletos = await pool.query(SELECT_FACTURA_PDF, [factura.id]);
         const fd = datosCompletos.rows[0];
         if (fd) {
           const pdfBuffer = await generarPdfFactura(fd);
