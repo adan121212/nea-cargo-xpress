@@ -10,6 +10,10 @@ const pool = require('../db');
  * Asi, si alguien roba un token y el dueño cambia su contraseña, el token
  * robado deja de funcionar de inmediato en vez de seguir valido hasta que
  * expire por su cuenta (hasta 7 dias).
+ *
+ * El "rol" SIEMPRE se toma fresco de la base de datos (no del payload del
+ * token). Asi, si a un admin le quitas el rol, pierde el acceso de admin
+ * en la siguiente peticion, sin esperar a que su token expire.
  */
 async function requiereAutenticacion(req, res, next) {
   const header = req.headers.authorization || '';
@@ -23,7 +27,7 @@ async function requiereAutenticacion(req, res, next) {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
     const resultado = await pool.query(
-      'SELECT token_valido_desde FROM usuarios WHERE id = $1',
+      'SELECT token_valido_desde, rol FROM usuarios WHERE id = $1',
       [payload.id]
     );
 
@@ -31,7 +35,7 @@ async function requiereAutenticacion(req, res, next) {
       return res.status(401).json({ mensaje: 'Token inválido o expirado. Vuelve a iniciar sesión.' });
     }
 
-    const tokenValidoDesde = resultado.rows[0].token_valido_desde;
+    const { token_valido_desde: tokenValidoDesde, rol: rolActual } = resultado.rows[0];
     const tokenEmitidoEn = new Date(payload.iat * 1000); // jwt.iat viene en segundos
 
     if (tokenEmitidoEn < tokenValidoDesde) {
@@ -40,7 +44,7 @@ async function requiereAutenticacion(req, res, next) {
       });
     }
 
-    req.usuario = payload;
+    req.usuario = { ...payload, rol: rolActual };
     next();
   } catch (error) {
     return res.status(401).json({ mensaje: 'Token inválido o expirado. Vuelve a iniciar sesión.' });
