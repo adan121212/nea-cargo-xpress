@@ -16,14 +16,14 @@ Construido con **Node.js + Express + PostgreSQL + JWT + Nodemailer**.
 - **Listado y detalle de paquetes** → cada cliente ve únicamente sus propios paquetes.
 
 ### Lo que queda para las siguientes fases (no incluido aún)
-- Producción real: dominio propio en Resend + número de WhatsApp Business verificado + PagueloFacil en modo producción (requiere aprobación KYC de PagueloFacil).
+- Producción real: dominio propio en Resend + número de WhatsApp Business verificado.
 - Activar Yappy de verdad (ver sección de abajo — la estructura ya está lista, falta que Banco General te apruebe la cuenta).
 
 Dilo cuando quieras seguir con alguna de estas partes.
 
 ## Pago con Yappy (nuevo, requiere activación)
 
-Se dejó preparada la integración con **Yappy** (Banco General) — el método de pago más usado en Panamá — usando el mismo patrón que ya tienes con PagueloFacil (redirección a una página de pago segura + confirmación automática al volver).
+Se dejó preparada la integración con **Yappy** (Banco General) — el método de pago más usado en Panamá — mediante redirección a una página de pago segura + confirmación automática al volver.
 
 **Por qué no está activo todavía:** Yappy solo se puede integrar con credenciales que Banco General entrega al aprobarte **Yappy Comercial** (requiere cuenta comercial de ese banco). El SDK oficial tampoco está en npm — te dan la URL exacta de descarga al aprobarte.
 
@@ -134,7 +134,7 @@ Pestaña **Mostrador** (la primera que ves al entrar al panel admin) — para cu
 
 ### Métodos de pago registrados
 - `efectivo`, `tarjeta`, `transferencia` — los marca el staff manualmente desde el Mostrador.
-- `pagueloFacil` / `yappy` — se registran automáticamente cuando el cliente paga en línea desde su dashboard.
+- `yappy` — se registra automáticamente cuando el cliente paga en línea desde su dashboard.
 
 ### Endpoints
 ```
@@ -158,32 +158,6 @@ Pestaña **Reportes** en el panel admin, con rango de fechas ajustable (por defe
 ```
 GET /api/admin/reportes?desde=2026-01-01&hasta=2026-01-31
 ```
-
-## Pago con tarjeta (nuevo)
-
-Se integró **PagueloFacil** (pasarela panameña) mediante su "Enlace de Pago": el cliente hace clic en "Pagar con tarjeta" en una factura pendiente, sale a la página segura de PagueloFacil, paga, y vuelve automáticamente a su dashboard con la factura ya marcada como pagada. **Nunca manejamos números de tarjeta en nuestro servidor.**
-
-> Stripe no está disponible para negocios registrados en Panamá, por eso se usó PagueloFacil.
-
-### Configurar PagueloFacil
-
-1. Para pruebas: regístrate en el ambiente sandbox — https://demo.paguelofacil.com
-2. Para producción real: crea cuenta en https://paguelofacil.com (requiere cuenta bancaria panameña y validación KYC de tu negocio).
-3. En tu cuenta, busca tu **CCLW** (código web / llave de conexión).
-4. Variables de entorno:
-   - `PAGUELOFACIL_CCLW`: tu código web.
-   - `PAGUELOFACIL_ENV`: `production` para cobros reales, cualquier otro valor usa el sandbox de pruebas.
-5. **Opcional pero recomendado**: escribe a customerservice@paguelofacil.com para configurar el **webhook** hacia `https://tu-dominio.com/api/pagos/webhook`. Esto confirma los pagos de forma segura server-to-server, además de la confirmación que ya ocurre cuando el cliente regresa a tu sitio.
-
-### Endpoints
-```
-POST /api/facturas/:id/pagar     # cliente, genera el enlace de pago de una factura propia y pendiente
-GET  /api/pagos/retorno          # PagueloFacil redirige aquí tras el intento de pago
-POST /api/pagos/webhook          # confirmación server-to-server (requiere configurarlo con soporte de PagueloFacil)
-```
-
-### Tarjetas de prueba (sandbox)
-VISA: `4059310181757001` — Mastercard: `5517747952039692`. Cualquier fecha de vencimiento futura y cualquier CVV de 3 dígitos.
 
 ## Fotos de paquetes
 
