@@ -36,7 +36,35 @@ app.use((req, res, next) => {
 });
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    // CSP activo. No bloqueamos scripts/estilos inline ('unsafe-inline') porque
+    // todo el JS de app.html/admin.html vive en un solo <script> por archivo
+    // (separarlo a archivos externos con nonce sería la mejora completa, pero
+    // es una refactorización grande). Lo que SÍ nos importa de verdad es
+    // connect-src, img-src, base-uri y form-action: aunque algún día se cuele
+    // un XSS, estas directivas evitan que ese script pueda mandar el token de
+    // sesión (guardado en localStorage) a un servidor que no sea el nuestro.
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'", "'unsafe-inline'",
+          'https://cdnjs.cloudflare.com', 'https://unpkg.com', 'https://cdn.jsdelivr.net',
+        ],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        // admin.html usa unos pocos onclick="..." en botones (cámara, copiar
+        // casillero). Sin esto, Helmet los bloquea por defecto aunque scriptSrc
+        // ya permita 'unsafe-inline' (script-src-attr manda sobre script-src
+        // para atributos onX=).
+        scriptSrcAttr: ["'unsafe-inline'"],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'],
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'self'"],
+      },
+    },
     crossOriginResourcePolicy: false,
     crossOriginEmbedderPolicy: false,
   })
