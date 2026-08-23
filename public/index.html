@@ -1039,24 +1039,40 @@
     const valor = parseFloat($('#calcValor').value);
     const conSeguro = $('#calcSeguro').checked;
 
-    if (!tarifa || isNaN(peso) || peso <= 0){ cont.innerHTML = ''; return; }
+    if (!tarifa){ cont.innerHTML = ''; return; }
 
-    const seguro = conSeguro && !isNaN(valor) ? (valor * Number(tarifa.pct_seguro)) / 100 : 0;
     const esVolumen = /volum/i.test(tarifa.nombre);
     const pesoVol = esVolumen ? pesoVolumetrico($('#calcLargo').value, $('#calcAncho').value, $('#calcAlto').value) : null;
+    const hayPeso = !isNaN(peso) && peso > 0;
 
-    // Peso a cobrar: en tarifa de volumen con medidas, el mayor entre real y volumétrico.
-    let pesoCobrar = peso;
+    // Determinar el peso a cobrar según el caso.
+    let pesoCobrar = null;
     let nota = '';
-    if (esVolumen && pesoVol){
-      pesoCobrar = Math.max(peso, pesoVol);
-      nota = pesoVol > peso
-        ? `Se cobra el peso volumétrico (${pesoVol} lb), mayor que el real (${peso} lb). Cálculo: ${$('#calcLargo').value}×${$('#calcAncho').value}×${$('#calcAlto').value} ÷ 166.`
-        : `Se cobra el peso real (${peso} lb), mayor que el volumétrico (${pesoVol} lb).`;
-    } else if (esVolumen && !pesoVol){
-      nota = 'Ingresa las medidas de la caja arriba para calcular el peso volumétrico.';
+    if (esVolumen){
+      if (pesoVol && hayPeso){
+        pesoCobrar = Math.max(peso, pesoVol);
+        nota = pesoVol > peso
+          ? `Se cobra el peso volumétrico (${pesoVol} lb), mayor que el real (${peso} lb). Cálculo: ${$('#calcLargo').value}×${$('#calcAncho').value}×${$('#calcAlto').value} ÷ 166.`
+          : `Se cobra el peso real (${peso} lb), mayor que el volumétrico (${pesoVol} lb).`;
+      } else if (pesoVol){
+        // Solo medidas: calcular con el volumétrico.
+        pesoCobrar = pesoVol;
+        nota = `Peso volumétrico ${pesoVol} lb (${$('#calcLargo').value}×${$('#calcAncho').value}×${$('#calcAlto').value} ÷ 166). Si el peso real en balanza es mayor, se cobrará ese.`;
+      } else if (hayPeso){
+        // Solo peso, sin medidas aún.
+        pesoCobrar = peso;
+        nota = 'Ingresa las medidas de la caja para calcular el peso volumétrico.';
+      } else {
+        cont.innerHTML = '<p class="calc-nota-vol">Ingresa las medidas de la caja (o el peso) para ver el estimado.</p>';
+        return;
+      }
+    } else {
+      // Tarifa normal: requiere peso.
+      if (!hayPeso){ cont.innerHTML = ''; return; }
+      pesoCobrar = peso;
     }
 
+    const seguro = conSeguro && !isNaN(valor) ? (valor * Number(tarifa.pct_seguro)) / 100 : 0;
     const costoEnvio = Math.max(pesoCobrar * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
     const cargoManejo = Number(tarifa.cargo_manejo);
     const total = costoEnvio + cargoManejo + seguro;
@@ -1077,6 +1093,8 @@
     const esVolumen = tarifa && /volum/i.test(tarifa.nombre);
     const cont = document.getElementById('calcDimensiones');
     if (cont) cont.style.display = esVolumen ? 'block' : 'none';
+    const lblPeso = document.querySelector('label[for="calcPeso"]');
+    if (lblPeso) lblPeso.textContent = esVolumen ? 'Peso estimado (lb, opcional)' : 'Peso estimado (lb)';
   }
 
   ['calcTarifa','calcPeso','calcValor','calcSeguro','calcLargo','calcAncho','calcAlto'].forEach(id => {
