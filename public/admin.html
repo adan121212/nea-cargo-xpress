@@ -488,7 +488,16 @@
   .firma-acciones .btn-primary{ flex:1; }
   .form-inline{ display:grid; grid-template-columns: 1.3fr 1.7fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:18px; }
   .form-inline label{ margin:0 0 5px; }
-  .row-actions{ display:flex; gap:6px; }
+  .row-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+  .btn-wa{
+    display:inline-flex; align-items:center; gap:5px;
+    background:#25D366; color:#fff; text-decoration:none;
+    font-family: var(--font-body); font-size:12px; font-weight:600;
+    padding:6px 11px; border-radius:8px; white-space:nowrap;
+    transition: background .15s ease;
+  }
+  .btn-wa:hover{ background:#1ebe5b; }
+  .btn-wa svg{ flex-shrink:0; }
   /* ===================== RESPONSIVE ===================== */
   @media (max-width: 860px){
     .dash-cards{ grid-template-columns:1fr 1fr; }
@@ -1444,6 +1453,24 @@
     return `<span class="dias-chip ${clase}">${d} d</span>${nota}`;
   }
 
+  // Arma el enlace wa.me con un mensaje pre-escrito para avisar que el
+  // paquete está listo para retiro. Devuelve '' si no hay teléfono válido.
+  // No envía nada: solo abre WhatsApp con el texto listo (sin costo).
+  function enlaceWhatsappRetiro(p){
+    const tel = String(p.cliente_telefono || '').replace(/[^\d]/g, '');
+    if (tel.length < 7) return '';
+    // Panamá: si el número viene sin código de país (8 dígitos), anteponer 507.
+    const numero = tel.length === 8 ? '507' + tel : tel;
+    const nombre = (p.cliente_nombre || '').split(' ')[0] || 'cliente';
+    const msg =
+      `Hola ${nombre} 👋\n\n` +
+      `Te escribimos de *NEA Cargo Xpress*. ¡Tu paquete` +
+      (p.tienda ? ` de ${p.tienda}` : '') +
+      ` (casillero ${p.numero_casillero}) ya está en Panamá y listo para retiro en tu sucursal! 📦✅\n\n` +
+      `¡Gracias por preferirnos!`;
+    return `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
+  }
+
   function renderPaquetes(paquetes){
     const tbody = $('#tbodyPaquetes');
     $('#emptyPaquetes').style.display = paquetes.length ? 'none' : 'block';
@@ -1487,6 +1514,12 @@
           <div class="row-actions">
             <button class="btn-secondary btn-fotos" data-id="${p.id}">📷 Fotos</button>
             <button class="btn-secondary btn-dimensiones" data-id="${p.id}" data-largo="${p.largo_in || ''}" data-ancho="${p.ancho_in || ''}" data-alto="${p.alto_in || ''}">📐 Medidas</button>
+            ${p.estado === 'listo_para_retiro' && enlaceWhatsappRetiro(p)
+              ? `<a class="btn-wa" href="${enlaceWhatsappRetiro(p)}" target="_blank" rel="noopener" title="Avisar al cliente por WhatsApp">
+                   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm0 2a8 8 0 0 1 6.5 12.6l-.3.4.6 2.2-2.3-.6-.4.2A8 8 0 1 1 12 4zm-3 4c-.2 0-.5 0-.7.4-.3.3-.9.9-.9 2.1s.9 2.4 1 2.6c.2.2 1.8 3 4.4 4 2.2.9 2.6.7 3.1.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3s-1.4-.7-1.6-.8c-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-.2-.1-1-.4-2-1.2-.7-.7-1.2-1.5-1.4-1.7-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4l-.8-1.9c-.2-.4-.4-.4-.5-.4z"/></svg>
+                   WhatsApp
+                 </a>`
+              : ''}
           </div>
         </td>
       </tr>

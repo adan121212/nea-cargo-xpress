@@ -75,7 +75,7 @@ router.get(
       const totalPaginas = Math.ceil(total / PAGE_SIZE);
       const resultado = await pool.query(
         `SELECT p.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
-                u.email AS cliente_email, u.numero_casillero,
+                u.email AS cliente_email, u.numero_casillero, u.telefono AS cliente_telefono,
                 (NOW()::date - p.fecha_prealerta::date) AS dias_transcurridos,
                 (p.fecha_entrega::date - p.fecha_prealerta::date) AS dias_hasta_entrega,
                 s.nombre AS sucursal_nombre,
