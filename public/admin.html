@@ -37,6 +37,61 @@
   *{ box-sizing:border-box; }
   body{ margin:0; background: var(--paper); color: var(--ink); font-family: var(--font-body); }
   ::selection{ background: var(--accent); color:#fff; }
+  /* ===== Tablas como tarjetas en móvil (solo .tabla-responsive) ===== */
+  /* Usa los data-label que cada <td> ya trae. En escritorio no cambia nada. */
+  @media (max-width: 680px){
+    .tabla-responsive thead{
+      position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+      overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+    }
+    .tabla-responsive, .tabla-responsive tbody, .tabla-responsive tr, .tabla-responsive td{
+      display:block; width:100%;
+    }
+    .tabla-responsive tr{
+      background: var(--panel);
+      border:1px solid var(--line);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding:12px 14px;
+      margin-bottom:12px;
+    }
+    .tabla-responsive td{
+      display:flex; justify-content:space-between; align-items:center; gap:14px;
+      padding:7px 0; border:0;
+      border-bottom:1px solid var(--line);
+      text-align:right;
+      font-size:13.5px;
+    }
+    .tabla-responsive td:last-child{ border-bottom:0; }
+    /* etiqueta de la columna a la izquierda de cada dato */
+    .tabla-responsive td::before{
+      content: attr(data-label);
+      font-weight:600;
+      color: var(--ink-soft);
+      text-align:left;
+      flex:0 0 42%;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.02em;
+    }
+    /* celdas sin data-label (acciones): ocupar todo el ancho, sin etiqueta */
+    .tabla-responsive td:not([data-label])::before,
+    .tabla-responsive td[data-label=""]::before{ content:""; flex:0; }
+    .tabla-responsive td:not([data-label]),
+    .tabla-responsive td[data-label=""]{
+      justify-content:stretch; padding-top:10px;
+    }
+    /* botones dentro de las celdas de acción: a lo ancho y fáciles de tocar */
+    .tabla-responsive td:not([data-label]) button,
+    .tabla-responsive td[data-label=""] button,
+    .tabla-responsive td[data-label="Actualizar"] select,
+    .tabla-responsive td[data-label="Actualizar"] button{
+      width:100%; min-height:40px;
+    }
+    /* el contenedor con scroll ya no necesita forzar scroll horizontal */
+    .tabla-responsive{ min-width:0 !important; }
+  }
+
   @media (prefers-reduced-motion: reduce){
     *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
@@ -846,7 +901,7 @@
       </div>
       <div id="bannerPaquetes" class="banner"></div>
       <div style="overflow-x:auto;">
-        <table>
+        <table class="tabla-responsive">
           <thead>
             <tr>
               <th>Cliente</th><th>Casillero</th><th>Tienda / Tracking</th>
@@ -870,7 +925,7 @@
       <h2>Clientes registrados</h2>
       <p class="card-sub">Total de clientes y paquetes por cliente.</p>
       <div style="overflow-x:auto;">
-        <table>
+        <table class="tabla-responsive">
           <thead><tr><th>Nombre</th><th>Correo</th><th>Casillero</th><th>Verificado</th><th>Paquetes</th><th>Registrado</th><th></th></tr></thead>
           <tbody id="tbodyClientes"></tbody>
         </table>
@@ -906,7 +961,7 @@
         <div style="flex:0;"><label>&nbsp;</label><button class="btn-secondary" id="btnFiltrarFacturas">Filtrar</button></div>
       </div>
       <div style="overflow-x:auto;">
-        <table>
+        <table class="tabla-responsive">
           <thead><tr><th>Factura</th><th>Cliente</th><th>Paquete</th><th>Total</th><th>Estado</th><th></th></tr></thead>
           <tbody id="tbodyFacturas"></tbody>
         </table>
@@ -931,7 +986,7 @@
       </form>
       <div class="banner" id="bannerTarifa"></div>
       <div style="overflow-x:auto;">
-        <table>
+        <table class="tabla-responsive">
           <thead><tr><th>Nombre</th><th>$/lb</th><th>Mínimo</th><th>Manejo</th><th>% Seguro</th><th>Activa</th><th></th></tr></thead>
           <tbody id="tbodyTarifas"></tbody>
         </table>
@@ -955,7 +1010,7 @@
       </form>
       <div class="banner" id="bannerSucursal"></div>
       <div style="overflow-x:auto;">
-        <table>
+        <table class="tabla-responsive">
           <thead><tr><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Horario</th><th>Activa</th><th></th></tr></thead>
           <tbody id="tbodySucursales"></tbody>
         </table>
