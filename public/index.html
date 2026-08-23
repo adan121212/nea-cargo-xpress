@@ -339,7 +339,20 @@
   .calc-total{ background: rgba(255,106,26,0.12); border:1px solid rgba(255,106,26,0.35); border-radius: var(--radius-md); padding: 18px 20px; animation: cardIn .3s ease; }
   .calc-total .linea{ display:flex; justify-content:space-between; font-size:12.5px; color: rgba(241,243,242,0.7); margin-bottom:5px; }
   .calc-total .total-final{ display:flex; justify-content:space-between; font-family: var(--font-display); font-size:20px; color: var(--accent); margin-top:11px; padding-top:11px; border-top:1px solid rgba(241,243,242,0.15); text-shadow: 0 0 20px var(--accent-glow); }
-  @media (max-width: 760px){ .calc-row{ grid-template-columns: 1fr; } }
+  /* dimensiones (tarifa por volumen) */
+  #calcDimensiones{ margin-top:14px; background: rgba(255,106,26,0.08); border:1px solid rgba(255,106,26,0.25); border-radius: var(--radius-md); padding:14px 15px; animation: cardIn .3s ease; }
+  .calc-dim-nota{ font-size:12px; color:#ffa86b; margin:0 0 11px; font-weight:600; }
+  .calc-row-dim{ grid-template-columns:1fr 1fr 1fr; }
+  /* cotización doble (real vs volumétrico) */
+  .calc-doble{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+  .calc-cotiz{ background: rgba(241,243,242,0.05); border:1px solid rgba(241,243,242,0.15); border-radius: var(--radius-md); padding:15px 16px; animation: cardIn .3s ease; }
+  .calc-cotiz-destacada{ background: rgba(255,106,26,0.12); border-color: rgba(255,106,26,0.4); }
+  .calc-cotiz-titulo{ font-size:12px; font-weight:600; color:#f1f3f2; margin-bottom:10px; text-transform:uppercase; letter-spacing:.03em; }
+  .calc-cotiz .linea{ display:flex; justify-content:space-between; gap:10px; font-size:11.5px; color: rgba(241,243,242,0.7); margin-bottom:5px; }
+  .calc-cotiz .total-final{ display:flex; justify-content:space-between; font-family: var(--font-display); font-size:17px; color: var(--accent); margin-top:9px; padding-top:9px; border-top:1px solid rgba(241,243,242,0.15); }
+  .calc-nota-vol{ font-size:12px; color: rgba(241,243,242,0.6); margin:12px 2px 0; line-height:1.5; }
+  .calc-nota-vol b{ color:#f1f3f2; }
+  @media (max-width: 760px){ .calc-row{ grid-template-columns: 1fr; } .calc-doble{ grid-template-columns:1fr; } .calc-row-dim{ grid-template-columns:1fr 1fr 1fr; } }
 
   /* ============ SUCURSALES ============ */
   .sucursales-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
@@ -590,6 +603,14 @@
       <div><label for="calcTarifa">Tarifa</label><select id="calcTarifa"></select></div>
       <div><label for="calcPeso">Peso estimado (lb)</label><input type="number" id="calcPeso" min="0" step="0.1" placeholder="Ej. 3.5"></div>
       <div><label for="calcValor">Valor declarado (USD, opcional)</label><input type="number" id="calcValor" min="0" step="0.01" placeholder="Ej. 60"></div>
+    </div>
+    <div id="calcDimensiones" style="display:none;">
+      <p class="calc-dim-nota">📐 Esta tarifa cobra por volumen. Ingresa las medidas de la caja (en pulgadas) para comparar peso real vs. volumétrico.</p>
+      <div class="calc-row calc-row-dim">
+        <div><label for="calcLargo">Largo (in)</label><input type="number" id="calcLargo" min="0" step="0.1" placeholder="Ej. 18"></div>
+        <div><label for="calcAncho">Ancho (in)</label><input type="number" id="calcAncho" min="0" step="0.1" placeholder="Ej. 12"></div>
+        <div><label for="calcAlto">Alto (in)</label><input type="number" id="calcAlto" min="0" step="0.1" placeholder="Ej. 10"></div>
+      </div>
     </div>
     <label class="calc-check"><input type="checkbox" id="calcSeguro"> Agregar seguro sobre el valor declarado</label>
     <div id="calcResultado"></div>
@@ -1004,9 +1025,36 @@
       ).join('');
 
       calcularEstimado();
+      actualizarVisibilidadDimensiones();
     } catch (err) {
       grid.innerHTML = '<div class="tarifa-card"><p>No se pudieron cargar las tarifas.</p></div>';
     }
+  }
+
+  // Peso volumétrico: (largo × ancho × alto en pulgadas) / 166, redondeado
+  // hacia arriba al medio libra — misma fórmula que usa el panel admin.
+  function pesoVolumetrico(l, a, h){
+    l = parseFloat(l); a = parseFloat(a); h = parseFloat(h);
+    if (isNaN(l) || isNaN(a) || isNaN(h) || l <= 0 || a <= 0 || h <= 0) return null;
+    return Math.ceil(((l * a * h) / 166) * 2) / 2;
+  }
+
+  function costoPorPeso(peso, tarifa){
+    return Math.max(peso * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
+  }
+
+  function bloqueCotizacion(titulo, peso, tarifa, seguro, destacar){
+    const envio = costoPorPeso(peso, tarifa);
+    const manejo = Number(tarifa.cargo_manejo);
+    const total = envio + manejo + seguro;
+    return `
+      <div class="calc-cotiz${destacar ? ' calc-cotiz-destacada' : ''}">
+        <div class="calc-cotiz-titulo">${titulo} — ${peso} lb</div>
+        <div class="linea"><span>Costo de envío (${peso} lb × $${Number(tarifa.precio_libra).toFixed(2)}/lb, mín. $${Number(tarifa.cargo_minimo).toFixed(2)})</span><span>$${envio.toFixed(2)}</span></div>
+        <div class="linea"><span>Cargo de manejo</span><span>$${manejo.toFixed(2)}</span></div>
+        ${seguro > 0 ? `<div class="linea"><span>Seguro (${tarifa.pct_seguro}% del valor)</span><span>$${seguro.toFixed(2)}</span></div>` : ''}
+        <div class="total-final"><span>Total</span><span>$${total.toFixed(2)}</span></div>
+      </div>`;
   }
 
   function calcularEstimado(){
@@ -1016,29 +1064,46 @@
     const valor = parseFloat($('#calcValor').value);
     const conSeguro = $('#calcSeguro').checked;
 
-    if (!tarifa || isNaN(peso) || peso <= 0){
-      cont.innerHTML = '';
+    if (!tarifa || isNaN(peso) || peso <= 0){ cont.innerHTML = ''; return; }
+
+    const seguro = conSeguro && !isNaN(valor) ? (valor * Number(tarifa.pct_seguro)) / 100 : 0;
+    const esVolumen = /volum/i.test(tarifa.nombre);
+    const pesoVol = esVolumen ? pesoVolumetrico($('#calcLargo').value, $('#calcAncho').value, $('#calcAlto').value) : null;
+
+    // Tarifa de volumen CON medidas: mostrar las dos cotizaciones lado a lado.
+    if (esVolumen && pesoVol){
+      const mayor = Math.max(peso, pesoVol);
+      cont.innerHTML = `
+        <div class="calc-doble">
+          ${bloqueCotizacion('Por peso real', peso, tarifa, seguro, peso >= pesoVol)}
+          ${bloqueCotizacion('Por peso volumétrico', pesoVol, tarifa, seguro, pesoVol > peso)}
+        </div>
+        <p class="calc-nota-vol">En carga aérea normalmente se cobra el <b>mayor</b> de los dos: <b>${mayor} lb</b>. La medida volumétrica se calcula ${$('#calcLargo').value}×${$('#calcAncho').value}×${$('#calcAlto').value} ÷ 166.</p>`;
       return;
     }
 
-    const costoEnvio = Math.max(peso * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
-    const cargoManejo = Number(tarifa.cargo_manejo);
-    const seguro = conSeguro && !isNaN(valor) ? (valor * Number(tarifa.pct_seguro)) / 100 : 0;
-    const total = costoEnvio + cargoManejo + seguro;
+    // Tarifa de volumen SIN medidas todavía: cotización por peso + recordatorio.
+    if (esVolumen && !pesoVol){
+      cont.innerHTML = bloqueCotizacion('Por peso real', peso, tarifa, seguro, true)
+        + `<p class="calc-nota-vol">Ingresa las medidas de la caja arriba para ver también el estimado por peso volumétrico.</p>`;
+      return;
+    }
 
-    cont.innerHTML = `
-      <div class="calc-total">
-        <div class="linea"><span>Costo de envío (${peso} lb × $${tarifa.precio_libra}/lb, mín. $${Number(tarifa.cargo_minimo).toFixed(2)})</span><span>$${costoEnvio.toFixed(2)}</span></div>
-        <div class="linea"><span>Cargo de manejo</span><span>$${cargoManejo.toFixed(2)}</span></div>
-        ${conSeguro ? `<div class="linea"><span>Seguro (${tarifa.pct_seguro}% del valor declarado)</span><span>$${seguro.toFixed(2)}</span></div>` : ''}
-        <div class="total-final"><span>Estimado total</span><span>$${total.toFixed(2)}</span></div>
-      </div>
-    `;
+    // Tarifa normal: una sola cotización (como antes).
+    cont.innerHTML = bloqueCotizacion('Estimado', peso, tarifa, seguro, true);
   }
 
-  ['calcTarifa','calcPeso','calcValor','calcSeguro'].forEach(id => {
+  function actualizarVisibilidadDimensiones(){
+    const tarifa = tarifasCache.find(t => t.id == $('#calcTarifa').value);
+    const esVolumen = tarifa && /volum/i.test(tarifa.nombre);
+    const cont = document.getElementById('calcDimensiones');
+    if (cont) cont.style.display = esVolumen ? 'block' : 'none';
+  }
+
+  ['calcTarifa','calcPeso','calcValor','calcSeguro','calcLargo','calcAncho','calcAlto'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', calcularEstimado);
   });
+  document.getElementById('calcTarifa')?.addEventListener('change', actualizarVisibilidadDimensiones);
 
   cargarTarifas();
 
