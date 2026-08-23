@@ -811,16 +811,45 @@
     document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
   }
 
-  // Contadores: arrancan cuando el elemento entra al viewport
-  const countObs = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting){
-        animarContador(entry.target);
-        countObs.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.5 });
-  document.querySelectorAll('[data-count-to]').forEach(el => countObs.observe(el));
+  // Contadores: arrancan cuando el elemento entra al viewport,
+  // pero también de una vez si ya están visibles al cargar la página
+  // (el hero se ve al instante, así que no siempre "entra" por scroll).
+  (function(){
+    const contadores = document.querySelectorAll('[data-count-to]');
+    if (!contadores.length) return;
+
+    const yaAnimado = new WeakSet();
+    function lanzar(el){
+      if (yaAnimado.has(el)) return;
+      yaAnimado.add(el);
+      animarContador(el);
+    }
+
+    if ('IntersectionObserver' in window){
+      const countObs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting){
+            lanzar(entry.target);
+            countObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      contadores.forEach(el => countObs.observe(el));
+
+      // Respaldo: si a los 1.2s alguno sigue sin animar
+      // (p. ej. ya estaba visible y el observer no disparó), lánzalo igual.
+      setTimeout(() => {
+        contadores.forEach(el => {
+          const r = el.getBoundingClientRect();
+          const visible = r.top < window.innerHeight && r.bottom > 0;
+          if (visible) lanzar(el);
+        });
+      }, 1200);
+    } else {
+      // Navegador sin IntersectionObserver: animar todos de una vez.
+      contadores.forEach(lanzar);
+    }
+  })();
 
   // ---------- Dropdowns del nav ----------
   function cerrarTodosLosDropdowns(){
