@@ -934,19 +934,8 @@
     </div>
     <!-- ---- TAB: Facturas ---- -->
     <div class="card tab-panel" id="tabFacturas" style="display:none;">
-      <h2>Generar factura</h2>
-      <p class="card-sub">Elige un paquete con peso real confirmado y la tarifa a aplicar.</p>
-      <form id="formFactura" class="form-inline" style="grid-template-columns: 2fr 1.5fr auto;">
-        <div><label for="facturaPaquete">Paquete</label><select id="facturaPaquete"></select></div>
-        <div><label for="facturaTarifa">Tarifa</label><select id="facturaTarifa"></select></div>
-        <div>
-          <button class="btn-primary" type="submit" id="btnFactura" style="margin-top:0;">
-            <span class="spinner"></span><span>Generar y enviar</span>
-          </button>
-        </div>
-      </form>
       <div class="banner" id="bannerFactura"></div>
-      <h2 style="margin-top:24px;">Todas las facturas</h2>
+      <h2>Todas las facturas</h2>
       <div class="filtros">
         <div>
           <label for="filtroFacturaEstado">Estado</label>
@@ -1385,7 +1374,7 @@
       if (tab === 'recepcion'){ $('#tabRecepcion').style.display = 'block'; setTimeout(() => $('#recepcionTracking').focus(), 50); }
       if (tab === 'clientes'){ $('#tabClientes').style.display = 'block'; cargarClientes(); }
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
-      if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); cargarOpcionesFactura(); }
+      if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); }
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
       if (tab === 'caja'){ $('#tabCaja').style.display = 'block'; cargarCaja(); cargarHistorialCaja(); }
       if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
@@ -1706,12 +1695,6 @@
           } catch (err) {}
         });
       });
-      const select = $('#facturaTarifa');
-      if (select){
-        select.innerHTML = tarifas.filter(t => t.activa).map(t =>
-          `<option value="${t.id}">${escapeHtml(t.nombre)} — $${Number(t.precio_libra).toFixed(2)}/lb</option>`
-        ).join('') || '<option value="">No hay tarifas activas</option>';
-      }
     } catch (err) {}
   }
   $('#formTarifa').addEventListener('submit', async (e) => {
@@ -1730,33 +1713,6 @@
     finally { setCargando(btn, false); }
   });
   const ESTADO_FACTURA_LABEL = { pendiente: 'Pendiente', pagada: 'Pagada', anulada: 'Anulada' };
-  async function cargarOpcionesFactura(){
-    try {
-      const res = await apiAdmin('/admin/paquetes');
-      const data = await res.json();
-      const elegibles = (data.paquetes || []).filter(p => p.peso_real_lb && !p.factura_id);
-      const select = $('#facturaPaquete');
-      select.innerHTML = elegibles.length ? elegibles.map(p => `<option value="${p.id}">${escapeHtml(p.cliente_nombre)} — ${escapeHtml(p.tienda)} (${escapeHtml(p.numero_tracking)}) — ${p.peso_real_lb} lb</option>`).join('') : '<option value="">No hay paquetes pendientes de facturar</option>';
-      await cargarTarifas();
-    } catch (err) {}
-  }
-  $('#formFactura').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = $('#btnFactura');
-    const paquete_id = $('#facturaPaquete').value, tarifa_id = $('#facturaTarifa').value;
-    if (!paquete_id || !tarifa_id){ mostrarBanner('#bannerFactura', 'error', 'Selecciona un paquete y una tarifa.'); return; }
-    setCargando(btn, true);
-    try {
-      const res = await apiAdmin('/admin/facturas', { method: 'POST', body: JSON.stringify({ paquete_id, tarifa_id }) });
-      const data = await res.json().catch(() => ({}));
-      if (res.status === 201){
-        const envios = data.envios || {};
-        mostrarBanner('#bannerFactura', envios.correo_enviado ? 'success' : 'error', `Factura ${data.factura.numero_factura} generada. ${envios.correo_enviado ? 'Correo ✓' : 'Correo ✗'}`);
-        await cargarOpcionesFactura(); await cargarFacturas();
-      } else { mostrarBanner('#bannerFactura', 'error', data.mensaje || 'No se pudo generar la factura.'); }
-    } catch (err) { mostrarBanner('#bannerFactura', 'error', 'No pudimos conectar.'); }
-    finally { setCargando(btn, false); }
-  });
   const MOTIVOS_ANULACION = {
     error_facturacion: 'Error de facturación',
     devolucion: 'Devolución al cliente',
