@@ -19,13 +19,13 @@ function generarNumeroCasillero(id) {
 function direccionCasillero(numeroCasillero, nombreCompleto) {
   return {
     nombre_destinatario: `${nombreCompleto || 'Tu Nombre'} - ${numeroCasillero}`,
-    linea1: process.env.WAREHOUSE_DIRECCION1 || '8548 NW 66th St',
+    linea1: process.env.WAREHOUSE_DIRECCION1 || '8610 NW 72 Street',
     linea2: `Suite ${numeroCasillero}`,
     ciudad: process.env.WAREHOUSE_CIUDAD || 'Miami',
     estado: process.env.WAREHOUSE_ESTADO || 'FL',
-    codigo_postal: process.env.WAREHOUSE_ZIP || '33166',
+    codigo_postal: process.env.WAREHOUSE_ZIP || '33195',
     pais: 'USA',
-    telefono: process.env.WAREHOUSE_TELEFONO || '',
+    telefono: process.env.WAREHOUSE_TELEFONO || '1-305-406-3654',
   };
 }
 
