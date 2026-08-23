@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#0c1b33"/>
+    <stop offset="1" stop-color="#16294a"/>
+  </linearGradient>
+  
+</defs>
+<rect width="800" height="600" fill="url(#sky)"/>
+
+  <!-- edificio / tienda -->
+  <rect x="250" y="250" width="300" height="230" fill="#16294a" stroke="#f1f3f2" stroke-width="4"/>
+  <!-- toldo -->
+  <path d="M235 250 h330 l-20 50 h-290 z" fill="#ff6a1a"/>
+  <g fill="#f1f3f2" opacity="0.85">
+    <rect x="245" y="250" width="40" height="50"/>
+    <rect x="325" y="250" width="40" height="50"/>
+    <rect x="405" y="250" width="40" height="50"/>
+    <rect x="485" y="250" width="40" height="50"/>
+  </g>
+  <!-- puerta -->
+  <rect x="365" y="360" width="70" height="120" fill="#ff6a1a" rx="4"/>
+  <!-- pin de ubicación -->
+  <g transform="translate(400 120)">
+    <path d="M0 0 C-45 0 -60 40 -30 80 L0 120 L30 80 C60 40 45 0 0 0 Z" fill="#ff6a1a"/>
+    <circle cx="0" cy="45" r="22" fill="#f1f3f2"/>
+  </g>
+  <!-- caja entregada -->
+  <g transform="translate(560 400)">
+    <rect x="0" y="0" width="70" height="60" rx="4" fill="#f1f3f2"/>
+    <rect x="0" y="0" width="70" height="22" rx="4" fill="#ff8c47"/>
+    <line x1="35" y1="0" x2="35" y2="60" stroke="#0c1b33" stroke-width="4"/>
+  </g>
+
+</svg>
