@@ -1297,6 +1297,24 @@
     });
   });
 
+  // ---------- Capitalizar primera letra de nombre y apellido ----------
+  // Pone en mayúscula solo la primera letra del campo, respetando el resto
+  // (ej: "juan carlos" -> "Juan carlos"). Corrige mientras el usuario escribe,
+  // sin mover el cursor de lugar.
+  function capitalizarPrimera(input){
+    if (!input) return;
+    input.addEventListener('input', () => {
+      const v = input.value;
+      if (v && v[0] !== v[0].toUpperCase()){
+        const pos = input.selectionStart;
+        input.value = v.charAt(0).toUpperCase() + v.slice(1);
+        try { input.setSelectionRange(pos, pos); } catch(e){}
+      }
+    });
+  }
+  capitalizarPrimera($('#regNombre'));
+  capitalizarPrimera($('#regApellido'));
+
   // ---------- Registro ----------
   $('#formRegistro').addEventListener('submit', async (e) => {
     e.preventDefault();
