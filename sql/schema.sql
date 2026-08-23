@@ -103,6 +103,42 @@ CREATE TABLE IF NOT EXISTS paquete_fotos (
 
 CREATE INDEX IF NOT EXISTS idx_paquete_fotos_paquete ON paquete_fotos (paquete_id);
 
+-- ============================================================================
+-- Columnas y tablas agregadas después de la versión inicial del esquema.
+-- (Mismo contenido que sql/migracion_dimensiones_y_caja.sql — se incluye aquí
+-- para que crear la base desde cero con solo este archivo quede completo.)
+-- Todo con IF NOT EXISTS: seguro de correr varias veces.
+-- ============================================================================
+
+-- Dimensiones de la caja + peso volumétrico (para tarifas por volumen).
+ALTER TABLE paquetes
+    ADD COLUMN IF NOT EXISTS largo_in NUMERIC(6,2),
+    ADD COLUMN IF NOT EXISTS ancho_in NUMERIC(6,2),
+    ADD COLUMN IF NOT EXISTS alto_in NUMERIC(6,2),
+    ADD COLUMN IF NOT EXISTS peso_volumetrico_lb NUMERIC(6,2),
+    ADD COLUMN IF NOT EXISTS peso_confirmado BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS sucursal_id INTEGER REFERENCES sucursales(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS retirado_por_nombre VARCHAR(120),
+    ADD COLUMN IF NOT EXISTS retirado_por_cedula VARCHAR(40);
+
+-- RUC del cliente (para facturación).
+ALTER TABLE usuarios
+    ADD COLUMN IF NOT EXISTS ruc VARCHAR(40);
+
+-- Cierres de caja diarios (un registro por día cerrado).
+CREATE TABLE IF NOT EXISTS cierres_caja (
+    id SERIAL PRIMARY KEY,
+    fecha DATE NOT NULL UNIQUE,
+    cerrado_por INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+    detalle_por_metodo JSONB NOT NULL DEFAULT '{}'::jsonb,
+    total_general NUMERIC(12,2) NOT NULL DEFAULT 0,
+    cantidad_facturas INTEGER NOT NULL DEFAULT 0,
+    notas TEXT,
+    creado_en TIMESTAMP NOT NULL DEFAULT NOW(),
+    actualizado_en TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_cierres_caja_fecha ON cierres_caja (fecha);
+
 -- Tarifa inicial de ejemplo (ajusta los valores a tu negocio real).
 INSERT INTO tarifas (nombre, precio_libra, cargo_minimo, cargo_manejo, pct_seguro, activa)
 VALUES ('Aéreo estándar', 4.50, 8.00, 2.00, 1.5, TRUE)
