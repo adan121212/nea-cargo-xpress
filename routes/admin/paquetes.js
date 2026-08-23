@@ -397,4 +397,29 @@ router.delete('/:id/fotos/:fotoId', async (req, res) => {
   }
 });
 
+// --- DELETE /api/admin/paquetes/:id --- (elimina el paquete y, por CASCADE,
+// su factura y registros de fotos; también borra las imágenes de Cloudinary)
+router.delete('/:id', async (req, res) => {
+  try {
+    const paqId = req.params.id;
+    const existe = await pool.query('SELECT id FROM paquetes WHERE id=$1', [paqId]);
+    if (existe.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+
+    // Borrar imágenes en Cloudinary antes de eliminar el paquete (best-effort).
+    const fotos = await pool.query('SELECT public_id FROM paquete_fotos WHERE paquete_id=$1', [paqId]);
+    for (const f of fotos.rows) {
+      if (f.public_id) {
+        try { await eliminarFotoCloudinary(f.public_id); } catch (e) { /* no bloquear el borrado */ }
+      }
+    }
+
+    // El resto (facturas y paquete_fotos) se borra solo por ON DELETE CASCADE.
+    await pool.query('DELETE FROM paquetes WHERE id=$1', [paqId]);
+    return res.json({ mensaje: 'Paquete eliminado' });
+  } catch (error) {
+    console.error('Error en DELETE /admin/paquetes/:id:', error);
+    return res.status(500).json({ mensaje: 'Error interno al eliminar el paquete' });
+  }
+});
+
 module.exports = router;

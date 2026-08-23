@@ -1520,12 +1520,35 @@
                    WhatsApp
                  </a>`
               : ''}
+            <button class="btn-secondary btn-danger btn-eliminar-paq" data-id="${p.id}" data-info="${escapeHtml((p.cliente_nombre || '') + ' · ' + (p.tienda || '') + ' · ' + (p.numero_tracking || ''))}">🗑 Eliminar</button>
           </div>
         </td>
       </tr>
     `).join('');
     tbody.querySelectorAll('.btn-fotos').forEach(btn => btn.addEventListener('click', () => abrirModalFotos(btn.dataset.id)));
     tbody.querySelectorAll('.btn-dimensiones').forEach(btn => btn.addEventListener('click', () => abrirModalDimensiones(btn.dataset.id, btn.dataset.largo, btn.dataset.ancho, btn.dataset.alto)));
+    tbody.querySelectorAll('.btn-eliminar-paq').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const info = btn.dataset.info || '';
+        if (!confirm(`¿Eliminar este paquete de forma permanente?\n\n${info}\n\nSe borrará también su factura y fotos asociadas. Esta acción no se puede deshacer.`)) return;
+        btn.disabled = true;
+        try {
+          const res = await apiAdmin(`/admin/paquetes/${id}`, { method: 'DELETE' });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok){
+            mostrarBanner('#bannerPaquetes', 'success', '✓ Paquete eliminado.');
+            cargarPaquetes();
+          } else {
+            mostrarBanner('#bannerPaquetes', 'error', data.mensaje || 'No se pudo eliminar el paquete.');
+            btn.disabled = false;
+          }
+        } catch (err) {
+          mostrarBanner('#bannerPaquetes', 'error', 'No pudimos conectar.');
+          btn.disabled = false;
+        }
+      });
+    });
     tbody.querySelectorAll('.btn-guardar-peso').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
