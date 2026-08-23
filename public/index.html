@@ -343,16 +343,9 @@
   #calcDimensiones{ margin-top:14px; background: rgba(255,106,26,0.08); border:1px solid rgba(255,106,26,0.25); border-radius: var(--radius-md); padding:14px 15px; animation: cardIn .3s ease; }
   .calc-dim-nota{ font-size:12px; color:#ffa86b; margin:0 0 11px; font-weight:600; }
   .calc-row-dim{ grid-template-columns:1fr 1fr 1fr; }
-  /* cotización doble (real vs volumétrico) */
-  .calc-doble{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
-  .calc-cotiz{ background: rgba(241,243,242,0.05); border:1px solid rgba(241,243,242,0.15); border-radius: var(--radius-md); padding:15px 16px; animation: cardIn .3s ease; }
-  .calc-cotiz-destacada{ background: rgba(255,106,26,0.12); border-color: rgba(255,106,26,0.4); }
-  .calc-cotiz-titulo{ font-size:12px; font-weight:600; color:#f1f3f2; margin-bottom:10px; text-transform:uppercase; letter-spacing:.03em; }
-  .calc-cotiz .linea{ display:flex; justify-content:space-between; gap:10px; font-size:11.5px; color: rgba(241,243,242,0.7); margin-bottom:5px; }
-  .calc-cotiz .total-final{ display:flex; justify-content:space-between; font-family: var(--font-display); font-size:17px; color: var(--accent); margin-top:9px; padding-top:9px; border-top:1px solid rgba(241,243,242,0.15); }
   .calc-nota-vol{ font-size:12px; color: rgba(241,243,242,0.6); margin:12px 2px 0; line-height:1.5; }
   .calc-nota-vol b{ color:#f1f3f2; }
-  @media (max-width: 760px){ .calc-row{ grid-template-columns: 1fr; } .calc-doble{ grid-template-columns:1fr; } .calc-row-dim{ grid-template-columns:1fr 1fr 1fr; } }
+  @media (max-width: 760px){ .calc-row{ grid-template-columns: 1fr; } .calc-row-dim{ grid-template-columns:1fr 1fr 1fr; } }
 
   /* ============ SUCURSALES ============ */
   .sucursales-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
@@ -605,7 +598,7 @@
       <div><label for="calcValor">Valor declarado (USD, opcional)</label><input type="number" id="calcValor" min="0" step="0.01" placeholder="Ej. 60"></div>
     </div>
     <div id="calcDimensiones" style="display:none;">
-      <p class="calc-dim-nota">📐 Esta tarifa cobra por volumen. Ingresa las medidas de la caja (en pulgadas) para comparar peso real vs. volumétrico.</p>
+      <p class="calc-dim-nota">📐 Esta tarifa cobra por volumen. Ingresa las medidas de la caja (en pulgadas) para un estimado exacto.</p>
       <div class="calc-row calc-row-dim">
         <div><label for="calcLargo">Largo (in)</label><input type="number" id="calcLargo" min="0" step="0.1" placeholder="Ej. 18"></div>
         <div><label for="calcAncho">Ancho (in)</label><input type="number" id="calcAncho" min="0" step="0.1" placeholder="Ej. 12"></div>
@@ -1039,24 +1032,6 @@
     return Math.ceil(((l * a * h) / 166) * 2) / 2;
   }
 
-  function costoPorPeso(peso, tarifa){
-    return Math.max(peso * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
-  }
-
-  function bloqueCotizacion(titulo, peso, tarifa, seguro, destacar){
-    const envio = costoPorPeso(peso, tarifa);
-    const manejo = Number(tarifa.cargo_manejo);
-    const total = envio + manejo + seguro;
-    return `
-      <div class="calc-cotiz${destacar ? ' calc-cotiz-destacada' : ''}">
-        <div class="calc-cotiz-titulo">${titulo} — ${peso} lb</div>
-        <div class="linea"><span>Costo de envío (${peso} lb × $${Number(tarifa.precio_libra).toFixed(2)}/lb, mín. $${Number(tarifa.cargo_minimo).toFixed(2)})</span><span>$${envio.toFixed(2)}</span></div>
-        <div class="linea"><span>Cargo de manejo</span><span>$${manejo.toFixed(2)}</span></div>
-        ${seguro > 0 ? `<div class="linea"><span>Seguro (${tarifa.pct_seguro}% del valor)</span><span>$${seguro.toFixed(2)}</span></div>` : ''}
-        <div class="total-final"><span>Total</span><span>$${total.toFixed(2)}</span></div>
-      </div>`;
-  }
-
   function calcularEstimado(){
     const cont = $('#calcResultado');
     const tarifa = tarifasCache.find(t => t.id == $('#calcTarifa').value);
@@ -1070,27 +1045,31 @@
     const esVolumen = /volum/i.test(tarifa.nombre);
     const pesoVol = esVolumen ? pesoVolumetrico($('#calcLargo').value, $('#calcAncho').value, $('#calcAlto').value) : null;
 
-    // Tarifa de volumen CON medidas: mostrar las dos cotizaciones lado a lado.
+    // Peso a cobrar: en tarifa de volumen con medidas, el mayor entre real y volumétrico.
+    let pesoCobrar = peso;
+    let nota = '';
     if (esVolumen && pesoVol){
-      const mayor = Math.max(peso, pesoVol);
-      cont.innerHTML = `
-        <div class="calc-doble">
-          ${bloqueCotizacion('Por peso real', peso, tarifa, seguro, peso >= pesoVol)}
-          ${bloqueCotizacion('Por peso volumétrico', pesoVol, tarifa, seguro, pesoVol > peso)}
-        </div>
-        <p class="calc-nota-vol">En carga aérea normalmente se cobra el <b>mayor</b> de los dos: <b>${mayor} lb</b>. La medida volumétrica se calcula ${$('#calcLargo').value}×${$('#calcAncho').value}×${$('#calcAlto').value} ÷ 166.</p>`;
-      return;
+      pesoCobrar = Math.max(peso, pesoVol);
+      nota = pesoVol > peso
+        ? `Se cobra el peso volumétrico (${pesoVol} lb), mayor que el real (${peso} lb). Cálculo: ${$('#calcLargo').value}×${$('#calcAncho').value}×${$('#calcAlto').value} ÷ 166.`
+        : `Se cobra el peso real (${peso} lb), mayor que el volumétrico (${pesoVol} lb).`;
+    } else if (esVolumen && !pesoVol){
+      nota = 'Ingresa las medidas de la caja arriba para calcular el peso volumétrico.';
     }
 
-    // Tarifa de volumen SIN medidas todavía: cotización por peso + recordatorio.
-    if (esVolumen && !pesoVol){
-      cont.innerHTML = bloqueCotizacion('Por peso real', peso, tarifa, seguro, true)
-        + `<p class="calc-nota-vol">Ingresa las medidas de la caja arriba para ver también el estimado por peso volumétrico.</p>`;
-      return;
-    }
+    const costoEnvio = Math.max(pesoCobrar * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
+    const cargoManejo = Number(tarifa.cargo_manejo);
+    const total = costoEnvio + cargoManejo + seguro;
 
-    // Tarifa normal: una sola cotización (como antes).
-    cont.innerHTML = bloqueCotizacion('Estimado', peso, tarifa, seguro, true);
+    cont.innerHTML = `
+      <div class="calc-total">
+        <div class="linea"><span>Costo de envío (${pesoCobrar} lb × $${Number(tarifa.precio_libra).toFixed(2)}/lb, mín. $${Number(tarifa.cargo_minimo).toFixed(2)})</span><span>$${costoEnvio.toFixed(2)}</span></div>
+        <div class="linea"><span>Cargo de manejo</span><span>$${cargoManejo.toFixed(2)}</span></div>
+        ${seguro > 0 ? `<div class="linea"><span>Seguro (${tarifa.pct_seguro}% del valor declarado)</span><span>$${seguro.toFixed(2)}</span></div>` : ''}
+        <div class="total-final"><span>Estimado total</span><span>$${total.toFixed(2)}</span></div>
+      </div>
+      ${nota ? `<p class="calc-nota-vol">${nota}</p>` : ''}
+    `;
   }
 
   function actualizarVisibilidadDimensiones(){
