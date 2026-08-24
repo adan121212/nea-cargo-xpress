@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
     const resultado = await pool.query(
       `SELECT r.id, r.tipo, r.mensaje, r.estado, r.respuesta_admin, r.creado_en, r.actualizado_en,
               r.paquete_id,
-              p.tienda, p.numero_tracking, p.numero_casillero AS pkg_casillero,
+              p.tienda, p.numero_tracking,
               u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
               u.email AS cliente_email, u.telefono AS cliente_telefono,
               u.numero_casillero
