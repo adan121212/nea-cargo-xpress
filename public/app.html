@@ -610,6 +610,10 @@
   .campo-b{ border:1px solid var(--line); background:#fff; border-radius:7px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer; flex-shrink:0; }
   .campo-b:hover{ border-color:var(--accent); color:var(--accent-dark); }
   @media (max-width:620px){ .campo-l{ width:100%; } .campo-row{ flex-wrap:wrap; } }
+  .modal-overlay{ position:fixed; inset:0; background:rgba(12,27,51,0.55); z-index:200; display:none; align-items:center; justify-content:center; padding:16px; }
+  .modal-overlay .modal-box{ background:#fff; border-radius:14px; padding:22px; max-width:420px; width:100%; max-height:90vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+  .btn-reportar-problema{ background:#fff; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:9px 12px; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; }
+  .btn-reportar-problema:hover{ border-color:#c0392b; color:#c0392b; }
   </style>
 </head>
 <body>
@@ -1694,6 +1698,7 @@
           <button class="btn-ver-fotos" data-id="${p.id}" style="flex:1;margin-top:0;">📷 Ver fotos</button>
           ${(()=>{ const td=detectarTienda(p.numero_tracking)||p.tienda; const ur=urlRastreo(td,p.numero_tracking); return ur?`<a href="${ur}" target="_blank" rel="noopener" class="btn-rastrear">🔍 Rastrear</a>`:''; })()}
           ${p.estado==='prealertado'?`<button class="btn-eliminar-prealerta" data-id="${p.id}">🗑 Cancelar</button>`:''}
+          <button class="btn-reportar-problema" data-id="${p.id}" data-tienda="${escapeHtml(p.tienda)}" style="flex:1;margin-top:0;">⚠️ Reportar problema</button>
           </div>
           <div class="mini-galeria" id="galeria-${p.id}" style="display:none;"></div>
         </div>
@@ -1712,6 +1717,83 @@
         else{ const d=await res.json().catch(()=>({})); alert(d.mensaje||'No se pudo eliminar.'); btn.disabled=false; btn.textContent='🗑 Cancelar'; }
       }catch(err){ alert('No pudimos conectar.'); btn.disabled=false; btn.textContent='🗑 Cancelar'; }
     }));
+    cont.querySelectorAll('.btn-reportar-problema').forEach(btn => {
+      btn.addEventListener('click', () => abrirModalReporte(btn.dataset.id, btn.dataset.tienda));
+    });
+  }
+
+  // ---- Modal de reportar problema ----
+  function abrirModalReporte(paqueteId, tienda){
+    let modal = document.getElementById('modalReporte');
+    if (!modal){
+      modal = document.createElement('div');
+      modal.id = 'modalReporte';
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-box">
+          <h3 style="margin:0 0 4px;">⚠️ Reportar un problema</h3>
+          <p class="modal-sub" id="repSub" style="font-size:13px;color:var(--ink-soft);margin:0 0 16px;"></p>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px;">¿Qué pasó?</label>
+          <div id="repTipos" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+            <button type="button" class="rep-tipo" data-tipo="no_reconozco">📦 No es mío / no lo reconozco</button>
+            <button type="button" class="rep-tipo" data-tipo="danado">💔 Llegó dañado o abierto</button>
+            <button type="button" class="rep-tipo" data-tipo="peso_precio">⚖️ El peso o precio no cuadra</button>
+            <button type="button" class="rep-tipo" data-tipo="otro">❓ Otra cosa</button>
+          </div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Cuéntanos más (opcional)</label>
+          <textarea id="repMensaje" rows="3" placeholder="Describe el problema..." style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;resize:vertical;"></textarea>
+          <div id="repError" style="color:#c0392b;font-size:13px;margin-top:8px;display:none;"></div>
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <button type="button" id="repCancelar" style="flex:1;padding:11px;border:1px solid var(--line);background:#fff;border-radius:8px;font-weight:600;cursor:pointer;">Cancelar</button>
+            <button type="button" id="repEnviar" style="flex:1;padding:11px;border:0;background:var(--accent);color:#fff;border-radius:8px;font-weight:600;cursor:pointer;">Enviar reporte</button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+      // estilos de los botones de tipo
+      const st = document.createElement('style');
+      st.textContent = `
+        #modalReporte .rep-tipo{ text-align:left;padding:11px 13px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:13.5px;cursor:pointer;transition:all .15s; }
+        #modalReporte .rep-tipo:hover{ border-color:var(--accent); }
+        #modalReporte .rep-tipo.sel{ border-color:var(--accent);background:rgba(255,106,26,0.08);font-weight:600; }`;
+      document.head.appendChild(st);
+    }
+
+    let tipoSel = null;
+    modal.querySelector('#repSub').textContent = `Paquete de ${tienda}`;
+    modal.querySelectorAll('.rep-tipo').forEach(b => {
+      b.classList.remove('sel');
+      b.onclick = () => { modal.querySelectorAll('.rep-tipo').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); tipoSel = b.dataset.tipo; };
+    });
+    modal.querySelector('#repMensaje').value = '';
+    modal.querySelector('#repError').style.display = 'none';
+    modal.style.display = 'flex';
+
+    modal.querySelector('#repCancelar').onclick = () => { modal.style.display = 'none'; };
+    modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+    const btnEnviar = modal.querySelector('#repEnviar');
+    btnEnviar.onclick = async () => {
+      const err = modal.querySelector('#repError');
+      if (!tipoSel){ err.textContent = 'Elige qué tipo de problema es.'; err.style.display = 'block'; return; }
+      btnEnviar.disabled = true; btnEnviar.textContent = 'Enviando…';
+      try {
+        const res = await apiAutenticado(`/paquetes/${paqueteId}/reportar`, {
+          method: 'POST',
+          body: JSON.stringify({ tipo: tipoSel, mensaje: modal.querySelector('#repMensaje').value.trim() })
+        });
+        if (res.ok){
+          modal.style.display = 'none';
+          alert('✓ Tu reporte fue enviado. Te contactaremos pronto.');
+        } else {
+          const d = await res.json().catch(()=>({}));
+          err.textContent = d.mensaje || 'No se pudo enviar el reporte.'; err.style.display = 'block';
+          btnEnviar.disabled = false; btnEnviar.textContent = 'Enviar reporte';
+        }
+      } catch(e){
+        err.textContent = 'No pudimos conectar.'; err.style.display = 'block';
+        btnEnviar.disabled = false; btnEnviar.textContent = 'Enviar reporte';
+      }
+    };
   }
 
   async function toggleFotosPaquete(id, btn){

@@ -161,6 +161,7 @@ app.use('/api/admin/sucursales', adminSucursalesRoutes);
 app.use('/api/admin/tarifas', adminTarifasRoutes);
 app.use('/api/admin/facturas', adminFacturasRoutes);
 app.use('/api/admin/reportes', adminReportesRoutes);
+app.use('/api/admin/reportes-paquete', require('./routes/admin/reportesPaquete'));
 app.use('/api/admin/mostrador', adminMostradorRoutes);
 app.use('/api/admin/caja', adminCajaRoutes);
 app.use('/api/admin/recepcion', adminRecepcionRoutes);

@@ -643,6 +643,9 @@
     <button class="tab-nav-btn" data-tab="caja">
       <span class="sb-icon">🏦</span> Cierre de caja
     </button>
+    <button class="tab-nav-btn" data-tab="reportesPaquete">
+      <span class="sb-icon">⚠️</span> Reportes <span class="sb-badge" id="badgeReportes" style="display:none;">0</span>
+    </button>
     <button class="tab-nav-btn" data-tab="pty">
       <span class="sb-icon">🚢</span> PTY Cargo
     </button>
@@ -1080,6 +1083,19 @@
         <div class="dash-section"><h3 class="dash-section-title">Top 5 clientes por paquetes</h3><div class="chart-box-sm"><canvas id="chartTopClientes"></canvas></div></div>
       </div>
     </div>
+    <!-- ---- TAB: Reportes de problemas ---- -->
+    <div class="card tab-panel" id="tabReportesPaquete" style="display:none;">
+      <h2 style="margin:0 0 4px;">⚠️ Reportes de problemas</h2>
+      <p class="card-sub" style="margin:0 0 18px;">Problemas que los clientes reportaron sobre sus paquetes.</p>
+      <div class="banner" id="bannerReportesPaq"></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="btn-secondary filtro-rep activo" data-estado="">Todos</button>
+        <button class="btn-secondary filtro-rep" data-estado="nuevo">Nuevos</button>
+        <button class="btn-secondary filtro-rep" data-estado="en_proceso">En proceso</button>
+        <button class="btn-secondary filtro-rep" data-estado="resuelto">Resueltos</button>
+      </div>
+      <div id="listaReportesPaq"></div>
+    </div>
     <!-- ---- TAB: PTY Cargo Express ---- -->
     <div class="card tab-panel" id="tabPty" style="display:none;">
       <h2 style="margin:0 0 4px;">🚢 PTY Cargo Express</h2>
@@ -1391,6 +1407,7 @@
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
       if (tab === 'caja'){ $('#tabCaja').style.display = 'block'; cargarCaja(); cargarHistorialCaja(); }
       if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
+      if (tab === 'reportesPaquete'){ $('#tabReportesPaquete').style.display = 'block'; cargarReportesPaq(); }
       if (tab === 'pty'){ $('#tabPty').style.display = 'block'; }
       // Cierra sidebar en móvil al elegir pestaña
       if (window.innerWidth <= 760){
@@ -2744,6 +2761,79 @@
     chartTopClientes=new Chart(document.getElementById('chartTopClientes').getContext('2d'),{type:'bar',data:{labels:top.map(c=>`${c.nombre} ${c.apellido}`),datasets:[{label:'Paquetes',data:top.map(c=>Number(c.total_paquetes)),backgroundColor:'rgba(255,106,26,0.75)',borderRadius:6,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(12,27,51,0.06)'},ticks:{color:'#6b7280',font:{size:11}}},y:{grid:{display:false},ticks:{color:'#0c1b33',font:{size:11}}}}}});
   }
   $('#btnActualizarReporte').addEventListener('click',cargarReporte);
+
+  // ===== Reportes de problemas de paquetes =====
+  let filtroReportesPaq = '';
+  const REP_TIPO_LABEL = { no_reconozco:'📦 No reconoce el paquete', danado:'💔 Llegó dañado o abierto', peso_precio:'⚖️ Peso o precio no cuadra', otro:'❓ Otro problema' };
+  const REP_ESTADO_LABEL = { nuevo:'Nuevo', en_proceso:'En proceso', resuelto:'Resuelto' };
+  const REP_ESTADO_COLOR = { nuevo:'background:#f5c542;color:#5a4a00;', en_proceso:'background:#4a90d9;color:#fff;', resuelto:'background:#177a63;color:#fff;' };
+
+  async function cargarReportesPaq(){
+    try {
+      const q = filtroReportesPaq ? `?estado=${filtroReportesPaq}` : '';
+      const res = await apiAdmin(`/admin/reportes-paquete${q}`);
+      const data = await res.json();
+      renderReportesPaq(data.reportes || []);
+      actualizarBadgeReportes();
+    } catch(err){ mostrarBanner('#bannerReportesPaq','error','No se pudieron cargar los reportes.'); }
+  }
+
+  function renderReportesPaq(reportes){
+    const cont = $('#listaReportesPaq');
+    if (!reportes.length){ cont.innerHTML = '<p style="color:var(--ink-soft);padding:20px 0;text-align:center;">No hay reportes en esta categoría.</p>'; return; }
+    cont.innerHTML = reportes.map(r => {
+      const fecha = new Date(r.creado_en).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      const wa = (r.cliente_telefono||'').replace(/[^\d]/g,'');
+      const waNum = wa.length===8 ? '507'+wa : wa;
+      return `
+        <div style="border:1px solid var(--line);border-radius:12px;padding:15px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <div>
+              <div style="font-weight:600;font-size:14px;">${REP_TIPO_LABEL[r.tipo]||r.tipo}</div>
+              <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">${escapeHtml(r.cliente_nombre)} ${escapeHtml(r.cliente_apellido)} · ${escapeHtml(r.numero_casillero||'')} · ${escapeHtml(r.tienda||'')} #${escapeHtml(r.numero_tracking||'')}</div>
+              <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">${fecha}</div>
+            </div>
+            <span style="font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;${REP_ESTADO_COLOR[r.estado]||''}">${REP_ESTADO_LABEL[r.estado]||r.estado}</span>
+          </div>
+          ${r.mensaje ? `<div style="font-size:13px;background:var(--paper);border-radius:8px;padding:10px 12px;margin-bottom:10px;">"${escapeHtml(r.mensaje)}"</div>` : ''}
+          ${r.respuesta_admin ? `<div style="font-size:12.5px;color:#177a63;margin-bottom:10px;">✓ Tu respuesta: ${escapeHtml(r.respuesta_admin)}</div>` : ''}
+          <div style="display:flex;gap:7px;flex-wrap:wrap;">
+            ${r.estado!=='resuelto' ? `<button class="btn-secondary rep-resolver" data-id="${r.id}">✓ Marcar resuelto</button>` : ''}
+            ${r.estado==='nuevo' ? `<button class="btn-secondary rep-proceso" data-id="${r.id}">⏳ En proceso</button>` : ''}
+            ${waNum.length>=8 ? `<a class="btn-wa" href="https://wa.me/${waNum}" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2z"/></svg> WhatsApp</a>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+    cont.querySelectorAll('.rep-resolver').forEach(b => b.addEventListener('click', () => actualizarReporte(b.dataset.id, {estado:'resuelto'})));
+    cont.querySelectorAll('.rep-proceso').forEach(b => b.addEventListener('click', () => actualizarReporte(b.dataset.id, {estado:'en_proceso'})));
+  }
+
+  async function actualizarReporte(id, cambios){
+    try {
+      const res = await apiAdmin(`/admin/reportes-paquete/${id}`, { method:'PATCH', body: JSON.stringify(cambios) });
+      if (res.ok){ mostrarBanner('#bannerReportesPaq','success','Reporte actualizado.'); cargarReportesPaq(); }
+      else { const d = await res.json().catch(()=>({})); mostrarBanner('#bannerReportesPaq','error', d.mensaje||'No se pudo actualizar.'); }
+    } catch(err){ mostrarBanner('#bannerReportesPaq','error','No pudimos conectar.'); }
+  }
+
+  async function actualizarBadgeReportes(){
+    try {
+      const res = await apiAdmin('/admin/reportes-paquete/conteo');
+      const data = await res.json();
+      const badge = $('#badgeReportes');
+      if (data.nuevos > 0){ badge.textContent = data.nuevos; badge.style.display = ''; }
+      else { badge.style.display = 'none'; }
+    } catch(err){}
+  }
+
+  document.querySelectorAll('.filtro-rep').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filtro-rep').forEach(b => b.classList.remove('activo'));
+      btn.classList.add('activo');
+      filtroReportesPaq = btn.dataset.estado;
+      cargarReportesPaq();
+    });
+  });
   $('#btnExportarCsv').addEventListener('click',()=>{
     if(!ultimoReporte){ alert('Primero carga un reporte.'); return; }
     const desde=$('#repDesde').value, hasta=$('#repHasta').value;
