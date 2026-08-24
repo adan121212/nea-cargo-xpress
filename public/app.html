@@ -1698,7 +1698,7 @@
           <button class="btn-ver-fotos" data-id="${p.id}" style="flex:1;margin-top:0;">📷 Ver fotos</button>
           ${(()=>{ const td=detectarTienda(p.numero_tracking)||p.tienda; const ur=urlRastreo(td,p.numero_tracking); return ur?`<a href="${ur}" target="_blank" rel="noopener" class="btn-rastrear">🔍 Rastrear</a>`:''; })()}
           ${p.estado==='prealertado'?`<button class="btn-eliminar-prealerta" data-id="${p.id}">🗑 Cancelar</button>`:''}
-          <button class="btn-reportar-problema" data-id="${p.id}" data-tienda="${escapeHtml(p.tienda)}" style="flex:1;margin-top:0;">⚠️ Reportar problema</button>
+          ${p.estado==='entregado'?`<button class="btn-reportar-problema" data-id="${p.id}" data-tienda="${escapeHtml(p.tienda)}" style="flex:1;margin-top:0;">⚠️ Reportar problema</button>`:''}
           </div>
           <div class="mini-galeria" id="galeria-${p.id}" style="display:none;"></div>
         </div>
