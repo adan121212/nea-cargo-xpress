@@ -461,20 +461,30 @@ function beep(){
 }
 function abrirCamara(){
   if(typeof ZXingBrowser==='undefined'){
-    if(!zxingTried){
-      zxingTried=true;
-      var s=document.createElement('script');
-      s.src='https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js';
-      s.onload=abrirCamara;
-      s.onerror=function(){alert('No se pudo cargar el lector. Ábrela una vez con internet y vuelve a intentar.');};
-      document.head.appendChild(s);return;
-    }
-    alert('El lector no está disponible sin internet. Usa el botón "Sin código".');return;
+    ...
   }
   document.getElementById('cam').style.display='block';
   document.getElementById('camhint').textContent='Apunta al código de barras';
-  if(!reader) reader=new ZXingBrowser.BrowserMultiFormatReader();
-  reader.decodeFromConstraints({video:{facingMode:{ideal:'environment'}}},document.getElementById('video'),
+  if(!reader){
+    var hints=new Map();
+    hints.set(ZXingBrowser.DecodeHintType.TRY_HARDER,true);
+    hints.set(ZXingBrowser.DecodeHintType.POSSIBLE_FORMATS,[
+      ZXingBrowser.BarcodeFormat.EAN_13,
+      ZXingBrowser.BarcodeFormat.EAN_8,
+      ZXingBrowser.BarcodeFormat.UPC_A,
+      ZXingBrowser.BarcodeFormat.UPC_E,
+      ZXingBrowser.BarcodeFormat.CODE_128,
+      ZXingBrowser.BarcodeFormat.CODE_39,
+      ZXingBrowser.BarcodeFormat.ITF
+    ]);
+    reader=new ZXingBrowser.BrowserMultiFormatReader(hints);
+  }
+  reader.decodeFromConstraints({video:{
+    facingMode:{ideal:'environment'},
+    width:{ideal:1920},
+    height:{ideal:1080},
+    focusMode:{ideal:'continuous'}
+  }},document.getElementById('video'),
     function(result,err,ctrl){
       if(ctrl)controls=ctrl;
       if(!result)return;
