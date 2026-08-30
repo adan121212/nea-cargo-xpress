@@ -5,10 +5,10 @@ const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudinary');
+const { ZONA, fechaPanama, inicioMes } = require('../../utils/fechas');
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
-const ZONA = 'America/Panama';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -35,16 +35,7 @@ const CATEGORIAS = {
 };
 const METODOS = ['efectivo', 'tarjeta', 'transferencia', 'yappy'];
 
-function fechaPanama(d = new Date()) {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit',
-  }).format(d);
-}
 
-/** Primer día del mes actual en Panamá */
-function inicioMes() {
-  return fechaPanama().slice(0, 8) + '01';
-}
 
 const SELECT_BASE = `
   SELECT g.*, u.nombre AS registrado_por_nombre

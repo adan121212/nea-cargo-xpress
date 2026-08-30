@@ -4,10 +4,10 @@ const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const { enviarCorreoGenerico } = require('../../utils/mailer');
+const { ZONA } = require('../../utils/fechas');
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
-const ZONA = 'America/Panama';
 const ESTADOS = ['solicitada', 'comprada', 'pagada', 'cancelada'];
 const METODOS = ['efectivo', 'tarjeta', 'transferencia', 'yappy'];
 const COMISION_DEFECTO = 5.00;

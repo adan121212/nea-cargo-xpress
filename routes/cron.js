@@ -1,21 +1,9 @@
 const express = require('express');
 const pool = require('../db');
 const { enviarCorreoGenerico } = require('../utils/mailer');
+const { fechaPanama } = require('../utils/fechas');
 const router = express.Router();
 
-/**
- * Fecha de HOY en hora de Panamá (UTC-5), formato YYYY-MM-DD.
- *
- * Ojo: new Date().toISOString() devuelve la fecha en UTC. Como Panamá va
- * 5 horas atrás, después de las 7:00 PM local el UTC ya pasó a mañana.
- * Por eso todo lo que dependa del "día de hoy" tiene que usar esta función.
- */
-function fechaPanama(d = new Date()) {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Panama',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-  }).format(d);
-}
 
 /**
  * Todas las rutas de aquí las llama un servicio externo, no una persona.

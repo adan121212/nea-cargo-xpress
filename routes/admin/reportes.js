@@ -3,26 +3,12 @@ const { query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
+const { ZONA, fechaPanama, restarDias } = require('../../utils/fechas');
 
 const router = express.Router();
 
-const ZONA = 'America/Panama';
 
-// Fecha de hoy en Panamá (YYYY-MM-DD). new Date() + toISOString() devuelve
-// UTC, y Panamá va 5 horas atrás: de noche el UTC ya cambió de día.
-function fechaPanama(d = new Date()) {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit',
-  }).format(d);
-}
 
-// Resta días a un YYYY-MM-DD sin que se meta la zona horaria del servidor
-function restarDias(fechaISO, dias) {
-  const [a, m, d] = fechaISO.split('-').map(Number);
-  const t = new Date(Date.UTC(a, m - 1, d));
-  t.setUTCDate(t.getUTCDate() - dias);
-  return t.toISOString().slice(0, 10);
-}
 router.use(requiereAutenticacion, requiereAdmin);
 
 // --- GET /api/admin/reportes ---

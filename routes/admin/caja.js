@@ -4,36 +4,13 @@ const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const { enviarCorreoGenerico } = require('../../utils/mailer');
+const { ZONA, fechaPanama, horaPanama, fechaLarga } = require('../../utils/fechas');
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
-const ZONA = 'America/Panama';
 
-/**
- * Fecha de hoy en Panamá (YYYY-MM-DD).
- * No se puede usar toISOString() porque devuelve UTC, y Panamá va 5 horas
- * atrás: después de las 7:00 PM local el UTC ya cambió de día.
- */
-function fechaPanama(d = new Date()) {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit',
-  }).format(d);
-}
 
-/** Hora legible (11:03 p. m.) de un timestamp, en hora de Panamá. */
-function horaPanama(valor) {
-  if (!valor) return '—';
-  return new Date(valor).toLocaleTimeString('es-PA', {
-    timeZone: ZONA, hour: '2-digit', minute: '2-digit',
-  });
-}
 
-/** "19 de agosto de 2026" a partir de un YYYY-MM-DD, sin depender de zonas. */
-const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-function fechaLarga(fechaISO) {
-  const [anio, mes, dia] = String(fechaISO).slice(0, 10).split('-');
-  return `${Number(dia)} de ${MESES[Number(mes) - 1]} de ${anio}`;
-}
 
 const METODO_LABEL = {
   efectivo: 'Efectivo',

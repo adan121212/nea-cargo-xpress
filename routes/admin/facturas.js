@@ -8,17 +8,10 @@ const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
 const { enviarFacturaPorWhatsapp } = require('../../utils/whatsapp');
+const { fechaPanama } = require('../../utils/fechas');
 
 const router = express.Router();
 
-// Fecha de hoy en hora de Panamá (UTC-5). No se puede usar toISOString(),
-// que devuelve UTC: después de las 7:00 PM local el UTC ya cambió de día.
-function fechaPanama(d = new Date()) {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Panama',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-  }).format(d);
-}
 
 router.use(requiereAutenticacion, requiereAdmin);
 
