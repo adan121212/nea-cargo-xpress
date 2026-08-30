@@ -3287,6 +3287,32 @@
   };
   let compraClienteId = null;
 
+  // Panamá: 8 dígitos -> 507XXXXXXXX. Si ya trae código de país, se respeta.
+  function telefonoWa(tel){
+    const d = String(tel || '').replace(/\D/g, '');
+    if(!d) return null;
+    if(d.length === 8) return '507' + d;
+    if(d.length === 11 && d.startsWith('507')) return d;
+    return d;
+  }
+
+  // Mensaje de agradecimiento tras una compra por encargo
+  function mensajeGraciasCompra(c){
+    const nombre = (c.cliente_nombre || '').split(' ')[0];
+    return `Hola ${nombre}, gracias por confiar en NEA Cargo Xpress para tu compra de ${c.descripcion}.`
+      + `\n\nYa quedó pedida en ${c.tienda} y te avisamos apenas llegue a Panamá para que la retires.`
+      + `\n\nSi necesitas comprar algo más y no tienes tarjeta, nosotros te lo compramos. Solo escríbenos. 🙌`;
+  }
+
+  function abrirWaCompra(c){
+    const tel = telefonoWa(c.cliente_telefono);
+    if(!tel){
+      mostrarBanner('#bannerCompra','error','Este cliente no tiene teléfono registrado. Agrégalo en Clientes → Editar.');
+      return;
+    }
+    window.open(`https://wa.me/${tel}?text=${encodeURIComponent(mensajeGraciasCompra(c))}`, '_blank');
+  }
+
   function recalcularTotalCompra(){
     const m = parseFloat($('#compraMonto').value) || 0;
     const c = parseFloat($('#compraComision').value);
@@ -3416,6 +3442,8 @@
         if(c.estado === 'solicitada'){
           acciones = `<button class="btn-secondary btn-compra-comprada" data-id="${c.id}">✓ Ya la compré</button>
                       <button class="btn-secondary btn-danger btn-compra-cancelar" data-id="${c.id}">Cancelar</button>`;
+        } else if(c.estado === 'pagada'){
+          acciones = `<button class="btn-secondary btn-compra-wa" data-id="${c.id}" style="border-color:#25d366;color:#128c4a;">💬 Agradecer por WhatsApp</button>`;
         } else if(c.estado === 'comprada'){
           acciones = `<button class="btn-cobrar btn-compra-pagada" data-id="${c.id}" style="width:auto;padding:7px 14px;">Cobrar $${Number(c.total_cobrado).toFixed(2)}</button>
                       <button class="btn-secondary btn-danger btn-compra-cancelar" data-id="${c.id}">Cancelar</button>`;
@@ -3470,9 +3498,24 @@
           try {
             const res = await apiAdmin(`/admin/compras/${btn.dataset.id}/pagada`, { method:'PATCH', body: JSON.stringify({ metodo_pago: metodo }) });
             const d = await res.json().catch(()=>({}));
-            if(res.ok){ mostrarBanner('#bannerCompra','success','✓ ' + d.mensaje); await cargarCompras(); }
+            if(res.ok){
+              mostrarBanner('#bannerCompra','success','✓ ' + d.mensaje);
+              const compra = compras.find(x => String(x.id) === btn.dataset.id);
+              await cargarCompras();
+              if(compra && compra.cliente_telefono && confirm('¿Le mandas el agradecimiento por WhatsApp ahora?')){
+                abrirWaCompra(compra);
+              }
+            }
             else { mostrarBanner('#bannerCompra','error', d.mensaje || 'No se pudo cobrar.'); btn.disabled = false; }
           } catch(e){ mostrarBanner('#bannerCompra','error','No pudimos conectar.'); btn.disabled = false; }
+        });
+      });
+
+      // Agradecer por WhatsApp
+      cont.querySelectorAll('.btn-compra-wa').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const c = compras.find(x => String(x.id) === btn.dataset.id);
+          if(c) abrirWaCompra(c);
         });
       });
 
