@@ -128,7 +128,7 @@ button{font-family:var(--sans);font-size:16px;cursor:pointer;border-radius:15px}
 #cam{position:fixed;inset:0;background:#000;z-index:100;display:none}
 #cam video{width:100%;height:100%;object-fit:cover}
 #cam .box{position:absolute;top:50%;left:8%;width:84%;height:150px;margin-top:-75px;
-  box-shadow:0 0 0 2000px rgba(6,10,8,.6);border-radius:12px}
+  box-shadow:0 0 0 2000px rgba(6,10,8,.35);border-radius:12px}
 #cam .box i{position:absolute;width:28px;height:28px;border:3px solid var(--acc)}
 #cam .box i:nth-child(1){top:-2px;left:-2px;border-right:0;border-bottom:0;border-radius:12px 0 0 0}
 #cam .box i:nth-child(2){top:-2px;right:-2px;border-left:0;border-bottom:0;border-radius:0 12px 0 0}
@@ -502,8 +502,8 @@ function abrirCamara(){
   }
   reader.decodeFromConstraints({video:{
     facingMode:{ideal:'environment'},
-    width:{ideal:2560},
-    height:{ideal:1440},
+    width:{ideal:1280},
+    height:{ideal:720},
     advanced:[{focusMode:'continuous'}]
   }},document.getElementById('video'),
     function(result,err,ctrl){
