@@ -10,6 +10,16 @@ const { enviarFacturaPorCorreo } = require('../../utils/mailer');
 const { enviarFacturaPorWhatsapp } = require('../../utils/whatsapp');
 
 const router = express.Router();
+
+// Fecha de hoy en hora de Panamá (UTC-5). No se puede usar toISOString(),
+// que devuelve UTC: después de las 7:00 PM local el UTC ya cambió de día.
+function fechaPanama(d = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Panama',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(d);
+}
+
 router.use(requiereAutenticacion, requiereAdmin);
 
 // Código para autorizar anulaciones. Se puede cambiar en Render
@@ -66,7 +76,7 @@ router.post(
       return res.status(400).json({ errores: errores.array() });
     }
     const { paquete_id, tarifa_id } = req.body;
-    const hoy = new Date().toISOString().slice(0, 10);
+    const hoy = fechaPanama();
     const cajaHoy = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [hoy]);
     if (cajaHoy.rows.length > 0) {
       return res.status(409).json({
@@ -227,7 +237,7 @@ router.patch('/:id/estado', [
         [facturaAntes.paquete_id]
       );
       if (facturaAntes.estado === 'pagada' && facturaAntes.fecha_pago) {
-        const fechaPagoStr = new Date(facturaAntes.fecha_pago).toISOString().slice(0, 10);
+        const fechaPagoStr = fechaPanama(new Date(facturaAntes.fecha_pago));
         const cierreDia = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [fechaPagoStr]);
         if (cierreDia.rows.length > 0) {
           const detalle = (req.body.motivo_detalle || '').trim();
@@ -314,7 +324,7 @@ router.post(
     const errores = validationResult(req);
     if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
     const { paquete_id, tarifa_id, metodo_pago } = req.body;
-    const hoy = new Date().toISOString().slice(0, 10);
+    const hoy = fechaPanama();
     const cajaHoy = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [hoy]);
     if (cajaHoy.rows.length > 0) return res.status(409).json({ mensaje: `La caja del ${hoy} ya fue cerrada.`, caja_cerrada: true });
     const client = await pool.connect();
