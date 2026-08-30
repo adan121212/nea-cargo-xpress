@@ -481,26 +481,31 @@ function abrirCamara(){
   document.getElementById('btnTorch').classList.remove('show','on');
   torchOn=false;
   if(!reader){
-    var hints=new Map();
-    hints.set(ZXingBrowser.DecodeHintType.TRY_HARDER,true);
-    hints.set(ZXingBrowser.DecodeHintType.ASSUME_GS1,true);
-    if(ZXingBrowser.DecodeHintType.ALSO_INVERTED){
-      hints.set(ZXingBrowser.DecodeHintType.ALSO_INVERTED,true);
+    var hints=null;
+    try{
+      hints=new Map();
+      hints.set(ZXingBrowser.DecodeHintType.TRY_HARDER,true);
+      hints.set(ZXingBrowser.DecodeHintType.ASSUME_GS1,true);
+      if(ZXingBrowser.DecodeHintType.ALSO_INVERTED){
+        hints.set(ZXingBrowser.DecodeHintType.ALSO_INVERTED,true);
+      }
+      hints.set(ZXingBrowser.DecodeHintType.POSSIBLE_FORMATS,[
+        ZXingBrowser.BarcodeFormat.EAN_13,
+        ZXingBrowser.BarcodeFormat.EAN_8,
+        ZXingBrowser.BarcodeFormat.UPC_A,
+        ZXingBrowser.BarcodeFormat.UPC_E,
+        ZXingBrowser.BarcodeFormat.CODE_128,
+        ZXingBrowser.BarcodeFormat.CODE_39,
+        ZXingBrowser.BarcodeFormat.CODE_93,
+        ZXingBrowser.BarcodeFormat.CODABAR,
+        ZXingBrowser.BarcodeFormat.ITF,
+        ZXingBrowser.BarcodeFormat.RSS_14,
+        ZXingBrowser.BarcodeFormat.RSS_EXPANDED
+      ]);
+    }catch(e){
+      hints=null; // esta versión de la librería no expone esas constantes; seguimos sin hints
     }
-    hints.set(ZXingBrowser.DecodeHintType.POSSIBLE_FORMATS,[
-      ZXingBrowser.BarcodeFormat.EAN_13,
-      ZXingBrowser.BarcodeFormat.EAN_8,
-      ZXingBrowser.BarcodeFormat.UPC_A,
-      ZXingBrowser.BarcodeFormat.UPC_E,
-      ZXingBrowser.BarcodeFormat.CODE_128,
-      ZXingBrowser.BarcodeFormat.CODE_39,
-      ZXingBrowser.BarcodeFormat.CODE_93,
-      ZXingBrowser.BarcodeFormat.CODABAR,
-      ZXingBrowser.BarcodeFormat.ITF,
-      ZXingBrowser.BarcodeFormat.RSS_14,
-      ZXingBrowser.BarcodeFormat.RSS_EXPANDED
-    ]);
-    reader=new ZXingBrowser.BrowserMultiFormatReader(hints);
+    reader = hints ? new ZXingBrowser.BrowserMultiFormatReader(hints) : new ZXingBrowser.BrowserMultiFormatReader();
   }
   var video=document.getElementById('video');
   var warn=document.getElementById('camwarn');
