@@ -24,6 +24,9 @@
     --cargo-green:#177a63;
     --cargo-green-bg: rgba(23,122,99,0.1);
     --amber-bg: rgba(255,106,26,0.1);
+    --danger:#c0392b;
+    --danger-bg:#fdecea;
+    --danger-line: rgba(192,57,43,0.22);
     --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
@@ -614,6 +617,43 @@
     .ruta-progreso{ max-width:none; }
     .ruta-labels span{ font-size:8.5px; width:52px; }
   }
+  /* ===================== DASHBOARD — TOPBAR ===================== */
+  .dash-topbar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
+  .dash-search{
+    display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--line);
+    border-radius:10px; padding:9px 13px; font-size:12.5px; color: var(--ink-soft); flex:1; min-width:220px;
+  }
+  .dash-search input{ border:none; padding:0; font-size:12.8px; flex:1; }
+  .dash-search input:focus-visible{ outline:none; box-shadow:none; }
+  .dash-topbar-actions{ display:flex; gap:10px; }
+  .dash-topbar-actions .btn-secondary, .dash-topbar-actions .btn-primary{ width:auto; margin:0; white-space:nowrap; }
+  /* ===================== KPI — versión plana ===================== */
+  .kpi-icon{ display:none; }
+  .kpi-card{ padding:16px 18px; box-shadow:none; }
+  .kpi-card:hover{ transform:none; box-shadow:none; border-color: rgba(12,27,51,0.22); }
+  .kpi-bar{ height:2px; margin-top:10px; }
+  /* ===================== AVISO CAJA — versión clara ===================== */
+  .aviso-caja{
+    background: var(--danger-bg); border:1px solid var(--danger-line); border-left:4px solid var(--danger);
+    color: var(--ink); border-radius: var(--radius-md); padding:16px 20px; margin-bottom:20px;
+  }
+  .aviso-caja .av-titulo{ font-family: var(--font-display); font-size:15px; font-weight:700; color: var(--danger); margin-bottom:4px; }
+  .aviso-caja .av-sub{ font-size:12.5px; color: var(--ink-soft); margin-bottom:12px; }
+  .aviso-caja .av-lista{ background:#fff; border:1px solid var(--danger-line); border-radius:9px; padding:10px 14px; }
+  .aviso-caja .av-fila{ display:flex; justify-content:space-between; gap:14px; font-size:13px; padding:3px 0; color: var(--ink); }
+  .aviso-caja .av-fila span:first-child{ color: var(--ink-soft); }
+  .aviso-caja .av-monto{ font-family: var(--font-mono); font-weight:700; }
+  .aviso-caja button{
+    background: var(--danger); color:#fff; border:none; border-radius:9px; padding:12px 22px;
+    font-weight:700; font-size:13.5px; cursor:pointer; white-space:nowrap;
+  }
+  .aviso-caja button:hover{ opacity:.9; }
+  /* ===================== PAQUETE DESTACADO ===================== */
+  .paquete-destacado{ margin-bottom:24px; }
+  .pd-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:2px; }
+  .pd-eyebrow{ font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color: var(--ink-soft); font-weight:600; margin-bottom:4px; }
+  .pd-head h3{ font-family: var(--font-display); font-size:16.5px; margin:0; }
+  .pd-meta{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:3px; }
 </style>
 </head>
 <body>
@@ -743,7 +783,16 @@
     <!-- ---- TAB: Dashboard ---- -->
     <div class="tab-panel" id="tabDashboard">
       <div class="hero">
-        <div id="avisoCajaPendiente" style="display:none;background:linear-gradient(135deg,#a5301f,#c0392b);color:#fff;border-radius:14px;padding:18px 22px;margin-bottom:20px;box-shadow:0 4px 20px rgba(192,57,43,.3);"></div>
+        <div id="avisoCajaPendiente" class="aviso-caja" style="display:none;"></div>
+        <div class="dash-topbar">
+          <div class="dash-search">
+            🔍 <input type="text" id="dashBuscar" placeholder="Buscar por tracking o correo del cliente…">
+          </div>
+          <div class="dash-topbar-actions">
+            <button type="button" class="btn-secondary" id="dashBtnEscanear">📷 Escanear</button>
+            <button type="button" class="btn-primary" id="dashBtnNuevo">+ Nuevo paquete</button>
+          </div>
+        </div>
         <h1 id="dashFecha">Dashboard</h1>
         <p>Vista general de operaciones — actualizado al instante.</p>
       </div>
@@ -752,6 +801,17 @@
         <div class="kpi-card"><div class="kpi-icon">📦</div><div class="kpi-label">Paquetes este mes</div><div class="kpi-num blue" id="kpiPaquetesMes">—</div><div class="kpi-sub" id="kpiPaquetesMesSub">paquetes nuevos</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:#2563eb;width:0%" id="kpiPaquetesMesBar"></div></div></div>
         <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-label">Ingresos este mes</div><div class="kpi-num green" id="kpiIngresosMes">—</div><div class="kpi-sub" id="kpiIngresosMesSub">cobrados</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:var(--cargo-green);width:0%" id="kpiIngresosMesBar"></div></div></div>
         <div class="kpi-card"><div class="kpi-icon">⏳</div><div class="kpi-label">Por cobrar</div><div class="kpi-num amber" id="kpiPendiente">—</div><div class="kpi-sub" id="kpiPendienteSub">pendientes</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:var(--accent);width:0%" id="kpiPendienteBar"></div></div></div>
+      </div>
+      <div class="card paquete-destacado" id="paqueteDestacadoBox" style="display:none;">
+        <div class="pd-head">
+          <div>
+            <div class="pd-eyebrow">Paquete destacado — el más urgente</div>
+            <h3 id="pdNombre">—</h3>
+            <div class="pd-meta" id="pdMeta"></div>
+          </div>
+          <button type="button" class="btn-secondary" id="pdVerFicha">Ver en Paquetes →</button>
+        </div>
+        <div id="pdRuta"></div>
       </div>
       <div class="dash-inicio-grid">
         <div class="dash-inicio-chart"><h3>Ingresos — últimos 30 días</h3><canvas id="chartDashIngresos"></canvas></div>
@@ -3184,7 +3244,62 @@
       if(chartDashE){chartDashE.destroy();chartDashE=null;} chartDashE=new Chart(document.getElementById('chartDashEstados').getContext('2d'),{type:'doughnut',data:{labels:estados.map(e=>ESTADO_LABEL_DASH[e.estado]||e.estado),datasets:[{data:estados.map(e=>Number(e.cantidad)),backgroundColor:estados.map(e=>ESTADO_COLORES_DASH[e.estado]||'#94a3b8'),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#0c1b33',font:{size:10},padding:8,boxWidth:10}}},cutout:'60%'}});
       const top=dataMes.top_clientes||[]; if(chartDashT){chartDashT.destroy();chartDashT=null;} chartDashT=new Chart(document.getElementById('chartDashTopClientes').getContext('2d'),{type:'bar',data:{labels:top.map(c=>`${c.nombre} ${c.apellido}`),datasets:[{label:'Paquetes',data:top.map(c=>Number(c.total_paquetes)),backgroundColor:'rgba(23,122,99,0.75)',borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(12,27,51,0.06)'},ticks:{color:'#6b7280',font:{size:10}}},y:{grid:{display:false},ticks:{color:'#0c1b33',font:{size:10}}}}}});
     } catch(err){ console.error('Dashboard error:',err); }
+    cargarPaqueteDestacado();
   }
+  // Elige el paquete más urgente (más días sin reclamo) para mostrarlo
+  // como tarjeta destacada arriba del dashboard, con su barra de ruta.
+  async function cargarPaqueteDestacado(){
+    const box = $('#paqueteDestacadoBox');
+    if(!box) return;
+    try {
+      let lista = [];
+      try {
+        const rUrgente = await apiAdmin('/admin/paquetes?antiguedad=23&page=1');
+        const dUrgente = await rUrgente.json();
+        lista = dUrgente.paquetes || [];
+      } catch(e){}
+      if(!lista.length){
+        const rDefault = await apiAdmin('/admin/paquetes?page=1');
+        const dDefault = await rDefault.json();
+        lista = (dDefault.paquetes || []).filter(p => p.estado !== 'entregado');
+      }
+      if(!lista.length){ box.style.display = 'none'; return; }
+      lista.sort((a,b) => Number(b.dias_transcurridos||0) - Number(a.dias_transcurridos||0));
+      const p = lista[0];
+      const nombre = p.cliente_nombre ? `${p.cliente_nombre} ${p.cliente_apellido||''}`.trim() : 'Sin cliente asignado';
+      $('#pdNombre').textContent = nombre;
+      $('#pdMeta').textContent = `${p.numero_casillero || '—'} · ${p.numero_tracking || 'sin tracking'} · ${Number(p.dias_transcurridos||0)} días`;
+      $('#pdRuta').innerHTML = barraRuta(p.estado);
+      $('#pdVerFicha').onclick = () => {
+        document.querySelector('.tab-nav-btn[data-tab="paquetes"]')?.click();
+        setTimeout(() => {
+          const inp = $('#filtroTracking');
+          if(inp && p.numero_tracking){ inp.value = p.numero_tracking; cargarPaquetes(1); }
+        }, 150);
+      };
+      box.style.display = 'block';
+    } catch(err){ console.error('Paquete destacado error:', err); box.style.display = 'none'; }
+  }
+  // ---- Topbar del Dashboard: búsqueda rápida y accesos directos ----
+  $('#dashBuscar')?.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const q = e.target.value.trim();
+    document.querySelector('.tab-nav-btn[data-tab="paquetes"]')?.click();
+    setTimeout(() => {
+      if (q.includes('@')) { const inp = $('#filtroEmail'); if (inp) inp.value = q; }
+      else { const inp = $('#filtroTracking'); if (inp) inp.value = q; }
+      cargarPaquetes(1);
+    }, 150);
+  });
+  $('#dashBtnEscanear')?.addEventListener('click', () => {
+    document.querySelector('.tab-nav-btn[data-tab="recepcion"]')?.click();
+    setTimeout(() => { $('#btnCamara')?.click(); }, 150);
+  });
+  $('#dashBtnNuevo')?.addEventListener('click', () => {
+    document.querySelector('.tab-nav-btn[data-tab="recepcion"]')?.click();
+    setTimeout(() => { $('#recepcionTracking')?.focus(); }, 150);
+  });
   // ---- Editar cliente ----
   let clienteEditandoId = null;
   function abrirEditCliente(u){
@@ -3913,25 +4028,19 @@
       if(n === 0){ aviso.style.display = 'none'; return; }
 
       const lista = (d.pendientes || []).slice(-5).map(p =>
-        `<div style="display:flex;justify-content:space-between;gap:14px;font-size:13px;padding:3px 0;">
-           <span>${formatearFechaSolo(p.fecha)} <span style="opacity:.65;">· ${p.dias_atraso} día${p.dias_atraso===1?'':'s'} de atraso</span></span>
-           <span style="font-family:var(--font-mono);font-weight:700;">$${p.total.toFixed(2)}</span>
+        `<div class="av-fila">
+           <span>${formatearFechaSolo(p.fecha)} · ${p.dias_atraso} día${p.dias_atraso===1?'':'s'} de atraso</span>
+           <span class="av-monto">$${p.total.toFixed(2)}</span>
          </div>`).join('');
 
       aviso.innerHTML = `
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;">
           <div style="flex:1;min-width:240px;">
-            <div style="font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:4px;">
-              ⚠ ${n} día${n===1?'':'s'} sin cerrar caja
-            </div>
-            <div style="font-size:13px;opacity:.85;margin-bottom:12px;">
-              Hubo cobros esos días y nadie cerró la caja. Mientras no se cierre, el corte queda incompleto.
-            </div>
-            <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;">${lista}</div>
+            <div class="av-titulo">⚠ ${n} día${n===1?'':'s'} sin cerrar caja</div>
+            <div class="av-sub">Hubo cobros esos días y nadie cerró la caja. Mientras no se cierre, el corte queda incompleto.</div>
+            <div class="av-lista">${lista}</div>
           </div>
-          <button id="btnIrACaja" style="background:#fff;color:#c0392b;border:none;border-radius:9px;padding:12px 22px;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap;">
-            Cerrar ahora
-          </button>
+          <button id="btnIrACaja">Cerrar ahora</button>
         </div>`;
       aviso.style.display = 'block';
 
