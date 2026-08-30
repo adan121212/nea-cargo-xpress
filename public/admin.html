@@ -632,6 +632,9 @@
       <span class="sb-icon">🛒</span> Compras
       <span class="sb-badge" id="sbBadgeCompras" style="display:none;">0</span>
     </button>
+    <button class="tab-nav-btn" data-tab="gastos">
+      <span class="sb-icon">💸</span> Gastos
+    </button>
     <button class="tab-nav-btn" data-tab="facturas">
       <span class="sb-icon">🗂</span> Facturas
     </button>
@@ -1034,6 +1037,82 @@
         </div>
         <div id="listaCompras"></div>
         <div class="empty" id="emptyCompras" style="display:none;">Todavía no hay compras registradas.</div>
+      </div>
+    </div>
+
+    <!-- ---- TAB: Gastos ---- -->
+    <div class="tab-panel" id="tabGastos" style="display:none;">
+
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+          <div>
+            <h2 style="margin:0 0 2px;">Gastos de la empresa</h2>
+            <p class="card-sub" style="margin:0;">Lo cobrado menos lo gastado es lo que de verdad ganaste.</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+            <div><label for="gastoDesde" style="font-size:11px;margin:0 0 4px;">Desde</label><input type="date" id="gastoDesde" style="padding:7px 10px;width:auto;"></div>
+            <div><label for="gastoHasta" style="font-size:11px;margin:0 0 4px;">Hasta</label><input type="date" id="gastoHasta" style="padding:7px 10px;width:auto;"></div>
+            <button class="btn-secondary" id="btnVerGastos" style="height:36px;">Ver</button>
+          </div>
+        </div>
+        <div id="gastosResumen" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;"></div>
+        <div id="gastosCategorias" style="margin-top:18px;"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <h2>Registrar un gasto</h2>
+        <p class="card-sub">Guarda la foto del recibo para que quede el respaldo.</p>
+        <form id="formGasto">
+          <div class="form-grid">
+            <div><label for="gFecha">Fecha</label><input id="gFecha" type="date"></div>
+            <div><label for="gCategoria">Categoría</label><select id="gCategoria"></select></div>
+            <div class="full"><label for="gDescripcion">Descripción</label><input id="gDescripcion" type="text" placeholder="Flete del contenedor de agosto"></div>
+            <div><label for="gMonto">Monto (USD)</label><input id="gMonto" type="number" step="0.01" min="0" placeholder="250.00"></div>
+            <div>
+              <label for="gMetodo">¿Cómo se pagó?</label>
+              <select id="gMetodo">
+                <option value="">Sin especificar</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="yappy">Yappy</option>
+              </select>
+            </div>
+            <div><label for="gProveedor">Proveedor (opcional)</label><input id="gProveedor" type="text" placeholder="LBS Global Express"></div>
+            <div><label for="gDocumento">N° de factura o recibo</label><input id="gDocumento" type="text" placeholder="0001-234"></div>
+            <div class="full"><label for="gComprobante">Foto del recibo (opcional)</label><input id="gComprobante" type="file" accept="image/*" style="border:none;padding:6px 0;"></div>
+            <div class="full"><label for="gNotas">Notas (opcional)</label><input id="gNotas" type="text"></div>
+          </div>
+          <div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:14px;">
+            <label style="display:flex;align-items:center;gap:8px;font-weight:500;margin:0;cursor:pointer;">
+              <input type="checkbox" id="gSaleCaja" style="width:16px;height:16px;accent-color:var(--accent);"> Salió efectivo de la caja
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-weight:500;margin:0;cursor:pointer;">
+              <input type="checkbox" id="gRecurrente" style="width:16px;height:16px;accent-color:var(--accent);"> Se repite todos los meses
+            </label>
+          </div>
+          <button class="btn-primary" type="submit" id="btnGuardarGasto" style="max-width:240px;">
+            <span class="spinner"></span><span>Registrar gasto</span>
+          </button>
+          <div class="banner" id="bannerGasto"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <h2 style="margin:0;">Gastos del período</h2>
+          <div>
+            <label for="filtroGastoCategoria" style="margin:0 0 4px;font-size:11px;">Categoría</label>
+            <select id="filtroGastoCategoria" style="width:auto;"><option value="">Todas</option></select>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th>Proveedor</th><th>Monto</th><th></th></tr></thead>
+            <tbody id="tbodyGastos"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="emptyGastos" style="display:none;">No hay gastos registrados en este período.</div>
       </div>
     </div>
 
@@ -1492,6 +1571,7 @@
       if (tab === 'recepcion'){ $('#tabRecepcion').style.display = 'block'; setTimeout(() => $('#recepcionTracking').focus(), 50); }
       if (tab === 'clientes'){ $('#tabClientes').style.display = 'block'; cargarClientes(); }
       if (tab === 'compras'){ $('#tabCompras').style.display = 'block'; cargarCompras(); }
+      if (tab === 'gastos'){ $('#tabGastos').style.display = 'block'; iniciarGastos(); }
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
       if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); }
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
@@ -3573,6 +3653,168 @@
       setTimeout(() => popup.querySelector('#cpOrden').focus(), 50);
     });
   }
+
+
+  // ============ GASTOS DE LA EMPRESA ============
+  let gastosCategorias = {};
+  let gastosIniciado = false;
+
+  function fechaHoyPanama(){
+    return new Intl.DateTimeFormat('en-CA', { timeZone:'America/Panama', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+  }
+
+  async function iniciarGastos(){
+    if(!gastosIniciado){
+      const hoy = fechaHoyPanama();
+      $('#gastoDesde').value = hoy.slice(0,8) + '01';
+      $('#gastoHasta').value = hoy;
+      $('#gFecha').value = hoy;
+      try {
+        const r = await apiAdmin('/admin/gastos/categorias');
+        gastosCategorias = (await r.json()).categorias || {};
+        const opts = Object.entries(gastosCategorias).map(([k,v]) => `<option value="${k}">${v}</option>`).join('');
+        $('#gCategoria').innerHTML = opts;
+        $('#filtroGastoCategoria').innerHTML = '<option value="">Todas</option>' + opts;
+      } catch(e){}
+      gastosIniciado = true;
+    }
+    await cargarGastos();
+  }
+
+  $('#btnVerGastos')?.addEventListener('click', (e) => { e.preventDefault(); cargarGastos(); });
+  $('#filtroGastoCategoria')?.addEventListener('change', () => cargarGastos());
+
+  async function cargarGastos(){
+    const desde = $('#gastoDesde').value, hasta = $('#gastoHasta').value;
+    const cat = $('#filtroGastoCategoria').value;
+    try {
+      const [rRes, rLista] = await Promise.all([
+        apiAdmin(`/admin/gastos/resumen?desde=${desde}&hasta=${hasta}`),
+        apiAdmin(`/admin/gastos?desde=${desde}&hasta=${hasta}${cat ? '&categoria='+cat : ''}`),
+      ]);
+      const res = await rRes.json();
+      const lista = (await rLista.json()).gastos || [];
+
+      const u = Number(res.utilidad || 0);
+      const colorU = u >= 0 ? 'green' : 'amber';
+      $('#gastosResumen').innerHTML = `
+        <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:3px;padding:15px 16px;">
+          <div style="font-size:20px;">💰</div><div class="dash-label">Cobrado</div>
+          <div class="dash-num" style="font-size:20px;">$${Number(res.ingresos.total).toFixed(2)}</div>
+          <div class="dash-sub">${res.ingresos.facturas} fact. · ${res.ingresos.compras} compras</div>
+        </div>
+        <div class="dash-card amber" style="flex-direction:column;align-items:flex-start;gap:3px;padding:15px 16px;">
+          <div style="font-size:20px;">💸</div><div class="dash-label">Gastado</div>
+          <div class="dash-num" style="font-size:20px;">$${Number(res.gastos.total).toFixed(2)}</div>
+          <div class="dash-sub">${lista.length} registros</div>
+        </div>
+        <div class="dash-card ${colorU}" style="flex-direction:column;align-items:flex-start;gap:3px;padding:15px 16px;">
+          <div style="font-size:20px;">${u >= 0 ? '📈' : '📉'}</div>
+          <div class="dash-label">${u >= 0 ? 'Ganancia' : 'Pérdida'}</div>
+          <div class="dash-num" style="font-size:20px;">$${Math.abs(u).toFixed(2)}</div>
+          <div class="dash-sub">${Number(res.margen).toFixed(1)}% de margen</div>
+        </div>
+        <div class="dash-card navy" style="flex-direction:column;align-items:flex-start;gap:3px;padding:15px 16px;">
+          <div style="font-size:20px;">🔁</div><div class="dash-label">Gastos fijos</div>
+          <div class="dash-num" style="font-size:20px;">$${Number(res.gastos.recurrentes).toFixed(2)}</div>
+          <div class="dash-sub">se repiten cada mes</div>
+        </div>`;
+
+      // Barras por categoría
+      const cats = res.gastos.por_categoria || [];
+      const mayor = cats.length ? Math.max(...cats.map(c => c.total)) : 0;
+      $('#gastosCategorias').innerHTML = cats.length ? `
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:10px;">En qué se fue la plata</div>
+        ${cats.map(c => `
+          <div style="margin-bottom:9px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+              <span>${escapeHtml(c.etiqueta)} <span style="color:var(--ink-soft);font-size:11.5px;">· ${c.cantidad}</span></span>
+              <span class="mono" style="font-weight:700;">$${c.total.toFixed(2)}</span>
+            </div>
+            <div style="height:7px;background:rgba(12,27,51,0.07);border-radius:4px;overflow:hidden;">
+              <div style="height:100%;width:${mayor ? (c.total/mayor*100) : 0}%;background:var(--accent);border-radius:4px;"></div>
+            </div>
+          </div>`).join('')}` : '';
+
+      $('#emptyGastos').style.display = lista.length ? 'none' : 'block';
+      $('#tbodyGastos').innerHTML = lista.map(g => `
+        <tr>
+          <td data-label="Fecha" class="muted">${formatearFechaSolo(g.fecha)}</td>
+          <td data-label="Categoría">
+            ${escapeHtml(gastosCategorias[g.categoria] || g.categoria)}
+            ${g.es_recurrente ? '<div style="font-size:10.5px;color:var(--ink-soft);">🔁 fijo</div>' : ''}
+          </td>
+          <td data-label="Descripción">
+            ${escapeHtml(g.descripcion)}
+            ${g.sale_de_caja ? '<div style="font-size:10.5px;color:var(--accent-dark);">salió de caja</div>' : ''}
+            ${g.notas ? `<div style="font-size:11px;color:var(--ink-soft);">${escapeHtml(g.notas)}</div>` : ''}
+          </td>
+          <td data-label="Proveedor" class="muted">
+            ${escapeHtml(g.proveedor || '—')}
+            ${g.numero_documento ? `<div class="mono" style="font-size:11px;">${escapeHtml(g.numero_documento)}</div>` : ''}
+          </td>
+          <td data-label="Monto" class="mono" style="font-weight:700;">$${Number(g.monto).toFixed(2)}</td>
+          <td data-label="">
+            <div class="row-actions">
+              ${g.comprobante_url ? `<a href="${escapeHtml(g.comprobante_url)}" target="_blank" rel="noopener" class="btn-secondary" style="text-decoration:none;">🧾</a>` : ''}
+              <button class="btn-secondary btn-danger btn-borrar-gasto" data-id="${g.id}">Borrar</button>
+            </div>
+          </td>
+        </tr>`).join('');
+
+      $('#tbodyGastos').querySelectorAll('.btn-borrar-gasto').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if(!confirm('¿Borrar este gasto? No se puede deshacer.')) return;
+          try {
+            const r = await apiAdmin(`/admin/gastos/${btn.dataset.id}`, { method:'DELETE' });
+            if(r.ok){ mostrarBanner('#bannerGasto','success','Gasto eliminado.'); await cargarGastos(); }
+            else { const d = await r.json().catch(()=>({})); mostrarBanner('#bannerGasto','error', d.mensaje || 'No se pudo borrar.'); }
+          } catch(e){ mostrarBanner('#bannerGasto','error','No pudimos conectar.'); }
+        });
+      });
+
+    } catch(err){ console.error('Error cargando gastos:', err); }
+  }
+
+  $('#formGasto')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const monto = parseFloat($('#gMonto').value);
+    if(!$('#gFecha').value || !$('#gDescripcion').value.trim() || isNaN(monto) || monto <= 0){
+      mostrarBanner('#bannerGasto','error','Completa fecha, descripción y un monto mayor que cero.');
+      return;
+    }
+    const fd = new FormData();
+    fd.append('fecha', $('#gFecha').value);
+    fd.append('categoria', $('#gCategoria').value);
+    fd.append('descripcion', $('#gDescripcion').value.trim());
+    fd.append('monto', monto);
+    if($('#gMetodo').value) fd.append('metodo_pago', $('#gMetodo').value);
+    if($('#gProveedor').value.trim()) fd.append('proveedor', $('#gProveedor').value.trim());
+    if($('#gDocumento').value.trim()) fd.append('numero_documento', $('#gDocumento').value.trim());
+    if($('#gNotas').value.trim()) fd.append('notas', $('#gNotas').value.trim());
+    fd.append('sale_de_caja', $('#gSaleCaja').checked ? 'true' : 'false');
+    fd.append('es_recurrente', $('#gRecurrente').checked ? 'true' : 'false');
+    const archivo = $('#gComprobante').files[0];
+    if(archivo) fd.append('comprobante', archivo);
+
+    const btn = $('#btnGuardarGasto');
+    setCargando(btn, true);
+    try {
+      const res = await apiAdminFormData('/admin/gastos', fd);
+      const d = await res.json().catch(()=>({}));
+      if(res.status === 201){
+        mostrarBanner('#bannerGasto','success','✓ Gasto registrado.');
+        const f = $('#gFecha').value;
+        $('#formGasto').reset();
+        $('#gFecha').value = f;
+        await cargarGastos();
+      } else {
+        const msg = d.errores?.map(x => x.msg).join(' · ') || d.mensaje || 'No se pudo registrar.';
+        mostrarBanner('#bannerGasto','error', msg);
+      }
+    } catch(err){ mostrarBanner('#bannerGasto','error','No pudimos conectar con el servidor.'); }
+    finally { setCargando(btn, false); }
+  });
 
   async function iniciarAdmin(){
     cargarNotificacionesGuardadas();

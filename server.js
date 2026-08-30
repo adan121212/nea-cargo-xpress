@@ -23,6 +23,7 @@ const adminCajaRoutes = require('./routes/admin/caja');
 const adminRecepcionRoutes = require('./routes/admin/recepcion');
 const adminPtyRoutes = require('./routes/admin/ptycargoexpress');
 const adminComprasRoutes = require('./routes/admin/compras');
+const adminGastosRoutes = require('./routes/admin/gastos');
 const cronRoutes = require('./routes/cron');
 const app = express();
 app.set('trust proxy', 1);
@@ -169,6 +170,7 @@ app.use('/api/admin/caja', adminCajaRoutes);
 app.use('/api/admin/recepcion', adminRecepcionRoutes);
 app.use('/api/admin/pty', adminPtyRoutes);
 app.use('/api/admin/compras', adminComprasRoutes);
+app.use('/api/admin/gastos', adminGastosRoutes);
 app.use('/api/cron', cronRoutes);
 // Redirección de la URL bonita del flyer al registro real
 app.get('/casillero', (req, res) => {
