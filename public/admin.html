@@ -1208,6 +1208,7 @@
         <h3 class="dash-section-title">Desglose por método de pago</h3>
         <div id="cajaMetodosCards" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
       </div>
+      <div id="cajaEfectivoBox" style="margin-bottom:20px;"></div>
       <div class="empty" id="emptyCajaDetalle" style="display:none;">No hay cobros registrados este día.</div>
       <div id="cajaCierreBox" style="margin-top:4px;"></div>
       <div class="banner" id="bannerCaja"></div>
@@ -2765,6 +2766,41 @@
     } else {
       metodosGrid.style.display = 'none';
     }
+    // --- Cuadre del efectivo de la gaveta ---
+    const ef = data.efectivo || { cobrado: 0, salidas: 0, en_gaveta: 0 };
+    const sal = (data.salidas_efectivo && data.salidas_efectivo.detalle) || [];
+    const cajaEf = $('#cajaEfectivoBox');
+    if (cajaEf) {
+      if (ef.cobrado > 0 || ef.salidas > 0) {
+        cajaEf.innerHTML = `
+          <h3 class="dash-section-title">Cuadre del efectivo</h3>
+          <div style="background:var(--paper);border-radius:12px;padding:18px 20px;border:1px solid var(--line);">
+            <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;">
+              <span>Cobrado en efectivo</span>
+              <span class="mono">$${Number(ef.cobrado).toFixed(2)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;color:var(--accent-dark);">
+              <span>Salidas de efectivo${sal.length ? ` (${sal.length})` : ''}</span>
+              <span class="mono">− $${Number(ef.salidas).toFixed(2)}</span>
+            </div>
+            ${sal.map(g => `
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);padding:2px 0 2px 14px;">
+                <span>${escapeHtml(g.descripcion)}</span>
+                <span class="mono">$${Number(g.monto).toFixed(2)}</span>
+              </div>`).join('')}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:12px;border-top:1px solid var(--line);">
+              <span style="font-weight:700;font-size:14px;">Debe haber en la gaveta</span>
+              <span class="mono" style="font-weight:700;font-size:20px;color:${Number(ef.en_gaveta) < 0 ? '#c0392b' : 'var(--cargo-green)'};">$${Number(ef.en_gaveta).toFixed(2)}</span>
+            </div>
+            <p style="font-size:11.5px;color:var(--ink-soft);margin:10px 0 0;">
+              Cuenta el efectivo antes de cerrar. Si no cuadra, anótalo en las notas del cierre.
+            </p>
+          </div>`;
+      } else {
+        cajaEf.innerHTML = '';
+      }
+    }
+
     $('#emptyCajaDetalle').style.display = metodos.length ? 'none' : 'block';
     // Estado y cierre
     const estadoDiv=$('#cajaEstadoDia'), cierreBox=$('#cajaCierreBox');

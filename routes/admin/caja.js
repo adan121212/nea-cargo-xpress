@@ -123,6 +123,23 @@ router.get(
     const fecha = req.query.fecha || fechaPanama();
     try {
       const { detalle, totalGeneral, cantidadFacturas, desglose } = await calcularResumenDia(fecha);
+
+      // Efectivo que salió de la gaveta ese día (gastos marcados "sale_de_caja").
+      // La tabla gastos puede no existir todavía: si falla, seguimos sin ella.
+      let salidas = { total: 0, detalle: [] };
+      try {
+        const s = await pool.query(
+          `SELECT id, categoria, descripcion, monto FROM gastos
+           WHERE fecha = $1::date AND sale_de_caja = TRUE ORDER BY id ASC`, [fecha]
+        );
+        salidas = {
+          total: s.rows.reduce((a, g) => a + Number(g.monto), 0),
+          detalle: s.rows.map(g => ({ ...g, monto: Number(g.monto) })),
+        };
+      } catch (e) { /* tabla gastos aún no creada */ }
+
+      const cobradoEfectivo = (detalle.find(d => d.metodo_pago === 'efectivo') || {}).total || 0;
+
       const cierreExistente = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [fecha]);
       let cierreActualizado = null;
       if (cierreExistente.rows.length > 0) {
@@ -140,6 +157,12 @@ router.get(
       return res.json({
         fecha, detalle_por_metodo: detalle, total_general: totalGeneral,
         cantidad_facturas: cantidadFacturas, desglose,
+        salidas_efectivo: salidas,
+        efectivo: {
+          cobrado: cobradoEfectivo,
+          salidas: salidas.total,
+          en_gaveta: cobradoEfectivo - salidas.total,
+        },
         cerrado: cierreActualizado !== null, cierre: cierreActualizado,
       });
     } catch (error) {
