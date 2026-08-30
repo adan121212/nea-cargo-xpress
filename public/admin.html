@@ -649,6 +649,7 @@
     </button>
     <button class="tab-nav-btn" data-tab="caja">
       <span class="sb-icon">🏦</span> Cierre de caja
+    <span class="sb-badge" id="sbBadgeCaja" style="display:none;background:rgba(192,57,43,.3);color:#ff9a8f;">0</span>
     </button>
     <button class="tab-nav-btn" data-tab="reportesPaquete">
       <span class="sb-icon">⚠️</span> Reclamos <span class="sb-badge" id="badgeReportes" style="display:none;">0</span>
@@ -724,6 +725,7 @@
     <!-- ---- TAB: Dashboard ---- -->
     <div class="tab-panel" id="tabDashboard">
       <div class="hero">
+        <div id="avisoCajaPendiente" style="display:none;background:linear-gradient(135deg,#a5301f,#c0392b);color:#fff;border-radius:14px;padding:18px 22px;margin-bottom:20px;box-shadow:0 4px 20px rgba(192,57,43,.3);"></div>
         <h1 id="dashFecha">Dashboard</h1>
         <p>Vista general de operaciones — actualizado al instante.</p>
       </div>
@@ -2823,7 +2825,7 @@
       $('#btnCerrarCaja').addEventListener('click',()=>cerrarCaja(data.fecha));
     }
   }
-  async function cerrarCaja(fecha){ if(!confirm(`¿Confirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','✓ Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
+  async function cerrarCaja(fecha){ if(!confirm(`¿Confirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','✓ Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); revisarCajasPendientes(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
   async function cargarHistorialCaja(){
     try {
       const res=await apiAdmin('/admin/caja/historial');
@@ -3852,8 +3854,62 @@
     finally { setCargando(btn, false); }
   });
 
+
+  // ---- Cierres de caja atrasados ----
+  // Si un día tuvo cobros y nadie cerró la caja, sale un aviso rojo en
+  // el dashboard y un contador en el menú. No depende de correos.
+  async function revisarCajasPendientes(){
+    const aviso = document.getElementById('avisoCajaPendiente');
+    const badge = document.getElementById('sbBadgeCaja');
+    try {
+      const r = await apiAdmin('/admin/caja/pendientes');
+      const d = await r.json();
+      const n = d.cantidad || 0;
+
+      if(badge){ badge.textContent = n; badge.style.display = n > 0 ? 'inline' : 'none'; }
+      if(!aviso) return;
+
+      if(n === 0){ aviso.style.display = 'none'; return; }
+
+      const lista = (d.pendientes || []).slice(-5).map(p =>
+        `<div style="display:flex;justify-content:space-between;gap:14px;font-size:13px;padding:3px 0;">
+           <span>${formatearFechaSolo(p.fecha)} <span style="opacity:.65;">· ${p.dias_atraso} día${p.dias_atraso===1?'':'s'} de atraso</span></span>
+           <span style="font-family:var(--font-mono);font-weight:700;">$${p.total.toFixed(2)}</span>
+         </div>`).join('');
+
+      aviso.innerHTML = `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:240px;">
+            <div style="font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:4px;">
+              ⚠ ${n} día${n===1?'':'s'} sin cerrar caja
+            </div>
+            <div style="font-size:13px;opacity:.85;margin-bottom:12px;">
+              Hubo cobros esos días y nadie cerró la caja. Mientras no se cierre, el corte queda incompleto.
+            </div>
+            <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;">${lista}</div>
+          </div>
+          <button id="btnIrACaja" style="background:#fff;color:#c0392b;border:none;border-radius:9px;padding:12px 22px;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap;">
+            Cerrar ahora
+          </button>
+        </div>`;
+      aviso.style.display = 'block';
+
+      document.getElementById('btnIrACaja')?.addEventListener('click', () => {
+        const masViejo = d.pendientes[0]?.fecha;
+        document.querySelector('.tab-nav-btn[data-tab="caja"]')?.click();
+        if(masViejo){
+          setTimeout(() => {
+            const inp = document.getElementById('cajaFecha');
+            if(inp){ inp.value = String(masViejo).slice(0,10); cargarCaja(); }
+          }, 120);
+        }
+      });
+    } catch(e){ console.error('Error revisando cajas pendientes:', e); }
+  }
+
   async function iniciarAdmin(){
     cargarNotificacionesGuardadas();
+    revisarCajasPendientes();
     renderNotifBadge();
     try { await cargarDashboard(); cargarPendientesMostrador(); mostrarAdmin(true); } catch(err){ mostrarAdmin(false); }
   }

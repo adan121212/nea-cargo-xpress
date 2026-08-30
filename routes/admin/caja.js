@@ -197,6 +197,49 @@ router.post(
   }
 );
 
+
+// --- GET /api/admin/caja/pendientes ---
+// Días anteriores que tuvieron movimiento y quedaron sin cerrar.
+// Se revisa el último mes; el día de hoy no cuenta como atrasado.
+router.get('/pendientes', async (req, res) => {
+  try {
+    const hoy = fechaPanama();
+
+    // Días con facturas cobradas
+    const dias = await pool.query(
+      `SELECT d.fecha, d.total, d.cantidad FROM (
+         SELECT (fecha_pago AT TIME ZONE 'UTC' AT TIME ZONE '${ZONA}')::date AS fecha,
+                SUM(total) AS total, COUNT(*)::int AS cantidad
+         FROM facturas
+         WHERE estado = 'pagada' AND fecha_pago IS NOT NULL
+           AND (fecha_pago AT TIME ZONE 'UTC' AT TIME ZONE '${ZONA}')::date
+               BETWEEN ($1::date - INTERVAL '30 days') AND ($1::date - INTERVAL '1 day')
+         GROUP BY 1
+       ) d
+       WHERE NOT EXISTS (SELECT 1 FROM cierres_caja c WHERE c.fecha = d.fecha)
+       ORDER BY d.fecha ASC`,
+      [hoy]
+    );
+
+    const pendientes = dias.rows.map(r => ({
+      fecha: r.fecha,
+      total: Number(r.total),
+      cantidad: r.cantidad,
+      dias_atraso: Math.round((new Date(hoy) - new Date(r.fecha)) / 86400000),
+    }));
+
+    return res.json({
+      pendientes,
+      cantidad: pendientes.length,
+      monto_total: pendientes.reduce((a, p) => a + p.total, 0),
+      mas_antiguo: pendientes.length ? pendientes[0].fecha : null,
+    });
+  } catch (error) {
+    console.error('Error en GET /admin/caja/pendientes:', error);
+    return res.status(500).json({ mensaje: 'Error interno al buscar cierres pendientes' });
+  }
+});
+
 // --- GET /api/admin/caja/historial ---
 router.get('/historial', async (req, res) => {
   try {
