@@ -232,6 +232,22 @@
   }
   .login-card h1{ font-family: var(--font-display); font-size:20px; margin:0 0 4px; }
   .login-card p.sub{ font-size:13px; color: var(--ink-soft); margin:0 0 22px; }
+  .login-brand{ display:flex; align-items:center; gap:11px; margin-bottom:22px; padding-bottom:20px; border-bottom:1px solid var(--line); }
+  .login-brand-mark{
+    width:38px; height:38px; border-radius:10px; background: var(--accent); color: var(--ink);
+    display:flex; align-items:center; justify-content:center; font-family: var(--font-display);
+    font-weight:700; font-size:13px; flex-shrink:0;
+  }
+  .login-brand-name{ font-family: var(--font-display); font-weight:700; font-size:14px; color: var(--ink); line-height:1.15; }
+  .login-brand-tag{ font-family: var(--font-mono); font-size:10px; color: var(--ink-soft); letter-spacing:.08em; margin-top:1px; }
+  .pw-wrap{ position:relative; }
+  .pw-wrap input{ padding-right:38px; }
+  .pw-toggle{
+    position:absolute; right:4px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; font-size:15px; padding:6px 8px;
+    opacity:.55; line-height:1;
+  }
+  .pw-toggle:hover{ opacity:1; }
   /* ===================== HERO ===================== */
   .hero{ margin-bottom: 22px; }
   .hero h1{ font-family: var(--font-display); font-size:22px; margin:0 0 4px; }
@@ -749,13 +765,23 @@
     <canvas id="loginNetworkCanvas" style="position:fixed;inset:0;z-index:-1;"></canvas>
     <div style="position:fixed;inset:0;background:var(--ink);z-index:-2;"></div>
     <div class="login-card">
+      <div class="login-brand">
+        <div class="login-brand-mark">NEA</div>
+        <div>
+          <div class="login-brand-name">CARGO XPRESS</div>
+          <div class="login-brand-tag">MIAMI → PANAMÁ</div>
+        </div>
+      </div>
       <h1>Acceso de staff</h1>
       <p class="sub">Inicia sesión con tu cuenta de administrador.</p>
       <form id="formLogin">
         <label for="loginEmail">Correo</label>
-        <input id="loginEmail" type="email" placeholder="admin@neacargo.com">
+        <input id="loginEmail" type="email" placeholder="admin@neacargo.com" autocomplete="username" autofocus>
         <label for="loginPassword">Contraseña</label>
-        <input id="loginPassword" type="password" placeholder="••••••••">
+        <div class="pw-wrap">
+          <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" id="btnVerPassword" class="pw-toggle" tabindex="-1" aria-label="Mostrar contraseña">👁</button>
+        </div>
         <button class="btn-primary" type="submit" id="btnLogin">
           <span class="spinner"></span><span>Entrar</span>
         </button>
@@ -765,7 +791,7 @@
       <form id="formOlvide" style="display:none;">
         <p class="sub" style="margin:0 0 14px;">Escribe tu correo y te enviamos un enlace para restablecerla.</p>
         <label for="olvideEmail">Correo</label>
-        <input id="olvideEmail" type="email" placeholder="admin@neacargo.com">
+        <input id="olvideEmail" type="email" placeholder="admin@neacargo.com" autocomplete="email">
         <button class="btn-primary" type="submit" id="btnOlvide">
           <span class="spinner"></span><span>Enviar enlace</span>
         </button>
@@ -1633,6 +1659,14 @@
   $('#btnMostrarOlvide').addEventListener('click', () => {
     $('#formLogin').style.display = 'none';
     $('#formOlvide').style.display = 'block';
+  });
+  $('#btnVerPassword')?.addEventListener('click', () => {
+    const input = $('#loginPassword');
+    const btn = $('#btnVerPassword');
+    const oculto = input.type === 'password';
+    input.type = oculto ? 'text' : 'password';
+    btn.textContent = oculto ? '🙈' : '👁';
+    btn.setAttribute('aria-label', oculto ? 'Ocultar contraseña' : 'Mostrar contraseña');
   });
   $('#btnVolverLogin').addEventListener('click', () => {
     $('#formOlvide').style.display = 'none';
