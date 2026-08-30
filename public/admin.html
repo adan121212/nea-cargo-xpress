@@ -628,6 +628,10 @@
     <button class="tab-nav-btn" data-tab="clientes">
       <span class="sb-icon">👥</span> Clientes
     </button>
+    <button class="tab-nav-btn" data-tab="compras">
+      <span class="sb-icon">🛒</span> Compras
+      <span class="sb-badge" id="sbBadgeCompras" style="display:none;">0</span>
+    </button>
     <button class="tab-nav-btn" data-tab="facturas">
       <span class="sb-icon">🗂</span> Facturas
     </button>
@@ -948,6 +952,91 @@
       </div>
       <div class="empty" id="emptyClientes" style="display:none;">Aún no hay clientes registrados.</div>
     </div>
+    <!-- ---- TAB: Compras por encargo ---- -->
+    <div class="tab-panel" id="tabCompras" style="display:none;">
+      <div class="card" style="margin-bottom:20px;">
+        <h2 style="margin:0 0 2px;">Servicio Profesional de Compras</h2>
+        <p class="card-sub" style="margin:0 0 18px;">
+          Compramos con la tarjeta de la empresa a nombre del cliente. El dinero del producto es un
+          reembolso; a caja solo entra la comisión de <strong>$5.00</strong>.
+        </p>
+
+        <div id="comprasResumen" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;"></div>
+
+        <form id="formCompra">
+          <div class="form-grid">
+            <div class="full">
+              <label for="compraCliente">Cliente</label>
+              <div style="display:flex;gap:8px;">
+                <div style="position:relative;flex:1;">
+                  <input id="compraCliente" type="text" placeholder="Casillero, nombre o correo — o presiona 1" autocomplete="off">
+                  <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">1</span>
+                </div>
+                <button type="button" id="btnBuscarClienteCompra" class="btn-secondary" style="white-space:nowrap;">Buscar</button>
+              </div>
+              <div id="compraClienteEncontrado" style="display:none;margin-top:6px;padding:8px 12px;background:var(--paper);border-radius:8px;font-size:12.5px;"></div>
+            </div>
+            <div>
+              <label for="compraTienda">Tienda</label>
+              <input id="compraTienda" type="text" placeholder="Amazon, Shein, eBay…">
+            </div>
+            <div>
+              <label for="compraMonto">Costo del producto (USD)</label>
+              <input id="compraMonto" type="number" step="0.01" min="0" placeholder="45.99">
+            </div>
+            <div class="full">
+              <label for="compraDescripcion">Qué se va a comprar</label>
+              <input id="compraDescripcion" type="text" placeholder="Audífonos Sony WH-1000XM4, color negro">
+            </div>
+            <div class="full">
+              <label for="compraEnlace">Enlace del producto (opcional)</label>
+              <input id="compraEnlace" type="text" placeholder="https://…">
+            </div>
+            <div>
+              <label for="compraComision">Comisión (USD)</label>
+              <input id="compraComision" type="number" step="0.01" min="0" value="5.00">
+            </div>
+            <div>
+              <label>Total a cobrar al cliente</label>
+              <div id="compraTotal" style="padding:11px 13px;border-radius:8px;background:var(--paper);font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--accent-dark);">$0.00</div>
+            </div>
+            <div class="full">
+              <label for="compraNotas">Notas (opcional)</label>
+              <input id="compraNotas" type="text" placeholder="Talla M · pidió color azul si no hay negro">
+            </div>
+          </div>
+          <button class="btn-primary" type="submit" id="btnGuardarCompra" style="max-width:280px;">
+            <span class="spinner"></span><span>Registrar solicitud</span>
+          </button>
+          <div class="banner" id="bannerCompra"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+          <div>
+            <h2 style="margin:0 0 2px;">Compras registradas</h2>
+            <p class="card-sub" style="margin:0;">Solicitada &rarr; Comprada &rarr; Pagada</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end;">
+            <div>
+              <label for="filtroCompraEstado" style="margin:0 0 5px;">Estado</label>
+              <select id="filtroCompraEstado" style="width:auto;">
+                <option value="">Todas</option>
+                <option value="solicitada">Por comprar</option>
+                <option value="comprada">Por cobrar</option>
+                <option value="pagada">Pagadas</option>
+                <option value="cancelada">Canceladas</option>
+              </select>
+            </div>
+            <button class="btn-secondary" id="btnFiltrarCompras" style="height:37px;">Filtrar</button>
+          </div>
+        </div>
+        <div id="listaCompras"></div>
+        <div class="empty" id="emptyCompras" style="display:none;">Todavía no hay compras registradas.</div>
+      </div>
+    </div>
+
     <!-- ---- TAB: Facturas ---- -->
     <div class="card tab-panel" id="tabFacturas" style="display:none;">
       <div class="banner" id="bannerFactura"></div>
@@ -1402,6 +1491,7 @@
       if (tab === 'mostrador'){ $('#tabMostrador').style.display = 'block'; cargarPendientesMostrador(); }
       if (tab === 'recepcion'){ $('#tabRecepcion').style.display = 'block'; setTimeout(() => $('#recepcionTracking').focus(), 50); }
       if (tab === 'clientes'){ $('#tabClientes').style.display = 'block'; cargarClientes(); }
+      if (tab === 'compras'){ $('#tabCompras').style.display = 'block'; cargarCompras(); }
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
       if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); }
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
@@ -2901,6 +2991,10 @@
   function f1Cerrar(){ $('#modalF1Clientes').style.display='none'; }
   function f1Seleccionar(idx){ const c=f1Filtrados[idx]; if(!c) return;
     if(f1Destino==='reasignar'){ f1Cerrar(); reasignarPaquete(f1PaqueteReasignar, c); return; }
+    if(f1Destino==='compra'){ compraClienteId=c.id; $('#compraCliente').value=c.numero_casillero||c.email; f1Cerrar();
+      const caja=$('#compraClienteEncontrado'); caja.style.display='block';
+      caja.innerHTML = `✓ <strong>${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)}</strong> · ${escapeHtml(c.email)} · <span class="mono">${escapeHtml(c.numero_casillero||'')}</span>`;
+      return; }
     if(f1Destino==='recepcion'){ $('#recNuevoCasillero').value=c.numero_casillero; f1Cerrar(); $('#btnBuscarClienteRec').click(); } else if(f1Destino==='ptyCliente'){ const inp=$('#ptyClienteCasillero'); if(inp){ inp.value=c.numero_casillero; f1Cerrar(); $('#btnBuscarClientePty').click(); } } else { $('#mostradorQ').value=c.numero_casillero; f1Cerrar(); $('#formBuscarMostrador').dispatchEvent(new Event('submit')); } }
   $('#f1SearchInput').addEventListener('input',(e)=>{ const q=e.target.value.toLowerCase(); f1Activo=0; f1Filtrados=q?f1ClientesCache.filter(c=>`${c.nombre} ${c.apellido}`.toLowerCase().includes(q)||c.email.toLowerCase().includes(q)||c.numero_casillero.toLowerCase().includes(q)):[...f1ClientesCache]; f1Render(); });
   $('#f1SearchInput').addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ f1Cerrar(); return; } if(e.key==='ArrowDown'){ f1Activo=Math.min(f1Activo+1,f1Filtrados.length-1); f1Render(); } if(e.key==='ArrowUp'){ f1Activo=Math.max(f1Activo-1,0); f1Render(); } if(e.key==='Enter') f1Seleccionar(f1Activo); });
@@ -3184,6 +3278,259 @@
       mostrarBanner('#bannerPtyTexto','error','No pudimos conectar.');
     } finally { setCargando(btn, false); }
   });
+  // ============ SERVICIO PROFESIONAL DE COMPRAS ============
+  const COMPRA_ESTADO = {
+    solicitada: { txt: 'Por comprar', bg: 'var(--amber-bg)',            col: 'var(--accent-dark)' },
+    comprada:   { txt: 'Por cobrar',  bg: 'rgba(58,110,165,0.12)',      col: '#3a6ea5' },
+    pagada:     { txt: 'Pagada',      bg: 'var(--cargo-green-bg)',      col: 'var(--cargo-green)' },
+    cancelada:  { txt: 'Cancelada',   bg: 'rgba(192,57,43,0.10)',       col: '#c0392b' },
+  };
+  let compraClienteId = null;
+
+  function recalcularTotalCompra(){
+    const m = parseFloat($('#compraMonto').value) || 0;
+    const c = parseFloat($('#compraComision').value);
+    const com = isNaN(c) ? 5 : c;
+    $('#compraTotal').textContent = '$' + (m + com).toFixed(2);
+  }
+  ['compraMonto','compraComision'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', recalcularTotalCompra);
+  });
+
+  // Buscar cliente (por texto o con el selector de la tecla 1)
+  async function buscarClienteCompra(){
+    const q = $('#compraCliente').value.trim();
+    if(!q) return;
+    try {
+      const res = await apiAdmin(`/admin/usuarios?q=${encodeURIComponent(q)}`);
+      const data = await res.json().catch(()=>({}));
+      const lista = data.usuarios || [];
+      const cl = lista.find(u => (u.numero_casillero||'').toLowerCase() === q.toLowerCase())
+              || lista.find(u => (u.email||'').toLowerCase() === q.toLowerCase())
+              || (lista.length === 1 ? lista[0] : null);
+      const caja = $('#compraClienteEncontrado');
+      caja.style.display = 'block';
+      if(cl){
+        compraClienteId = cl.id;
+        caja.innerHTML = `✓ <strong>${escapeHtml(cl.nombre)} ${escapeHtml(cl.apellido)}</strong> · ${escapeHtml(cl.email)} · <span class="mono">${escapeHtml(cl.numero_casillero||'')}</span>`;
+      } else {
+        compraClienteId = null;
+        caja.innerHTML = lista.length > 1
+          ? '<span style="color:var(--accent-dark);">Hay varios clientes con ese dato. Usa la tecla 1 para elegir.</span>'
+          : '<span style="color:#c0392b;">No se encontró ningún cliente.</span>';
+      }
+    } catch(e){}
+  }
+  $('#btnBuscarClienteCompra')?.addEventListener('click', buscarClienteCompra);
+  $('#compraCliente')?.addEventListener('keydown', (e) => {
+    if(e.key === '1'){ e.preventDefault(); f1Abrir('compra'); }
+    if(e.key === 'Enter'){ e.preventDefault(); buscarClienteCompra(); }
+  });
+
+  // Registrar la solicitud
+  $('#formCompra')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if(!compraClienteId){ mostrarBanner('#bannerCompra','error','Busca y selecciona el cliente primero.'); return; }
+    const payload = {
+      usuario_id: compraClienteId,
+      tienda: $('#compraTienda').value.trim(),
+      descripcion: $('#compraDescripcion').value.trim(),
+      enlace: $('#compraEnlace').value.trim() || undefined,
+      monto_producto: parseFloat($('#compraMonto').value),
+      comision: parseFloat($('#compraComision').value),
+      notas: $('#compraNotas').value.trim() || undefined,
+    };
+    if(!payload.tienda || !payload.descripcion || isNaN(payload.monto_producto)){
+      mostrarBanner('#bannerCompra','error','Completa tienda, descripción y costo del producto.');
+      return;
+    }
+    const btn = $('#btnGuardarCompra');
+    setCargando(btn, true);
+    try {
+      const res = await apiAdmin('/admin/compras', { method:'POST', body: JSON.stringify(payload) });
+      const d = await res.json().catch(()=>({}));
+      if(res.status === 201){
+        mostrarBanner('#bannerCompra','success','✓ Solicitud registrada. Ahora compra el producto y márcala como comprada.');
+        $('#formCompra').reset();
+        $('#compraComision').value = '5.00';
+        $('#compraClienteEncontrado').style.display = 'none';
+        compraClienteId = null;
+        recalcularTotalCompra();
+        await cargarCompras();
+      } else {
+        const msg = d.errores?.map(x => x.msg).join(' · ') || d.mensaje || 'No se pudo registrar.';
+        mostrarBanner('#bannerCompra','error', msg);
+      }
+    } catch(err){ mostrarBanner('#bannerCompra','error','No pudimos conectar con el servidor.'); }
+    finally { setCargando(btn, false); }
+  });
+
+  $('#btnFiltrarCompras')?.addEventListener('click', (e) => { e.preventDefault(); cargarCompras(); });
+
+  async function cargarCompras(){
+    const cont = $('#listaCompras');
+    const estado = $('#filtroCompraEstado')?.value || '';
+    try {
+      const res = await apiAdmin(`/admin/compras${estado ? '?estado='+estado : ''}`);
+      const data = await res.json();
+      const compras = data.compras || [];
+      const r = data.resumen || {};
+
+      // Badge del menú: lo que falta comprar
+      const badge = $('#sbBadgeCompras');
+      if(badge){
+        const n = Number(r.por_comprar || 0);
+        badge.textContent = n; badge.style.display = n > 0 ? 'inline' : 'none';
+      }
+
+      $('#comprasResumen').innerHTML = `
+        <div class="dash-card amber" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
+          <div style="font-size:20px;">🛒</div>
+          <div class="dash-label">Por comprar</div>
+          <div class="dash-num" style="font-size:20px;">${r.por_comprar || 0}</div>
+        </div>
+        <div class="dash-card blue" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
+          <div style="font-size:20px;">⏳</div>
+          <div class="dash-label">Por cobrar</div>
+          <div class="dash-num" style="font-size:20px;">${r.por_cobrar || 0}</div>
+          <div class="dash-sub">$${Number(r.monto_por_cobrar||0).toFixed(2)}</div>
+        </div>
+        <div class="dash-card navy" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
+          <div style="font-size:20px;">💳</div>
+          <div class="dash-label">Adelantado</div>
+          <div class="dash-num" style="font-size:20px;">$${Number(r.adelantado_tarjeta||0).toFixed(2)}</div>
+          <div class="dash-sub">sin recuperar</div>
+        </div>
+        <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
+          <div style="font-size:20px;">📦</div>
+          <div class="dash-label">Total</div>
+          <div class="dash-num" style="font-size:20px;">${compras.length}</div>
+          <div class="dash-sub">en la lista</div>
+        </div>`;
+
+      $('#emptyCompras').style.display = compras.length ? 'none' : 'block';
+      cont.innerHTML = compras.map(c => {
+        const e = COMPRA_ESTADO[c.estado] || COMPRA_ESTADO.solicitada;
+        const fecha = formatearFechaSolo(c.fecha_solicitud);
+        let acciones = '';
+        if(c.estado === 'solicitada'){
+          acciones = `<button class="btn-secondary btn-compra-comprada" data-id="${c.id}">✓ Ya la compré</button>
+                      <button class="btn-secondary btn-danger btn-compra-cancelar" data-id="${c.id}">Cancelar</button>`;
+        } else if(c.estado === 'comprada'){
+          acciones = `<button class="btn-cobrar btn-compra-pagada" data-id="${c.id}" style="width:auto;padding:7px 14px;">Cobrar $${Number(c.total_cobrado).toFixed(2)}</button>
+                      <button class="btn-secondary btn-danger btn-compra-cancelar" data-id="${c.id}">Cancelar</button>`;
+        }
+        return `
+        <div class="mostrador-item" style="${c.estado==='cancelada'?'opacity:.55;':''}">
+          <div class="mi-top">
+            <div style="min-width:0;">
+              <div class="mi-tienda">${escapeHtml(c.descripcion)}</div>
+              <div class="mi-tracking">${escapeHtml(c.tienda)} · ${escapeHtml(c.cliente_nombre)} ${escapeHtml(c.cliente_apellido)} · ${fecha}</div>
+              ${c.numero_orden ? `<div class="mi-tracking">Orden: ${escapeHtml(c.numero_orden)}${c.numero_tracking ? ' · Tracking: '+escapeHtml(c.numero_tracking) : ''}</div>` : ''}
+              ${c.notas ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">📝 ${escapeHtml(c.notas)}</div>` : ''}
+              ${c.motivo_cancelacion ? `<div style="font-size:12px;color:#c0392b;margin-top:4px;">Cancelada: ${escapeHtml(c.motivo_cancelacion)}</div>` : ''}
+              ${c.enlace ? `<a href="${escapeHtml(c.enlace)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent-dark);">Ver producto ↗</a>` : ''}
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <span class="badge" style="background:${e.bg};color:${e.col};">${e.txt}</span>
+              <div style="font-family:var(--font-mono);font-size:13px;margin-top:6px;color:var(--ink-soft);">
+                Producto $${Number(c.monto_producto).toFixed(2)}
+              </div>
+              <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--cargo-green);">
+                Comisión $${Number(c.comision).toFixed(2)}
+              </div>
+            </div>
+          </div>
+          ${acciones ? `<div class="mi-metodo-pago">${acciones}</div>` : ''}
+        </div>`;
+      }).join('');
+
+      // Ya la compré
+      cont.querySelectorAll('.btn-compra-comprada').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const c = compras.find(x => String(x.id) === btn.dataset.id);
+          const datos = await pedirDatosCompra(c);
+          if(!datos) return;
+          btn.disabled = true;
+          try {
+            const res = await apiAdmin(`/admin/compras/${btn.dataset.id}/comprada`, { method:'PATCH', body: JSON.stringify(datos) });
+            const d = await res.json().catch(()=>({}));
+            if(res.ok){ mostrarBanner('#bannerCompra','success','✓ Marcada como comprada. Cuando el cliente pague, cóbrala.'); await cargarCompras(); }
+            else { mostrarBanner('#bannerCompra','error', d.mensaje || 'No se pudo actualizar.'); btn.disabled = false; }
+          } catch(e){ mostrarBanner('#bannerCompra','error','No pudimos conectar.'); btn.disabled = false; }
+        });
+      });
+
+      // Cobrar
+      cont.querySelectorAll('.btn-compra-pagada').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const metodo = await pedirMetodoPago(btn);
+          if(!metodo) return;
+          btn.disabled = true; btn.textContent = 'Procesando…';
+          try {
+            const res = await apiAdmin(`/admin/compras/${btn.dataset.id}/pagada`, { method:'PATCH', body: JSON.stringify({ metodo_pago: metodo }) });
+            const d = await res.json().catch(()=>({}));
+            if(res.ok){ mostrarBanner('#bannerCompra','success','✓ ' + d.mensaje); await cargarCompras(); }
+            else { mostrarBanner('#bannerCompra','error', d.mensaje || 'No se pudo cobrar.'); btn.disabled = false; }
+          } catch(e){ mostrarBanner('#bannerCompra','error','No pudimos conectar.'); btn.disabled = false; }
+        });
+      });
+
+      // Cancelar
+      cont.querySelectorAll('.btn-compra-cancelar').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const motivo = prompt('¿Por qué se cancela esta compra?');
+          if(motivo === null || !motivo.trim()) return;
+          try {
+            const res = await apiAdmin(`/admin/compras/${btn.dataset.id}/cancelar`, { method:'PATCH', body: JSON.stringify({ motivo: motivo.trim() }) });
+            const d = await res.json().catch(()=>({}));
+            if(res.ok){ mostrarBanner('#bannerCompra','success','Compra cancelada.'); await cargarCompras(); }
+            else { mostrarBanner('#bannerCompra','error', d.mensaje || 'No se pudo cancelar.'); }
+          } catch(e){ mostrarBanner('#bannerCompra','error','No pudimos conectar.'); }
+        });
+      });
+
+    } catch(err){ console.error('Error cargando compras:', err); }
+  }
+
+  // Popup para registrar la orden ya comprada
+  function pedirDatosCompra(c){
+    return new Promise(resolve => {
+      const popup = document.createElement('div');
+      popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
+      popup.innerHTML = `
+        <div style="background:#fff;border-radius:14px;padding:24px;width:400px;max-width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);">
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:4px;">Confirmar la compra</div>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;">${escapeHtml(c.descripcion)} — ${escapeHtml(c.tienda)}</p>
+          <label style="margin:0 0 5px;">Número de orden de la tienda</label>
+          <input id="cpOrden" type="text" placeholder="112-4567890-1234567" style="margin-bottom:12px;">
+          <label style="margin:0 0 5px;">Tracking (si ya lo dieron)</label>
+          <input id="cpTracking" type="text" placeholder="1Z999AA10123456784" style="margin-bottom:12px;">
+          <label style="margin:0 0 5px;">Costo final del producto</label>
+          <input id="cpMonto" type="number" step="0.01" min="0" value="${Number(c.monto_producto).toFixed(2)}" style="margin-bottom:6px;">
+          <p style="font-size:11.5px;color:var(--ink-soft);margin:0 0 14px;">Ajústalo si cambió por impuestos o envío interno.</p>
+          <div id="cpError" style="display:none;color:#c0392b;font-size:12px;margin-bottom:10px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button id="cpCancelar" class="btn-secondary" style="flex:1;">Cancelar</button>
+            <button id="cpOk" style="flex:1;padding:10px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:13px;cursor:pointer;">Confirmar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(popup);
+      const cerrar = v => { popup.remove(); resolve(v); };
+      popup.querySelector('#cpCancelar').addEventListener('click', () => cerrar(null));
+      popup.addEventListener('click', e => { if(e.target === popup) cerrar(null); });
+      popup.querySelector('#cpOk').addEventListener('click', () => {
+        const orden = popup.querySelector('#cpOrden').value.trim();
+        const monto = parseFloat(popup.querySelector('#cpMonto').value);
+        const err = popup.querySelector('#cpError');
+        if(!orden){ err.textContent = 'Ingresa el número de orden.'; err.style.display='block'; return; }
+        if(isNaN(monto) || monto <= 0){ err.textContent = 'El costo debe ser mayor que cero.'; err.style.display='block'; return; }
+        cerrar({ numero_orden: orden, numero_tracking: popup.querySelector('#cpTracking').value.trim() || undefined, monto_producto: monto });
+      });
+      setTimeout(() => popup.querySelector('#cpOrden').focus(), 50);
+    });
+  }
+
   async function iniciarAdmin(){
     cargarNotificacionesGuardadas();
     renderNotifBadge();

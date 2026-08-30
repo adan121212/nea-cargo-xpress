@@ -68,9 +68,49 @@ async function calcularResumenDia(fecha) {
     total: Number(r.total),
     cantidad: Number(r.cantidad),
   }));
+  // Comisiones del Servicio Profesional de Compras cobradas ese día.
+  // Solo entra la comisión: el monto del producto es un reembolso, no una venta.
+  const compras = await pool.query(
+    `SELECT COALESCE(metodo_pago, 'sin_especificar') AS metodo_pago,
+            SUM(comision) AS total, COUNT(*) AS cantidad
+     FROM compras
+     WHERE estado = 'pagada'
+       AND fecha_pago IS NOT NULL
+       AND (fecha_pago AT TIME ZONE 'UTC' AT TIME ZONE '${ZONA}')::date = $1::date
+     GROUP BY metodo_pago`,
+    [fecha]
+  );
+
+  // Se juntan con las facturas por método, porque en la gaveta el dinero es el mismo
+  compras.rows.forEach((c) => {
+    const existente = detalle.find((d) => d.metodo_pago === c.metodo_pago);
+    if (existente) {
+      existente.total += Number(c.total);
+      existente.cantidad += Number(c.cantidad);
+    } else {
+      detalle.push({
+        metodo_pago: c.metodo_pago,
+        etiqueta: METODO_LABEL[c.metodo_pago] || c.metodo_pago,
+        total: Number(c.total),
+        cantidad: Number(c.cantidad),
+      });
+    }
+  });
+  detalle.sort((a, b) => b.total - a.total);
+
+  const totalComisiones = compras.rows.reduce((a, c) => a + Number(c.total), 0);
+  const cantidadCompras = compras.rows.reduce((a, c) => a + Number(c.cantidad), 0);
+
   const totalGeneral = detalle.reduce((acum, d) => acum + d.total, 0);
   const cantidadFacturas = detalle.reduce((acum, d) => acum + d.cantidad, 0);
-  return { detalle, totalGeneral, cantidadFacturas };
+  return {
+    detalle, totalGeneral, cantidadFacturas,
+    desglose: {
+      flete: totalGeneral - totalComisiones,
+      comisiones_compras: totalComisiones,
+      cantidad_compras: cantidadCompras,
+    },
+  };
 }
 
 // --- GET /api/admin/caja/dia?fecha=2026-08-19 ---
@@ -82,7 +122,7 @@ router.get(
     if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
     const fecha = req.query.fecha || fechaPanama();
     try {
-      const { detalle, totalGeneral, cantidadFacturas } = await calcularResumenDia(fecha);
+      const { detalle, totalGeneral, cantidadFacturas, desglose } = await calcularResumenDia(fecha);
       const cierreExistente = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [fecha]);
       let cierreActualizado = null;
       if (cierreExistente.rows.length > 0) {
@@ -99,7 +139,8 @@ router.get(
       }
       return res.json({
         fecha, detalle_por_metodo: detalle, total_general: totalGeneral,
-        cantidad_facturas: cantidadFacturas, cerrado: cierreActualizado !== null, cierre: cierreActualizado,
+        cantidad_facturas: cantidadFacturas, desglose,
+        cerrado: cierreActualizado !== null, cierre: cierreActualizado,
       });
     } catch (error) {
       console.error('Error en GET /admin/caja/dia:', error);

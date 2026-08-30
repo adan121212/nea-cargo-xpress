@@ -22,6 +22,7 @@ const adminMostradorRoutes = require('./routes/admin/mostrador');
 const adminCajaRoutes = require('./routes/admin/caja');
 const adminRecepcionRoutes = require('./routes/admin/recepcion');
 const adminPtyRoutes = require('./routes/admin/ptycargoexpress');
+const adminComprasRoutes = require('./routes/admin/compras');
 const app = express();
 app.set('trust proxy', 1);
 
@@ -166,6 +167,7 @@ app.use('/api/admin/mostrador', adminMostradorRoutes);
 app.use('/api/admin/caja', adminCajaRoutes);
 app.use('/api/admin/recepcion', adminRecepcionRoutes);
 app.use('/api/admin/pty', adminPtyRoutes);
+app.use('/api/admin/compras', adminComprasRoutes);
 // Redirección de la URL bonita del flyer al registro real
 app.get('/casillero', (req, res) => {
   res.redirect('/app.html?registro');
