@@ -5,6 +5,24 @@ const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 
 const router = express.Router();
+
+const ZONA = 'America/Panama';
+
+// Fecha de hoy en Panamá (YYYY-MM-DD). new Date() + toISOString() devuelve
+// UTC, y Panamá va 5 horas atrás: de noche el UTC ya cambió de día.
+function fechaPanama(d = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(d);
+}
+
+// Resta días a un YYYY-MM-DD sin que se meta la zona horaria del servidor
+function restarDias(fechaISO, dias) {
+  const [a, m, d] = fechaISO.split('-').map(Number);
+  const t = new Date(Date.UTC(a, m - 1, d));
+  t.setUTCDate(t.getUTCDate() - dias);
+  return t.toISOString().slice(0, 10);
+}
 router.use(requiereAutenticacion, requiereAdmin);
 
 // --- GET /api/admin/reportes ---
@@ -22,14 +40,11 @@ router.get(
       return res.status(400).json({ errores: errores.array() });
     }
 
-    const hasta = req.query.hasta ? new Date(req.query.hasta) : new Date();
-    const desde = req.query.desde
-      ? new Date(req.query.desde)
-      : new Date(hasta.getTime() - 29 * 24 * 60 * 60 * 1000);
-
-    // Incluye todo el día "hasta"
-    const hastaFin = new Date(hasta);
-    hastaFin.setHours(23, 59, 59, 999);
+    // Se trabaja con fechas en texto (YYYY-MM-DD) y la comparación se hace
+    // en hora de Panamá dentro de cada consulta, no con objetos Date del
+    // servidor, que corren en UTC.
+    const hasta = String(req.query.hasta || fechaPanama()).slice(0, 10);
+    const desde = String(req.query.desde || restarDias(hasta, 29)).slice(0, 10);
 
     try {
       const [
@@ -44,8 +59,10 @@ router.get(
         pool.query(
           `SELECT COALESCE(SUM(total), 0) AS total, COUNT(*) AS cantidad
            FROM facturas
-           WHERE estado = 'pagada' AND fecha_pago BETWEEN $1 AND $2`,
-          [desde, hastaFin]
+           WHERE estado = 'pagada' AND fecha_pago IS NOT NULL
+             AND (fecha_pago AT TIME ZONE 'UTC' AT TIME ZONE '${ZONA}')::date
+                 BETWEEN $1::date AND $2::date`,
+          [desde, hasta]
         ),
         pool.query(
           `SELECT COALESCE(SUM(total), 0) AS total, COUNT(*) AS cantidad
@@ -53,22 +70,27 @@ router.get(
         ),
         pool.query(
           `SELECT COUNT(*) AS cantidad FROM paquetes
-           WHERE fecha_prealerta BETWEEN $1 AND $2`,
-          [desde, hastaFin]
+           WHERE (fecha_prealerta AT TIME ZONE 'UTC' AT TIME ZONE '${ZONA}')::date
+                 BETWEEN $1::date AND $2::date`,
+          [desde, hasta]
         ),
         pool.query(
           `SELECT COUNT(*) AS cantidad FROM usuarios
-           WHERE fecha_registro BETWEEN $1 AND $2`,
-          [desde, hastaFin]
+           WHERE (fecha_registro AT TIME ZONE 'UTC' AT TIME ZONE '${ZONA}')::date
+                 BETWEEN $1::date AND $2::date`,
+          [desde, hasta]
         ),
         pool.query(`SELECT estado, COUNT(*) AS cantidad FROM paquetes GROUP BY estado`),
         pool.query(
-          `SELECT DATE(fecha_pago) AS dia, SUM(total) AS total
+          `SELECT (fecha_pago AT TIME ZONE 'UTC' AT TIME ZONE '${ZONA}')::date AS dia,
+                  SUM(total) AS total
            FROM facturas
-           WHERE estado = 'pagada' AND fecha_pago BETWEEN $1 AND $2
-           GROUP BY DATE(fecha_pago)
+           WHERE estado = 'pagada' AND fecha_pago IS NOT NULL
+             AND (fecha_pago AT TIME ZONE 'UTC' AT TIME ZONE '${ZONA}')::date
+                 BETWEEN $1::date AND $2::date
+           GROUP BY 1
            ORDER BY dia ASC`,
-          [desde, hastaFin]
+          [desde, hasta]
         ),
         pool.query(
           `SELECT u.id, u.nombre, u.apellido, u.email, COUNT(p.id) AS total_paquetes
@@ -81,7 +103,7 @@ router.get(
       ]);
 
       return res.json({
-        rango: { desde: desde.toISOString(), hasta: hastaFin.toISOString() },
+        rango: { desde, hasta },
         ingresos: ingresos.rows[0],
         pendientes: pendientes.rows[0],
         paquetes_nuevos: paquetesNuevos.rows[0].cantidad,
