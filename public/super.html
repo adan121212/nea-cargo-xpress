@@ -212,6 +212,7 @@ input:focus{outline:2px solid var(--acc);outline-offset:0;border-color:transpare
 <div id="cam">
   <video id="video" playsinline autoplay muted></video>
   <p class="hint" id="camwarn" style="display:none;top:auto;bottom:calc(100px + env(safe-area-inset-bottom));color:#FF6B5B">No se ve la cámara. Revisa el permiso de Cámara para este sitio en Ajustes &gt; Safari, o cierra y vuelve a abrir Safari.</p>
+  <p id="camdebug" style="position:absolute;left:8px;right:8px;bottom:6px;color:#0F0;font-size:11px;font-family:monospace;white-space:pre-wrap;z-index:200;background:rgba(0,0,0,.5);padding:4px;border-radius:6px"></p>
   <div class="box"><i></i><i></i><i></i><i></i><div class="scan"></div></div>
   <p class="hint" id="camhint">Apunta al código de barras</p>
   <button class="torch" id="btnTorch" title="Linterna">🔦</button>
@@ -243,7 +244,7 @@ input:focus{outline:2px solid var(--acc);outline-offset:0;border-color:transpare
 <script>
 var ITBMS=0.07, cat={}, cart=[], budget=0;
 var mode='unit', editIndex=-1, pendingCode='', prevTotal=0;
-var reader=null, controls=null, lastCode='', lastTime=0;
+var reader=null, controls=null, lastCode='', lastTime=0, camDebugTimer=null;
 var torchOn=false, torchCheckTimer=null;
 function load(){
   try{
@@ -503,18 +504,32 @@ function abrirCamara(){
   }
   var video=document.getElementById('video');
   var warn=document.getElementById('camwarn');
+  var dbg=document.getElementById('camdebug');
   warn.style.display='none';
+  dbg.textContent='pidiendo permiso de cámara...';
+
+  var dbgTimer=setInterval(function(){
+    if(!video.srcObject){ return; }
+    var tr=video.srcObject.getVideoTracks()[0];
+    dbg.textContent =
+      'track: '+(tr?tr.readyState:'—')+' / muted:'+(tr?tr.muted:'—')+'\n'+
+      'video: '+video.videoWidth+'x'+video.videoHeight+' readyState:'+video.readyState+' paused:'+video.paused;
+  },400);
+  camDebugTimer=dbgTimer;
 
   navigator.mediaDevices.getUserMedia({video:{
     facingMode:{ideal:'environment'},
     width:{ideal:1280},
     height:{ideal:720}
   }}).then(function(stream){
+    dbg.textContent='permiso OK, conectando video...';
     video.srcObject=stream;
     video.muted=true;
     video.setAttribute('playsinline','');
     var playPromise=video.play();
-    if(playPromise&&playPromise.catch) playPromise.catch(function(){});
+    if(playPromise&&playPromise.catch) playPromise.catch(function(e){
+      dbg.textContent='video.play() falló: '+(e&&e.name?e.name:e);
+    });
 
     // si en 2.5s no hay imagen real, avisamos (permiso a medias, cámara ocupada, etc.)
     setTimeout(function(){
@@ -545,6 +560,7 @@ function cerrarCamara(){
   try{if(torchOn){var t=getTrack();if(t)t.applyConstraints({advanced:[{torch:false}]}).catch(function(){});}}catch(e){}
   torchOn=false;
   if(torchCheckTimer){clearTimeout(torchCheckTimer);torchCheckTimer=null;}
+  if(camDebugTimer){clearInterval(camDebugTimer);camDebugTimer=null;}
   try{if(controls)controls.stop();}catch(e){}
   controls=null;
   try{
