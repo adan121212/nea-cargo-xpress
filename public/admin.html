@@ -3391,15 +3391,21 @@
     });
   }
   const _cargarPendientesOriginal = cargarPendientesMostrador;
-  let _ultimoTotalPendientes = 0;
+  const ULTIMO_TOTAL_KEY = 'nea_ultimo_total_pendientes';
+  let _ultimoTotalPendientes = localStorage.getItem(ULTIMO_TOTAL_KEY);
+  _ultimoTotalPendientes = _ultimoTotalPendientes === null ? null : parseInt(_ultimoTotalPendientes);
   cargarPendientesMostrador = async function(){
     await _cargarPendientesOriginal();
     const total = parseInt($('#facBadgeCount').textContent)||0;
-    if(total > _ultimoTotalPendientes && _ultimoTotalPendientes >= 0){
+    // _ultimoTotalPendientes se guarda en localStorage para que sobreviva a un refresh
+    // de la página. Si no, cada recarga reiniciaba el contador en 0 y avisaba "facturas
+    // nuevas" por facturas que ya llevaban ahí días — de ahí la campana enloquecida.
+    if(_ultimoTotalPendientes !== null && total > _ultimoTotalPendientes){
       const nuevas = total - _ultimoTotalPendientes;
-      if(nuevas > 0 && _ultimoTotalPendientes >= 0) agregarNotificacion(`${nuevas} factura${nuevas>1?'s':''} pendiente${nuevas>1?'s':''}`, 'Ve al Facturador para cobrarlas.');
+      agregarNotificacion(`${nuevas} factura${nuevas>1?'s':''} pendiente${nuevas>1?'s':''}`, 'Ve al Facturador para cobrarlas.');
     }
     _ultimoTotalPendientes = total;
+    localStorage.setItem(ULTIMO_TOTAL_KEY, String(total));
   };
   function parsearTextoPTY(texto){
     var sep = String.fromCharCode(10);
