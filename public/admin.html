@@ -40,8 +40,6 @@
   *{ box-sizing:border-box; }
   body{ margin:0; background: var(--paper); color: var(--ink); font-family: var(--font-body); }
   ::selection{ background: var(--accent); color:#fff; }
-  /* ===== Tablas como tarjetas en móvil (solo .tabla-responsive) ===== */
-  /* Usa los data-label que cada <td> ya trae. En escritorio no cambia nada. */
   @media (max-width: 680px){
     .tabla-responsive thead{
       position:absolute; width:1px; height:1px; padding:0; margin:-1px;
@@ -66,7 +64,6 @@
       font-size:13.5px;
     }
     .tabla-responsive td:last-child{ border-bottom:0; }
-    /* etiqueta de la columna a la izquierda de cada dato */
     .tabla-responsive td::before{
       content: attr(data-label);
       font-weight:600;
@@ -77,28 +74,23 @@
       text-transform:uppercase;
       letter-spacing:.02em;
     }
-    /* celdas sin data-label (acciones): ocupar todo el ancho, sin etiqueta */
     .tabla-responsive td:not([data-label])::before,
     .tabla-responsive td[data-label=""]::before{ content:""; flex:0; }
     .tabla-responsive td:not([data-label]),
     .tabla-responsive td[data-label=""]{
       justify-content:stretch; padding-top:10px;
     }
-    /* botones dentro de las celdas de acción: a lo ancho y fáciles de tocar */
     .tabla-responsive td:not([data-label]) button,
     .tabla-responsive td[data-label=""] button,
     .tabla-responsive td[data-label="Actualizar"] select,
     .tabla-responsive td[data-label="Actualizar"] button{
       width:100%; min-height:40px;
     }
-    /* el contenedor con scroll ya no necesita forzar scroll horizontal */
     .tabla-responsive{ min-width:0 !important; }
   }
-
   @media (prefers-reduced-motion: reduce){
     *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
-  /* ===================== SIDEBAR ===================== */
   .sidebar{
     position: fixed; top:0; left:0; bottom:0;
     width: var(--sidebar-w);
@@ -182,7 +174,6 @@
     transition: all .15s;
   }
   .sb-logout:hover{ background:rgba(255,0,0,0.1); color:rgba(255,120,120,0.9); }
-  /* ===================== TOPBAR MÓVIL ===================== */
   .topbar-movil{
     display:none;
     align-items:center; justify-content:space-between;
@@ -197,14 +188,12 @@
     font-size:22px; cursor:pointer; padding:4px 8px;
     -webkit-tap-highlight-color: transparent;
   }
-  /* Overlay oscuro para móvil cuando el sidebar está abierto */
   .sidebar-overlay{
     display:none;
     position:fixed; inset:0; background:rgba(0,0,0,0.5);
     z-index:39;
   }
   .sidebar-overlay.show{ display:block; }
-  /* ===================== LAYOUT PRINCIPAL ===================== */
   .layout{
     display: flex; min-height:100vh;
   }
@@ -213,7 +202,6 @@
     flex:1; min-width:0;
     padding: 28px 26px 70px;
   }
-  /* ===================== LOGIN ===================== */
   #vistaLogin{
     display:flex; justify-content:center; padding-top: 60px;
     position: relative; min-height: 100vh;
@@ -248,11 +236,9 @@
     opacity:.55; line-height:1;
   }
   .pw-toggle:hover{ opacity:1; }
-  /* ===================== HERO ===================== */
   .hero{ margin-bottom: 22px; }
   .hero h1{ font-family: var(--font-display); font-size:22px; margin:0 0 4px; }
   .hero p{ margin:0; color: var(--ink-soft); font-size:13px; }
-  /* ===================== TODOS LOS ESTILOS EXISTENTES ===================== */
   label{ display:block; font-size:12.5px; font-weight:600; margin: 14px 0 6px; }
   label:first-of-type{ margin-top:0; }
   input, select{
@@ -517,7 +503,6 @@
   }
   .btn-wa:hover{ background:#1ebe5b; }
   .btn-wa svg{ flex-shrink:0; }
-  /* ===================== RESPONSIVE ===================== */
   @media (max-width: 860px){
     .dash-cards{ grid-template-columns:1fr 1fr; }
     .dash-grid2{ grid-template-columns:1fr; }
@@ -537,7 +522,6 @@
     tbody td{ border-bottom:none; display:flex; justify-content:space-between; gap:10px; }
     tbody td::before{ content: attr(data-label); font-weight:600; color: var(--ink-soft); font-size:11px; }
   }
-  /* ===================== HISTORIAL DE CIERRES ===================== */
   .caja-historial-box{ border:1px solid var(--line); border-radius:12px; overflow:hidden; }
   .caja-historial-head{
     display:grid; grid-template-columns:1fr 110px 80px 1fr 90px 80px;
@@ -579,9 +563,7 @@
     #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; }
     #cajaMetodosCards{ grid-template-columns:1fr 1fr !important; }
   }
-  /* Modal editar cliente */
   .modal-edit-cliente .modal-box{ max-width:480px; }
-  /* Campana de notificaciones */
   .notif-btn{ position:relative; background:none; border:none; cursor:pointer; padding:6px; color:rgba(255,255,255,0.7); font-size:20px; border-radius:8px; transition:background .15s; }
   .notif-btn:hover{ background:rgba(255,255,255,0.1); color:#fff; }
   .notif-badge{ position:absolute; top:2px; right:2px; width:16px; height:16px; border-radius:50%; background:var(--accent); color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; display:none; }
@@ -615,7 +597,6 @@
   .dash-inicio-chart h3{ font-family:var(--font-display); font-size:14px; margin:0 0 14px; }
   .dash-inicio-chart canvas{ max-height:200px; }
   @media(max-width:860px){ .kpi-grid{ grid-template-columns:1fr 1fr; } .dash-inicio-grid{ grid-template-columns:1fr; } }
-  /* ===================== BARRA DE RUTA (MIA → PTY) ===================== */
   .btn-ruta{ background:none; border:none; cursor:pointer; font-size:13px; margin-left:7px; color:var(--ink-soft); vertical-align:middle; }
   .btn-ruta:hover{ color:var(--accent); }
   .fila-ruta td{ background:var(--paper); padding:18px 24px !important; }
@@ -633,7 +614,6 @@
     .ruta-progreso{ max-width:none; }
     .ruta-labels span{ font-size:8.5px; width:52px; }
   }
-  /* ===================== DASHBOARD — TOPBAR ===================== */
   .dash-topbar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
   .dash-search{
     display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--line);
@@ -643,12 +623,10 @@
   .dash-search input:focus-visible{ outline:none; box-shadow:none; }
   .dash-topbar-actions{ display:flex; gap:10px; }
   .dash-topbar-actions .btn-secondary, .dash-topbar-actions .btn-primary{ width:auto; margin:0; white-space:nowrap; }
-  /* ===================== KPI — versión plana ===================== */
   .kpi-icon{ display:none; }
   .kpi-card{ padding:16px 18px; box-shadow:none; }
   .kpi-card:hover{ transform:none; box-shadow:none; border-color: rgba(12,27,51,0.22); }
   .kpi-bar{ height:2px; margin-top:10px; }
-  /* ===================== AVISO CAJA — versión clara ===================== */
   .aviso-caja{
     background: var(--danger-bg); border:1px solid var(--danger-line); border-left:4px solid var(--danger);
     color: var(--ink); border-radius: var(--radius-md); padding:16px 20px; margin-bottom:20px;
@@ -664,12 +642,20 @@
     font-weight:700; font-size:13.5px; cursor:pointer; white-space:nowrap;
   }
   .aviso-caja button:hover{ opacity:.9; }
-  /* ===================== PAQUETE DESTACADO ===================== */
   .paquete-destacado{ margin-bottom:24px; }
   .pd-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:2px; }
   .pd-eyebrow{ font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color: var(--ink-soft); font-weight:600; margin-bottom:4px; }
   .pd-head h3{ font-family: var(--font-display); font-size:16.5px; margin:0; }
   .pd-meta{ font-family: var(--font-mono); font-size:11.5px; color: var(--ink-soft); margin-top:3px; }
+  .compra-step{ display:flex; align-items:center; gap:9px; margin:22px 0 12px; }
+  .compra-step:first-of-type{ margin-top:2px; }
+  .compra-step-num{ width:20px; height:20px; border-radius:50%; background:var(--accent); color:#fff; font-size:10.5px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:var(--font-body); }
+  .compra-step-title{ font-family:var(--font-display); font-size:13px; font-weight:600; color:var(--ink); }
+  .compra-step-line{ flex:1; height:1px; background:var(--line); }
+  .compra-grid2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:680px){ .compra-grid2{ grid-template-columns:1fr; } }
+  .btn-icon-people{ padding:9px 12px; border-radius:8px; border:1.5px solid var(--line); background:#fff; cursor:pointer; font-size:15px; transition:border-color .15s ease; flex-shrink:0; }
+  .btn-icon-people:hover{ border-color:var(--ink); }
 </style>
 </head>
 <body>
@@ -1082,58 +1068,68 @@
           Compramos con la tarjeta de la empresa a nombre del cliente. El dinero del producto es un
           reembolso; a caja solo entra la comisión de <strong>$5.00</strong>.
         </p>
-
         <div id="comprasResumen" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;"></div>
-
         <form id="formCompra">
-          <div class="form-grid">
-            <div class="full">
-              <label for="compraCliente">Cliente</label>
-              <div style="display:flex;gap:8px;">
-                <div style="position:relative;flex:1;">
-                  <input id="compraCliente" type="text" placeholder="Casillero, nombre o correo — o presiona 1" autocomplete="off">
-                  <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">1</span>
-                </div>
-                <button type="button" id="btnBuscarClienteCompra" class="btn-secondary" style="white-space:nowrap;">Buscar</button>
-              </div>
-              <div id="compraClienteEncontrado" style="display:none;margin-top:6px;padding:8px 12px;background:var(--paper);border-radius:8px;font-size:12.5px;"></div>
+          <div class="compra-step">
+            <span class="compra-step-num">1</span>
+            <span class="compra-step-title">Cliente</span>
+            <span class="compra-step-line"></span>
+          </div>
+          <label for="compraCliente">Cliente</label>
+          <div style="display:flex;gap:8px;">
+            <div style="position:relative;flex:1;">
+              <input id="compraCliente" type="text" placeholder="Casillero, nombre o correo — o presiona 1" autocomplete="off">
+              <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">1</span>
             </div>
+            <button type="button" id="btnAbrirListaClientesCompra" class="btn-icon-people" title="Ver todos los clientes">👥</button>
+            <button type="button" id="btnBuscarClienteCompra" class="btn-secondary" style="white-space:nowrap;">Buscar</button>
+          </div>
+          <div id="compraClienteEncontrado" style="display:none;margin-top:6px;padding:8px 12px;background:var(--paper);border-radius:8px;font-size:12.5px;"></div>
+
+          <div class="compra-step">
+            <span class="compra-step-num">2</span>
+            <span class="compra-step-title">Producto</span>
+            <span class="compra-step-line"></span>
+          </div>
+          <label for="compraDescripcion">Qué se va a comprar</label>
+          <input id="compraDescripcion" type="text" placeholder="Audífonos Sony WH-1000XM4, color negro">
+          <div class="compra-grid2">
             <div>
               <label for="compraTienda">Tienda</label>
               <input id="compraTienda" type="text" placeholder="Amazon, Shein, eBay…">
             </div>
             <div>
-              <label for="compraMonto">Costo del producto (USD)</label>
-              <input id="compraMonto" type="number" step="0.01" min="0" placeholder="45.99">
-            </div>
-            <div class="full">
-              <label for="compraDescripcion">Qué se va a comprar</label>
-              <input id="compraDescripcion" type="text" placeholder="Audífonos Sony WH-1000XM4, color negro">
-            </div>
-            <div class="full">
               <label for="compraEnlace">Enlace del producto (opcional)</label>
               <input id="compraEnlace" type="text" placeholder="https://…">
+            </div>
+          </div>
+
+          <div class="compra-step">
+            <span class="compra-step-num">3</span>
+            <span class="compra-step-title">Precio</span>
+            <span class="compra-step-line"></span>
+          </div>
+          <div class="compra-grid2">
+            <div>
+              <label for="compraMonto">Costo del producto (USD)</label>
+              <input id="compraMonto" type="number" step="0.01" min="0" placeholder="45.99">
             </div>
             <div>
               <label for="compraComision">Comisión (USD)</label>
               <input id="compraComision" type="number" step="0.01" min="0" value="5.00">
             </div>
-            <div>
-              <label>Total a cobrar al cliente</label>
-              <div id="compraTotal" style="padding:11px 13px;border-radius:8px;background:var(--paper);font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--accent-dark);">$0.00</div>
-            </div>
-            <div class="full">
-              <label for="compraNotas">Notas (opcional)</label>
-              <input id="compraNotas" type="text" placeholder="Talla M · pidió color azul si no hay negro">
-            </div>
           </div>
+          <label>Total a cobrar al cliente</label>
+          <div id="compraTotal" style="padding:11px 13px;border-radius:8px;background:var(--paper);font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--accent-dark);">$0.00</div>
+          <label for="compraNotas">Notas (opcional)</label>
+          <input id="compraNotas" type="text" placeholder="Talla M · pidió color azul si no hay negro">
+
           <button class="btn-primary" type="submit" id="btnGuardarCompra" style="max-width:280px;">
             <span class="spinner"></span><span>Registrar solicitud</span>
           </button>
           <div class="banner" id="bannerCompra"></div>
         </form>
       </div>
-
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
           <div>
@@ -1158,10 +1154,8 @@
         <div class="empty" id="emptyCompras" style="display:none;">Todavía no hay compras registradas.</div>
       </div>
     </div>
-
     <!-- ---- TAB: Gastos ---- -->
     <div class="tab-panel" id="tabGastos" style="display:none;">
-
       <div class="card" style="margin-bottom:20px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
           <div>
@@ -1177,7 +1171,6 @@
         <div id="gastosResumen" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;"></div>
         <div id="gastosCategorias" style="margin-top:18px;"></div>
       </div>
-
       <div class="card" style="margin-bottom:20px;">
         <h2>Registrar un gasto</h2>
         <p class="card-sub">Guarda la foto del recibo para que quede el respaldo.</p>
@@ -1216,7 +1209,6 @@
           <div class="banner" id="bannerGasto"></div>
         </form>
       </div>
-
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
           <h2 style="margin:0;">Gastos del período</h2>
@@ -1234,7 +1226,6 @@
         <div class="empty" id="emptyGastos" style="display:none;">No hay gastos registrados en este período.</div>
       </div>
     </div>
-
     <!-- ---- TAB: Facturas ---- -->
     <div class="card tab-panel" id="tabFacturas" style="display:none;">
       <div class="banner" id="bannerFactura"></div>
@@ -1509,7 +1500,6 @@
     prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
     en_panama: 'En Panamá', listo_para_retiro: 'Listo para retiro', entregado: 'Entregado',
   };
-  // Barra visual de ruta MIA → PTY según el estado del paquete
   function barraRuta(estado){
     const idx = Math.max(0, ESTADOS.indexOf(estado));
     const pct = (idx / (ESTADOS.length - 1)) * 100;
@@ -1531,7 +1521,6 @@
     fila.innerHTML = `<td colspan="9">${barraRuta(btn.dataset.estado)}</td>`;
     tr.insertAdjacentElement('afterend', fila);
   }
-  // ---- Sidebar móvil ----
   $('#btnMenuMovil').addEventListener('click', (e) => {
     e.stopPropagation();
     $('#sidebar').classList.toggle('open');
@@ -1564,7 +1553,6 @@
     boton.disabled = cargando;
     boton.classList.toggle('loading', cargando);
   }
-  // ---- Partículas de login ----
   (function redParticulasLogin(){
     const canvas = document.getElementById('loginNetworkCanvas');
     if (!canvas) return;
@@ -1621,7 +1609,6 @@
     $('#topbarMovil').style.display = mostrar ? 'flex' : 'none';
     if (!mostrar) $('#topbarMovil').style.display = 'none';
   }
-  // ---- Login ----
   $('#formLogin').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = $('#btnLogin');
@@ -1708,7 +1695,6 @@
     if (res.status === 401 || res.status === 403){ localStorage.removeItem(TOKEN_KEY); mostrarAdmin(false); throw new Error('Sesión inválida'); }
     return res;
   }
-  // ---- Navegación por tabs (sidebar) ----
   document.querySelectorAll('.tab-nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
@@ -1729,7 +1715,6 @@
       if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
       if (tab === 'reportesPaquete'){ $('#tabReportesPaquete').style.display = 'block'; cargarReportesPaq(); }
       if (tab === 'pty'){ $('#tabPty').style.display = 'block'; }
-      // Cierra sidebar en móvil al elegir pestaña
       if (window.innerWidth <= 760){
         $('#sidebar').classList.remove('open');
         $('#sidebarOverlay').classList.remove('show');
@@ -1738,8 +1723,6 @@
   });
 </script>
 <script>
-  // ---- Todo el JavaScript original a partir de "Paquetes" en adelante ----
-  // (idéntico al original, sin cambios)
   let paginaActualPaquetes = 1;
   async function cargarPaquetes(page){
     paginaActualPaquetes = page || 1;
@@ -1767,12 +1750,8 @@
     $('#btnPagAnterior').disabled = pag.page <= 1;
     $('#btnPagSiguiente').disabled = pag.page >= pag.total_paginas;
   }
-  // Días que lleva el paquete desde que entró al sistema.
-  // Pasados 30 días ya no hay reclamo, así que se marca en rojo.
   const DIAS_LIMITE_RECLAMO = 30;
   function celdaDias(p){
-    // Ya entregado: mostramos lo que TARDÓ, no los días que han pasado.
-    // Ese número se congela y sirve para medir el tiempo real de servicio.
     if (p.estado === 'entregado') {
       const t = p.dias_hasta_entrega;
       if (t === null || t === undefined) return '<span class="dias-chip dias-ok">—</span>';
@@ -1789,14 +1768,9 @@
     }
     return `<span class="dias-chip ${clase}">${d} d</span>${nota}`;
   }
-
-  // Arma el enlace wa.me con un mensaje pre-escrito para avisar que el
-  // paquete está listo para retiro. Devuelve '' si no hay teléfono válido.
-  // No envía nada: solo abre WhatsApp con el texto listo (sin costo).
   function enlaceWhatsappRetiro(p){
     const tel = String(p.cliente_telefono || '').replace(/[^\d]/g, '');
     if (tel.length < 7) return '';
-    // Panamá: si el número viene sin código de país (8 dígitos), anteponer 507.
     const numero = tel.length === 8 ? '507' + tel : tel;
     const nombre = (p.cliente_nombre || '').split(' ')[0] || 'cliente';
     const msg =
@@ -1807,7 +1781,6 @@
       `¡Gracias por preferirnos!`;
     return `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
   }
-
   function renderPaquetes(paquetes){
     const tbody = $('#tbodyPaquetes');
     $('#emptyPaquetes').style.display = paquetes.length ? 'none' : 'block';
@@ -1894,9 +1867,8 @@
         const peso = parseFloat(input.value);
         const pesoVol = parseFloat(input.dataset.pesoVol) || 0;
         if (!input.value.trim() || isNaN(peso) || peso <= 0){ mostrarBanner('#bannerPaquetes', 'error', 'El peso no puede quedar en blanco — ingresa un valor válido antes de guardar.'); return; }
-        // El modal muestra un precio por tarifa, ya calculado sobre el mayor entre peso real y volumétrico.
         const tarifaId = await pedirTarifa(peso, pesoVol);
-        if(!tarifaId) return; // canceló
+        if(!tarifaId) return;
         btn.disabled = true;
         try {
           const res = await apiAdmin(`/admin/paquetes/${id}/peso`, { method: 'PATCH', body: JSON.stringify({ peso_real_lb: peso, tarifa_id: tarifaId }) });
@@ -1917,8 +1889,6 @@
         const previo = sel.dataset.estadoPrevio;
         const id = sel.dataset.id;
         sel.disabled = true;
-
-        // Al pasar a "listo para retiro" preguntamos en qué sucursal quedó el paquete
         if (nuevoEstado === 'listo_para_retiro') {
           try {
             const resSuc = await apiAdmin('/admin/sucursales');
@@ -1939,7 +1909,6 @@
             }
           } catch(e) { console.error('Error cargando sucursales:', e); }
         }
-
         try {
           const res = await apiAdmin(`/admin/paquetes/${id}/estado`, { method: 'PATCH', body: JSON.stringify({ estado: nuevoEstado }) });
           if (res.ok){ mostrarBanner('#bannerPaquetes', 'success', 'Estado actualizado.'); await cargarPaquetes(); }
@@ -1948,9 +1917,6 @@
       });
     });
   }
-
-  // Popup para elegir la sucursal donde queda el paquete.
-  // Devuelve el id, null si eligió "sin asignar", o false si canceló.
   function pedirSucursal(sucursales){
     return new Promise(resolve => {
       const popup = document.createElement('div');
@@ -2119,9 +2085,6 @@
     cliente_desistio: 'Cliente desistió',
     otro: 'Otro',
   };
-
-  // Popup que pide código + motivo antes de anular.
-  // Devuelve {codigo, motivo, motivo_detalle} o null si canceló.
   function pedirDatosAnulacion(factura){
     return new Promise(resolve => {
       const popup = document.createElement('div');
@@ -2133,43 +2096,33 @@
             Total: <strong>$${Number(factura.total).toFixed(2)}</strong> · Cliente: ${escapeHtml(factura.cliente_nombre)} ${escapeHtml(factura.cliente_apellido)}
             ${factura.estado === 'pagada' ? '<br><span style="color:#c0392b;font-weight:600;">Esta factura ya está pagada — se registrará un ajuste en el cierre de caja.</span>' : ''}
           </p>
-
           <label style="margin:0 0 5px;">Motivo de la anulación</label>
           <select id="anMotivo" style="margin-bottom:12px;">
             <option value="">— Selecciona un motivo —</option>
             ${Object.entries(MOTIVOS_ANULACION).map(([k,v]) => `<option value="${k}">${v}</option>`).join('')}
           </select>
-
           <div id="anDetalleBox" style="display:none;margin-bottom:12px;">
             <label style="margin:0 0 5px;">Explica el motivo</label>
             <input id="anDetalle" type="text" maxlength="300" placeholder="Escribe qué pasó…">
           </div>
-
           <label style="margin:0 0 5px;">Código de anulación</label>
           <input id="anCodigo" type="password" placeholder="••••" autocomplete="off" style="margin-bottom:6px;">
-
           <div id="anError" style="display:none;color:#c0392b;font-size:12px;margin-bottom:10px;"></div>
-
           <div style="display:flex;gap:8px;margin-top:12px;">
             <button id="anCancelar" class="btn-secondary" style="flex:1;">Cancelar</button>
             <button id="anConfirmar" style="flex:1;padding:10px;border-radius:8px;border:none;background:#c0392b;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">Anular factura</button>
           </div>
         </div>`;
       document.body.appendChild(popup);
-
       const selMotivo = popup.querySelector('#anMotivo');
       const boxDetalle = popup.querySelector('#anDetalleBox');
       const errorDiv = popup.querySelector('#anError');
-
       selMotivo.addEventListener('change', () => {
         boxDetalle.style.display = selMotivo.value === 'otro' ? 'block' : 'none';
       });
-
       function cerrar(valor){ popup.remove(); resolve(valor); }
-
       popup.querySelector('#anCancelar').addEventListener('click', () => cerrar(null));
       popup.addEventListener('click', e => { if(e.target === popup) cerrar(null); });
-
       popup.querySelector('#anConfirmar').addEventListener('click', () => {
         const motivo = selMotivo.value;
         const detalle = (popup.querySelector('#anDetalle')?.value || '').trim();
@@ -2179,11 +2132,9 @@
         if(!codigo){ errorDiv.textContent = 'Ingresa el código de anulación.'; errorDiv.style.display = 'block'; return; }
         cerrar({ codigo, motivo, motivo_detalle: detalle });
       });
-
       setTimeout(() => selMotivo.focus(), 50);
     });
   }
-
   async function cargarFacturas(){
     const params = new URLSearchParams();
     if ($('#filtroFacturaEstado').value) params.set('estado', $('#filtroFacturaEstado').value);
@@ -2193,7 +2144,6 @@
       const data = await res.json();
       const facturas = data.facturas || [];
       $('#emptyFacturas').style.display = facturas.length ? 'none' : 'block';
-
       $('#tbodyFacturas').innerHTML = facturas.map(f => {
         const anulada = f.estado === 'anulada';
         const infoAnulacion = anulada ? `
@@ -2202,7 +2152,6 @@
             ${f.motivo_anulacion_detalle ? `<br>${escapeHtml(f.motivo_anulacion_detalle)}` : ''}
             ${f.anulada_por_nombre ? `<br><span style="opacity:.75;">Por ${escapeHtml(f.anulada_por_nombre)} ${escapeHtml(f.anulada_por_apellido || '')}${f.fecha_anulacion ? ' · ' + formatearFechaSolo(f.fecha_anulacion) : ''}</span>` : ''}
           </div>` : '';
-
         return `
         <tr${anulada ? ' style="background:rgba(192,57,43,.03);"' : ''}>
           <td data-label="Factura" class="mono"${anulada ? ' style="text-decoration:line-through;opacity:.6;"' : ''}>${escapeHtml(f.numero_factura)}</td>
@@ -2226,8 +2175,6 @@
           </td>
         </tr>`;
       }).join('');
-
-      // Cambio de estado (con popup si es anulación)
       $('#tbodyFacturas').querySelectorAll('.factura-estado-select').forEach(sel => {
         sel.dataset.estadoPrevio = sel.value;
         sel.addEventListener('change', async () => {
@@ -2235,13 +2182,11 @@
           const previo = sel.dataset.estadoPrevio;
           const factura = facturas.find(x => String(x.id) === sel.dataset.id);
           let extra = {};
-
           if (nuevoEstado === 'anulada') {
             const datos = await pedirDatosAnulacion(factura);
             if (!datos) { sel.value = previo; return; }
             extra = { codigo_anulacion: datos.codigo, motivo: datos.motivo, motivo_detalle: datos.motivo_detalle };
           }
-
           sel.disabled = true;
           try {
             const r = await apiAdmin(`/admin/facturas/${sel.dataset.id}/estado`, {
@@ -2260,7 +2205,6 @@
               sel.disabled = false;
             }
           } catch (err) {
-            // apiAdmin lanza en 401/403 (sesión). Cualquier otro fallo es de red.
             mostrarBanner('#bannerFactura', 'error', err.message === 'Sesión inválida'
               ? 'Tu sesión expiró. Vuelve a iniciar sesión.'
               : 'No pudimos conectar con el servidor.');
@@ -2269,11 +2213,9 @@
           }
         });
       });
-
       $('#tbodyFacturas').querySelectorAll('.btn-ver-pdf').forEach(btn => {
         btn.addEventListener('click', async () => { btn.textContent = '...'; btn.disabled = true; try { const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/pdf`); const blob = await res.blob(); window.open(window.URL.createObjectURL(blob), '_blank'); } catch(err){ alert('No se pudo abrir el PDF.'); } finally { btn.textContent = 'Ver PDF'; btn.disabled = false; } });
       });
-
       $('#tbodyFacturas').querySelectorAll('.btn-reenviar-factura').forEach(btn => {
         btn.addEventListener('click', async () => { btn.textContent = 'Enviando…'; btn.disabled = true; try { const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/reenviar`, { method: 'POST' }); const data = await res.json().catch(()=>({})); if(res.ok){ const e=data.envios||{}; mostrarBanner('#bannerFactura', e.correo_enviado||e.whatsapp_enviado?'success':'error', `Reenvío: ${e.correo_enviado?'Correo ✓':'Correo ✗'}`); } else { mostrarBanner('#bannerFactura','error',data.mensaje||'No se pudo reenviar.'); } } catch(err){ mostrarBanner('#bannerFactura','error','No pudimos conectar.'); } finally { btn.textContent='Reenviar'; btn.disabled=false; } });
       });
@@ -2387,10 +2329,8 @@
       const totalGlobal=facturas.reduce((s,f)=>s+Number(f.total),0);
       $('#facBadgeCount').textContent=facturas.length;
       $('#facTotalGlobal').textContent='$'+totalGlobal.toFixed(2);
-      // Actualizar badge del sidebar
       const sbBadge=$('#sbBadgeMostrador');
       if(sbBadge){ sbBadge.textContent=facturas.length; sbBadge.style.display=facturas.length>0?'inline':'none'; }
-      // Obtener el email del cliente buscado actualmente (si hay)
       const clienteActual = facturadorCliente ? facturadorCliente.email : null;
       cont.innerHTML=facturas.map(f => {
         const fecha=new Date(f.fecha_creacion).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});
@@ -2497,22 +2437,14 @@
     }
     if(errores>0) mostrarBanner('#bannerMostrador','error',errores+' factura(s) no se pudieron generar.');
   }
-  // Cache de tarifas para el popup
   let _tarifasCache = [];
-  // pesoReal: peso de la balanza. pesoVol: peso volumétrico calculado (0 si no aplica).
-  // Cada tarifa cobra por SU propio peso: si su nombre dice "volumen", usa el volumétrico;
-  // cualquier otra tarifa usa el peso real. No hay comparación automática entre las dos —
-  // la tarifa que el admin elija es la que decide qué peso se cobra.
-  // Devuelve el id de la tarifa elegida, o null si se cancela.
   async function pedirTarifa(pesoReal, pesoVol){
     pesoReal = Number(pesoReal) || 0;
     pesoVol = Number(pesoVol) || 0;
     const pesoDeLaTarifa = (t) => {
       const esVolumetrica = /volum/i.test(t.nombre || '');
-      // Si la tarifa es de volumen pero el paquete no tiene medidas (pesoVol=0), usa el peso real para no facturar en $0.
       return (esVolumetrica && pesoVol > 0) ? pesoVol : pesoReal;
     };
-    // Cargar tarifas si no las tenemos en caché
     if(_tarifasCache.length === 0){
       try {
         const res = await apiAdmin('/admin/tarifas');
@@ -2524,7 +2456,6 @@
       alert('No hay tarifas activas. Ve a la pestaña Tarifas y activa una primero.');
       return null;
     }
-    // Si solo hay una tarifa, usarla directamente sin popup
     if(_tarifasCache.length === 1) return _tarifasCache[0].id;
     return new Promise(resolve => {
       const popup = document.createElement('div');
@@ -2702,17 +2633,12 @@
     finally { setCargando(btn,false); }
   });
   function cancelarNuevo(){ $('#recepcionFormNuevo').style.display='none'; $('#bannerRecepcion').innerHTML=''; $('#recepcionTracking').value=''; $('#recepcionTracking').focus(); clienteRecepcionId=null; }
-  // ============ ESCÁNER DE CÓDIGO DE BARRAS ============
-  // Usa ZXing, que sí lee Code128 / Code39 / ITF (los de UPS, FedEx, USPS).
-  // La librería se carga solo cuando se abre la cámara, no al cargar la página.
   let zxingControls = null;
   let zxingReader = null;
   let cargandoZXing = null;
-
   function cargarZXing(){
     if (window.ZXingBrowser) return Promise.resolve();
     if (cargandoZXing) return cargandoZXing;
-    // Dos CDN: si unpkg falla, se intenta jsDelivr
     const FUENTES = [
       'https://unpkg.com/@zxing/browser@0.1.5',
       'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5',
@@ -2735,13 +2661,10 @@
     });
     return cargandoZXing;
   }
-
   function estadoCamara(texto, color){
     const el = document.getElementById('camaraEstado');
     if(el){ el.textContent = texto; el.style.color = color || '#fff'; }
   }
-
-  // Pitido corto al leer, para saber que capturó sin mirar la pantalla
   function pitido(){
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2752,7 +2675,6 @@
       setTimeout(() => ctx.close(), 400);
     } catch(e){}
   }
-
   function construirHints(){
     try {
       const BF = window.ZXingBrowser?.BarcodeFormat || window.ZXing?.BarcodeFormat;
@@ -2767,12 +2689,9 @@
       return hints;
     } catch(e){ return undefined; }
   }
-
-  // Limpia lo que devuelve el lector: sin espacios y en mayúsculas
   function limpiarTracking(texto){
     return String(texto || '').replace(/\s+/g, '').toUpperCase();
   }
-
   async function abrirCamara(){
     const camaraBox = $('#camaraRecepcion');
     camaraBox.style.display = 'block';
@@ -2803,7 +2722,6 @@
           }, 350);
         }
       );
-      // Guardamos el stream para poder apagarlo aunque falle el control
       const v = document.getElementById('camaraVideo');
       if(v && v.srcObject) camaraStream = v.srcObject;
     } catch(e){
@@ -2815,13 +2733,11 @@
       mostrarBanner('#bannerRecepcion','error', msg);
     }
   }
-
   $('#btnCamara').addEventListener('click', async ()=>{
     const camaraBox = $('#camaraRecepcion');
     if(camaraBox.style.display === 'block'){ cerrarCamara(); return; }
     await abrirCamara();
   });
-
   window.cerrarCamara = function(){
     try { if(zxingControls) zxingControls.stop(); } catch(e){}
     zxingControls = null;
@@ -2859,10 +2775,6 @@
   function pasarADimensiones(){ $('#pasoFoto').style.display='none'; $('#dimLargo').value=''; $('#dimAncho').value=''; $('#dimAlto').value=''; $('#bannerPasoDimensiones').innerHTML=''; $('#pasoDimensiones').style.display='block'; }
   function saltarPasoDimensiones(){ terminarFlujoRecepcion(); }
   function terminarFlujoRecepcion(){ $('#pasoFoto').style.display='none'; $('#pasoDimensiones').style.display='none'; $('#btnGuardarDimensionesRecepcion').disabled=false; setCargando($('#btnGuardarDimensionesRecepcion'),false); flujoFotoDimPaqueteId=null; $('#recepcionTracking').focus(); }
-  // Convierte una fecha a "YYYY-MM-DD" usando la hora LOCAL del navegador,
-  // no UTC. toISOString() convertía a UTC primero, y como Panamá es UTC-5,
-  // cerrar caja después de las 7:00 PM local ya caía en el día siguiente
-  // en UTC — por eso la caja se cerraba con la fecha equivocada.
   function fechaISOCaja(d){
     const anio = d.getFullYear();
     const mes = String(d.getMonth()+1).padStart(2,'0');
@@ -2874,7 +2786,6 @@
   const METODO_ICONO = { efectivo:'💵', tarjeta:'💳', transferencia:'🏦', yappy:'📱' };
   const METODO_COLOR = { efectivo:'green', tarjeta:'blue', transferencia:'navy', yappy:'amber' };
   function renderCaja(data){
-    // Tarjetas de resumen
     const total = Number(data.total_general);
     const facturas = data.cantidad_facturas;
     const metodos = data.detalle_por_metodo || [];
@@ -2898,7 +2809,6 @@
         <div class="dash-sub">${data.cerrado?'cerrada':'pendiente'}</div>
       </div>
     `;
-    // Cards por método de pago
     const metodosGrid = $('#cajaMétodosGrid');
     if(metodos.length > 0){
       metodosGrid.style.display = 'block';
@@ -2916,7 +2826,6 @@
     } else {
       metodosGrid.style.display = 'none';
     }
-    // --- Cuadre del efectivo de la gaveta ---
     const ef = data.efectivo || { cobrado: 0, salidas: 0, en_gaveta: 0 };
     const sal = (data.salidas_efectivo && data.salidas_efectivo.detalle) || [];
     const cajaEf = $('#cajaEfectivoBox');
@@ -2950,9 +2859,7 @@
         cajaEf.innerHTML = '';
       }
     }
-
     $('#emptyCajaDetalle').style.display = metodos.length ? 'none' : 'block';
-    // Estado y cierre
     const estadoDiv=$('#cajaEstadoDia'), cierreBox=$('#cajaCierreBox');
     if(data.cerrado){
       const c=data.cierre;
@@ -3011,9 +2918,6 @@
     try {
       const res = await apiAdmin(`/admin/caja/dia?fecha=${fecha}`);
       const data = await res.json();
-      // Pedimos las facturas ya filtradas por el servidor en hora de Panamá.
-      // Antes se filtraba aquí cortando la fecha UTC, y lo cobrado después
-      // de las 7:00 PM no aparecía en su día.
       const facturasRes = await apiAdmin(`/admin/caja/facturas-dia?fecha=${fecha}`);
       const delDia = (await facturasRes.json()).facturas || [];
       if(delDia.length === 0){
@@ -3117,13 +3021,10 @@
     chartTopClientes=new Chart(document.getElementById('chartTopClientes').getContext('2d'),{type:'bar',data:{labels:top.map(c=>`${c.nombre} ${c.apellido}`),datasets:[{label:'Paquetes',data:top.map(c=>Number(c.total_paquetes)),backgroundColor:'rgba(255,106,26,0.75)',borderRadius:6,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(12,27,51,0.06)'},ticks:{color:'#6b7280',font:{size:11}}},y:{grid:{display:false},ticks:{color:'#0c1b33',font:{size:11}}}}}});
   }
   $('#btnActualizarReporte').addEventListener('click',cargarReporte);
-
-  // ===== Reportes de problemas de paquetes =====
   let filtroReportesPaq = '';
   const REP_TIPO_LABEL = { no_reconozco:'📦 No reconoce el paquete', danado:'💔 Llegó dañado o abierto', peso_precio:'⚖️ Peso o precio no cuadra', otro:'❓ Otro problema' };
   const REP_ESTADO_LABEL = { nuevo:'Nuevo', en_proceso:'En proceso', resuelto:'Resuelto' };
   const REP_ESTADO_COLOR = { nuevo:'background:#f5c542;color:#5a4a00;', en_proceso:'background:#4a90d9;color:#fff;', resuelto:'background:#177a63;color:#fff;' };
-
   async function cargarReportesPaq(){
     try {
       const q = filtroReportesPaq ? `?estado=${filtroReportesPaq}` : '';
@@ -3133,7 +3034,6 @@
       actualizarBadgeReportes();
     } catch(err){ mostrarBanner('#bannerReportesPaq','error','No se pudieron cargar los reportes.'); }
   }
-
   function renderReportesPaq(reportes){
     const cont = $('#listaReportesPaq');
     if (!reportes.length){ cont.innerHTML = '<p style="color:var(--ink-soft);padding:20px 0;text-align:center;">No hay reportes en esta categoría.</p>'; return; }
@@ -3163,7 +3063,6 @@
     cont.querySelectorAll('.rep-resolver').forEach(b => b.addEventListener('click', () => actualizarReporte(b.dataset.id, {estado:'resuelto'})));
     cont.querySelectorAll('.rep-proceso').forEach(b => b.addEventListener('click', () => actualizarReporte(b.dataset.id, {estado:'en_proceso'})));
   }
-
   async function actualizarReporte(id, cambios){
     try {
       const res = await apiAdmin(`/admin/reportes-paquete/${id}`, { method:'PATCH', body: JSON.stringify(cambios) });
@@ -3171,7 +3070,6 @@
       else { const d = await res.json().catch(()=>({})); mostrarBanner('#bannerReportesPaq','error', d.mensaje||'No se pudo actualizar.'); }
     } catch(err){ mostrarBanner('#bannerReportesPaq','error','No pudimos conectar.'); }
   }
-
   async function actualizarBadgeReportes(){
     try {
       const res = await apiAdmin('/admin/reportes-paquete/conteo');
@@ -3181,7 +3079,6 @@
       else { badge.style.display = 'none'; }
     } catch(err){}
   }
-
   document.querySelectorAll('.filtro-rep').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filtro-rep').forEach(b => b.classList.remove('activo'));
@@ -3222,7 +3119,6 @@
     list.innerHTML=f1Filtrados.map((c,i)=>`<div class="f1-row${i===f1Activo?' f1-row-active':''}" data-idx="${i}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--line);transition:background .1s;${i===f1Activo?'background:var(--paper);':''}"><div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#1e40af;flex-shrink:0;">${iniciales(c.nombre)}</div><div><div style="font-size:13px;font-weight:600;">${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)}</div><div style="font-size:12px;color:var(--ink-soft);">${escapeHtml(c.email)}</div></div></div><span style="font-family:var(--font-mono);font-size:11.5px;background:var(--paper);padding:2px 8px;border-radius:4px;color:var(--ink-soft);">${escapeHtml(c.numero_casillero)}</span></div>`).join('');
     list.querySelectorAll('.f1-row').forEach(row=>{ row.addEventListener('click',()=>{ f1Activo=parseInt(row.dataset.idx); f1Render(); }); row.addEventListener('dblclick',()=>f1Seleccionar(parseInt(row.dataset.idx))); });
   }
-  // Mueve el paquete (y su factura si ya existe) a otro cliente
   async function reasignarPaquete(paqueteId, cliente){
     if(!paqueteId || !cliente) return;
     if(!confirm(`¿Pasar este paquete a ${cliente.nombre} ${cliente.apellido} (${cliente.numero_casillero})?`)) return;
@@ -3238,7 +3134,6 @@
           msg += ' Se movió también la factura ' + d.facturas_movidas.join(', ') + '.';
         }
         mostrarBanner('#bannerRecepcion','success', msg);
-        // Volvemos a buscar el tracking para refrescar la tarjeta con el cliente nuevo
         const tr = $('#recepcionTracking').value.trim();
         if(tr) $('#formRecepcion').dispatchEvent(new Event('submit', { cancelable:true }));
       } else {
@@ -3248,7 +3143,6 @@
       mostrarBanner('#bannerRecepcion','error','No pudimos conectar con el servidor.');
     }
   }
-
   async function f1Abrir(destino='facturador', paqueteId=null){
     f1Destino=destino; f1PaqueteReasignar=paqueteId; const overlay=$('#modalF1Clientes'); overlay.style.display='flex'; $('#f1SearchInput').value=''; f1Activo=0;
     if(f1ClientesCache.length===0){ try { const res=await apiAdmin('/admin/usuarios'); const data=await res.json(); f1ClientesCache=data.usuarios||[]; } catch(e){ f1ClientesCache=[]; } }
@@ -3268,7 +3162,6 @@
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'&&$('#modalF1Clientes').style.display==='flex') f1Cerrar(); });
   $('#mostradorQ').addEventListener('keydown',(e)=>{ if(e.key==='1'){ e.preventDefault(); f1Abrir('facturador'); } });
   document.addEventListener('keydown',(e)=>{ if(e.key==='1'&&document.activeElement?.id==='recNuevoCasillero'){ e.preventDefault(); f1Abrir('recepcion'); } });
-  // ---- Dashboard de estadísticas ----
   let chartDashI=null, chartDashE=null, chartDashT=null;
   const ESTADO_COLORES_DASH={prealertado:'#ff6a1a',en_bodega_miami:'#2563eb',en_transito:'#7c3aed',en_panama:'#0891b2',listo_para_retiro:'#177a63',entregado:'#6b7280'};
   const ESTADO_LABEL_DASH={prealertado:'Prealertado',en_bodega_miami:'Bodega MIA',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo retiro',entregado:'Entregado'};
@@ -3294,9 +3187,6 @@
     cargarPaqueteDestacado();
     cargarUltimosEscaneados();
   }
-  // Últimos paquetes registrados — reutiliza el mismo listado de Paquetes
-  // (ordenado por fecha_prealerta DESC en el backend), así que ya son
-  // los más recientes sin necesidad de un endpoint nuevo.
   async function cargarUltimosEscaneados(){
     const tbody = $('#dashRecientesBody');
     const empty = $('#dashRecientesEmpty');
@@ -3321,8 +3211,6 @@
   $('#dashVerTodosPaquetes')?.addEventListener('click', () => {
     document.querySelector('.tab-nav-btn[data-tab="paquetes"]')?.click();
   });
-  // Elige el paquete más urgente (más días sin reclamo) para mostrarlo
-  // como tarjeta destacada arriba del dashboard, con su barra de ruta.
   async function cargarPaqueteDestacado(){
     const box = $('#paqueteDestacadoBox');
     if(!box) return;
@@ -3355,7 +3243,6 @@
       box.style.display = 'block';
     } catch(err){ console.error('Paquete destacado error:', err); box.style.display = 'none'; }
   }
-  // ---- Topbar del Dashboard: búsqueda rápida y accesos directos ----
   $('#dashBuscar')?.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     e.preventDefault();
@@ -3375,7 +3262,6 @@
     document.querySelector('.tab-nav-btn[data-tab="recepcion"]')?.click();
     setTimeout(() => { $('#recepcionTracking')?.focus(); }, 150);
   });
-  // ---- Editar cliente ----
   let clienteEditandoId = null;
   function abrirEditCliente(u){
     clienteEditandoId = u.id;
@@ -3468,8 +3354,7 @@
     } catch(err){ mostrarBanner('#bannerEditCliente','error','No pudimos conectar.'); }
     finally { setCargando(btn,false); }
     });
-  }); // fin DOMContentLoaded
-  // ---- Notificaciones internas ----
+  });
   const NOTIF_KEY = 'nea_notifs';
   let notifLista = [];
   function cargarNotificacionesGuardadas(){
@@ -3505,7 +3390,6 @@
       });
     });
   }
-  // Interceptar cargarPendientesMostrador para generar notif cuando hay facturas nuevas
   const _cargarPendientesOriginal = cargarPendientesMostrador;
   let _ultimoTotalPendientes = 0;
   cargarPendientesMostrador = async function(){
@@ -3517,8 +3401,6 @@
     }
     _ultimoTotalPendientes = total;
   };
-  // ---- PTY Cargo Express ----
-    // ---- Importar PTY por texto ----
   function parsearTextoPTY(texto){
     var sep = String.fromCharCode(10);
     var lineas = texto.split(sep).map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 5; });
@@ -3545,7 +3427,7 @@
     }
     return paquetes;
   }
-    let ptyParsedCache = [];
+  let ptyParsedCache = [];
   $('#ptyTexto').addEventListener('input', () => {
     const texto = $('#ptyTexto').value.trim();
     $('#ptyPreview').style.display = 'none';
@@ -3627,7 +3509,6 @@
       mostrarBanner('#bannerPtyTexto','error','No pudimos conectar.');
     } finally { setCargando(btn, false); }
   });
-  // ============ SERVICIO PROFESIONAL DE COMPRAS ============
   const COMPRA_ESTADO = {
     solicitada: { txt: 'Por comprar', bg: 'var(--amber-bg)',            col: 'var(--accent-dark)' },
     comprada:   { txt: 'Por cobrar',  bg: 'rgba(58,110,165,0.12)',      col: '#3a6ea5' },
@@ -3635,8 +3516,6 @@
     cancelada:  { txt: 'Cancelada',   bg: 'rgba(192,57,43,0.10)',       col: '#c0392b' },
   };
   let compraClienteId = null;
-
-  // Panamá: 8 dígitos -> 507XXXXXXXX. Si ya trae código de país, se respeta.
   function telefonoWa(tel){
     const d = String(tel || '').replace(/\D/g, '');
     if(!d) return null;
@@ -3644,15 +3523,12 @@
     if(d.length === 11 && d.startsWith('507')) return d;
     return d;
   }
-
-  // Mensaje de agradecimiento tras una compra por encargo
   function mensajeGraciasCompra(c){
     const nombre = (c.cliente_nombre || '').split(' ')[0];
     return `Hola ${nombre}, gracias por confiar en NEA Cargo Xpress para tu compra de ${c.descripcion}.`
       + `\n\nYa quedó pedida en ${c.tienda} y te avisamos apenas llegue a Panamá para que la retires.`
       + `\n\nSi necesitas comprar algo más y no tienes tarjeta, nosotros te lo compramos. Solo escríbenos. 🙌`;
   }
-
   function abrirWaCompra(c){
     const tel = telefonoWa(c.cliente_telefono);
     if(!tel){
@@ -3661,7 +3537,6 @@
     }
     window.open(`https://wa.me/${tel}?text=${encodeURIComponent(mensajeGraciasCompra(c))}`, '_blank');
   }
-
   function recalcularTotalCompra(){
     const m = parseFloat($('#compraMonto').value) || 0;
     const c = parseFloat($('#compraComision').value);
@@ -3671,8 +3546,6 @@
   ['compraMonto','compraComision'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', recalcularTotalCompra);
   });
-
-  // Buscar cliente (por texto o con el selector de la tecla 1)
   async function buscarClienteCompra(){
     const q = $('#compraCliente').value.trim();
     if(!q) return;
@@ -3697,12 +3570,11 @@
     } catch(e){}
   }
   $('#btnBuscarClienteCompra')?.addEventListener('click', buscarClienteCompra);
+  $('#btnAbrirListaClientesCompra')?.addEventListener('click', () => f1Abrir('compra'));
   $('#compraCliente')?.addEventListener('keydown', (e) => {
     if(e.key === '1'){ e.preventDefault(); f1Abrir('compra'); }
     if(e.key === 'Enter'){ e.preventDefault(); buscarClienteCompra(); }
   });
-
-  // Registrar la solicitud
   $('#formCompra')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if(!compraClienteId){ mostrarBanner('#bannerCompra','error','Busca y selecciona el cliente primero.'); return; }
@@ -3739,9 +3611,7 @@
     } catch(err){ mostrarBanner('#bannerCompra','error','No pudimos conectar con el servidor.'); }
     finally { setCargando(btn, false); }
   });
-
   $('#btnFiltrarCompras')?.addEventListener('click', (e) => { e.preventDefault(); cargarCompras(); });
-
   async function cargarCompras(){
     const cont = $('#listaCompras');
     const estado = $('#filtroCompraEstado')?.value || '';
@@ -3750,14 +3620,11 @@
       const data = await res.json();
       const compras = data.compras || [];
       const r = data.resumen || {};
-
-      // Badge del menú: lo que falta comprar
       const badge = $('#sbBadgeCompras');
       if(badge){
         const n = Number(r.por_comprar || 0);
         badge.textContent = n; badge.style.display = n > 0 ? 'inline' : 'none';
       }
-
       $('#comprasResumen').innerHTML = `
         <div class="dash-card amber" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
           <div style="font-size:20px;">🛒</div>
@@ -3782,7 +3649,6 @@
           <div class="dash-num" style="font-size:20px;">${compras.length}</div>
           <div class="dash-sub">en la lista</div>
         </div>`;
-
       $('#emptyCompras').style.display = compras.length ? 'none' : 'block';
       cont.innerHTML = compras.map(c => {
         const e = COMPRA_ESTADO[c.estado] || COMPRA_ESTADO.solicitada;
@@ -3821,8 +3687,6 @@
           ${acciones ? `<div class="mi-metodo-pago">${acciones}</div>` : ''}
         </div>`;
       }).join('');
-
-      // Ya la compré
       cont.querySelectorAll('.btn-compra-comprada').forEach(btn => {
         btn.addEventListener('click', async () => {
           const c = compras.find(x => String(x.id) === btn.dataset.id);
@@ -3837,8 +3701,6 @@
           } catch(e){ mostrarBanner('#bannerCompra','error','No pudimos conectar.'); btn.disabled = false; }
         });
       });
-
-      // Cobrar
       cont.querySelectorAll('.btn-compra-pagada').forEach(btn => {
         btn.addEventListener('click', async () => {
           const metodo = await pedirMetodoPago(btn);
@@ -3859,16 +3721,12 @@
           } catch(e){ mostrarBanner('#bannerCompra','error','No pudimos conectar.'); btn.disabled = false; }
         });
       });
-
-      // Agradecer por WhatsApp
       cont.querySelectorAll('.btn-compra-wa').forEach(btn => {
         btn.addEventListener('click', () => {
           const c = compras.find(x => String(x.id) === btn.dataset.id);
           if(c) abrirWaCompra(c);
         });
       });
-
-      // Cancelar
       cont.querySelectorAll('.btn-compra-cancelar').forEach(btn => {
         btn.addEventListener('click', async () => {
           const motivo = prompt('¿Por qué se cancela esta compra?');
@@ -3881,11 +3739,8 @@
           } catch(e){ mostrarBanner('#bannerCompra','error','No pudimos conectar.'); }
         });
       });
-
     } catch(err){ console.error('Error cargando compras:', err); }
   }
-
-  // Popup para registrar la orden ya comprada
   function pedirDatosCompra(c){
     return new Promise(resolve => {
       const popup = document.createElement('div');
@@ -3922,16 +3777,11 @@
       setTimeout(() => popup.querySelector('#cpOrden').focus(), 50);
     });
   }
-
-
-  // ============ GASTOS DE LA EMPRESA ============
   let gastosCategorias = {};
   let gastosIniciado = false;
-
   function fechaHoyPanama(){
     return new Intl.DateTimeFormat('en-CA', { timeZone:'America/Panama', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
   }
-
   async function iniciarGastos(){
     if(!gastosIniciado){
       const hoy = fechaHoyPanama();
@@ -3949,10 +3799,8 @@
     }
     await cargarGastos();
   }
-
   $('#btnVerGastos')?.addEventListener('click', (e) => { e.preventDefault(); cargarGastos(); });
   $('#filtroGastoCategoria')?.addEventListener('change', () => cargarGastos());
-
   async function cargarGastos(){
     const desde = $('#gastoDesde').value, hasta = $('#gastoHasta').value;
     const cat = $('#filtroGastoCategoria').value;
@@ -3963,7 +3811,6 @@
       ]);
       const res = await rRes.json();
       const lista = (await rLista.json()).gastos || [];
-
       const u = Number(res.utilidad || 0);
       const colorU = u >= 0 ? 'green' : 'amber';
       $('#gastosResumen').innerHTML = `
@@ -3988,8 +3835,6 @@
           <div class="dash-num" style="font-size:20px;">$${Number(res.gastos.recurrentes).toFixed(2)}</div>
           <div class="dash-sub">se repiten cada mes</div>
         </div>`;
-
-      // Barras por categoría
       const cats = res.gastos.por_categoria || [];
       const mayor = cats.length ? Math.max(...cats.map(c => c.total)) : 0;
       $('#gastosCategorias').innerHTML = cats.length ? `
@@ -4004,7 +3849,6 @@
               <div style="height:100%;width:${mayor ? (c.total/mayor*100) : 0}%;background:var(--accent);border-radius:4px;"></div>
             </div>
           </div>`).join('')}` : '';
-
       $('#emptyGastos').style.display = lista.length ? 'none' : 'block';
       $('#tbodyGastos').innerHTML = lista.map(g => `
         <tr>
@@ -4030,7 +3874,6 @@
             </div>
           </td>
         </tr>`).join('');
-
       $('#tbodyGastos').querySelectorAll('.btn-borrar-gasto').forEach(btn => {
         btn.addEventListener('click', async () => {
           if(!confirm('¿Borrar este gasto? No se puede deshacer.')) return;
@@ -4041,10 +3884,8 @@
           } catch(e){ mostrarBanner('#bannerGasto','error','No pudimos conectar.'); }
         });
       });
-
     } catch(err){ console.error('Error cargando gastos:', err); }
   }
-
   $('#formGasto')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const monto = parseFloat($('#gMonto').value);
@@ -4065,7 +3906,6 @@
     fd.append('es_recurrente', $('#gRecurrente').checked ? 'true' : 'false');
     const archivo = $('#gComprobante').files[0];
     if(archivo) fd.append('comprobante', archivo);
-
     const btn = $('#btnGuardarGasto');
     setCargando(btn, true);
     try {
@@ -4084,11 +3924,6 @@
     } catch(err){ mostrarBanner('#bannerGasto','error','No pudimos conectar con el servidor.'); }
     finally { setCargando(btn, false); }
   });
-
-
-  // ---- Cierres de caja atrasados ----
-  // Si un día tuvo cobros y nadie cerró la caja, sale un aviso rojo en
-  // el dashboard y un contador en el menú. No depende de correos.
   async function revisarCajasPendientes(){
     const aviso = document.getElementById('avisoCajaPendiente');
     const badge = document.getElementById('sbBadgeCaja');
@@ -4096,18 +3931,14 @@
       const r = await apiAdmin('/admin/caja/pendientes');
       const d = await r.json();
       const n = d.cantidad || 0;
-
       if(badge){ badge.textContent = n; badge.style.display = n > 0 ? 'inline' : 'none'; }
       if(!aviso) return;
-
       if(n === 0){ aviso.style.display = 'none'; return; }
-
       const lista = (d.pendientes || []).slice(-5).map(p =>
         `<div class="av-fila">
            <span>${formatearFechaSolo(p.fecha)} · ${p.dias_atraso} día${p.dias_atraso===1?'':'s'} de atraso</span>
            <span class="av-monto">$${p.total.toFixed(2)}</span>
          </div>`).join('');
-
       aviso.innerHTML = `
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;">
           <div style="flex:1;min-width:240px;">
@@ -4118,7 +3949,6 @@
           <button id="btnIrACaja">Cerrar ahora</button>
         </div>`;
       aviso.style.display = 'block';
-
       document.getElementById('btnIrACaja')?.addEventListener('click', () => {
         const masViejo = d.pendientes[0]?.fecha;
         document.querySelector('.tab-nav-btn[data-tab="caja"]')?.click();
@@ -4131,7 +3961,6 @@
       });
     } catch(e){ console.error('Error revisando cajas pendientes:', e); }
   }
-
   async function iniciarAdmin(){
     cargarNotificacionesGuardadas();
     revisarCajasPendientes();
@@ -4140,7 +3969,6 @@
   }
   if(localStorage.getItem(TOKEN_KEY)){ iniciarAdmin(); }
 </script>
-<!-- Panel de notificaciones -->
 <div class="notif-panel" id="notifPanel">
   <div class="notif-panel-head">
     <span>🔔 Notificaciones</span>
@@ -4154,7 +3982,6 @@
   </div>
 </div>
 <div id="notifOverlay" style="display:none;position:fixed;inset:0;z-index:199;"></div>
-<!-- Modal editar cliente -->
 <div id="modalEditCliente" class="modal-overlay modal-edit-cliente">
   <div class="modal-box">
     <div class="modal-header">
@@ -4192,8 +4019,7 @@
     </div>
   </div>
 </div>
-  <!-- FIX: centrar tarjeta de login en toda la pantalla -->
-<style>
+  <style>
   .nea-login-centrado{
     position: fixed !important;
     top: 50% !important;
@@ -4231,8 +4057,7 @@
   }
 })();
 </script>
-  <!-- CASILLERO DEL CLIENTE -->
-<div id="modalCasillero" style="display:none;position:fixed;inset:0;background:rgba(12,27,51,.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div id="modalCasillero" style="display:none;position:fixed;inset:0;background:rgba(12,27,51,.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:14px;max-width:420px;width:100%;padding:22px;font-family:Inter,sans-serif;">
     <div style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;color:#0c1b33;">Dirección de casillero</div>
     <div style="font-size:13px;color:#64748b;margin:3px 0 14px;">Cópiala y mándasela al cliente tal cual.</div>
