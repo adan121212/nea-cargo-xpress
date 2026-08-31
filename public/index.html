@@ -481,8 +481,71 @@
 [data-theme="dark"] .rastreo-tab-btn{ background:var(--panel); border-color:var(--line); color:var(--ink); }
 [data-theme="dark"] .rastreo-form input,[data-theme="dark"] .calc-row input,[data-theme="dark"] .calc-row select{ background:#1a2436; border-color:rgba(228,234,245,0.15); color:var(--ink); }
 </style>
+<style>
+  /* ============ PANTALLA DE CARGA (splash) ============ */
+  #splash{
+    position:fixed; inset:0; z-index:9999;
+    background:
+      radial-gradient(ellipse at 50% 35%, rgba(255,106,26,0.10) 0%, transparent 55%),
+      linear-gradient(180deg, var(--ink) 0%, #060f1c 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition: opacity .55s ease, visibility .55s ease;
+  }
+  #splash.oculto{ opacity:0; visibility:hidden; pointer-events:none; }
+  .splash-marca{ display:flex; align-items:center; gap:14px; margin-bottom:54px; }
+  .splash-mark{
+    width:52px; height:52px; border-radius:10px; background:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700; font-size:26px; color:#fff;
+  }
+  .splash-nombre{ font-family:var(--font-display); font-weight:700; font-size:26px; color:#fff; letter-spacing:.01em; line-height:1; }
+  .splash-tag{ font-family:var(--font-mono); font-size:11px; color:rgba(255,255,255,0.45); letter-spacing:.16em; margin-top:6px; }
+  .splash-ruta{ width:min(560px, 84vw); position:relative; margin-bottom:30px; }
+  .splash-track{ position:relative; height:2px; background:rgba(255,255,255,0.14); border-radius:2px; overflow:visible; }
+  .splash-track-fill{ position:absolute; left:0; top:0; height:2px; width:0%; border-radius:2px; background:var(--accent); }
+  .splash-puerto{ position:absolute; top:50%; transform:translate(-50%,-50%); width:9px; height:9px; border-radius:50%; background:var(--ink); border:2px solid rgba(255,255,255,0.3); }
+  .splash-puerto.a{ left:0; } .splash-puerto.b{ left:100%; border-color:var(--accent); }
+  .splash-vehiculo{ position:absolute; top:50%; left:0%; transform:translate(-50%,-60%); }
+  .splash-labels{ display:flex; justify-content:space-between; margin-top:9px; }
+  .splash-labels span{ font-family:var(--font-mono); font-size:10.5px; color:rgba(255,255,255,0.45); letter-spacing:.05em; }
+  .splash-labels span.destino{ color:var(--accent); }
+  .splash-pct{ font-family:var(--font-display); font-weight:700; font-size:44px; color:#fff; line-height:1; letter-spacing:.01em; }
+  .splash-pct span{ color:var(--accent); }
+  .splash-estado{ font-family:var(--font-body); font-size:12.5px; color:rgba(255,255,255,0.45); margin-top:8px; letter-spacing:.02em; }
+  .splash-flash{ position:fixed; inset:0; background:#fff; opacity:0; pointer-events:none; z-index:10000; }
+  .splash-flash.disparar{ animation: splashDestello .5s ease-out; }
+  @keyframes splashDestello{ 0%{ opacity:0; } 18%{ opacity:1; } 100%{ opacity:0; } }
+  @media (prefers-reduced-motion: reduce){ #splash{ transition-duration:0.01ms; } }
+</style>
 </head>
 <body>
+
+<!-- ============ PANTALLA DE CARGA ============ -->
+<div id="splash">
+  <div class="splash-marca">
+    <div class="splash-mark">N</div>
+    <div>
+      <div class="splash-nombre">NEA CARGO XPRESS</div>
+      <div class="splash-tag">MIAMI → PANAMÁ</div>
+    </div>
+  </div>
+  <div class="splash-ruta">
+    <div class="splash-track">
+      <div class="splash-track-fill" id="splashFill"></div>
+      <div class="splash-puerto a"></div>
+      <div class="splash-puerto b"></div>
+      <div class="splash-vehiculo" id="splashVehiculo">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+          <path d="M2 16 L22 12 L15 9 L9 4 L7 5 L10 10 L4 11 L2 9 L1 10 L3 13 L1 15 Z" fill="#ff6a1a"/>
+        </svg>
+      </div>
+    </div>
+    <div class="splash-labels"><span>MIAMI</span><span class="destino">PANAMÁ</span></div>
+  </div>
+  <div class="splash-pct"><span id="splashNum">0</span>%</div>
+  <div class="splash-estado" id="splashEstado">Preparando tu envío…</div>
+</div>
+<div class="splash-flash" id="splashFlash"></div>
 
 <!-- ============ NAV ============ -->
 <nav class="nav">
@@ -1443,6 +1506,62 @@ setLang(lang);
     const i = document.getElementById('themeIcon');
     if(i) i.textContent = next === 'dark' ? '☀️' : '🌙';
   });
+})();
+</script>
+
+<script>
+(function(){
+  var reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var splash = document.getElementById('splash');
+  var flash = document.getElementById('splashFlash');
+  var numEl = document.getElementById('splashNum');
+  var fillEl = document.getElementById('splashFill');
+  var vehEl = document.getElementById('splashVehiculo');
+  var estadoEl = document.getElementById('splashEstado');
+  if(!splash) return;
+
+  var estados = [
+    [0, 'Preparando tu envío…'],
+    [30, 'Consolidando la carga…'],
+    [60, 'En camino a Panamá…'],
+    [90, 'Casi listo…'],
+    [100, '¡Listo!']
+  ];
+
+  function terminarSplash(){
+    if(flash) flash.classList.add('disparar');
+    setTimeout(function(){ splash.classList.add('oculto'); }, 220);
+  }
+
+  if(reducido){
+    splash.classList.add('oculto');
+    return;
+  }
+
+  var duracionMs = 2200;
+  var inicio = performance.now();
+
+  function pasoSplash(ahora){
+    var t = Math.min((ahora - inicio) / duracionMs, 1);
+    var eased = t < 0.85 ? (t / 0.85) * 92 : 92 + ((t - 0.85) / 0.15) * 8;
+    var pct = Math.min(Math.round(eased), 100);
+
+    numEl.textContent = pct;
+    fillEl.style.width = pct + '%';
+    vehEl.style.left = pct + '%';
+    for(var i=0;i<estados.length;i++){ if(pct >= estados[i][0]) estadoEl.textContent = estados[i][1]; }
+
+    if(t < 1){
+      requestAnimationFrame(pasoSplash);
+    } else {
+      numEl.textContent = 100;
+      fillEl.style.width = '100%';
+      vehEl.style.left = '100%';
+      estadoEl.textContent = '¡Listo!';
+      setTimeout(terminarSplash, 260);
+    }
+  }
+  requestAnimationFrame(pasoSplash);
 })();
 </script>
 
