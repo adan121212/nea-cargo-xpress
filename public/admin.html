@@ -699,6 +699,10 @@
       <span class="sb-icon">🛒</span> Compras
       <span class="sb-badge" id="sbBadgeCompras" style="display:none;">0</span>
     </button>
+    <button class="tab-nav-btn" data-tab="deliveries">
+      <span class="sb-icon">🚚</span> Deliveries
+      <span class="sb-badge" id="sbBadgeDeliveries" style="display:none;">0</span>
+    </button>
     <button class="tab-nav-btn" data-tab="gastos">
       <span class="sb-icon">💸</span> Gastos
     </button>
@@ -1166,6 +1170,38 @@
         </div>
         <div id="listaCompras"></div>
         <div class="empty" id="emptyCompras" style="display:none;">Todavía no hay compras registradas.</div>
+      </div>
+    </div>
+    <!-- ---- TAB: Deliveries ---- -->
+    <div class="tab-panel" id="tabDeliveries" style="display:none;">
+      <div class="card" style="margin-bottom:20px;">
+        <h2 style="margin:0 0 2px;">🚚 Deliveries</h2>
+        <p class="card-sub" style="margin:0 0 18px;">Paquetes que el cliente pidió que le llevaran en vez de retirar en sucursal.</p>
+        <div id="deliveriesResumen" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;"></div>
+        <div class="banner" id="bannerDelivery"></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+          <div>
+            <h2 style="margin:0 0 2px;">Solicitudes</h2>
+            <p class="card-sub" style="margin:0;">Solicitado &rarr; Asignado &rarr; Entregado</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end;">
+            <div>
+              <label for="filtroDeliveryEstado" style="margin:0 0 5px;">Estado</label>
+              <select id="filtroDeliveryEstado" style="width:auto;">
+                <option value="">Todas</option>
+                <option value="solicitado">Por asignar</option>
+                <option value="asignado">En camino</option>
+                <option value="entregado">Entregadas</option>
+                <option value="cancelado">Canceladas</option>
+              </select>
+            </div>
+            <button class="btn-secondary" id="btnFiltrarDeliveries" style="height:37px;">Filtrar</button>
+          </div>
+        </div>
+        <div id="listaDeliveries"></div>
+        <div class="empty" id="emptyDeliveries" style="display:none;">No hay solicitudes de delivery.</div>
       </div>
     </div>
     <!-- ---- TAB: Gastos ---- -->
@@ -1721,6 +1757,7 @@
       if (tab === 'recepcion'){ $('#tabRecepcion').style.display = 'block'; setTimeout(() => $('#recepcionTracking').focus(), 50); }
       if (tab === 'clientes'){ $('#tabClientes').style.display = 'block'; cargarClientes(); }
       if (tab === 'compras'){ $('#tabCompras').style.display = 'block'; cargarCompras(); }
+      if (tab === 'deliveries'){ $('#tabDeliveries').style.display = 'block'; cargarDeliveries(); }
       if (tab === 'gastos'){ $('#tabGastos').style.display = 'block'; iniciarGastos(); }
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
       if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); }
@@ -3698,6 +3735,7 @@
     finally { setCargando(btn, false); }
   });
   $('#btnFiltrarCompras')?.addEventListener('click', (e) => { e.preventDefault(); cargarCompras(); });
+  $('#btnFiltrarDeliveries')?.addEventListener('click', (e) => { e.preventDefault(); cargarDeliveries(); });
   async function cargarCompras(){
     const cont = $('#listaCompras');
     const estado = $('#filtroCompraEstado')?.value || '';
@@ -3827,6 +3865,151 @@
         });
       });
     } catch(err){ console.error('Error cargando compras:', err); }
+  }
+
+  // ---------- Deliveries ----------
+  const DELIVERY_ESTADO = {
+    solicitado: { txt: 'Por asignar', bg: 'var(--amber-bg)',       col: 'var(--accent-dark)' },
+    asignado:   { txt: 'En camino',   bg: 'rgba(58,110,165,0.12)', col: '#3a6ea5' },
+    entregado:  { txt: 'Entregado',   bg: 'var(--cargo-green-bg)', col: 'var(--cargo-green)' },
+    cancelado:  { txt: 'Cancelado',   bg: 'rgba(192,57,43,0.10)',  col: '#c0392b' },
+  };
+  async function cargarDeliveries(){
+    const cont = $('#listaDeliveries');
+    const estado = $('#filtroDeliveryEstado')?.value || '';
+    try {
+      const res = await apiAdmin(`/admin/deliveries${estado ? '?estado='+estado : ''}`);
+      const data = await res.json();
+      const deliveries = data.deliveries || [];
+      const r = data.resumen || {};
+      const badge = $('#sbBadgeDeliveries');
+      if(badge){
+        const n = Number(r.pendientes || 0);
+        badge.textContent = n; badge.style.display = n > 0 ? 'inline' : 'none';
+      }
+      $('#deliveriesResumen').innerHTML = `
+        <div class="dash-card amber" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
+          <div style="font-size:20px;">🚚</div>
+          <div class="dash-label">Por asignar</div>
+          <div class="dash-num" style="font-size:20px;">${r.pendientes || 0}</div>
+        </div>
+        <div class="dash-card blue" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
+          <div style="font-size:20px;">🛵</div>
+          <div class="dash-label">En camino</div>
+          <div class="dash-num" style="font-size:20px;">${r.en_camino || 0}</div>
+        </div>
+        <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
+          <div style="font-size:20px;">✅</div>
+          <div class="dash-label">Entregados hoy</div>
+          <div class="dash-num" style="font-size:20px;">${r.entregados_hoy || 0}</div>
+          <div class="dash-sub">$${Number(r.cobrado_delivery_hoy||0).toFixed(2)} en delivery</div>
+        </div>`;
+      $('#emptyDeliveries').style.display = deliveries.length ? 'none' : 'block';
+      cont.innerHTML = deliveries.map(d => {
+        const e = DELIVERY_ESTADO[d.estado] || DELIVERY_ESTADO.solicitado;
+        const fecha = formatearFechaSolo(d.fecha_solicitud);
+        const telWa = telefonoWa(d.telefono);
+        const mapaUrl = (d.latitud && d.longitud) ? `https://www.google.com/maps?q=${d.latitud},${d.longitud}` : null;
+        let acciones = '';
+        if(d.estado === 'solicitado'){
+          acciones = `<button class="btn-secondary btn-delivery-asignar" data-id="${d.id}">🛵 Asignar mensajero</button>
+                      <button class="btn-secondary btn-danger btn-delivery-cancelar" data-id="${d.id}">Cancelar</button>`;
+        } else if(d.estado === 'asignado'){
+          acciones = `<button class="btn-cobrar btn-delivery-entregado" data-id="${d.id}" style="width:auto;padding:7px 14px;">✓ Marcar entregado</button>
+                      <button class="btn-secondary btn-danger btn-delivery-cancelar" data-id="${d.id}">Cancelar</button>`;
+        }
+        return `
+        <div class="mostrador-item" style="${d.estado==='cancelado'?'opacity:.55;':''}">
+          <div class="mi-top">
+            <div style="min-width:0;">
+              <div class="mi-tienda">${escapeHtml(d.cliente_nombre)} ${escapeHtml(d.cliente_apellido)} · ${escapeHtml(d.numero_casillero||'')}</div>
+              <div class="mi-tracking">${escapeHtml(d.tienda)} · #${escapeHtml(d.numero_tracking)} · ${fecha}</div>
+              <div style="font-size:12.5px;margin-top:4px;">
+                📞 ${telWa ? `<a href="https://wa.me/${telWa}" target="_blank" rel="noopener" style="color:var(--ink);font-weight:600;text-decoration:none;">${escapeHtml(d.telefono)}</a>` : escapeHtml(d.telefono)}
+              </div>
+              <div style="font-size:12.5px;color:var(--ink-soft);margin-top:2px;">
+                📍 ${escapeHtml(d.zona_nombre)} — ${escapeHtml(d.direccion_texto)}
+                ${mapaUrl ? ` · <a href="${mapaUrl}" target="_blank" rel="noopener" style="color:var(--accent-dark);">Ver en mapa ↗</a>` : ''}
+              </div>
+              ${d.referencia ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">📝 ${escapeHtml(d.referencia)}</div>` : ''}
+              ${d.mensajero_nombre ? `<div style="font-size:12.5px;color:#3a6ea5;margin-top:4px;">🛵 ${escapeHtml(d.mensajero_nombre)}${d.mensajero_telefono ? ' · '+escapeHtml(d.mensajero_telefono) : ''}</div>` : ''}
+              ${d.motivo_cancelacion ? `<div style="font-size:12px;color:#c0392b;margin-top:4px;">Cancelado: ${escapeHtml(d.motivo_cancelacion)}</div>` : ''}
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <span class="badge" style="background:${e.bg};color:${e.col};">${e.txt}</span>
+              <div style="font-family:var(--font-mono);font-size:13px;margin-top:6px;color:var(--ink-soft);">Flete $${Number(d.flete).toFixed(2)}</div>
+              <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--cargo-green);">Delivery $${Number(d.zona_precio).toFixed(2)}</div>
+              <div style="font-family:var(--font-mono);font-size:14px;font-weight:800;color:var(--ink);border-top:1px solid var(--line);margin-top:4px;padding-top:4px;">Total $${Number(d.total).toFixed(2)}</div>
+            </div>
+          </div>
+          ${acciones ? `<div class="mi-metodo-pago">${acciones}</div>` : ''}
+        </div>`;
+      }).join('');
+      cont.querySelectorAll('.btn-delivery-asignar').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const datos = await pedirDatosMensajero();
+          if(!datos) return;
+          btn.disabled = true;
+          try {
+            const res = await apiAdmin(`/admin/deliveries/${btn.dataset.id}/asignar`, { method:'PATCH', body: JSON.stringify(datos) });
+            const d = await res.json().catch(()=>({}));
+            if(res.ok){ mostrarBanner('#bannerDelivery','success','✓ Mensajero asignado.'); await cargarDeliveries(); }
+            else { mostrarBanner('#bannerDelivery','error', d.mensaje || 'No se pudo asignar.'); btn.disabled = false; }
+          } catch(e){ mostrarBanner('#bannerDelivery','error','No pudimos conectar.'); btn.disabled = false; }
+        });
+      });
+      cont.querySelectorAll('.btn-delivery-entregado').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if(!confirm('¿Confirmar que el paquete ya fue entregado?')) return;
+          btn.disabled = true; btn.textContent = 'Procesando…';
+          try {
+            const res = await apiAdmin(`/admin/deliveries/${btn.dataset.id}/entregado`, { method:'PATCH' });
+            const d = await res.json().catch(()=>({}));
+            if(res.ok){ mostrarBanner('#bannerDelivery','success','✓ Marcado como entregado.'); await cargarDeliveries(); }
+            else { mostrarBanner('#bannerDelivery','error', d.mensaje || 'No se pudo actualizar.'); btn.disabled = false; }
+          } catch(e){ mostrarBanner('#bannerDelivery','error','No pudimos conectar.'); btn.disabled = false; }
+        });
+      });
+      cont.querySelectorAll('.btn-delivery-cancelar').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const motivo = prompt('¿Por qué se cancela este delivery?');
+          if(motivo === null || !motivo.trim()) return;
+          try {
+            const res = await apiAdmin(`/admin/deliveries/${btn.dataset.id}/cancelar`, { method:'PATCH', body: JSON.stringify({ motivo: motivo.trim() }) });
+            const d = await res.json().catch(()=>({}));
+            if(res.ok){ mostrarBanner('#bannerDelivery','success','Delivery cancelado.'); await cargarDeliveries(); }
+            else { mostrarBanner('#bannerDelivery','error', d.mensaje || 'No se pudo cancelar.'); }
+          } catch(e){ mostrarBanner('#bannerDelivery','error','No pudimos conectar.'); }
+        });
+      });
+    } catch(err){ console.error('Error cargando deliveries:', err); }
+  }
+  function pedirDatosMensajero(){
+    return new Promise(resolve => {
+      const popup = document.createElement('div');
+      popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
+      popup.innerHTML = `
+        <div style="background:#fff;border-radius:14px;padding:24px;width:360px;max-width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);">
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:14px;">Asignar mensajero</div>
+          <label style="margin:0 0 5px;">Nombre del mensajero</label>
+          <input id="pmNombre" type="text" placeholder="Nombre completo" style="margin-bottom:12px;">
+          <label style="margin:0 0 5px;">Teléfono (opcional)</label>
+          <input id="pmTelefono" type="text" placeholder="6XXX-XXXX" style="margin-bottom:16px;">
+          <div style="display:flex;gap:8px;">
+            <button type="button" id="pmCancelar" style="flex:1;padding:10px;border:1px solid var(--line);background:#fff;border-radius:8px;font-weight:600;cursor:pointer;">Cancelar</button>
+            <button type="button" id="pmConfirmar" style="flex:1;padding:10px;border:0;background:var(--accent);color:#fff;border-radius:8px;font-weight:600;cursor:pointer;">Asignar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(popup);
+      popup.querySelector('#pmCancelar').onclick = () => { popup.remove(); resolve(null); };
+      popup.querySelector('#pmConfirmar').onclick = () => {
+        const nombre = popup.querySelector('#pmNombre').value.trim();
+        if(!nombre){ popup.querySelector('#pmNombre').style.borderColor = '#c0392b'; return; }
+        const telefono = popup.querySelector('#pmTelefono').value.trim();
+        popup.remove();
+        resolve({ mensajero_nombre: nombre, mensajero_telefono: telefono || undefined });
+      };
+    });
   }
   function pedirDatosCompra(c){
     return new Promise(resolve => {

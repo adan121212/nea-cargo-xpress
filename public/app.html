@@ -10,6 +10,8 @@
 <link rel="apple-touch-icon" href="/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   :root{
     --ink:#0c1b33;
@@ -1698,6 +1700,7 @@
           <button class="btn-ver-fotos" data-id="${p.id}" style="flex:1;margin-top:0;">📷 Ver fotos</button>
           ${(()=>{ const td=detectarTienda(p.numero_tracking)||p.tienda; const ur=urlRastreo(td,p.numero_tracking); return ur?`<a href="${ur}" target="_blank" rel="noopener" class="btn-rastrear">🔍 Rastrear</a>`:''; })()}
           ${p.estado==='prealertado'?`<button class="btn-eliminar-prealerta" data-id="${p.id}">🗑 Cancelar</button>`:''}
+          ${p.estado==='listo_para_retiro'?`<button class="btn-pedir-delivery" data-id="${p.id}" data-tienda="${escapeHtml(p.tienda)}" style="flex:1;margin-top:0;">🚚 Pedir delivery</button>`:''}
           ${p.estado==='entregado'?`<button class="btn-reportar-problema" data-id="${p.id}" data-tienda="${escapeHtml(p.tienda)}" style="flex:1;margin-top:0;">⚠️ Reportar problema</button>`:''}
           </div>
           <div class="mini-galeria" id="galeria-${p.id}" style="display:none;"></div>
@@ -1707,6 +1710,9 @@
 
     cont.querySelectorAll('.btn-ver-fotos').forEach(btn => {
       btn.addEventListener('click', () => toggleFotosPaquete(btn.dataset.id, btn));
+    });
+    cont.querySelectorAll('.btn-pedir-delivery').forEach(btn => {
+      btn.addEventListener('click', () => abrirModalDelivery(btn.dataset.id, btn.dataset.tienda));
     });
     cont.querySelectorAll('.btn-eliminar-prealerta').forEach(btn => btn.addEventListener('click', async () => {
       if(!confirm('¿Cancelar esta prealerta? El paquete se eliminará de tu lista.')) return;
@@ -1795,6 +1801,277 @@
       }
     };
   }
+
+  // ---- Modal de pedir delivery ----
+  const SUCURSAL_DELIVERY = { lat: 9.3422, lng: -79.8011 }; // Sabanitas, Colón
+  let mapaDeliveryListo = false, mapaDelivery, marcadorDelivery, debounceBusquedaDelivery = null;
+  let deliverySeleccion = { paqueteId: null, telefono: '', direccion: '', referencia: '', lat: null, lng: null, zonaNombre: null, zonaPrecio: 0 };
+
+  function abrirModalDelivery(paqueteId, tienda){
+    let modal = document.getElementById('modalDelivery');
+    if (!modal){
+      modal = document.createElement('div');
+      modal.id = 'modalDelivery';
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-box" style="max-width:400px;">
+          <h3 style="margin:0 0 4px;">🚚 Pedir delivery</h3>
+          <p class="modal-sub" id="delSub" style="font-size:13px;color:var(--ink-soft);margin:0 0 14px;"></p>
+
+          <div style="position:relative;margin-bottom:8px;">
+            <input type="text" id="delBuscador" placeholder="Busca tu calle, barrio o edificio..."
+                   style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;">
+            <div id="delResultados" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;
+                 border:1.5px solid var(--line);border-radius:8px;box-shadow:0 10px 24px rgba(12,27,51,.12);
+                 max-height:170px;overflow-y:auto;z-index:20;display:none;"></div>
+          </div>
+          <button type="button" id="delUsarUbicacion" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;
+                  border:1.5px dashed var(--accent);background:#fff6f0;color:var(--accent);border-radius:8px;
+                  padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px;">
+            📍 Usar mi ubicación actual
+          </button>
+
+          <div id="delMapa" style="width:100%;height:190px;border-radius:10px;margin-bottom:6px;border:1.5px solid var(--line);"></div>
+          <p style="font-size:10.5px;color:var(--ink-soft);text-align:center;margin:0 0 10px;">Puedes arrastrar el pin 📍 para ajustar el punto exacto</p>
+
+          <div id="delZonaBox" style="display:none;background:#fff6f0;border:1.5px solid var(--accent-glow);border-radius:8px;
+               padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div id="delZonaNombre" style="font-weight:700;font-size:13px;color:var(--ink);">—</div>
+              <div id="delZonaDesc" style="font-size:11px;color:var(--ink-soft);"></div>
+            </div>
+            <div id="delZonaPrecio" style="font-size:16px;font-weight:800;color:var(--accent);">—</div>
+          </div>
+
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Teléfono de contacto</label>
+          <input type="tel" id="delTelefono" placeholder="6XXX-XXXX" maxlength="9"
+                 style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;margin-bottom:10px;">
+
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Referencia (opcional)</label>
+          <textarea id="delReferencia" rows="2" placeholder="Portón negro, casa esquinera, apto 4B..."
+                    style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;margin-bottom:10px;"></textarea>
+
+          <div id="delResumen" style="display:none;background:var(--ink);color:#fff;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:13px;">
+            <div style="display:flex;justify-content:space-between;color:#c7cfe0;padding:2px 0;"><span>Flete del paquete</span><span id="delFlete">$0.00</span></div>
+            <div style="display:flex;justify-content:space-between;color:#c7cfe0;padding:2px 0;"><span>Delivery</span><span id="delDeliveryPrecio">$0.00</span></div>
+            <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14.5px;border-top:1px solid rgba(255,255,255,.15);margin-top:6px;padding-top:8px;"><span>Total</span><span id="delTotal" style="color:var(--accent);">$0.00</span></div>
+          </div>
+
+          <div id="delError" style="color:#c0392b;font-size:13px;margin-bottom:8px;display:none;"></div>
+          <div style="display:flex;gap:8px;">
+            <button type="button" id="delCancelar" style="flex:1;padding:11px;border:1px solid var(--line);background:#fff;border-radius:8px;font-weight:600;cursor:pointer;">Cancelar</button>
+            <button type="button" id="delEnviar" disabled style="flex:1;padding:11px;border:0;background:var(--accent);color:#fff;border-radius:8px;font-weight:600;cursor:pointer;opacity:.5;">Solicitar delivery</button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+      modal.querySelector('#delBuscador').addEventListener('input', busquedaDireccionDelivery);
+      modal.querySelector('#delUsarUbicacion').addEventListener('click', usarMiUbicacionDelivery);
+      modal.querySelector('#delTelefono').addEventListener('input', function(){
+        let v = this.value.replace(/\D/g,'').slice(0,8);
+        if (v.length > 4) v = v.slice(0,4) + '-' + v.slice(4);
+        this.value = v;
+        actualizarBotonDelivery();
+      });
+    }
+
+    deliverySeleccion = { paqueteId, telefono:'', direccion:'', referencia:'', lat:null, lng:null, zonaNombre:null, zonaPrecio:0 };
+    modal.querySelector('#delSub').textContent = `Paquete de ${tienda}`;
+    modal.querySelector('#delBuscador').value = '';
+    modal.querySelector('#delTelefono').value = '';
+    modal.querySelector('#delReferencia').value = '';
+    modal.querySelector('#delZonaBox').style.display = 'none';
+    modal.querySelector('#delResumen').style.display = 'none';
+    modal.querySelector('#delError').style.display = 'none';
+    modal.querySelector('#delEnviar').disabled = true;
+    modal.querySelector('#delEnviar').style.opacity = '.5';
+    modal.style.display = 'flex';
+
+    setTimeout(() => {
+      inicializarMapaDelivery();
+      if (mapaDelivery) mapaDelivery.invalidateSize();
+    }, 60);
+
+    modal.querySelector('#delCancelar').onclick = () => { modal.style.display = 'none'; };
+    modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+    // El flete se calcula en el servidor, pero lo mostramos aquí con la factura pendiente del cliente si está cargada
+    const factura = (facturasCache || []).find(f => String(f.paquete_id) === String(paqueteId) && f.estado !== 'anulada');
+    deliverySeleccion.fletePreview = factura ? Number(factura.total) : 0;
+
+    const btnEnviar = modal.querySelector('#delEnviar');
+    btnEnviar.onclick = async () => {
+      const err = modal.querySelector('#delError');
+      if (!deliverySeleccion.lat || !deliverySeleccion.zonaNombre){ err.textContent = 'Marca tu ubicación en el mapa.'; err.style.display = 'block'; return; }
+      const telefono = modal.querySelector('#delTelefono').value.replace(/\D/g,'');
+      if (telefono.length < 7){ err.textContent = 'Ingresa un teléfono de contacto válido.'; err.style.display = 'block'; return; }
+      btnEnviar.disabled = true; btnEnviar.textContent = 'Enviando…';
+      try {
+        const res = await apiAutenticado('/deliveries', {
+          method: 'POST',
+          body: JSON.stringify({
+            paquete_id: parseInt(paqueteId),
+            telefono: modal.querySelector('#delTelefono').value,
+            direccion_texto: deliverySeleccion.direccion || 'Punto marcado en el mapa',
+            referencia: modal.querySelector('#delReferencia').value.trim(),
+            latitud: deliverySeleccion.lat,
+            longitud: deliverySeleccion.lng,
+            zona_nombre: deliverySeleccion.zonaNombre,
+            zona_precio: deliverySeleccion.zonaPrecio,
+          })
+        });
+        if (res.ok){
+          modal.style.display = 'none';
+          alert('✓ Delivery solicitado. Te avisaremos cuando el mensajero esté en camino.');
+        } else {
+          const d = await res.json().catch(() => ({}));
+          err.textContent = d.mensaje || 'No se pudo solicitar el delivery.'; err.style.display = 'block';
+          btnEnviar.disabled = false; btnEnviar.textContent = 'Solicitar delivery';
+        }
+      } catch (e){
+        err.textContent = 'No pudimos conectar.'; err.style.display = 'block';
+        btnEnviar.disabled = false; btnEnviar.textContent = 'Solicitar delivery';
+      }
+    };
+  }
+
+  function inicializarMapaDelivery(){
+    if (mapaDeliveryListo) return;
+    mapaDelivery = L.map('delMapa', { zoomControl:false }).setView([SUCURSAL_DELIVERY.lat, SUCURSAL_DELIVERY.lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(mapaDelivery);
+    L.control.zoom({ position:'bottomright' }).addTo(mapaDelivery);
+
+    const iconoSucursal = L.divIcon({
+      className:'', html:'<div style="background:#0c1b33;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);">🏢</div>',
+      iconSize:[24,24], iconAnchor:[12,12]
+    });
+    L.marker([SUCURSAL_DELIVERY.lat, SUCURSAL_DELIVERY.lng], { icon: iconoSucursal, interactive:false })
+      .addTo(mapaDelivery).bindTooltip('Sucursal NEA — Sabanitas', { direction:'top' });
+
+    const iconoPin = L.divIcon({ className:'', html:'<div style="font-size:28px;transform:translateY(-6px);">📍</div>', iconSize:[28,28], iconAnchor:[14,28] });
+    marcadorDelivery = L.marker([SUCURSAL_DELIVERY.lat, SUCURSAL_DELIVERY.lng], { icon: iconoPin, draggable:true }).addTo(mapaDelivery);
+
+    marcadorDelivery.on('dragend', () => {
+      const p = marcadorDelivery.getLatLng();
+      actualizarZonaDelivery(p.lat, p.lng);
+      reverseGeocodeDelivery(p.lat, p.lng);
+    });
+    mapaDelivery.on('click', (e) => {
+      marcadorDelivery.setLatLng(e.latlng);
+      actualizarZonaDelivery(e.latlng.lat, e.latlng.lng);
+      reverseGeocodeDelivery(e.latlng.lat, e.latlng.lng);
+    });
+    mapaDeliveryListo = true;
+  }
+
+  function distanciaKmDelivery(lat1, lng1, lat2, lng2){
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180, dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function actualizarZonaDelivery(lat, lng){
+    const km = distanciaKmDelivery(SUCURSAL_DELIVERY.lat, SUCURSAL_DELIVERY.lng, lat, lng);
+    let nombre, precio;
+    if (km <= 1.5){ nombre='Cerca de la sucursal'; precio=3; }
+    else if (km <= 5){ nombre='Zona media'; precio=5; }
+    else { nombre='Zona extendida'; precio=8; }
+
+    deliverySeleccion.lat = lat; deliverySeleccion.lng = lng;
+    deliverySeleccion.zonaNombre = nombre; deliverySeleccion.zonaPrecio = precio;
+
+    const modal = document.getElementById('modalDelivery');
+    modal.querySelector('#delZonaNombre').textContent = nombre;
+    modal.querySelector('#delZonaDesc').textContent = `A ${km.toFixed(1)} km de la sucursal`;
+    modal.querySelector('#delZonaPrecio').textContent = '$' + precio.toFixed(2);
+    modal.querySelector('#delZonaBox').style.display = 'flex';
+
+    const flete = deliverySeleccion.fletePreview || 0;
+    modal.querySelector('#delFlete').textContent = '$' + flete.toFixed(2);
+    modal.querySelector('#delDeliveryPrecio').textContent = '$' + precio.toFixed(2);
+    modal.querySelector('#delTotal').textContent = '$' + (flete + precio).toFixed(2);
+    modal.querySelector('#delResumen').style.display = 'block';
+
+    actualizarBotonDelivery();
+  }
+
+  function actualizarBotonDelivery(){
+    const modal = document.getElementById('modalDelivery');
+    if (!modal) return;
+    const telOk = modal.querySelector('#delTelefono').value.replace(/\D/g,'').length >= 7;
+    const btn = modal.querySelector('#delEnviar');
+    const habilitado = telOk && !!deliverySeleccion.zonaNombre;
+    btn.disabled = !habilitado; btn.style.opacity = habilitado ? '1' : '.5';
+  }
+
+  async function reverseGeocodeDelivery(lat, lng){
+    const modal = document.getElementById('modalDelivery');
+    modal.querySelector('#delBuscador').value = 'Ubicando dirección...';
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
+      const data = await res.json();
+      const direccion = data.display_name || `Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`;
+      deliverySeleccion.direccion = direccion;
+      modal.querySelector('#delBuscador').value = direccion;
+    } catch (e){
+      deliverySeleccion.direccion = `Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`;
+      modal.querySelector('#delBuscador').value = deliverySeleccion.direccion;
+    }
+  }
+
+  function moverMapaADelivery(lat, lng, etiqueta){
+    mapaDelivery.setView([lat, lng], 16);
+    marcadorDelivery.setLatLng([lat, lng]);
+    actualizarZonaDelivery(lat, lng);
+    deliverySeleccion.direccion = etiqueta;
+    const modal = document.getElementById('modalDelivery');
+    modal.querySelector('#delBuscador').value = etiqueta;
+    modal.querySelector('#delResultados').style.display = 'none';
+  }
+
+  function busquedaDireccionDelivery(){
+    const texto = this.value.trim();
+    clearTimeout(debounceBusquedaDelivery);
+    const cont = document.getElementById('delResultados');
+    if (texto.length < 3){ cont.style.display = 'none'; return; }
+    debounceBusquedaDelivery = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(texto)}&countrycodes=pa&limit=5&addressdetails=1&viewbox=-79.95,9.45,-79.65,9.25`);
+        const data = await res.json();
+        cont.innerHTML = '';
+        if (data.length === 0){
+          cont.innerHTML = '<div style="padding:9px 12px;font-size:12px;color:var(--ink-soft);">Sin resultados</div>';
+        } else {
+          data.forEach(lugar => {
+            const item = document.createElement('div');
+            item.style.cssText = 'padding:9px 12px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--line);';
+            item.textContent = lugar.display_name;
+            item.onmouseenter = () => item.style.background = '#fff6f0';
+            item.onmouseleave = () => item.style.background = '';
+            item.onclick = () => moverMapaADelivery(parseFloat(lugar.lat), parseFloat(lugar.lon), lugar.display_name);
+            cont.appendChild(item);
+          });
+        }
+        cont.style.display = 'block';
+      } catch (e){ /* silencioso */ }
+    }, 450);
+  }
+
+  function usarMiUbicacionDelivery(){
+    if (!navigator.geolocation){ alert('Tu navegador no permite compartir ubicación.'); return; }
+    const btn = document.getElementById('delUsarUbicacion');
+    const original = btn.textContent;
+    btn.textContent = '📍 Ubicando...';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        moverMapaADelivery(pos.coords.latitude, pos.coords.longitude, 'Ubicando dirección...');
+        reverseGeocodeDelivery(pos.coords.latitude, pos.coords.longitude);
+        btn.textContent = original;
+      },
+      () => { alert('No pudimos obtener tu ubicación. Búscala manualmente arriba.'); btn.textContent = original; }
+    );
+  }
+
 
   async function toggleFotosPaquete(id, btn){
     const galeria = document.getElementById(`galeria-${id}`);
