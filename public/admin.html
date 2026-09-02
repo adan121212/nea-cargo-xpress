@@ -407,6 +407,13 @@
   }
   .ft-pago-btn:hover{ border-color: var(--ink-soft); }
   .ft-pago-btn.selected{ border-color: var(--accent); background:#fff8f3; color: var(--accent); }
+  .ft-efectivo-box{ margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); }
+  .ft-efectivo-box label{ font-size:11.5px; font-weight:700; color: var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; }
+  .ft-efectivo-box input{ width:100%; padding:8px 10px; border:1.5px solid var(--line); border-radius:8px; font-size:14px; margin-top:4px; box-sizing:border-box; }
+  .ft-efectivo-box input:focus{ outline:none; border-color: var(--accent); }
+  .ft-vuelto-row{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:14px; font-weight:700; }
+  .ft-vuelto-row.negativo span:last-child{ color:#dc2626; }
+  .ft-vuelto-row.positivo span:last-child{ color:#16a34a; }
   .fac-grid-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
   .fac-grid-titulo{ font-family: var(--font-display); font-size:16px; display:flex; align-items:center; gap:8px; }
   .fac-badge-count{ background: var(--accent); color:#fff; font-size:11px; font-weight:700; padding:2px 7px; border-radius:20px; font-family: var(--font-body); }
@@ -882,6 +889,13 @@
               <button type="button" class="ft-pago-btn" data-metodo="tarjeta">💳 Tarjeta</button>
               <button type="button" class="ft-pago-btn" data-metodo="transferencia">🏦 Transferencia</button>
               <button type="button" class="ft-pago-btn" data-metodo="yappy">📱 Yappy</button>
+            </div>
+            <div class="ft-efectivo-box" id="ftEfectivoBox" style="display:none;">
+              <label for="ftMontoRecibido">Monto recibido</label>
+              <input type="number" id="ftMontoRecibido" step="0.01" min="0" placeholder="0.00" inputmode="decimal">
+              <div class="ft-vuelto-row" id="ftVueltoRow">
+                <span>Vuelto</span><span class="mono" id="ftVuelto">$0.00</span>
+              </div>
             </div>
             <button class="btn-primary" id="btnGenerarFacturas" disabled style="width:100%;margin-top:10px;">
               <span class="spinner"></span><span>Generar y cobrar</span>
@@ -2336,7 +2350,7 @@
         const fecha=new Date(f.fecha_creacion).toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});
         const yaEntregado=f.paquete_estado==='entregado';
         const esDelCliente = !clienteActual || f.cliente_email === clienteActual;
-        return `<div class="fac-grid-row" data-factura-pendiente="${f.id}" data-paquete-id="${f.paquete_id}" data-ya-entregado="${yaEntregado}" style="${!esDelCliente?'opacity:.35;pointer-events:none;':''}">
+        return `<div class="fac-grid-row" data-factura-pendiente="${f.id}" data-paquete-id="${f.paquete_id}" data-ya-entregado="${yaEntregado}" data-total="${Number(f.total)}" style="${!esDelCliente?'opacity:.35;pointer-events:none;':''}">
           <div class="fac-num">${escapeHtml(f.numero_factura)}</div>
           <div><div class="fac-cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</div><div class="fac-casillero">${escapeHtml(f.cliente_email)}</div></div>
           <div><div style="font-weight:500;font-size:13px;">${escapeHtml(f.tienda)}</div><div class="fac-tracking">#${escapeHtml(f.numero_tracking)}</div>${!yaEntregado?'<div style="font-size:11px;color:#d97706;margin-top:2px;">📦 pendiente entrega</div>':''}</div>
@@ -2350,7 +2364,7 @@
         const yaEntregado=item.dataset.yaEntregado==='true';
         btn.addEventListener('click', async () => {
           const facturaId=item.dataset.facturaPendiente, paqueteId=item.dataset.paqueteId;
-          const metodoPago=await pedirMetodoPago(btn);
+          const metodoPago=await pedirMetodoPago(btn, parseFloat(item.dataset.total||0));
           if(!metodoPago) return;
           if(!yaEntregado){ abrirModalFirma({paqueteId,facturaId,metodoPago,item,btnOriginal:btn,textoOriginal:'Cobrar y entregar'}); return; }
           btn.disabled=true; btn.textContent='Procesando…';
@@ -2364,10 +2378,10 @@
       });
     } catch(err){ cont.innerHTML=''; }
   }
-  let facturadorMetodoPago='', facturadorCliente=null, facturadorTarifas=[];
+  let facturadorMetodoPago='', facturadorCliente=null, facturadorTarifas=[], ftTotalNum=0;
   function renderResultadoMostrador(cliente, paquetes, facturasPendientes, autorizados){
     const cont=$('#resultadoMostrador');
-    facturadorCliente=cliente; facturadorMetodoPago='';
+    facturadorCliente=cliente; facturadorMetodoPago=''; $('#ftMontoRecibido').value=''; $('#ftEfectivoBox').style.display='none';
     let html=`<div class="cliente-card" style="display:flex;justify-content:space-between;align-items:center;"><div><div class="nombre">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</div><div class="detalle">${escapeHtml(cliente.email)} · Casillero <span>${escapeHtml(cliente.numero_casillero)}</span>${cliente.telefono?' · '+escapeHtml(cliente.telefono):''}</div></div><div class="stats">${paquetes.length}<small>paquetes</small></div></div>`;
     const sinFacturaTodos=paquetes.filter(p=>!p.factura_id||p.factura_estado==='anulada');
     const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||p.peso_lb||0)>0&&Number(p.valor_declarado||0)>0);
@@ -2388,7 +2402,8 @@
       pkg.querySelector('input').addEventListener('change',()=>{ pkg.classList.toggle('selected',pkg.querySelector('input').checked); recalcularTotales(); });
     });
     $('#btnSelectAll').addEventListener('click',()=>{ const pkgs=cont.querySelectorAll('.ft-pkg'); const allChecked=[...pkgs].every(p=>p.querySelector('input').checked); pkgs.forEach(p=>{ p.querySelector('input').checked=!allChecked; p.classList.toggle('selected',!allChecked); }); recalcularTotales(); });
-    document.querySelectorAll('.ft-pago-btn').forEach(btn=>{ btn.addEventListener('click',()=>{ document.querySelectorAll('.ft-pago-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); facturadorMetodoPago=btn.dataset.metodo; actualizarBotonGenerar(); }); });
+    document.querySelectorAll('.ft-pago-btn').forEach(btn=>{ btn.addEventListener('click',()=>{ document.querySelectorAll('.ft-pago-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); facturadorMetodoPago=btn.dataset.metodo; mostrarOcultarEfectivoBox(); actualizarBotonGenerar(); }); });
+    $('#ftMontoRecibido').addEventListener('input', actualizarVuelto);
     $('#btnGenerarFacturas').onclick=generarFacturasLote;
     $('#facturadorResumen').style.display='block'; $('#facturadorResultado').style.display='none';
     recalcularTotales();
@@ -2411,10 +2426,38 @@
   function recalcularTotales(){
     let envio=0,manejo=0,seguro=0,cant=0;
     document.querySelectorAll('.ft-pkg').forEach(p=>{ if(p.querySelector('input').checked){ envio+=parseFloat(p.dataset.envio||0); manejo+=parseFloat(p.dataset.manejo||0); seguro+=parseFloat(p.dataset.seguro||0); cant++; } });
-    $('#ftFlete').textContent='$'+envio.toFixed(2); $('#ftManejo').textContent='$'+manejo.toFixed(2); $('#ftSeguro').textContent='$'+seguro.toFixed(2); $('#ftCant').textContent=cant; $('#ftTotal').textContent='$'+(envio+manejo+seguro).toFixed(2);
+    ftTotalNum=envio+manejo+seguro;
+    $('#ftFlete').textContent='$'+envio.toFixed(2); $('#ftManejo').textContent='$'+manejo.toFixed(2); $('#ftSeguro').textContent='$'+seguro.toFixed(2); $('#ftCant').textContent=cant; $('#ftTotal').textContent='$'+ftTotalNum.toFixed(2);
+    actualizarVuelto();
     actualizarBotonGenerar();
   }
-  function actualizarBotonGenerar(){ const cant=parseInt($('#ftCant').textContent)||0; $('#btnGenerarFacturas').disabled=cant===0||!facturadorMetodoPago; }
+  function mostrarOcultarEfectivoBox(){
+    const esEfectivo=facturadorMetodoPago==='efectivo';
+    $('#ftEfectivoBox').style.display=esEfectivo?'block':'none';
+    if(!esEfectivo){ $('#ftMontoRecibido').value=''; }
+    actualizarVuelto();
+  }
+  function actualizarVuelto(){
+    const fila=$('#ftVueltoRow');
+    if(facturadorMetodoPago!=='efectivo'){ fila.classList.remove('negativo','positivo'); $('#ftVuelto').textContent='$0.00'; return; }
+    const recibido=parseFloat($('#ftMontoRecibido').value)||0;
+    const vuelto=recibido-ftTotalNum;
+    $('#ftVuelto').textContent='$'+Math.abs(vuelto).toFixed(2);
+    fila.classList.remove('negativo','positivo');
+    if(recibido===0){ /* sin marcar aún */ }
+    else if(vuelto<0){ fila.classList.add('negativo'); $('#ftVuelto').textContent='Faltan $'+Math.abs(vuelto).toFixed(2); }
+    else { fila.classList.add('positivo'); }
+    actualizarBotonGenerar();
+  }
+  function actualizarBotonGenerar(){
+    const cant=parseInt($('#ftCant').textContent)||0;
+    let bloqueadoPorEfectivo=false;
+    if(facturadorMetodoPago==='efectivo'){
+      const recibido=parseFloat($('#ftMontoRecibido').value)||0;
+      bloqueadoPorEfectivo = recibido < ftTotalNum;
+    }
+    $('#btnGenerarFacturas').disabled = cant===0 || !facturadorMetodoPago || bloqueadoPorEfectivo;
+  }
   async function generarFacturasLote(){
     const btn=$('#btnGenerarFacturas');
     const seleccionados=[...document.querySelectorAll('.ft-pkg')].filter(p=>p.querySelector('input').checked);
@@ -2432,7 +2475,7 @@
     if(resultados.length>0){
       const totalCobrado=$('#ftTotal').textContent;
       mostrarBanner('#bannerMostrador','success',`✓ ${resultados.map(f=>f.numero_factura).join(', ')} · ${totalCobrado} · ${facturadorMetodoPago}`);
-      setTimeout(()=>{ $('#resultadoMostrador').innerHTML=''; $('#facturadorResumen').style.display='none'; $('#facturadorResultado').style.display='none'; $('#bannerMostrador').innerHTML=''; $('#mostradorQ').value=''; facturadorMetodoPago=''; document.querySelectorAll('.ft-pago-btn').forEach(b=>b.classList.remove('selected')); $('#mostradorQ').focus(); }, 3000);
+      setTimeout(()=>{ $('#resultadoMostrador').innerHTML=''; $('#facturadorResumen').style.display='none'; $('#facturadorResultado').style.display='none'; $('#bannerMostrador').innerHTML=''; $('#mostradorQ').value=''; facturadorMetodoPago=''; $('#ftMontoRecibido').value=''; $('#ftEfectivoBox').style.display='none'; document.querySelectorAll('.ft-pago-btn').forEach(b=>b.classList.remove('selected')); $('#mostradorQ').focus(); }, 3000);
       cargarPendientesMostrador();
     }
     if(errores>0) mostrarBanner('#bannerMostrador','error',errores+' factura(s) no se pudieron generar.');
@@ -2486,14 +2529,51 @@
       popup.querySelector('#popTarifaCancelar').addEventListener('click', () => { popup.remove(); resolve(null); });
     });
   }
-  function pedirMetodoPago(btnOrigen){
+  function pedirMetodoPago(btnOrigen, totalMonto){
+    totalMonto=Number(totalMonto)||0;
     return new Promise(resolve=>{
       const popup=document.createElement('div');
       popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;';
-      popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px 24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,.25);"><div style="font-weight:700;font-size:15px;margin-bottom:14px;">Método de pago</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;"><button class="pop-pay" data-m="efectivo" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">💵 Efectivo</button><button class="pop-pay" data-m="tarjeta" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">💳 Tarjeta</button><button class="pop-pay" data-m="transferencia" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">🏦 Transferencia</button><button class="pop-pay" data-m="yappy" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">📱 Yappy</button></div><button id="popCancelar" style="width:100%;padding:9px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:13px;color:#6b7280;">Cancelar</button></div>`;
+      const cerrar=(valor)=>{ popup.remove(); resolve(valor); };
+      const pintarPasoMetodos=()=>{
+        popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px 24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,.25);"><div style="font-weight:700;font-size:15px;margin-bottom:14px;">Método de pago</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;"><button class="pop-pay" data-m="efectivo" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">💵 Efectivo</button><button class="pop-pay" data-m="tarjeta" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">💳 Tarjeta</button><button class="pop-pay" data-m="transferencia" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">🏦 Transferencia</button><button class="pop-pay" data-m="yappy" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">📱 Yappy</button></div><button id="popCancelar" style="width:100%;padding:9px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:13px;color:#6b7280;">Cancelar</button></div>`;
+        popup.querySelectorAll('.pop-pay').forEach(b=>{
+          b.addEventListener('click',()=>{
+            if(b.dataset.m==='efectivo' && totalMonto>0){ pintarPasoEfectivo(); }
+            else { cerrar(b.dataset.m); }
+          });
+        });
+        popup.querySelector('#popCancelar').addEventListener('click',()=>cerrar(null));
+      };
+      const pintarPasoEfectivo=()=>{
+        popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px 24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,.25);">
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px;">💵 Cobro en efectivo</div>
+          <div style="font-size:12.5px;color:#6b7280;margin-bottom:14px;">Total a cobrar: <strong>$${totalMonto.toFixed(2)}</strong></div>
+          <label style="font-size:11.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;">Monto recibido</label>
+          <input type="number" id="popMontoRecibido" step="0.01" min="0" placeholder="0.00" inputmode="decimal" style="width:100%;padding:9px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box;">
+          <div id="popVueltoRow" style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:14px;font-weight:700;">
+            <span>Vuelto</span><span id="popVuelto" class="mono">$0.00</span>
+          </div>
+          <button id="popConfirmarEfectivo" disabled style="width:100%;margin-top:16px;padding:10px;border-radius:8px;border:none;background:#ff6a1a;color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;opacity:.5;">Confirmar cobro</button>
+          <button id="popVolver" style="width:100%;margin-top:8px;padding:8px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:12.5px;color:#6b7280;">Atrás</button>
+        </div>`;
+        const inputMonto=popup.querySelector('#popMontoRecibido');
+        const btnConfirmar=popup.querySelector('#popConfirmarEfectivo');
+        inputMonto.addEventListener('input',()=>{
+          const recibido=parseFloat(inputMonto.value)||0;
+          const vuelto=recibido-totalMonto;
+          const fila=popup.querySelector('#popVueltoRow'), spanVuelto=popup.querySelector('#popVuelto');
+          if(vuelto<0){ spanVuelto.textContent='Faltan $'+Math.abs(vuelto).toFixed(2); spanVuelto.style.color='#dc2626'; }
+          else { spanVuelto.textContent='$'+vuelto.toFixed(2); spanVuelto.style.color='#16a34a'; }
+          const habilitado = recibido>=totalMonto && recibido>0;
+          btnConfirmar.disabled=!habilitado; btnConfirmar.style.opacity=habilitado?'1':'.5';
+        });
+        btnConfirmar.addEventListener('click',()=>cerrar('efectivo'));
+        popup.querySelector('#popVolver').addEventListener('click',pintarPasoMetodos);
+        setTimeout(()=>inputMonto.focus(),50);
+      };
       document.body.appendChild(popup);
-      popup.querySelectorAll('.pop-pay').forEach(b=>{ b.addEventListener('click',()=>{ popup.remove(); resolve(b.dataset.m); }); });
-      popup.querySelector('#popCancelar').addEventListener('click',()=>{ popup.remove(); resolve(null); });
+      pintarPasoMetodos();
     });
   }
   let entregaPendiente=null, dibujando=false, firmaTieneTrazo=false;
@@ -3709,7 +3789,8 @@
       });
       cont.querySelectorAll('.btn-compra-pagada').forEach(btn => {
         btn.addEventListener('click', async () => {
-          const metodo = await pedirMetodoPago(btn);
+          const c = compras.find(x => String(x.id) === btn.dataset.id);
+          const metodo = await pedirMetodoPago(btn, c ? Number(c.total_cobrado) : 0);
           if(!metodo) return;
           btn.disabled = true; btn.textContent = 'Procesando…';
           try {
