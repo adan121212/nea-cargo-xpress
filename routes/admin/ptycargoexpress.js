@@ -161,11 +161,15 @@ router.get('/paquetes', async (req, res) => {
       },
       body: body.toString(),
     });
+    // OJO: nunca usar status 401/403 aquí. En este proyecto esos códigos
+    // los intercepta apiAdmin() en el frontend y los trata como "tu sesión
+    // de NEA expiró" (cierra sesión y tapa el mensaje real). Estos errores
+    // son de la sesión de PTY Cargo, no de la del admin — van con 503/502.
     if (response.status === 401 || response.status === 403) {
       const detalle401 = sesionAutomatica
-        ? 'PTY Cargo rechazó la sesión automática (401). Revisa que PTY_USUARIO/PTY_PASSWORD en Render sean correctos.'
-        : 'Sesión PTY expirada o inválida (401). Actualiza PTY_PHPSESSID en Render.';
-      return res.status(401).json({ mensaje: detalle401 });
+        ? 'PTY Cargo rechazó la sesión automática. Revisa que PTY_USUARIO/PTY_PASSWORD en Render sean correctos.'
+        : 'Sesión PTY expirada o inválida. Actualiza PTY_PHPSESSID en Render.';
+      return res.status(503).json({ mensaje: detalle401 });
     }
     if (!response.ok) {
       return res.status(502).json({ mensaje: `PTY Cargo respondió con error ${response.status}.` });
@@ -175,7 +179,7 @@ router.get('/paquetes', async (req, res) => {
       const detalle = sesionAutomatica
         ? 'La sesión automática no funcionó. Revisa PTY_USUARIO/PTY_PASSWORD en Render.'
         : 'Sesión PTY expirada. Actualiza PTY_PHPSESSID en Render.';
-      return res.status(401).json({ mensaje: detalle });
+      return res.status(503).json({ mensaje: detalle });
     }
     const items = data.data?.items || [];
     // Comparar con paquetes que ya existen en NEA
