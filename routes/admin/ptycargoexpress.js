@@ -1,4 +1,5 @@
 const express = require('express');
+const cheerio = require('cheerio');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const pool = require('../../db');
@@ -10,18 +11,111 @@ const PTY_BASE = 'https://carga.ptycargoexpress.com';
 const PTY_TRACK_URL = `${PTY_BASE}/ajax.php`;
 const PTY_RASTREO_URL = 'https://ptycargoexpress.com/track/aut_log_consulta.php';
 
-// Obtener PHPSESSID desde variable de entorno
+// Obtener PHPSESSID desde variable de entorno (respaldo manual, opcional)
 function getSesion() {
   return process.env.PTY_PHPSESSID || '';
 }
 
-// --- GET /api/admin/pty/paquetes ---
-// Trae la lista de paquetes desde PTY Cargo Express
-router.get('/paquetes', async (req, res) => {
-  // Aceptar sesión desde el query (enviada desde el frontend) o desde variable de entorno
-  const sesion = req.query.sesion || getSesion();
+// Extrae el PHPSESSID de las cabeceras Set-Cookie de una respuesta fetch,
+// soportando tanto getSetCookie() (Node 18.14+) como el fallback de un solo header.
+function extraerPhpSessId(headers) {
+  let cookies = [];
+  if (typeof headers.getSetCookie === 'function') {
+    cookies = headers.getSetCookie();
+  } else {
+    const raw = headers.get('set-cookie');
+    if (raw) cookies = [raw];
+  }
+  for (const c of cookies) {
+    const m = c.match(/PHPSESSID=([^;]+)/);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+// Inicia sesión en PTY Cargo Express usando usuario/contraseña guardados en
+// variables de entorno (PTY_USUARIO / PTY_PASSWORD). Lee el formulario de
+// login real de la página (sin adivinar nombres de campos a ciegas): toma
+// el primer input visible como usuario y el input type=password como
+// contraseña, conservando cualquier campo oculto (token CSRF, etc.).
+async function iniciarSesionPTY() {
+  const usuario = process.env.PTY_USUARIO;
+  const contrasena = process.env.PTY_PASSWORD;
+  if (!usuario || !contrasena) {
+    throw new Error('Faltan PTY_USUARIO / PTY_PASSWORD en las variables de entorno.');
+  }
+
+  // 1) Pedimos la página principal; si no hay sesión, PTY normalmente
+  //    responde directo con el formulario de login (o redirige a él).
+  const resInicio = await fetch(`${PTY_BASE}/`, { redirect: 'follow' });
+  const htmlInicio = await resInicio.text();
+  const $ = cheerio.load(htmlInicio);
+
+  const form = $('form').filter((i, el) => $(el).find('input[type="password"]').length > 0).first();
+  if (form.length === 0) {
+    throw new Error('No se encontró el formulario de login en la página de PTY Cargo (puede que ya haya cambiado de diseño).');
+  }
+
+  const accion = form.attr('action') || resInicio.url;
+  const urlAccion = new URL(accion, resInicio.url).toString();
+  const metodo = (form.attr('method') || 'POST').toUpperCase();
+
+  const datos = new URLSearchParams();
+  let campoUsuarioLlenado = false;
+  form.find('input').each((i, el) => {
+    const $el = $(el);
+    const name = $el.attr('name');
+    if (!name) return;
+    const tipo = ($el.attr('type') || 'text').toLowerCase();
+    if (tipo === 'password') {
+      datos.set(name, contrasena);
+    } else if (tipo === 'submit' || tipo === 'button') {
+      // no enviar botones
+    } else if (tipo === 'text' || tipo === 'email' || !campoUsuarioLlenado && tipo !== 'hidden' && tipo !== 'checkbox' && tipo !== 'radio') {
+      datos.set(name, usuario);
+      campoUsuarioLlenado = true;
+    } else {
+      datos.set(name, $el.attr('value') || '');
+    }
+  });
+
+  if (!campoUsuarioLlenado) {
+    throw new Error('No se encontró un campo de usuario/correo en el formulario de login de PTY Cargo.');
+  }
+
+  const resLogin = await fetch(urlAccion, {
+    method: metodo,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      'Referer': resInicio.url,
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    },
+    body: datos.toString(),
+    redirect: 'manual',
+  });
+
+  const sesion = extraerPhpSessId(resLogin.headers);
   if (!sesion) {
-    return res.status(503).json({ mensaje: 'Pega el PHPSESSID en el campo de sesión del panel PTY.' });
+    throw new Error('PTY Cargo no devolvió una sesión válida. Revisa que PTY_USUARIO/PTY_PASSWORD sean correctos.');
+  }
+  return sesion;
+}
+
+// --- GET /api/admin/pty/paquetes ---
+// Trae la lista de paquetes desde PTY Cargo Express. Si no hay una sesión
+// manual (PTY_PHPSESSID) configurada, inicia sesión sola con PTY_USUARIO /
+// PTY_PASSWORD — el admin no tiene que copiar ningún PHPSESSID a mano.
+router.get('/paquetes', async (req, res) => {
+  let sesion = req.query.sesion || getSesion();
+  let sesionAutomatica = false;
+  if (!sesion) {
+    try {
+      sesion = await iniciarSesionPTY();
+      sesionAutomatica = true;
+    } catch (err) {
+      console.error('Error iniciando sesión automática en PTY:', err);
+      return res.status(503).json({ mensaje: 'No se pudo iniciar sesión automática en PTY Cargo: ' + err.message });
+    }
   }
   const pagina = parseInt(req.query.pagina) || 1;
   const porPagina = parseInt(req.query.porPagina) || 100;
@@ -56,7 +150,10 @@ router.get('/paquetes', async (req, res) => {
     }
     const data = await response.json();
     if (!data.success) {
-      return res.status(401).json({ mensaje: 'Sesión PTY expirada. Actualiza PTY_PHPSESSID en Render.' });
+      const detalle = sesionAutomatica
+        ? 'La sesión automática no funcionó. Revisa PTY_USUARIO/PTY_PASSWORD en Render.'
+        : 'Sesión PTY expirada. Actualiza PTY_PHPSESSID en Render.';
+      return res.status(401).json({ mensaje: detalle });
     }
     const items = data.data?.items || [];
     // Comparar con paquetes que ya existen en NEA
@@ -74,6 +171,7 @@ router.get('/paquetes', async (req, res) => {
       total: data.data?.total || items.length,
       paginas: data.data?.paginas || 1,
       pagina,
+      sesion_automatica: sesionAutomatica,
     });
   } catch (err) {
     console.error('Error consultando PTY Cargo Express:', err);

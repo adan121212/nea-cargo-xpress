@@ -1428,8 +1428,24 @@
     <!-- ---- TAB: PTY Cargo Express ---- -->
     <div class="card tab-panel" id="tabPty" style="display:none;">
       <h2 style="margin:0 0 4px;">🚢 PTY Cargo Express</h2>
-      <p class="card-sub" style="margin:0 0 22px;">Copia la lista de paquetes desde PTY Cargo y égala aquí. Solo se importan los paquetes con estado <strong>EN BODEGA</strong>. Los demás se omiten automáticamente.</p>
+      <p class="card-sub" style="margin:0 0 22px;">Sincroniza automáticamente o copia la lista a mano. Solo se importan los paquetes con estado <strong>EN BODEGA</strong>. Los demás se omiten automáticamente.</p>
       <div class="banner" id="bannerPtyTexto"></div>
+
+      <div style="background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-weight:700;font-size:14px;">🔄 Sincronización automática</div>
+            <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">Entra a PTY Cargo solo, sin que tengas que copiar nada.</div>
+          </div>
+          <button class="btn-primary" id="btnSincronizarPty" style="width:auto;">
+            <span class="spinner"></span><span>🔄 Sincronizar con PTY Cargo</span>
+          </button>
+        </div>
+      </div>
+
+      <details style="margin-bottom:16px;">
+        <summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--ink-soft);">O pega la lista a mano (respaldo manual)</summary>
+        <div style="margin-top:14px;">
       <textarea id="ptyTexto" rows="10" placeholder="Pega aquí la lista de paquetes de PTY Cargo… Solo se importan los EN BODEGA." style="width:100%;padding:14px;border:1.5px solid var(--line);border-radius:10px;font-family:var(--font-mono);font-size:12px;color:var(--ink);background:var(--panel);resize:vertical;line-height:1.7;margin-bottom:12px;"></textarea>
       <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
         <button class="btn-primary" id="btnProcesarTexto" style="width:auto;">
@@ -1437,6 +1453,8 @@
         </button>
         <div id="ptyTextoResumen" style="font-size:12.5px;color:var(--ink-soft);"></div>
       </div>
+        </div>
+      </details>
       <!-- Preview de paquetes detectados -->
       <div id="ptyPreview" style="display:none;">
         <div style="overflow-x:auto;margin-bottom:14px;">
@@ -3561,15 +3579,8 @@
     const importables = todos.filter(p => p.estado === 'en_bodega_miami');
     $('#ptyTextoResumen').textContent = todos.length + ' paquetes · ' + importables.length + ' en bodega · ' + (todos.length - importables.length) + ' otros';
   });
-  $('#btnProcesarTexto').addEventListener('click', async () => {
-    const texto = $('#ptyTexto').value.trim();
-    if(!texto){ mostrarBanner('#bannerPtyTexto','error','Pega el texto de PTY primero.'); return; }
-    const todos = parsearTextoPTY(texto);
-    const importables = todos.filter(p => p.estado === 'en_bodega_miami');
-    if(!importables.length){ mostrarBanner('#bannerPtyTexto','error','No hay paquetes EN BODEGA en el texto.'); return; }
-    const btn = $('#btnProcesarTexto');
-    setCargando(btn, true);
-    mostrarBanner('#bannerPtyTexto','','');
+  async function mostrarPreviewPty(importables){
+    if(!importables.length){ mostrarBanner('#bannerPtyTexto','error','No hay paquetes EN BODEGA para importar.'); return; }
     try {
       const trackings = importables.map(p => p.tracking);
       const chkRes = await apiAdmin('/admin/pty/verificar', { method:'POST', body: JSON.stringify({ trackings }) });
@@ -3601,6 +3612,47 @@
       $('#ptyTextoResumen').textContent = importables.length + ' en bodega · ' + nuevos.length + ' nuevos · ' + (importables.length - nuevos.length) + ' ya en NEA';
     } catch(err){
       mostrarBanner('#bannerPtyTexto','error','No pudimos conectar.');
+    }
+  }
+  $('#btnProcesarTexto').addEventListener('click', async () => {
+    const texto = $('#ptyTexto').value.trim();
+    if(!texto){ mostrarBanner('#bannerPtyTexto','error','Pega el texto de PTY primero.'); return; }
+    const todos = parsearTextoPTY(texto);
+    const importables = todos.filter(p => p.estado === 'en_bodega_miami');
+    if(!importables.length){ mostrarBanner('#bannerPtyTexto','error','No hay paquetes EN BODEGA en el texto.'); return; }
+    const btn = $('#btnProcesarTexto');
+    setCargando(btn, true);
+    mostrarBanner('#bannerPtyTexto','','');
+    await mostrarPreviewPty(importables);
+    setCargando(btn, false);
+  });
+  $('#btnSincronizarPty').addEventListener('click', async () => {
+    const btn = $('#btnSincronizarPty');
+    setCargando(btn, true);
+    mostrarBanner('#bannerPtyTexto','','');
+    try {
+      const res = await apiAdmin('/admin/pty/paquetes');
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok){
+        mostrarBanner('#bannerPtyTexto','error', data.mensaje || 'No se pudo sincronizar con PTY Cargo.');
+        return;
+      }
+      const items = data.paquetes || [];
+      // Normalizamos al mismo formato que produce el pegado manual de texto
+      const importables = items
+        .filter(p => p.Status === 'En Bodega')
+        .map(p => ({
+          tracking: p.TrackingNum, whr: p.WHR || '', consignatario: p.Consignatario || '',
+          referencias: p.Referencias || '', peso: p.Peso ? parseFloat(p.Peso) : null,
+          estado: 'en_bodega_miami',
+        }));
+      if(!importables.length){
+        mostrarBanner('#bannerPtyTexto','success','✓ Sincronizado — no hay paquetes en bodega pendientes por ahora.');
+        return;
+      }
+      await mostrarPreviewPty(importables);
+    } catch(err){
+      mostrarBanner('#bannerPtyTexto','error','No pudimos conectar con PTY Cargo.');
     } finally { setCargando(btn, false); }
   });
   $('#btnImportarTexto').addEventListener('click', async () => {
