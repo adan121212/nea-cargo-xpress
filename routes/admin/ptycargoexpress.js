@@ -51,6 +51,13 @@ async function iniciarSesionPTY() {
   const htmlInicio = await resInicio.text();
   const $ = cheerio.load(htmlInicio);
 
+  // Guardamos la sesión (PHPSESSID) que PTY nos da desde esta primera
+  // visita: el login normalmente se valida sobre ESA misma sesión, no
+  // sobre una nueva. Si no la reenviamos en el POST de abajo, PTY puede
+  // procesar el usuario/contraseña "sueltos" y nunca marcar la sesión
+  // como autenticada, aunque no devuelva ningún error en el momento.
+  const sesionInicial = extraerPhpSessId(resInicio.headers);
+
   const form = $('form').filter((i, el) => $(el).find('input[type="password"]').length > 0).first();
   if (form.length === 0) {
     throw new Error('No se encontró el formulario de login en la página de PTY Cargo (puede que ya haya cambiado de diseño).');
@@ -83,18 +90,27 @@ async function iniciarSesionPTY() {
     throw new Error('No se encontró un campo de usuario/correo en el formulario de login de PTY Cargo.');
   }
 
+  const headersLogin = {
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Referer': resInicio.url,
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  };
+  // Reenviamos la cookie de la sesión inicial para que el login se valide
+  // sobre esa misma sesión (ver nota arriba).
+  if (sesionInicial) {
+    headersLogin['Cookie'] = `PHPSESSID=${sesionInicial}`;
+  }
+
   const resLogin = await fetch(urlAccion, {
     method: metodo,
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      'Referer': resInicio.url,
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    },
+    headers: headersLogin,
     body: datos.toString(),
     redirect: 'manual',
   });
 
-  const sesion = extraerPhpSessId(resLogin.headers);
+  // Si el login no devuelve una cookie nueva, es porque PTY conserva la
+  // misma sesión inicial (ya autenticada) — usamos esa.
+  const sesion = extraerPhpSessId(resLogin.headers) || sesionInicial;
   if (!sesion) {
     throw new Error('PTY Cargo no devolvió una sesión válida. Revisa que PTY_USUARIO/PTY_PASSWORD sean correctos.');
   }
@@ -145,6 +161,12 @@ router.get('/paquetes', async (req, res) => {
       },
       body: body.toString(),
     });
+    if (response.status === 401 || response.status === 403) {
+      const detalle401 = sesionAutomatica
+        ? 'PTY Cargo rechazó la sesión automática (401). Revisa que PTY_USUARIO/PTY_PASSWORD en Render sean correctos.'
+        : 'Sesión PTY expirada o inválida (401). Actualiza PTY_PHPSESSID en Render.';
+      return res.status(401).json({ mensaje: detalle401 });
+    }
     if (!response.ok) {
       return res.status(502).json({ mensaje: `PTY Cargo respondió con error ${response.status}.` });
     }
