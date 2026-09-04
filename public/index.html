@@ -482,178 +482,229 @@
 [data-theme="dark"] .rastreo-form input,[data-theme="dark"] .calc-row input,[data-theme="dark"] .calc-row select{ background:#1a2436; border-color:rgba(228,234,245,0.15); color:var(--ink); }
 </style>
 <style>
-  /* ======================================================= */
-  /* ================  PUERTAS DE CONTENEDOR  ================ */
-  /* ======================================================= */
-  #splash{ position:fixed; inset:0; z-index:9990; }
-  #splash.oculto{ visibility:hidden; }
-
-  .puerta{
-    position:fixed; top:0; bottom:0; width:50vw;
-    background: linear-gradient(180deg, #ff8544 0%, var(--accent) 12%, var(--accent) 88%, #d85c17 100%);
-    display:flex; align-items:center;
-    transition: transform .12s linear;
-    z-index:9992; overflow:hidden;
+  :root{
+    --ink:#0c1b33;
+    --accent:#ff6a1a;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
   }
-  .puerta::before{ /* corrugado: crestas y sombras alternadas, más marcado */
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:var(--font-body); overflow:hidden; }
+
+  .nota-demo{
+    background:#f1f3f2; color:var(--ink); font-family:var(--font-body);
+    font-size:13px; padding:10px 24px; text-align:center; position:relative; z-index:100;
+  }
+  .nota-demo b{ color:#c2470a; }
+
+  /* ============ ESCENA (splash) ============ */
+  #splash{ position:fixed; inset:0; z-index:9990; transition: opacity .6s ease, visibility .6s ease; }
+  #splash.oculto{ opacity:0; visibility:hidden; pointer-events:none; }
+  .sp3d-escenario{
+    height:100vh;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% 38%, #2a4568 0%, #16283e 55%, #0a1524 100%);
+    display:flex; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+  }
+  /* piso con leve reflejo */
+  .sp3d-piso{
+    position:absolute; left:0; right:0; bottom:0; height:38%;
+    background: linear-gradient(180deg, rgba(10,21,36,0) 0%, rgba(6,13,23,0.85) 100%);
+  }
+  .sp3d-piso::before{
     content:''; position:absolute; inset:0;
-    background-image:
-      repeating-linear-gradient(90deg,
-        rgba(255,255,255,0.16) 0 3px,
-        rgba(0,0,0,0.12) 3px 6px,
-        transparent 6px 34px);
+    background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 100% 34px;
+    -webkit-mask-image: linear-gradient(180deg, black, transparent 85%);
+    mask-image: linear-gradient(180deg, black, transparent 85%);
   }
-  .puerta::after{ /* sombra hacia el centro para dar volumen */
-    content:''; position:absolute; top:0; bottom:0; width:70px;
-  }
-  .puerta-izq{ left:0; transform: translateX(0%); justify-content:flex-end; }
-  .puerta-izq::after{ right:0; background:linear-gradient(90deg, transparent, rgba(0,0,0,0.3)); }
-  .puerta-der{ right:0; transform: translateX(0%); justify-content:flex-start; }
-  .puerta-der::after{ left:0; background:linear-gradient(270deg, transparent, rgba(0,0,0,0.3)); }
-
-  /* raíl inferior (zócalo) y superior, como el chasis real del contenedor */
-  .puerta-riel{ position:absolute; left:0; right:0; height:22px; background:rgba(0,0,0,0.22); z-index:1; }
-  .puerta-riel.abajo{ bottom:0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
-  .puerta-riel.arriba{ top:0; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.3); }
-
-  /* esquineras (corner castings) */
-  .esquinera{ position:absolute; width:22px; height:34px; background:var(--ink); border-radius:2px; z-index:1; box-shadow:0 0 0 1px rgba(255,255,255,0.08) inset; }
-  .esquinera::after{ content:''; position:absolute; inset:5px; border:1px solid rgba(255,255,255,0.15); border-radius:1px; }
-
-  /* remaches */
-  .remache{ position:absolute; width:6px; height:6px; border-radius:50%; background:rgba(0,0,0,0.28); box-shadow: inset 0 1px 1px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.12); z-index:1; }
-
-  /* barra de traba con manija (locking rod) */
-  .traba{ position:absolute; top:14%; bottom:14%; width:9px; background:linear-gradient(90deg, #a8b2bf, #6b7480 55%, #4d5560); border-radius:3px; z-index:1; box-shadow:0 0 0 1px rgba(0,0,0,0.25); }
-  .puerta-izq .traba{ right:58px; }
-  .puerta-der .traba{ left:58px; }
-  .traba-manija{ position:absolute; left:50%; top:50%; width:34px; height:11px; background:linear-gradient(90deg,#6b7480,#a8b2bf); transform:translate(-50%,-50%) rotate(90deg); border-radius:3px; box-shadow:0 0 0 1px rgba(0,0,0,0.3); }
-  .traba-gozne{ position:absolute; left:50%; width:15px; height:15px; background:#4d5560; border-radius:50%; transform:translateX(-50%); box-shadow:0 0 0 1px rgba(0,0,0,0.3); }
-  .traba-gozne.a{ top:-4px; } .traba-gozne.b{ bottom:-4px; }
-
-  /* marca pintada NEA CARGO XPRESS, grande, cruzando ambas puertas */
-  .marca-pintada{
-    position:relative; z-index:1;
-    font-family:var(--font-display); font-weight:700; color:var(--ink);
-    font-size:clamp(28px, 4.2vw, 58px); letter-spacing:.01em; line-height:1;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.25);
-    white-space:nowrap;
-  }
-  .puerta-izq .marca-pintada{ margin-right:26px; }
-  .puerta-der .marca-pintada{ margin-left:26px; }
-  .marca-sub{
-    font-family:var(--font-mono); font-weight:700; color:rgba(12,27,51,0.6);
-    font-size:clamp(9px, 0.9vw, 12px); letter-spacing:.28em; margin-top:6px;
+  .sp3d-halo{
+    position:absolute; top:14%; left:50%; transform:translateX(-50%);
+    width:640px; height:640px; border-radius:50%;
+    background: radial-gradient(circle, rgba(255,106,26,0.16) 0%, transparent 68%);
+    filter: blur(10px);
   }
 
-  /* placa ISO en la esquina, como la placa real de identificación */
-  .placa-iso{
-    position:absolute; top:38px; z-index:1;
-    background:rgba(12,27,51,0.85); border:1px solid rgba(255,255,255,0.15); border-radius:3px;
-    padding:5px 8px; font-family:var(--font-mono); font-size:9.5px; color:rgba(255,255,255,0.7); letter-spacing:.05em;
+  .sp3d-escena3d{ perspective: 1900px; position:relative; z-index:2; }
+  .sp3d-rig{
+    width:560px; height:280px; position:relative;
+    transform-style: preserve-3d;
+    transform: rotateX(-14deg) rotateY(-30deg);
+    animation: mecer 7s ease-in-out infinite;
   }
-  .puerta-izq .placa-iso{ right:30px; }
-  .puerta-der .placa-iso{ left:30px; }
+  @keyframes mecer{
+    0%,100%{ transform: rotateX(-14deg) rotateY(-30deg); }
+    50%{ transform: rotateX(-14deg) rotateY(-22deg); }
+  }
+  @media (prefers-reduced-motion: reduce){ .sp3d-rig{ animation:none; } }
 
-  /* ---- centro: sello / candado / porcentaje ---- */
-  .splash-centro{
-    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    z-index:9995; display:flex; flex-direction:column; align-items:center;
-    transition: opacity .35s ease, transform .35s ease;
-    background:rgba(6,15,28,0.96); backdrop-filter:blur(6px);
-    border:1px solid rgba(255,255,255,0.12); border-radius:16px;
-    padding:30px 40px 26px; box-shadow:0 20px 50px -12px rgba(0,0,0,0.5);
-  }
-  .splash-centro.escondido{ opacity:0; transform:translate(-50%,-50%) scale(0.8); }
+  .sp3d-cara{ position:absolute; top:50%; left:50%; }
 
-  .sello-ring-wrap{ position:relative; width:120px; height:120px; margin-bottom:22px; }
-  .sello-ring-wrap svg{ width:100%; height:100%; transform:rotate(-90deg); }
-  .sello-ring-bg{ fill:none; stroke:rgba(255,255,255,0.1); stroke-width:3; }
-  .sello-ring-fg{ fill:none; stroke:var(--accent); stroke-width:3; stroke-linecap:round; }
-  .sello-icono{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  /* ---- cara frontal (puertas) ---- */
+  .sp3d-frente{
+    width:560px; height:280px;
+    transform: translate(-50%,-50%) translateZ(110px);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.28) 100%),
+      linear-gradient(100deg, #ff8a4d 0%, #ff6a1a 22%, #f2650f 60%, #d8570f 100%);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.35);
   }
-  .sello-icono svg{ width:34px; height:34px; transition: transform .35s cubic-bezier(.34,1.6,.5,1); }
-  .sello-icono .grillete{ transform-origin: 24px 15px; transition: transform .4s cubic-bezier(.34,1.6,.5,1); }
-  .sello-icono.abierto .grillete{ transform: translateX(-3px) rotate(-28deg); }
+  .sp3d-frente::before{
+    content:''; position:absolute; inset:0;
+    background-image: repeating-linear-gradient(90deg,
+      rgba(255,255,255,0.22) 0 2px,
+      rgba(0,0,0,0.16) 2px 4px,
+      transparent 4px 24px);
+    mix-blend-mode:overlay;
+  }
+  .sp3d-costura{ position:absolute; top:0; bottom:0; left:50%; width:3px; background:rgba(0,0,0,0.4); transform:translateX(-50%); }
 
-  .splash-nombre{ font-family:var(--font-display); font-weight:700; font-size:20px; color:#fff; letter-spacing:.01em; }
-  .splash-tag{ font-family:var(--font-mono); font-size:10px; color:var(--mist-dim); letter-spacing:.18em; margin-top:5px; margin-bottom:18px; }
-  .splash-pct{ font-family:var(--font-mono); font-size:14px; color:var(--accent); letter-spacing:.05em; }
-  .splash-estado{ font-family:var(--font-body); font-size:11.5px; color:var(--mist-dim); margin-top:4px; }
+  .sp3d-esquinera3d{ position:absolute; width:20px; height:32px; background:#0c1b33; border-radius:2px; box-shadow:0 0 0 1px rgba(255,255,255,0.1) inset, 0 2px 4px rgba(0,0,0,0.4); }
+  .sp3d-remache3d{ position:absolute; width:6px; height:6px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #ffe0c2, #b5500f 65%, #7a3308); box-shadow:0 1px 2px rgba(0,0,0,0.5); }
 
-  /* destello breve al desbloquear */
-  .splash-spark{
-    position:fixed; top:50%; left:50%; width:10px; height:10px; border-radius:50%;
-    transform:translate(-50%,-50%); background:#fff; opacity:0; z-index:9996; pointer-events:none;
+  .sp3d-traba3d{ position:absolute; top:16%; bottom:16%; width:8px; border-radius:2px;
+    background:linear-gradient(90deg,#dfe4e9,#8b95a3 45%,#5a6270); box-shadow:0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.25); }
+  .sp3d-manija3d{ position:absolute; left:50%; top:50%; width:30px; height:10px; transform:translate(-50%,-50%) rotate(90deg);
+    background:linear-gradient(90deg,#5a6270,#dfe4e9); border-radius:3px; box-shadow:0 1px 3px rgba(0,0,0,0.5); }
+  .sp3d-gozne3d{ position:absolute; left:50%; width:13px; height:13px; border-radius:50%; transform:translateX(-50%);
+    background:radial-gradient(circle at 35% 30%,#dfe4e9,#4a5158); box-shadow:0 1px 2px rgba(0,0,0,0.5); }
+
+  .sp3d-placa-iso3d{
+    position:absolute; background:rgba(10,21,36,0.88); border:1px solid rgba(255,255,255,0.18); border-radius:3px;
+    padding:5px 8px; font-family:var(--font-mono); font-size:9px; color:rgba(255,255,255,0.75); letter-spacing:.04em; line-height:1.5;
   }
-  .splash-spark.disparar{ animation: chispa .55s ease-out; }
-  @keyframes chispa{
-    0%{ opacity:1; box-shadow:0 0 0 0 rgba(255,255,255,0.9); }
-    100%{ opacity:0; box-shadow:0 0 0 90px rgba(255,255,255,0); }
+  .sp3d-placa-carga{
+    position:absolute; background:rgba(255,255,255,0.94); border-radius:2px; padding:4px 7px;
+    font-family:var(--font-mono); font-size:7px; color:#1a1a1a; line-height:1.55; letter-spacing:.01em;
   }
+
+  .sp3d-marca3d{
+    position:absolute; z-index:2; text-align:center;
+    font-family:var(--font-display); font-weight:700; color:#0c1b33;
+    letter-spacing:.01em; line-height:0.95; text-shadow:0 1px 0 rgba(255,255,255,0.3);
+  }
+  .sp3d-marca3d .l1{ font-size:44px; }
+  .sp3d-marca3d .l2{ font-size:44px; }
+  .sp3d-marca3d .sub{ font-family:var(--font-mono); font-weight:700; font-size:10px; color:rgba(12,27,51,0.55); letter-spacing:.32em; margin-top:8px; }
+
+  .sp3d-logo-badge3d{
+    position:absolute; width:46px; height:46px; border-radius:10px; background:#0c1b33;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.15);
+  }
+  .sp3d-logo-badge3d span{ font-family:var(--font-display); font-weight:700; font-size:22px; color:var(--accent); }
+
+  /* ---- cara lateral (más oscura, luz indirecta) ---- */
+  .sp3d-lado{
+    width:220px; height:280px;
+    transform: translate(-50%,-50%) rotateY(90deg) translateZ(280px);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.4) 100%),
+      linear-gradient(90deg, #b8480c 0%, #a8410b 50%, #8f3708 100%);
+  }
+  .sp3d-lado::before{
+    content:''; position:absolute; inset:0;
+    background-image: repeating-linear-gradient(90deg,
+      rgba(255,255,255,0.1) 0 2px,
+      rgba(0,0,0,0.22) 2px 4px,
+      transparent 4px 24px);
+  }
+  .sp3d-lado .sp3d-texto-lateral{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    font-family:var(--font-mono); font-weight:700; font-size:13px; color:rgba(12,27,51,0.45);
+    letter-spacing:.22em; white-space:nowrap;
+  }
+
+  /* ---- techo (sombra más profunda) ---- */
+  .sp3d-techo{
+    width:560px; height:220px;
+    transform: translate(-50%,-50%) rotateX(90deg) translateZ(140px);
+    background: linear-gradient(180deg, #d1560f 0%, #a8420c 100%);
+  }
+  .sp3d-techo::before{
+    content:''; position:absolute; inset:0;
+    background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.14) 0 2px, transparent 2px 30px);
+  }
+
+  /* ---- sombra proyectada en el piso ---- */
+  .sp3d-sombra-piso{
+    position:absolute; bottom:9%; left:50%; transform:translateX(-50%);
+    width:520px; height:70px; border-radius:50%;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 72%);
+    z-index:1; filter:blur(2px);
+  }
+
+  .sp3d-creditos{
+    position:absolute; bottom:22px; left:50%; transform:translateX(-50%); z-index:3;
+    font-family:var(--font-mono); font-size:10.5px; color:rgba(255,255,255,0.3); letter-spacing:.1em; text-align:center;
+  }
+
+  /* ---- carga: nombre + porcentaje debajo de la escena ---- */
+  .sp3d-carga{
+    position:absolute; bottom:64px; left:50%; transform:translateX(-50%); z-index:3;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+  }
+  .sp3d-carga .nombre{ font-family:var(--font-display); font-weight:700; font-size:15px; color:#fff; letter-spacing:.04em; margin-bottom:10px; }
+  .sp3d-barra{ width:200px; height:2px; background:rgba(255,255,255,0.14); border-radius:2px; overflow:hidden; margin-bottom:8px; }
+  .sp3d-barra-fill{ height:100%; width:0%; background:var(--accent); }
+  .sp3d-carga .estado{ font-family:var(--font-mono); font-size:10.5px; color:rgba(255,255,255,0.45); letter-spacing:.05em; }
+  .sp3d-carga .estado span{ color:var(--accent); font-weight:700; }
+  @media (prefers-reduced-motion: reduce){ #splash{ transition-duration:.01ms; } }
 </style>
 </head>
 <body>
 
-<!-- ============ SPLASH: PUERTAS ============ -->
 <div id="splash">
-  <div class="puerta puerta-izq" id="puertaIzq">
-    <div class="puerta-riel arriba"></div>
-    <div class="puerta-riel abajo"></div>
-    <div class="esquinera" style="top:6px; left:6px;"></div>
-    <div class="esquinera" style="bottom:6px; left:6px;"></div>
-    <span class="remache" style="top:34px; left:34px;"></span>
-    <span class="remache" style="bottom:34px; left:34px;"></span>
-    <div class="traba">
-      <div class="traba-gozne a"></div>
-      <div class="traba-manija"></div>
-      <div class="traba-gozne b"></div>
-    </div>
-    <div class="placa-iso">NEAU 149810</div>
-    <div>
-      <div class="marca-pintada">NEA CARGO</div>
-      <div class="marca-sub">CASILLERO VIRTUAL</div>
-    </div>
-  </div>
-  <div class="puerta puerta-der" id="puertaDer">
-    <div class="puerta-riel arriba"></div>
-    <div class="puerta-riel abajo"></div>
-    <div class="esquinera" style="top:6px; right:6px;"></div>
-    <div class="esquinera" style="bottom:6px; right:6px;"></div>
-    <span class="remache" style="top:34px; right:34px;"></span>
-    <span class="remache" style="bottom:34px; right:34px;"></span>
-    <div class="traba">
-      <div class="traba-gozne a"></div>
-      <div class="traba-manija"></div>
-      <div class="traba-gozne b"></div>
-    </div>
-    <div class="placa-iso">MIAMI ⇄ PANAMÁ</div>
-    <div>
-      <div class="marca-pintada">XPRESS</div>
-      <div class="marca-sub">MIAMI · PANAMÁ</div>
-    </div>
-  </div>
+  <div class="sp3d-escenario">
+    <div class="sp3d-piso"></div>
+    <div class="sp3d-halo"></div>
+    <div class="sp3d-sombra-piso"></div>
 
-  <div class="splash-centro" id="splashCentro">
-    <div class="sello-ring-wrap">
-      <svg viewBox="0 0 120 120">
-        <circle class="sello-ring-bg" cx="60" cy="60" r="52"/>
-        <circle class="sello-ring-fg" id="anilloProgreso" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
-      </svg>
-      <div class="sello-icono" id="selloIcono">
-        <svg viewBox="0 0 48 40" fill="none">
-          <rect x="10" y="17" width="28" height="20" rx="3" fill="#ff6a1a"/>
-          <path class="grillete" d="M16 17 V11 a8 8 0 0 1 16 0 V17" stroke="#ff6a1a" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-        </svg>
+    <div class="sp3d-escena3d">
+      <div class="sp3d-rig">
+        <div class="sp3d-cara sp3d-frente">
+          <div class="sp3d-costura"></div>
+          <div class="sp3d-esquinera3d" style="top:8px; left:8px;"></div>
+          <div class="sp3d-esquinera3d" style="top:8px; right:8px;"></div>
+          <div class="sp3d-esquinera3d" style="bottom:8px; left:8px;"></div>
+          <div class="sp3d-esquinera3d" style="bottom:8px; right:8px;"></div>
+          <div class="sp3d-remache3d" style="top:34px; left:34px;"></div>
+          <div class="sp3d-remache3d" style="top:34px; right:34px;"></div>
+          <div class="sp3d-remache3d" style="bottom:34px; left:34px;"></div>
+          <div class="sp3d-remache3d" style="bottom:34px; right:34px;"></div>
+          <div class="sp3d-traba3d" style="left:150px;">
+            <div class="sp3d-gozne3d" style="top:-4px;"></div>
+            <div class="sp3d-manija3d"></div>
+            <div class="sp3d-gozne3d" style="bottom:-4px;"></div>
+          </div>
+          <div class="sp3d-traba3d" style="right:150px;">
+            <div class="sp3d-gozne3d" style="top:-4px;"></div>
+            <div class="sp3d-manija3d"></div>
+            <div class="sp3d-gozne3d" style="bottom:-4px;"></div>
+          </div>
+          <div class="sp3d-placa-iso3d" style="top:34px; left:56px;">NEAU 149810-4<br>ISO 22G1 · 20' DRY</div>
+          <div class="sp3d-placa-carga" style="bottom:30px; right:60px;">MAX GROSS 30480 KG<br>TARE 2200 KG · NET 28280 KG</div>
+          <div class="sp3d-logo-badge3d" style="top:50%; left:50%; transform:translate(-50%,-140%);"><span>N</span></div>
+          <div class="sp3d-marca3d" style="top:50%; left:50%; transform:translate(-50%,-10%);">
+            <div class="l1">NEA CARGO</div>
+            <div class="l2">XPRESS</div>
+            <div class="sub">MIAMI · PANAMÁ</div>
+          </div>
+        </div>
+        <div class="sp3d-cara sp3d-lado">
+          <div class="sp3d-texto-lateral">NEA CARGO XPRESS</div>
+        </div>
+        <div class="sp3d-cara sp3d-techo"></div>
       </div>
     </div>
-    <div class="splash-nombre">NEA CARGO XPRESS</div>
-    <div class="splash-tag">ABRIENDO CONTENEDOR</div>
-    <div class="splash-pct" id="splashPct">0%</div>
-    <div class="splash-estado" id="splashEstado">Verificando sello de seguridad…</div>
+
+    <div class="sp3d-carga">
+      <div class="nombre">NEA CARGO XPRESS</div>
+      <div class="sp3d-barra"><div class="sp3d-barra-fill" id="splashFill"></div></div>
+      <div class="estado"><span id="splashPct">0%</span> — <span id="splashEstado">Cargando…</span></div>
+    </div>
   </div>
-  <div class="splash-spark" id="splashSpark"></div>
 </div>
 
 <!-- ============ NAV ============ -->
@@ -1622,58 +1673,35 @@ setLang(lang);
 (function(){
   var reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var splash = document.getElementById('splash');
-  var puertaIzq = document.getElementById('puertaIzq');
-  var puertaDer = document.getElementById('puertaDer');
-  var anillo = document.getElementById('anilloProgreso');
+  var fill = document.getElementById('splashFill');
   var pctEl = document.getElementById('splashPct');
   var estadoEl = document.getElementById('splashEstado');
-  var centro = document.getElementById('splashCentro');
-  var sello = document.getElementById('selloIcono');
-  var spark = document.getElementById('splashSpark');
-
-  var CIRCUNFERENCIA = 326.7;
+  if(!splash) return;
 
   var estados = [
-    [0, 'Verificando sello de seguridad…'],
-    [35, 'Sello verificado — desbloqueando…'],
-    [70, 'Abriendo puertas…'],
-    [96, '¡Bienvenido!']
+    [0, 'Cargando…'],
+    [40, 'Preparando tu envío…'],
+    [75, 'Casi listo…'],
+    [100, '¡Listo!']
   ];
 
-  function actualizar(pct){
-    pctEl.textContent = pct + '%';
-    anillo.style.strokeDashoffset = CIRCUNFERENCIA * (1 - pct/100);
-    // las puertas empiezan a abrirse recién después del 15% (primero se "verifica" el sello)
-    var aperturaPct = Math.max(0, (pct - 15) / 85 * 100);
-    puertaIzq.style.transform = 'translateX(-' + aperturaPct + '%)';
-    puertaDer.style.transform = 'translateX(' + aperturaPct + '%)';
-    for(var i=0;i<estados.length;i++){ if(pct >= estados[i][0]) estadoEl.textContent = estados[i][1]; }
-  }
+  if(reducido){ splash.classList.add('oculto'); return; }
 
-  if(reducido){
-    splash.classList.add('oculto');
-    return;
-  }
-
-  actualizar(0);
-
-  var duracionMs = 2600;
+  var duracionMs = 2400;
   var inicio = performance.now();
 
   function paso(ahora){
     var t = Math.min((ahora - inicio) / duracionMs, 1);
-    var eased = 1 - Math.pow(1 - t, 2); // ease-out cuadrático
+    var eased = 1 - Math.pow(1 - t, 2);
     var pct = Math.min(Math.round(eased * 100), 100);
-    actualizar(pct);
+    fill.style.width = pct + '%';
+    pctEl.textContent = pct + '%';
+    for(var i=0;i<estados.length;i++){ if(pct >= estados[i][0]) estadoEl.textContent = estados[i][1]; }
 
     if(t < 1){
       requestAnimationFrame(paso);
     } else {
-      actualizar(100);
-      sello.classList.add('abierto');
-      spark.classList.add('disparar');
-      centro.classList.add('escondido');
-      setTimeout(function(){ splash.classList.add('oculto'); }, 500);
+      setTimeout(function(){ splash.classList.add('oculto'); }, 320);
     }
   }
   requestAnimationFrame(paso);
