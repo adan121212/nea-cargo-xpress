@@ -254,7 +254,7 @@ async function generarPdfFactura(factura) {
       doc.font('Helvetica-Bold').fontSize(8).fillColor(NAVY)
          .text('NEA CARGO XPRESS', LM, doc.y);
       doc.font('Helvetica').fontSize(7).fillColor(GRAY)
-         .text('Miami a Panamá · +507 6293-7497 · info@neacargoxpress.com', LM, doc.y + 10)
+         .text('Miami a Panamá · +507 6293-7497 · adan@neacargoxpress.com', LM, doc.y + 10)
          .text('Comprobante interno — no es una factura fiscal electrónica DGI.', LM, doc.y + 20);
 
       doc.end();
