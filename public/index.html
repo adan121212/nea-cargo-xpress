@@ -490,15 +490,7 @@
     --font-mono:'JetBrains Mono', monospace;
   }
   *{ box-sizing:border-box; }
-  body{ margin:0; font-family:var(--font-body); overflow:hidden; }
   @media (prefers-reduced-motion: reduce){ *{ animation-duration:.01ms !important; } }
-
-  .nota-demo{
-    background:#f1f3f2; color:var(--ink); font-family:var(--font-body);
-    font-size:13px; padding:10px 24px; text-align:center; position:relative; z-index:100;
-  }
-  .nota-demo b{ color:#c2470a; }
-  .nota-demo button{ margin-left:10px; background:var(--ink); color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:12px; cursor:pointer; font-family:var(--font-body); }
 
   /* ============ ESCENA (splash) ============ */
   #splash{ position:fixed; inset:0; z-index:9990; transition: opacity .6s ease, visibility .6s ease; }
