@@ -6,8 +6,8 @@ const router = express.Router();
 
 // --- GET /api/public/facturas/:token/pdf ---
 // Sin login: protegido únicamente por un token aleatorio de 48 caracteres
-// (imposible de adivinar). Se usa para que WhatsApp/Twilio pueda descargar
-// el PDF, y también sirve como link para compartir la factura directamente.
+// (imposible de adivinar). Sirve como link para compartir o descargar
+// la factura directamente, sin necesidad de iniciar sesión.
 router.get('/facturas/:token/pdf', async (req, res) => {
   try {
     const resultado = await pool.query(
