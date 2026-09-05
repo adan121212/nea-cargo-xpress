@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     let queryStr = `
       SELECT u.id, u.nombre, u.apellido, u.email, u.telefono, u.numero_casillero,
              u.verificado, u.rol, u.fecha_registro, u.activo, u.fecha_desactivacion,
-             COUNT(p.id) AS total_paquetes
+             u.saldo_a_favor, COUNT(p.id) AS total_paquetes
       FROM usuarios u
       LEFT JOIN paquetes p ON p.usuario_id = u.id
     `;
@@ -80,6 +80,32 @@ router.get('/:id/autorizados', async (req, res) => {
   } catch (error) {
     console.error('Error en GET /admin/usuarios/:id/autorizados:', error);
     return res.status(500).json({ mensaje: 'Error interno al listar autorizados' });
+  }
+});
+
+// --- GET /api/admin/usuarios/:id/referidos ---
+// Lista quién ha referido este cliente, con su estado (pendiente/activado).
+router.get('/:id/referidos', async (req, res) => {
+  try {
+    const usuario = await pool.query('SELECT id, saldo_a_favor FROM usuarios WHERE id = $1', [req.params.id]);
+    if (usuario.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Cliente no encontrado' });
+    }
+
+    const resultado = await pool.query(
+      `SELECT r.estado, r.monto_credito, r.fecha_registro, r.fecha_activacion,
+              u.nombre, u.apellido
+       FROM referidos r
+       JOIN usuarios u ON u.id = r.referido_id
+       WHERE r.referidor_id = $1
+       ORDER BY r.fecha_registro DESC`,
+      [req.params.id]
+    );
+
+    return res.json({ saldo_a_favor: usuario.rows[0].saldo_a_favor, referidos: resultado.rows });
+  } catch (error) {
+    console.error('Error en GET /admin/usuarios/:id/referidos:', error);
+    return res.status(500).json({ mensaje: 'Error interno al listar referidos' });
   }
 });
 

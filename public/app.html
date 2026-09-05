@@ -747,6 +747,8 @@
           <input id="regTelefono" type="tel" placeholder="6123-4567">
           <label for="regPassword">Contraseña</label>
           <input id="regPassword" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+          <label for="regCodigoReferido">¿Alguien te refirió? (opcional)</label>
+          <input id="regCodigoReferido" type="text" placeholder="Código de casillero de quien te invitó">
           <button class="btn-primary" type="submit" id="btnRegistro">
             <span class="spinner"></span><span>Crear mi casillero</span>
           </button>
@@ -853,6 +855,31 @@
             <div class="campos-titulo">O copia campo por campo</div>
             <p style="font-size:12px;color:var(--ink-soft);margin:0 0 6px;">Útil cuando la tienda te pide cada dato en una casilla distinta.</p>
             <div id="camposCasillero"></div>
+          </div>
+          <div class="card reveal" style="margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:26px;">🎁</span>
+              <div>
+                <h2 style="margin:0 0 2px;">Referí y ganá</h2>
+                <p style="margin:0;font-size:12px;color:var(--ink-soft);">Ganas $5 en tu próximo flete aéreo por cada persona que traigas y ya haya pagado su primer envío.</p>
+              </div>
+            </div>
+            <div style="background:var(--cargo-navy,#0c1b33);border-radius:12px;padding:14px;text-align:center;margin:14px 0;">
+              <p style="margin:0 0 4px;font-size:12px;color:#fff;opacity:.8;">Tu código de referido</p>
+              <p style="margin:0;font-size:20px;font-weight:700;color:#fff;letter-spacing:.5px;" id="codigoReferidoTexto">—</p>
+            </div>
+            <button class="btn-primary" id="btnCompartirReferido" type="button" style="width:100%;">📲 Compartir mi código</button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;">
+              <div style="background:#f5f5f0;border-radius:10px;padding:10px;text-align:center;">
+                <p style="margin:0 0 4px;font-size:11px;color:var(--ink-soft);">Referidos</p>
+                <p style="margin:0;font-size:18px;font-weight:700;" id="totalReferidos">0</p>
+              </div>
+              <div style="background:#f5f5f0;border-radius:10px;padding:10px;text-align:center;">
+                <p style="margin:0 0 4px;font-size:11px;color:var(--ink-soft);">Saldo a favor</p>
+                <p style="margin:0;font-size:18px;font-weight:700;color:var(--cargo-green);" id="saldoAFavorTexto">$0.00</p>
+              </div>
+            </div>
+            <div id="listaReferidos"></div>
           </div>
           <div class="card reveal" style="opacity:.7;position:relative;">
             <div style="position:absolute;top:16px;right:16px;background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.05em;">PRÓXIMAMENTE</div>
@@ -1321,6 +1348,10 @@
   capitalizarPrimera($('#regNombre'));
   capitalizarPrimera($('#regApellido'));
 
+  // Si llegó por un link de referido (ej. ?ref=PTY-14981-00013), precarga el código
+  const refUrl = new URLSearchParams(window.location.search).get('ref');
+  if (refUrl && $('#regCodigoReferido')) $('#regCodigoReferido').value = refUrl.trim();
+
   // ---------- Registro ----------
   $('#formRegistro').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1342,6 +1373,8 @@
     formData.append('email', email);
     formData.append('telefono', telefono);
     formData.append('password', password);
+    const codigoReferido = $('#regCodigoReferido').value.trim();
+    if (codigoReferido) formData.append('codigo_referido', codigoReferido);
 
     if (tipo === 'personal'){
       const nombre   = $('#regNombre').value.trim();
@@ -1535,6 +1568,48 @@
       contCampos.querySelectorAll('.campo-b').forEach(b => {
         b.onclick = () => copiarTexto(CAMPOS[b.dataset.i][1], b, 'Copiar');
       });
+    }
+
+    const codigoRef = usuario.numero_casillero;
+    $('#codigoReferidoTexto').textContent = codigoRef;
+    $('#saldoAFavorTexto').textContent = '$' + Number(usuario.saldo_a_favor || 0).toFixed(2);
+
+    const btnCompartir = document.getElementById('btnCompartirReferido');
+    if (btnCompartir){
+      btnCompartir.onclick = () => {
+        const link = `${window.location.origin}${window.location.pathname}?registro&ref=${encodeURIComponent(codigoRef)}`;
+        const texto = `¡Te invito a NEA Cargo Xpress para traer tus compras de EE.UU.! Usa mi código ${codigoRef} al registrarte: ${link}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+      };
+    }
+
+    cargarReferidos();
+  }
+
+  async function cargarReferidos(){
+    const cont = document.getElementById('listaReferidos');
+    if (!cont) return;
+    try {
+      const res = await apiAutenticado('/casillero/referidos');
+      const data = await res.json();
+      const lista = data.referidos || [];
+      $('#totalReferidos').textContent = lista.length;
+      if (lista.length === 0){
+        cont.innerHTML = `<p style="font-size:12.5px;color:var(--ink-soft);text-align:center;margin:10px 0 0;">Todavía no has referido a nadie.</p>`;
+        return;
+      }
+      cont.innerHTML = lista.map(r => {
+        const activado = r.estado === 'activado';
+        const pill = activado
+          ? `<span style="font-size:11px;background:#e2f5e9;color:#1a7a4a;padding:3px 9px;border-radius:20px;font-weight:600;">+$${Number(r.monto_credito).toFixed(2)}</span>`
+          : `<span style="font-size:11px;background:#f2f2ec;color:var(--ink-soft);padding:3px 9px;border-radius:20px;">Sin pago aún</span>`;
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#f9f9f5;border-radius:8px;margin-bottom:6px;">
+          <span style="font-size:13px;">${escapeHtml(r.nombre)} ${escapeHtml(r.apellido || '')}</span>
+          ${pill}
+        </div>`;
+      }).join('');
+    } catch(e){
+      cont.innerHTML = `<p style="font-size:12.5px;color:var(--ink-soft);">No se pudo cargar la lista de referidos.</p>`;
     }
   }
 

@@ -5,6 +5,7 @@ const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
+const { activarCreditoSiCorresponde } = require('../../utils/referidos');
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
@@ -128,6 +129,7 @@ router.post(
             `UPDATE facturas SET estado = 'pagada', fecha_pago = NOW(), metodo_pago = $1 WHERE id = $2`,
             [metodo_pago, factura_id]
           );
+          await activarCreditoSiCorresponde(client, facturaRes.rows[0].usuario_id);
         }
       }
 
@@ -215,6 +217,7 @@ router.post(
       if (resultado.rows.length === 0) {
         return res.status(400).json({ mensaje: 'Esta factura ya no está pendiente.' });
       }
+      await activarCreditoSiCorresponde(pool, resultado.rows[0].usuario_id);
       return res.json({ mensaje: 'Factura cobrada correctamente', factura: resultado.rows[0] });
     } catch (error) {
       console.error('Error en POST /admin/mostrador/cobrar:', error);

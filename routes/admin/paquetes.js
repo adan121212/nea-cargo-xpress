@@ -9,6 +9,7 @@ const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudi
 const { enviarCorreoCambioEstado, enviarFacturaListaParaRetiro } = require('../../utils/mailer');
 const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
+const { aplicarSaldoAFavor } = require('../../utils/referidos');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -212,14 +213,16 @@ router.patch(
         const costoEnvio = Math.max(Number(pesoParaCobrar) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
         const seguro = paquete.valor_declarado ? (Number(paquete.valor_declarado) * Number(tarifa.pct_seguro)) / 100 : 0;
         const cargoManejo = Number(tarifa.cargo_manejo);
-        const total = costoEnvio + cargoManejo + seguro;
+        const totalAntes = costoEnvio + cargoManejo + seguro;
+        const descuentoReferido = await aplicarSaldoAFavor(client, paquete.usuario_id, totalAntes);
+        const total = totalAntes - descuentoReferido;
         const insercion = await client.query(
           `INSERT INTO facturas (paquete_id, usuario_id, tarifa_id, peso_facturado_lb, precio_libra,
-             costo_envio, cargo_manejo, seguro, total, token_pdf, estado)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'pendiente') RETURNING *`,
+             costo_envio, cargo_manejo, seguro, total, descuento_referido, token_pdf, estado)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'pendiente') RETURNING *`,
           [req.params.id, paquete.usuario_id, tarifa.id, pesoParaCobrar, tarifa.precio_libra,
            costoEnvio.toFixed(2), cargoManejo.toFixed(2), seguro.toFixed(2), total.toFixed(2),
-           crypto.randomBytes(24).toString('hex')]
+           descuentoReferido.toFixed(2), crypto.randomBytes(24).toString('hex')]
         );
         facturaGenerada = insercion.rows[0];
         const numeroFactura = generarNumeroFactura(facturaGenerada.id);

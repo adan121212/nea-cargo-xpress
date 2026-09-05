@@ -167,12 +167,12 @@ async function generarPdfFactura(factura) {
         doc.y = cy + 18;
       });
 
-      // Subtotal / ITBMS / Total
-      const subtotal = Number(factura.total || 0) > 0 && TASA_ITBMS === 0
-        ? Number(factura.total || 0)
-        : conceptos.reduce((s, [,v]) => s + v, 0);
-      const itbms = +(subtotal * TASA_ITBMS).toFixed(2);
-      const totalConImpuesto = +(subtotal + itbms).toFixed(2);
+      // Subtotal / descuento por referido / ITBMS / Total
+      const subtotalBruto = conceptos.reduce((s, [,v]) => s + v, 0);
+      const descuentoReferido = Number(factura.descuento_referido || 0);
+      const baseConDescuento = subtotalBruto - descuentoReferido;
+      const itbms = +(baseConDescuento * TASA_ITBMS).toFixed(2);
+      const totalConImpuesto = +(baseConDescuento + itbms).toFixed(2);
 
       doc.moveTo(dX, doc.y + 3).lineTo(RM, doc.y + 3)
          .strokeColor(LINE).lineWidth(0.5).stroke();
@@ -186,7 +186,15 @@ async function generarPdfFactura(factura) {
            .text(fmt$(valor), dX, fy + 2, { width: dW - 6, align:'right' });
         doc.y = fy + 15;
       };
-      filaResumen('Subtotal', subtotal, false);
+      filaResumen('Subtotal', subtotalBruto, false);
+      if (descuentoReferido > 0) {
+        const fyD = doc.y;
+        doc.font('Helvetica').fontSize(8.5).fillColor(GRAY)
+           .text('Descuento por referido', dX + 6, fyD + 2, { width: dW * 0.6 });
+        doc.font('Helvetica-Bold').fontSize(8.5).fillColor(NAVY)
+           .text(`-${fmt$(descuentoReferido)}`, dX, fyD + 2, { width: dW - 6, align:'right' });
+        doc.y = fyD + 15;
+      }
       // Fila de ITBMS: solo se muestra si la tasa es mayor a 0
       if (TASA_ITBMS > 0) {
         filaResumen(`ITBMS (${(TASA_ITBMS*100).toFixed(0)}%)`, itbms, false);

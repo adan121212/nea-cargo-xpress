@@ -8,6 +8,7 @@ const pool = require('../db');
 const { enviarCorreoConfirmacion, enviarCorreoRecuperacion, enviarCorreoNuevoRegistroAdmin } = require('../utils/mailer');
 const { enviarCorreoCasillero } = require('../utils/correoCasillero');
 const { generarNumeroCasillero } = require('../utils/casillero');
+const { registrarReferido } = require('../utils/referidos');
 const cloudinary = require('../utils/cloudinary');
 
 const router = express.Router();
@@ -130,6 +131,10 @@ router.post(
       await client.query('UPDATE usuarios SET numero_casillero = $1 WHERE id = $2', [
         numeroCasillero, nuevoUsuario.id,
       ]);
+
+      // Si vino un código de referido (el numero_casillero de otro cliente),
+      // queda registrado aquí mismo. No falla el registro si el código no existe.
+      await registrarReferido(client, req.body.codigo_referido, nuevoUsuario.id);
 
       await client.query('COMMIT');
 

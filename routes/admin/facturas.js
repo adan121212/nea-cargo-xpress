@@ -8,6 +8,7 @@ const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
 const { fechaPanama } = require('../../utils/fechas');
+const { aplicarSaldoAFavor, activarCreditoSiCorresponde } = require('../../utils/referidos');
 
 const router = express.Router();
 
@@ -91,12 +92,14 @@ router.post(
       const costoEnvio = Math.max(Number(pesoFacturado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
       const seguro = paquete.valor_declarado ? (Number(paquete.valor_declarado) * Number(tarifa.pct_seguro)) / 100 : 0;
       const cargoManejo = Number(tarifa.cargo_manejo);
-      const total = costoEnvio + cargoManejo + seguro;
+      const totalAntes = costoEnvio + cargoManejo + seguro;
       await client.query('BEGIN');
+      const descuentoReferido = await aplicarSaldoAFavor(client, paquete.usuario_id, totalAntes);
+      const total = totalAntes - descuentoReferido;
       const insercion = await client.query(
-        `INSERT INTO facturas (paquete_id, usuario_id, tarifa_id, peso_facturado_lb, precio_libra, costo_envio, cargo_manejo, seguro, total, token_pdf)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-        [paquete_id, paquete.usuario_id, tarifa_id, pesoFacturado, tarifa.precio_libra, costoEnvio.toFixed(2), cargoManejo.toFixed(2), seguro.toFixed(2), total.toFixed(2), crypto.randomBytes(24).toString('hex')]
+        `INSERT INTO facturas (paquete_id, usuario_id, tarifa_id, peso_facturado_lb, precio_libra, costo_envio, cargo_manejo, seguro, total, descuento_referido, token_pdf)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+        [paquete_id, paquete.usuario_id, tarifa_id, pesoFacturado, tarifa.precio_libra, costoEnvio.toFixed(2), cargoManejo.toFixed(2), seguro.toFixed(2), total.toFixed(2), descuentoReferido.toFixed(2), crypto.randomBytes(24).toString('hex')]
       );
       const factura = insercion.rows[0];
       const numeroFactura = generarNumeroFactura(factura.id);
@@ -232,6 +235,9 @@ router.patch('/:id/estado', [
         }
       }
     }
+    if (!esAnulacion && req.body.estado === 'pagada' && facturaAntes.estado !== 'pagada') {
+      await activarCreditoSiCorresponde(pool, facturaAntes.usuario_id);
+    }
     return res.json({ mensaje: 'Estado de factura actualizado', factura: resultado.rows[0], nota_ajuste });
   } catch (error) {
     console.error('Error en PATCH /admin/facturas/:id/estado:', error);
@@ -314,17 +320,20 @@ router.post(
       const costoEnvio = Math.max(Number(pesoFacturado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
       const seguro = paquete.valor_declarado ? (Number(paquete.valor_declarado) * Number(tarifa.pct_seguro)) / 100 : 0;
       const cargoManejo = Number(tarifa.cargo_manejo);
-      const total = costoEnvio + cargoManejo + seguro;
+      const totalAntes = costoEnvio + cargoManejo + seguro;
       await client.query('BEGIN');
+      const descuentoReferido = await aplicarSaldoAFavor(client, paquete.usuario_id, totalAntes);
+      const total = totalAntes - descuentoReferido;
       const insercion = await client.query(
-        `INSERT INTO facturas (paquete_id, usuario_id, tarifa_id, peso_facturado_lb, precio_libra, costo_envio, cargo_manejo, seguro, total, token_pdf, estado, fecha_pago, metodo_pago)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'pagada',NOW(),$11) RETURNING *`,
-        [paquete_id, paquete.usuario_id, tarifa_id, pesoFacturado, tarifa.precio_libra, costoEnvio.toFixed(2), cargoManejo.toFixed(2), seguro.toFixed(2), total.toFixed(2), crypto.randomBytes(24).toString('hex'), metodo_pago]
+        `INSERT INTO facturas (paquete_id, usuario_id, tarifa_id, peso_facturado_lb, precio_libra, costo_envio, cargo_manejo, seguro, total, descuento_referido, token_pdf, estado, fecha_pago, metodo_pago)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'pagada',NOW(),$12) RETURNING *`,
+        [paquete_id, paquete.usuario_id, tarifa_id, pesoFacturado, tarifa.precio_libra, costoEnvio.toFixed(2), cargoManejo.toFixed(2), seguro.toFixed(2), total.toFixed(2), descuentoReferido.toFixed(2), crypto.randomBytes(24).toString('hex'), metodo_pago]
       );
       const factura = insercion.rows[0];
       const numeroFactura = generarNumeroFactura(factura.id);
       await client.query('UPDATE facturas SET numero_factura = $1 WHERE id = $2', [numeroFactura, factura.id]);
       await client.query(`UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW() WHERE id = $1 AND estado NOT IN ('entregado','listo_para_retiro')`, [paquete_id]);
+      await activarCreditoSiCorresponde(client, paquete.usuario_id);
       await client.query('COMMIT');
       const facturaCompleta = { ...factura, numero_factura: numeroFactura };
       const envios = { correo_enviado: false };
