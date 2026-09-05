@@ -16,7 +16,7 @@ Construido con **Node.js + Express + PostgreSQL + JWT + Nodemailer**.
 - **Listado y detalle de paquetes** → cada cliente ve únicamente sus propios paquetes.
 
 ### Lo que queda para las siguientes fases (no incluido aún)
-- Producción real: dominio propio en Resend + número de WhatsApp Business verificado.
+- Producción real: dominio propio en Resend.
 - Activar Yappy de verdad (ver sección de abajo — la estructura ya está lista, falta que Banco General te apruebe la cuenta).
 
 Dilo cuando quieras seguir con alguna de estas partes.
@@ -70,7 +70,7 @@ POST /api/auth/restablecer-password   # { token, password } -> completa el cambi
 Pestaña **Recepción** en el panel admin, pensada para el staff de la bodega en Miami: en vez de buscar cada paquete a mano y cambiarle el estado, escanean (o escriben) el número de tracking de cada caja según va llegando.
 
 - El sistema busca automáticamente entre las **prealertas pendientes** (estado `prealertado`) y, si encuentra coincidencia, la pasa a `en_bodega_miami` de inmediato.
-- Dispara la notificación automática por correo/WhatsApp al cliente (la misma que ya construimos).
+- Dispara la notificación automática por correo al cliente (la misma que ya construimos).
 - El campo se vuelve a enfocar solo después de cada escaneo — pensado para trabajar con un lector de código de barras USB (que simplemente "escribe" el número y presiona Enter) sin tocar el mouse.
 - Si dos clientes distintos prealertaron el mismo número de tracking por error, el sistema te deja elegir cuál es antes de continuar.
 - Si no encuentra ninguna prealerta con ese tracking, te avisa (puede ser que el cliente no haya prealertado, o que el número esté mal escrito/escaneado).
@@ -88,9 +88,8 @@ POST /api/admin/paquetes/recibir/:id/confirmar        # cuando hay más de una c
 Cuando el admin cambia el estado de un paquete desde la pestaña **Paquetes** (ej. de "prealertado" a "en bodega Miami", o a "listo para retiro"), el cliente recibe automáticamente:
 
 - Un **correo** explicando en qué va su paquete.
-- Un **WhatsApp** con el mismo mensaje (si el cliente tiene teléfono registrado).
 
-Es "best-effort": si el envío falla (por ejemplo, Resend o Twilio no están bien configurados), el cambio de estado **igual se guarda** — no se bloquea la operación por un fallo de notificación. La respuesta del endpoint incluye `notificaciones: { correo_enviado, whatsapp_enviado }` para que sepas si llegó o no.
+Es "best-effort": si el envío falla (por ejemplo, Resend no está bien configurado), el cambio de estado **igual se guarda** — no se bloquea la operación por un fallo de notificación. La respuesta del endpoint incluye `notificaciones: { correo_enviado }` para que sepas si llegó o no.
 
 No se envía notificación desde el **Mostrador** al marcar "entregado" — ahí el cliente ya está presente en persona recibiendo su paquete y firmando, sería redundante.
 
@@ -111,14 +110,14 @@ Cuando el staff marca un paquete como entregado desde el **Mostrador**, ahora se
 
 La cobranza (si aplica) y la firma se confirman juntas — el cliente firma una sola vez y eso cierra tanto el pago como la entrega.
 
-**Además:** si esa entrega tiene una factura asociada, el PDF actualizado (ya con la firma estampada) se **reenvía automáticamente** por correo y WhatsApp al cliente en cuanto se confirma la entrega — no hace falta ir a la pestaña Facturas a darle "Reenviar" a mano.
+**Además:** si esa entrega tiene una factura asociada, el PDF actualizado (ya con la firma estampada) se **reenvía automáticamente** por correo al cliente en cuanto se confirma la entrega — no hace falta ir a la pestaña Facturas a darle "Reenviar" a mano.
 
 ### Endpoint actualizado
 ```
 POST /api/admin/mostrador/entregar
 # body: { paquete_id, factura_id?, metodo_pago?, firma }
 # "firma" es obligatorio: un data URL "data:image/png;base64,..." del canvas de firma
-# Respuesta incluye: envios_factura: { correo_enviado, whatsapp_enviado }
+# Respuesta incluye: envios_factura: { correo_enviado }
 ```
 
 ## Mostrador (nuevo)
@@ -212,7 +211,7 @@ PATCH /api/admin/paquetes/:id/peso
 POST  /api/admin/facturas                  # { paquete_id, tarifa_id } -> genera la factura
 GET   /api/admin/facturas                  # todas (filtros: ?estado=&email=)
 PATCH /api/admin/facturas/:id/estado       # { "estado": "pagada" }  (pendiente | pagada | anulada)
-POST  /api/admin/facturas/:id/reenviar     # reenvía la factura por correo (PDF) y WhatsApp
+POST  /api/admin/facturas/:id/reenviar     # reenvía la factura por correo (PDF)
 ```
 
 El botón **"Reenviar"** aparece junto a cada factura en la pestaña Facturas del panel admin — útil cuando el cliente vuelve otro día y pide de nuevo su factura. Regenera el PDF (con la firma de entrega incluida, si ya la tiene) y lo reenvía por ambos canales.
