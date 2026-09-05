@@ -491,220 +491,246 @@
   }
   *{ box-sizing:border-box; }
   body{ margin:0; font-family:var(--font-body); overflow:hidden; }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.01ms !important; } }
 
   .nota-demo{
     background:#f1f3f2; color:var(--ink); font-family:var(--font-body);
     font-size:13px; padding:10px 24px; text-align:center; position:relative; z-index:100;
   }
   .nota-demo b{ color:#c2470a; }
+  .nota-demo button{ margin-left:10px; background:var(--ink); color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:12px; cursor:pointer; font-family:var(--font-body); }
 
   /* ============ ESCENA (splash) ============ */
   #splash{ position:fixed; inset:0; z-index:9990; transition: opacity .6s ease, visibility .6s ease; }
   #splash.oculto{ opacity:0; visibility:hidden; pointer-events:none; }
-  .sp3d-escenario{
+  .spg-escenario{
     height:100vh;
-    background:
-      radial-gradient(ellipse 900px 500px at 50% 38%, #2a4568 0%, #16283e 55%, #0a1524 100%);
+    background: radial-gradient(ellipse 1000px 560px at 50% 32%, #24405f 0%, #142235 55%, #080f1c 100%);
     display:flex; align-items:center; justify-content:center;
     position:relative; overflow:hidden;
   }
-  /* piso con leve reflejo */
-  .sp3d-piso{
-    position:absolute; left:0; right:0; bottom:0; height:38%;
-    background: linear-gradient(180deg, rgba(10,21,36,0) 0%, rgba(6,13,23,0.85) 100%);
+  .spg-piso{
+    position:absolute; left:0; right:0; bottom:0; height:34%;
+    background: linear-gradient(180deg, rgba(8,15,28,0) 0%, rgba(5,10,19,0.9) 100%);
   }
-  .sp3d-piso::before{
+  .spg-piso::before{
     content:''; position:absolute; inset:0;
-    background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
-    background-size: 100% 34px;
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 100% 30px;
     -webkit-mask-image: linear-gradient(180deg, black, transparent 85%);
     mask-image: linear-gradient(180deg, black, transparent 85%);
   }
-  .sp3d-halo{
-    position:absolute; top:14%; left:50%; transform:translateX(-50%);
-    width:640px; height:640px; border-radius:50%;
-    background: radial-gradient(circle, rgba(255,106,26,0.16) 0%, transparent 68%);
-    filter: blur(10px);
+
+  /* ============ GRÚA (elementos planos, fuera del 3D) ============ */
+  .spg-grua{ position:static; }
+  .spg-grua-mastil{ z-index:5;
+    position:absolute; top:24px; left:900px; width:18px; height:380px;
+    background: linear-gradient(90deg, #4a5563 0%, #7c8798 45%, #3a4350 100%);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
+  }
+  .spg-grua-mastil::before, .spg-grua-mastil::after{
+    content:''; position:absolute; left:2px; right:2px; height:2px; background:rgba(0,0,0,0.25);
+  }
+  .spg-grua-celosia{ z-index:5;
+    position:absolute; top:24px; left:900px; width:18px; height:380px;
+    background-image: repeating-linear-gradient(135deg, transparent 0 14px, rgba(0,0,0,0.18) 14px 16px),
+                       repeating-linear-gradient(45deg, transparent 0 14px, rgba(0,0,0,0.18) 14px 16px);
+  }
+  .spg-grua-pluma{ z-index:5;
+    position:absolute; top:20px; left:560px; width:358px; height:15px;
+    background: linear-gradient(180deg, #8b96a5 0%, #5a6472 100%);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.35);
+  }
+  .spg-grua-contrapeso{ z-index:5;
+    position:absolute; top:14px; left:918px; width:52px; height:28px; border-radius:2px;
+    background: linear-gradient(180deg, #384457, #232c3b);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.35);
+  }
+  .spg-grua-tirantes{ z-index:5;
+    position:absolute; top:24px; left:640px; width:260px; height:90px;
+    border-top:2px solid rgba(140,150,165,0.5);
+    border-left:2px solid rgba(140,150,165,0.5);
+    border-top-left-radius: 4px;
+  }
+  .spg-grua-trolley{ z-index:6;
+    position:absolute; top:28px; left:628px; width:24px; height:13px; border-radius:2px;
+    background:linear-gradient(180deg,#9aa4b2,#5a6472); box-shadow:0 2px 4px rgba(0,0,0,0.4);
+  }
+  .spg-grua-luz{ z-index:5;
+    position:absolute; top:18px; left:948px; width:6px; height:6px; border-radius:50%;
+    background:var(--accent); box-shadow:0 0 8px 2px rgba(255,106,26,0.8);
+    animation: parpadeo 1.1s ease-in-out infinite;
+  }
+  @keyframes parpadeo{ 0%,100%{ opacity:1; } 50%{ opacity:.25; } }
+
+  /* cable: fijo desde el gancho hasta la posición final; el contenedor lo va tapando al bajar */
+  .spg-grua-cable{
+    position:absolute; top:41px; left:639px; width:2px; height:230px;
+    background: repeating-linear-gradient(180deg, #8b96a5 0 3px, #5a6472 3px 6px);
+    z-index:4;
   }
 
-  .sp3d-escena3d{ perspective: 1900px; position:relative; z-index:2; }
-  .sp3d-rig{
-    width:560px; height:280px; position:relative;
-    transform-style: preserve-3d;
-    transform: rotateX(-14deg) rotateY(-30deg);
-    animation: mecer 7s ease-in-out infinite;
-  }
-  @keyframes mecer{
-    0%,100%{ transform: rotateX(-14deg) rotateY(-30deg); }
-    50%{ transform: rotateX(-14deg) rotateY(-22deg); }
-  }
-  @media (prefers-reduced-motion: reduce){ .sp3d-rig{ animation:none; } }
+  /* ============ ESCENA 3D (los contenedores) ============ */
+  .spg-escena3d{ perspective: 2000px; position:relative; z-index:3; margin-top:170px; }
+  .spg-rig{ width:360px; height:160px; position:relative; transform-style: preserve-3d; transform: rotateX(-14deg) rotateY(-30deg); }
 
-  .sp3d-cara{ position:absolute; top:50%; left:50%; }
+  .spg-caja{ position:absolute; top:50%; left:50%; transform-style:preserve-3d; }
+  .spg-cara{ position:absolute; top:50%; left:50%; }
 
-  /* ---- cara frontal (puertas) ---- */
-  .sp3d-frente{
-    width:560px; height:280px;
-    transform: translate(-50%,-50%) translateZ(110px);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.28) 100%),
-      linear-gradient(100deg, #ff8a4d 0%, #ff6a1a 22%, #f2650f 60%, #d8570f 100%);
+  .spg-frente{
+    width:360px; height:160px;
+    transform: translate(-50%,-50%) translateZ(70px);
     box-shadow: 0 0 0 1px rgba(0,0,0,0.35);
   }
-  .sp3d-frente::before{
+  .spg-frente::before{
     content:''; position:absolute; inset:0;
-    background-image: repeating-linear-gradient(90deg,
-      rgba(255,255,255,0.22) 0 2px,
-      rgba(0,0,0,0.16) 2px 4px,
-      transparent 4px 24px);
+    background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0 2px, rgba(0,0,0,0.14) 2px 4px, transparent 4px 20px);
     mix-blend-mode:overlay;
   }
-  .sp3d-costura{ position:absolute; top:0; bottom:0; left:50%; width:3px; background:rgba(0,0,0,0.4); transform:translateX(-50%); }
-
-  .sp3d-esquinera3d{ position:absolute; width:20px; height:32px; background:#0c1b33; border-radius:2px; box-shadow:0 0 0 1px rgba(255,255,255,0.1) inset, 0 2px 4px rgba(0,0,0,0.4); }
-  .sp3d-remache3d{ position:absolute; width:6px; height:6px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #ffe0c2, #b5500f 65%, #7a3308); box-shadow:0 1px 2px rgba(0,0,0,0.5); }
-
-  .sp3d-traba3d{ position:absolute; top:16%; bottom:16%; width:8px; border-radius:2px;
-    background:linear-gradient(90deg,#dfe4e9,#8b95a3 45%,#5a6270); box-shadow:0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.25); }
-  .sp3d-manija3d{ position:absolute; left:50%; top:50%; width:30px; height:10px; transform:translate(-50%,-50%) rotate(90deg);
-    background:linear-gradient(90deg,#5a6270,#dfe4e9); border-radius:3px; box-shadow:0 1px 3px rgba(0,0,0,0.5); }
-  .sp3d-gozne3d{ position:absolute; left:50%; width:13px; height:13px; border-radius:50%; transform:translateX(-50%);
-    background:radial-gradient(circle at 35% 30%,#dfe4e9,#4a5158); box-shadow:0 1px 2px rgba(0,0,0,0.5); }
-
-  .sp3d-placa-iso3d{
-    position:absolute; background:rgba(10,21,36,0.88); border:1px solid rgba(255,255,255,0.18); border-radius:3px;
-    padding:5px 8px; font-family:var(--font-mono); font-size:9px; color:rgba(255,255,255,0.75); letter-spacing:.04em; line-height:1.5;
+  .spg-lado{
+    width:140px; height:160px;
+    transform: translate(-50%,-50%) rotateY(90deg) translateZ(180px);
   }
-  .sp3d-placa-carga{
-    position:absolute; background:rgba(255,255,255,0.94); border-radius:2px; padding:4px 7px;
-    font-family:var(--font-mono); font-size:7px; color:#1a1a1a; line-height:1.55; letter-spacing:.01em;
-  }
-
-  .sp3d-marca3d{
-    position:absolute; z-index:2; text-align:center;
-    font-family:var(--font-display); font-weight:700; color:#0c1b33;
-    letter-spacing:.01em; line-height:0.95; text-shadow:0 1px 0 rgba(255,255,255,0.3);
-  }
-  .sp3d-marca3d .l1{ font-size:44px; }
-  .sp3d-marca3d .l2{ font-size:44px; }
-  .sp3d-marca3d .sub{ font-family:var(--font-mono); font-weight:700; font-size:10px; color:rgba(12,27,51,0.55); letter-spacing:.32em; margin-top:8px; }
-
-  .sp3d-logo-badge3d{
-    position:absolute; width:46px; height:46px; border-radius:10px; background:#0c1b33;
-    display:flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.15);
-  }
-  .sp3d-logo-badge3d span{ font-family:var(--font-display); font-weight:700; font-size:22px; color:var(--accent); }
-
-  /* ---- cara lateral (más oscura, luz indirecta) ---- */
-  .sp3d-lado{
-    width:220px; height:280px;
-    transform: translate(-50%,-50%) rotateY(90deg) translateZ(280px);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.4) 100%),
-      linear-gradient(90deg, #b8480c 0%, #a8410b 50%, #8f3708 100%);
-  }
-  .sp3d-lado::before{
+  .spg-lado::before{
     content:''; position:absolute; inset:0;
-    background-image: repeating-linear-gradient(90deg,
-      rgba(255,255,255,0.1) 0 2px,
-      rgba(0,0,0,0.22) 2px 4px,
-      transparent 4px 24px);
+    background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 2px, rgba(0,0,0,0.2) 2px 4px, transparent 4px 20px);
   }
-  .sp3d-lado .sp3d-texto-lateral{
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    font-family:var(--font-mono); font-weight:700; font-size:13px; color:rgba(12,27,51,0.45);
-    letter-spacing:.22em; white-space:nowrap;
+  .spg-techo{
+    width:360px; height:140px;
+    transform: translate(-50%,-50%) rotateX(90deg) translateZ(80px);
   }
-
-  /* ---- techo (sombra más profunda) ---- */
-  .sp3d-techo{
-    width:560px; height:220px;
-    transform: translate(-50%,-50%) rotateX(90deg) translateZ(140px);
-    background: linear-gradient(180deg, #d1560f 0%, #a8420c 100%);
-  }
-  .sp3d-techo::before{
+  .spg-techo::before{
     content:''; position:absolute; inset:0;
-    background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.14) 0 2px, transparent 2px 30px);
+    background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.14) 0 2px, transparent 2px 26px);
   }
 
-  /* ---- sombra proyectada en el piso ---- */
-  .sp3d-sombra-piso{
+  /* paletas de color por nivel */
+  .spg-n-naranja .spg-frente{ background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.28) 100%), linear-gradient(100deg, #ff8a4d 0%, #ff6a1a 22%, #f2650f 60%, #d8570f 100%); }
+  .spg-n-naranja .spg-lado{ background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.4) 100%), linear-gradient(90deg, #b8480c 0%, #a8410b 50%, #8f3708 100%); }
+  .spg-n-naranja .spg-techo{ background: linear-gradient(180deg, #d1560f 0%, #a8420c 100%); }
+
+  .spg-n-acero .spg-frente{ background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.3) 100%), linear-gradient(100deg, #5c6a7d 0%, #4a5768 30%, #384354 100%); }
+  .spg-n-acero .spg-lado{ background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.42) 100%), linear-gradient(90deg, #333d4c 0%, #2a323e 100%); }
+  .spg-n-acero .spg-techo{ background: linear-gradient(180deg, #414c5c 0%, #2c3543 100%); }
+
+  .spg-n-verde .spg-frente{ background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.3) 100%), linear-gradient(100deg, #2f6b56 0%, #255a48 30%, #1c4837 100%); }
+  .spg-n-verde .spg-lado{ background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.42) 100%), linear-gradient(90deg, #1c4837 0%, #163a2c 100%); }
+  .spg-n-verde .spg-techo{ background: linear-gradient(180deg, #245a47 0%, #163a2c 100%); }
+
+  .spg-esquinera3d{ position:absolute; width:15px; height:24px; background:#0c1b33; border-radius:2px; box-shadow:0 0 0 1px rgba(255,255,255,0.08) inset; }
+  .spg-remache3d{ position:absolute; width:5px; height:5px; border-radius:50%; background:rgba(0,0,0,0.3); box-shadow:0 1px 1px rgba(255,255,255,0.1); }
+
+  .spg-marca-mini{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;
+    font-family:var(--font-display); font-weight:700; color:#0c1b33; letter-spacing:.01em; line-height:0.95;
+    text-shadow:0 1px 0 rgba(255,255,255,0.25);
+  }
+  .spg-marca-mini .l1{ font-size:30px; }
+  .spg-marca-mini .sub{ font-family:var(--font-mono); font-weight:700; font-size:7.5px; letter-spacing:.28em; color:rgba(12,27,51,0.5); margin-top:6px; }
+
+  /* contenedor que baja */
+  .spg-caja-suspendida{
+    animation: bajar 3.6s cubic-bezier(.32,0,.15,1) forwards;
+  }
+  @keyframes bajar{
+    0%{   transform: translate(-50%,-50%) translateY(-900px) rotateZ(-3deg); }
+    55%{  transform: translate(-50%,-50%) translateY(-360px) rotateZ(2.5deg); }
+    75%{  transform: translate(-50%,-50%) translateY(-320px) rotateZ(-1deg); }
+    88%{  transform: translate(-50%,-50%) translateY(-335px) rotateZ(0.6deg); }
+    100%{ transform: translate(-50%,-50%) translateY(-320px) rotateZ(0deg); }
+  }
+
+  .spg-sombra-piso{
     position:absolute; bottom:9%; left:50%; transform:translateX(-50%);
-    width:520px; height:70px; border-radius:50%;
+    width:440px; height:56px; border-radius:50%;
     background: radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 72%);
     z-index:1; filter:blur(2px);
   }
 
-  .sp3d-creditos{
-    position:absolute; bottom:22px; left:50%; transform:translateX(-50%); z-index:3;
-    font-family:var(--font-mono); font-size:10.5px; color:rgba(255,255,255,0.3); letter-spacing:.1em; text-align:center;
+  .spg-creditos{
+    position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:6;
+    font-family:var(--font-mono); font-size:10px; color:rgba(255,255,255,0.28); letter-spacing:.1em; text-align:center;
   }
 
   /* ---- carga: nombre + porcentaje debajo de la escena ---- */
-  .sp3d-carga{
-    position:absolute; bottom:64px; left:50%; transform:translateX(-50%); z-index:3;
+  .spg-carga{
+    position:absolute; bottom:56px; left:50%; transform:translateX(-50%); z-index:6;
     display:flex; flex-direction:column; align-items:center; text-align:center;
   }
-  .sp3d-carga .nombre{ font-family:var(--font-display); font-weight:700; font-size:15px; color:#fff; letter-spacing:.04em; margin-bottom:10px; }
-  .sp3d-barra{ width:200px; height:2px; background:rgba(255,255,255,0.14); border-radius:2px; overflow:hidden; margin-bottom:8px; }
-  .sp3d-barra-fill{ height:100%; width:0%; background:var(--accent); }
-  .sp3d-carga .estado{ font-family:var(--font-mono); font-size:10.5px; color:rgba(255,255,255,0.45); letter-spacing:.05em; }
-  .sp3d-carga .estado span{ color:var(--accent); font-weight:700; }
-  @media (prefers-reduced-motion: reduce){ #splash{ transition-duration:.01ms; } }
+  .spg-carga .nombre{ font-family:var(--font-display); font-weight:700; font-size:15px; color:#fff; letter-spacing:.04em; margin-bottom:10px; }
+  .spg-barra{ width:200px; height:2px; background:rgba(255,255,255,0.14); border-radius:2px; overflow:hidden; margin-bottom:8px; }
+  .spg-barra-fill{ height:100%; width:0%; background:var(--accent); }
+  .spg-carga .estado{ font-family:var(--font-mono); font-size:10.5px; color:rgba(255,255,255,0.45); letter-spacing:.05em; }
+  .spg-carga .estado span{ color:var(--accent); font-weight:700; }
+  @media (prefers-reduced-motion: reduce){ #splash{ transition-duration:.01ms; } .spg-caja-suspendida{ animation-duration:.01ms !important; } }
 </style>
 </head>
 <body>
 
 <div id="splash">
-  <div class="sp3d-escenario">
-    <div class="sp3d-piso"></div>
-    <div class="sp3d-halo"></div>
-    <div class="sp3d-sombra-piso"></div>
+<div class="spg-escenario">
+  <div class="spg-piso"></div>
+  <div class="spg-sombra-piso"></div>
 
-    <div class="sp3d-escena3d">
-      <div class="sp3d-rig">
-        <div class="sp3d-cara sp3d-frente">
-          <div class="sp3d-costura"></div>
-          <div class="sp3d-esquinera3d" style="top:8px; left:8px;"></div>
-          <div class="sp3d-esquinera3d" style="top:8px; right:8px;"></div>
-          <div class="sp3d-esquinera3d" style="bottom:8px; left:8px;"></div>
-          <div class="sp3d-esquinera3d" style="bottom:8px; right:8px;"></div>
-          <div class="sp3d-remache3d" style="top:34px; left:34px;"></div>
-          <div class="sp3d-remache3d" style="top:34px; right:34px;"></div>
-          <div class="sp3d-remache3d" style="bottom:34px; left:34px;"></div>
-          <div class="sp3d-remache3d" style="bottom:34px; right:34px;"></div>
-          <div class="sp3d-traba3d" style="left:150px;">
-            <div class="sp3d-gozne3d" style="top:-4px;"></div>
-            <div class="sp3d-manija3d"></div>
-            <div class="sp3d-gozne3d" style="bottom:-4px;"></div>
-          </div>
-          <div class="sp3d-traba3d" style="right:150px;">
-            <div class="sp3d-gozne3d" style="top:-4px;"></div>
-            <div class="sp3d-manija3d"></div>
-            <div class="sp3d-gozne3d" style="bottom:-4px;"></div>
-          </div>
-          <div class="sp3d-placa-iso3d" style="top:34px; left:56px;">NEAU 149810-4<br>ISO 22G1 · 20' DRY</div>
-          <div class="sp3d-placa-carga" style="bottom:30px; right:60px;">MAX GROSS 30480 KG<br>TARE 2200 KG · NET 28280 KG</div>
-          <div class="sp3d-logo-badge3d" style="top:50%; left:50%; transform:translate(-50%,-140%);"><span>N</span></div>
-          <div class="sp3d-marca3d" style="top:50%; left:50%; transform:translate(-50%,-10%);">
-            <div class="l1">NEA CARGO</div>
-            <div class="l2">XPRESS</div>
+  <div class="spg-grua">
+    <div class="spg-grua-mastil"></div>
+    <div class="spg-grua-celosia"></div>
+    <div class="spg-grua-contrapeso"></div>
+    <div class="spg-grua-pluma"></div>
+    <div class="spg-grua-tirantes"></div>
+    <div class="spg-grua-cable"></div>
+    <div class="spg-grua-trolley"></div>
+    <div class="spg-grua-luz"></div>
+  </div>
+
+  <div class="spg-escena3d">
+    <div class="spg-rig">
+
+      <!-- Nivel 0: base acero (estático) -->
+      <div class="spg-caja spg-n-acero" style="transform:translate(-50%,-50%) translateY(0px);">
+        <div class="spg-cara spg-frente">
+          <div class="spg-esquinera3d" style="top:6px; left:6px;"></div><div class="spg-esquinera3d" style="top:6px; right:6px;"></div>
+          <div class="spg-esquinera3d" style="bottom:6px; left:6px;"></div><div class="spg-esquinera3d" style="bottom:6px; right:6px;"></div>
+        </div>
+        <div class="spg-cara spg-lado"></div>
+        <div class="spg-cara spg-techo"></div>
+      </div>
+
+      <!-- Nivel 1: verde (estático) -->
+      <div class="spg-caja spg-n-verde" style="transform:translate(-50%,-50%) translateY(-160px);">
+        <div class="spg-cara spg-frente">
+          <div class="spg-esquinera3d" style="top:6px; left:6px;"></div><div class="spg-esquinera3d" style="top:6px; right:6px;"></div>
+          <div class="spg-esquinera3d" style="bottom:6px; left:6px;"></div><div class="spg-esquinera3d" style="bottom:6px; right:6px;"></div>
+        </div>
+        <div class="spg-cara spg-lado"></div>
+        <div class="spg-cara spg-techo"></div>
+      </div>
+
+      <!-- Nivel 2: naranja NEA — la que baja la grúa -->
+      <div class="spg-caja spg-n-naranja spg-caja-suspendida">
+        <div class="spg-cara spg-frente">
+          <div class="spg-esquinera3d" style="top:6px; left:6px;"></div><div class="spg-esquinera3d" style="top:6px; right:6px;"></div>
+          <div class="spg-esquinera3d" style="bottom:6px; left:6px;"></div><div class="spg-esquinera3d" style="bottom:6px; right:6px;"></div>
+          <div class="spg-remache3d" style="top:26px; left:26px;"></div><div class="spg-remache3d" style="top:26px; right:26px;"></div>
+          <div class="spg-remache3d" style="bottom:26px; left:26px;"></div><div class="spg-remache3d" style="bottom:26px; right:26px;"></div>
+          <div class="spg-marca-mini">
+            <div class="l1">NEA CARGO XPRESS</div>
             <div class="sub">MIAMI · PANAMÁ</div>
           </div>
         </div>
-        <div class="sp3d-cara sp3d-lado">
-          <div class="sp3d-texto-lateral">NEA CARGO XPRESS</div>
-        </div>
-        <div class="sp3d-cara sp3d-techo"></div>
+        <div class="spg-cara spg-lado"></div>
+        <div class="spg-cara spg-techo"></div>
       </div>
-    </div>
 
-    <div class="sp3d-carga">
-      <div class="nombre">NEA CARGO XPRESS</div>
-      <div class="sp3d-barra"><div class="sp3d-barra-fill" id="splashFill"></div></div>
-      <div class="estado"><span id="splashPct">0%</span> — <span id="splashEstado">Cargando…</span></div>
     </div>
   </div>
+
+  <div class="spg-carga">
+    <div class="nombre">NEA CARGO XPRESS</div>
+    <div class="spg-barra"><div class="spg-barra-fill" id="splashFill"></div></div>
+    <div class="estado"><span id="splashPct">0%</span> — <span id="splashEstado">Bajando contenedor…</span></div>
+  </div>
+</div>
 </div>
 
 <!-- ============ NAV ============ -->
@@ -1679,21 +1705,20 @@ setLang(lang);
   if(!splash) return;
 
   var estados = [
-    [0, 'Cargando…'],
-    [40, 'Preparando tu envío…'],
-    [75, 'Casi listo…'],
+    [0, 'Bajando contenedor…'],
+    [45, 'Acomodando en la pila…'],
+    [85, 'Asegurando carga…'],
     [100, '¡Listo!']
   ];
 
   if(reducido){ splash.classList.add('oculto'); return; }
 
-  var duracionMs = 2400;
+  var duracionMs = 3800;
   var inicio = performance.now();
 
   function paso(ahora){
     var t = Math.min((ahora - inicio) / duracionMs, 1);
-    var eased = 1 - Math.pow(1 - t, 2);
-    var pct = Math.min(Math.round(eased * 100), 100);
+    var pct = Math.min(Math.round(t * 100), 100);
     fill.style.width = pct + '%';
     pctEl.textContent = pct + '%';
     for(var i=0;i<estados.length;i++){ if(pct >= estados[i][0]) estadoEl.textContent = estados[i][1]; }
