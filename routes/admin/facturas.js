@@ -7,7 +7,6 @@ const { requiereAdmin } = require('../../middleware/admin');
 const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
-const { enviarFacturaPorWhatsapp } = require('../../utils/whatsapp');
 const { fechaPanama } = require('../../utils/fechas');
 
 const router = express.Router();
@@ -107,7 +106,7 @@ router.post(
       const facturaCompleta = { ...factura, numero_factura: numeroFactura };
       const datosCompletos = await pool.query(SELECT_FACTURA_PDF, [factura.id]);
       const facturaParaEnvio = datosCompletos.rows[0];
-      const envios = { correo_enviado: false, whatsapp_enviado: false, errores_envio: [] };
+      const envios = { correo_enviado: false, errores_envio: [] };
       try {
         const pdfBuffer = await generarPdfFactura(facturaParaEnvio);
         await enviarFacturaPorCorreo(facturaParaEnvio.cliente_email, facturaParaEnvio.cliente_nombre, facturaParaEnvio, pdfBuffer);
@@ -115,16 +114,6 @@ router.post(
       } catch (errorCorreo) {
         console.error('Error enviando factura por correo:', errorCorreo);
         envios.errores_envio.push(`Correo: ${errorCorreo.message}`);
-      }
-      if (facturaParaEnvio.cliente_telefono) {
-        try {
-          const urlPdfPublica = `${process.env.BASE_URL}/api/public/facturas/${facturaParaEnvio.token_pdf}/pdf`;
-          await enviarFacturaPorWhatsapp(facturaParaEnvio.cliente_telefono, facturaParaEnvio, urlPdfPublica);
-          envios.whatsapp_enviado = true;
-        } catch (errorWhatsapp) {
-          console.error('Error enviando factura por WhatsApp:', errorWhatsapp);
-          envios.errores_envio.push(`WhatsApp: ${errorWhatsapp.message}`);
-        }
       }
       return res.status(201).json({ mensaje: 'Factura generada', factura: facturaCompleta, envios });
     } catch (error) {
@@ -279,7 +268,7 @@ router.post('/:id/reenviar', async (req, res) => {
       await pool.query('UPDATE facturas SET token_pdf = $1 WHERE id = $2', [nuevoToken, factura.id]);
       factura.token_pdf = nuevoToken;
     }
-    const envios = { correo_enviado: false, whatsapp_enviado: false, errores_envio: [] };
+    const envios = { correo_enviado: false, errores_envio: [] };
     try {
       const pdfBuffer = await generarPdfFactura(factura);
       await enviarFacturaPorCorreo(factura.cliente_email, factura.cliente_nombre, factura, pdfBuffer);
@@ -287,16 +276,6 @@ router.post('/:id/reenviar', async (req, res) => {
     } catch (errorCorreo) {
       console.error('Error reenviando factura por correo:', errorCorreo);
       envios.errores_envio.push(`Correo: ${errorCorreo.message}`);
-    }
-    if (factura.cliente_telefono) {
-      try {
-        const urlPdfPublica = `${process.env.BASE_URL}/api/public/facturas/${factura.token_pdf}/pdf`;
-        await enviarFacturaPorWhatsapp(factura.cliente_telefono, factura, urlPdfPublica);
-        envios.whatsapp_enviado = true;
-      } catch (errorWhatsapp) {
-        console.error('Error reenviando factura por WhatsApp:', errorWhatsapp);
-        envios.errores_envio.push(`WhatsApp: ${errorWhatsapp.message}`);
-      }
     }
     return res.json({ mensaje: 'Reenvío procesado', envios });
   } catch (error) {
