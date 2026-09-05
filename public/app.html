@@ -780,6 +780,9 @@
         <button class="side-item" data-seccion="paquetes">
           <span class="side-ico">📦</span><span class="side-label">Paquetes</span>
         </button>
+        <button class="side-item" data-seccion="deliveries">
+          <span class="side-ico">🚚</span><span class="side-label">Deliveries</span>
+        </button>
 
         <button class="side-item side-parent" id="btnFacturasParent">
           <span class="side-ico">🧾</span><span class="side-label">Facturas</span><span class="side-caret">▾</span>
@@ -937,6 +940,15 @@
               <button class="panel-tab" data-filtro="entregado">Entregados</button>
             </div>
             <div id="listaPaquetes"></div>
+          </div>
+        </div>
+
+        <!-- ---- Sección: Deliveries ---- -->
+        <div class="seccion-app" id="seccionDeliveries" style="display:none;">
+          <div class="card reveal">
+            <h2>Mis deliveries</h2>
+            <p class="card-sub">El estado de cada entrega que has pedido a domicilio.</p>
+            <div id="listaDeliveries"></div>
           </div>
         </div>
 
@@ -1144,6 +1156,7 @@
     'inicio': { titulo: (nombre) => `Hola, ${nombre}`, sub: 'Este es el estado de tu casillero y tus paquetes.' },
     'casillero': { titulo: () => 'Mi casillero', sub: 'Tu dirección personal para comprar en EE.UU.' },
     'paquetes': { titulo: () => 'Paquetes', sub: 'Prealerta y sigue el estado de cada compra.' },
+    'deliveries': { titulo: () => 'Mis deliveries', sub: 'El estado de cada entrega que has pedido a domicilio.' },
     'historial-facturas': { titulo: () => 'Historial de facturas', sub: 'Todas tus facturas, pagadas y pendientes.' },
     'estado-cuenta': { titulo: () => 'Estado de cuenta', sub: 'Resumen de lo facturado, pagado y pendiente.' },
     'autorizados': { titulo: () => 'Autorizados', sub: 'Personas que pueden retirar tu pedido por ti.' },
@@ -1155,6 +1168,7 @@
     'inicio': 'seccionInicio',
     'casillero': 'seccionCasillero',
     'paquetes': 'seccionPaquetes',
+    'deliveries': 'seccionDeliveries',
     'historial-facturas': 'seccionHistorialFacturas',
     'estado-cuenta': 'seccionEstadoCuenta',
     'autorizados': 'seccionAutorizados',
@@ -1177,6 +1191,7 @@
     }
 
     if (seccion === 'autorizados') cargarAutorizados();
+    if (seccion === 'deliveries') cargarDeliveries();
     if (seccion === 'perfil') cargarDatosPerfil();
 
     // En móvil, cierra el menú al elegir una sección.
@@ -1997,6 +2012,7 @@
         if (res.ok){
           modal.style.display = 'none';
           alert('✓ Delivery solicitado. Te avisaremos cuando el mensajero esté en camino.');
+          cargarDeliveries();
         } else {
           const d = await res.json().catch(() => ({}));
           err.textContent = d.mensaje || 'No se pudo solicitar el delivery.'; err.style.display = 'block';
@@ -2007,6 +2023,67 @@
         btnEnviar.disabled = false; btnEnviar.textContent = 'Solicitar delivery';
       }
     };
+  }
+
+  // ---------- Mis deliveries ----------
+  const DELIVERY_ESTADO_INFO = {
+    solicitado: { label: 'Solicitado', color: '#8a6d00', bg: '#fff4cc' },
+    asignado:   { label: 'En camino',  color: '#0f6b4f', bg: '#e2f5e9' },
+    entregado:  { label: 'Entregado',  color: '#3d3d3a', bg: '#eceae2' },
+    cancelado:  { label: 'Cancelado',  color: '#a32d2d', bg: '#fcebeb' },
+  };
+  async function cargarDeliveries(){
+    const cont = document.getElementById('listaDeliveries');
+    if (!cont) return;
+    cont.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">Cargando…</p>';
+    try {
+      const res = await apiAutenticado('/deliveries');
+      const data = await res.json();
+      renderDeliveries(data.deliveries || []);
+    } catch (e){
+      cont.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">No se pudieron cargar tus deliveries.</p>';
+    }
+  }
+  function renderDeliveries(lista){
+    const cont = document.getElementById('listaDeliveries');
+    if (lista.length === 0){
+      cont.innerHTML = '<p style="font-size:13px;color:var(--ink-soft);">Todavía no has pedido ningún delivery.</p>';
+      return;
+    }
+    cont.innerHTML = lista.map(d => {
+      const info = DELIVERY_ESTADO_INFO[d.estado] || DELIVERY_ESTADO_INFO.solicitado;
+      const fecha = new Date(d.fecha_solicitud).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
+      const mensajero = d.estado === 'asignado' && d.mensajero_nombre
+        ? `<div style="font-size:12.5px;color:var(--ink-soft);margin-top:4px;">🛵 ${escapeHtml(d.mensajero_nombre)}${d.mensajero_telefono ? ' · ' + escapeHtml(d.mensajero_telefono) : ''}</div>`
+        : '';
+      const cancelar = d.estado === 'solicitado'
+        ? `<button class="btn-cancelar-delivery" data-id="${d.id}" style="margin-top:8px;">Cancelar solicitud</button>`
+        : '';
+      return `
+        <div class="card reveal" style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+            <div>
+              <div style="font-weight:600;font-size:14px;">${escapeHtml(d.tienda || 'Paquete')} — #${escapeHtml(d.numero_tracking || '')}</div>
+              <div style="font-size:12.5px;color:var(--ink-soft);margin-top:2px;">${escapeHtml(d.direccion_texto)}</div>
+              ${mensajero}
+              <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">Pedido el ${fecha} · Total: $${Number(d.total).toFixed(2)}</div>
+            </div>
+            <span style="font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;background:${info.bg};color:${info.color};">${info.label}</span>
+          </div>
+          ${cancelar}
+        </div>`;
+    }).join('');
+    cont.querySelectorAll('.btn-cancelar-delivery').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('¿Cancelar esta solicitud de delivery?')) return;
+        btn.disabled = true; btn.textContent = 'Cancelando…';
+        try {
+          const res = await apiAutenticado(`/deliveries/${btn.dataset.id}`, { method: 'DELETE' });
+          if (res.ok || res.status === 204) cargarDeliveries();
+          else { const d = await res.json().catch(()=>({})); alert(d.mensaje || 'No se pudo cancelar.'); btn.disabled = false; btn.textContent = 'Cancelar solicitud'; }
+        } catch (e){ alert('No pudimos conectar.'); btn.disabled = false; btn.textContent = 'Cancelar solicitud'; }
+      });
+    });
   }
 
   function inicializarMapaDelivery(){
