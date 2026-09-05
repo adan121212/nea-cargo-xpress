@@ -40,7 +40,11 @@
   *{ box-sizing:border-box; }
   body{ margin:0; background: var(--paper); color: var(--ink); font-family: var(--font-body); }
   ::selection{ background: var(--accent); color:#fff; }
+  /* red de seguridad: nada debe poder empujar la página entera hacia los lados en celular */
+  @media (max-width: 760px){ html, body{ overflow-x:hidden; max-width:100vw; } }
   @media (max-width: 680px){
+    /* números largos (tracking) no deben desbordar la tarjeta en la vista móvil */
+    .tabla-responsive td .mono{ word-break: break-all; text-align:right; }
     .tabla-responsive thead{
       position:absolute; width:1px; height:1px; padding:0; margin:-1px;
       overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
@@ -551,6 +555,10 @@
   @media (max-width:760px){
     #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; }
     #cajaMetodosCards{ grid-template-columns:repeat(2,1fr) !important; }
+    #comprasResumen{ grid-template-columns:repeat(2,1fr) !important; }
+    #gastosResumen{ grid-template-columns:repeat(2,1fr) !important; }
+    #deliveriesResumen{ grid-template-columns:repeat(2,1fr) !important; }
+    #formTarifa{ grid-template-columns:1fr !important; }
     .caja-historial-head{ display:none; }
     .caja-historial-row{
       grid-template-columns:1fr 1fr; grid-template-rows:auto auto auto;
@@ -569,6 +577,9 @@
     .dash-cards{ grid-template-columns:1fr; }
     #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; }
     #cajaMetodosCards{ grid-template-columns:1fr 1fr !important; }
+    #comprasResumen{ grid-template-columns:1fr 1fr !important; }
+    #gastosResumen{ grid-template-columns:1fr 1fr !important; }
+    #deliveriesResumen{ grid-template-columns:1fr !important; }
   }
   .modal-edit-cliente .modal-box{ max-width:480px; }
   .notif-btn{ position:relative; background:none; border:none; cursor:pointer; padding:6px; color:rgba(255,255,255,0.7); font-size:20px; border-radius:8px; transition:background .15s; }
