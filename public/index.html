@@ -1281,12 +1281,31 @@
     });
   });
 
+  // ---------- Ayudante: pide datos con reintentos ----------
+  // El servidor gratis de Render "se duerme" tras un rato sin visitas, y la
+  // primera visita después de eso puede tardar 30-60 segundos en responder.
+  // Sin esto, esa primera visita fallaba una sola vez y se quedaba en
+  // "No se pudieron cargar" para siempre, aunque el servidor ya hubiera
+  // despertado unos segundos después.
+  async function fetchConReintentos(url, intentos = 5, esperas = [3000, 5000, 8000, 12000]){
+    for (let i = 0; i < intentos; i++){
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+      } catch (err) {
+        if (i === intentos - 1) throw err;
+        await new Promise(r => setTimeout(r, esperas[i] || 12000));
+      }
+    }
+  }
+
   // ---------- Sucursales (dato real desde la API) ----------
   async function cargarSucursales(){
     const grid = $('#sucursalesGrid');
+    grid.innerHTML = '<div class="sucursal-card"><p class="linea">Cargando sucursales…</p></div>';
     try {
-      const res = await fetch('/api/sucursales');
-      const data = await res.json();
+      const data = await fetchConReintentos('/api/sucursales');
       const sucursales = data.sucursales || [];
 
       if (sucursales.length === 0){
@@ -1303,7 +1322,7 @@
         </div>
       `).join('');
     } catch (err) {
-      grid.innerHTML = '<div class="sucursal-card"><p class="linea">No se pudieron cargar las sucursales.</p></div>';
+      grid.innerHTML = `<div class="sucursal-card"><p class="linea">No se pudieron cargar las sucursales.</p><button type="button" onclick="cargarSucursales()" style="margin-top:8px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:13px;">↻ Reintentar</button></div>`;
     }
   }
 
@@ -1321,9 +1340,9 @@
   async function cargarTarifas(){
     const grid = $('#tarifasGrid');
     const select = $('#calcTarifa');
+    grid.innerHTML = '<div class="tarifa-card"><p>Cargando tarifas…</p></div>';
     try {
-      const res = await fetch('/api/public/tarifas');
-      const data = await res.json();
+      const data = await fetchConReintentos('/api/public/tarifas');
       tarifasCache = data.tarifas || [];
 
       if (tarifasCache.length === 0){
@@ -1347,7 +1366,7 @@
       calcularEstimado();
       actualizarVisibilidadDimensiones();
     } catch (err) {
-      grid.innerHTML = '<div class="tarifa-card"><p>No se pudieron cargar las tarifas.</p></div>';
+      grid.innerHTML = '<div class="tarifa-card"><p>No se pudieron cargar las tarifas.</p><button type="button" onclick="cargarTarifas()" style="margin-top:8px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:13px;">↻ Reintentar</button></div>';
     }
   }
 
