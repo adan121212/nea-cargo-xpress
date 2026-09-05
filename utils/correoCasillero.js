@@ -126,7 +126,7 @@ async function enviarCorreoCasillero(email, nombre, codigoCliente) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: process.env.RESEND_FROM || 'NEA Cargo Xpress <no-reply@neacargoxpress.com>',
+      from: process.env.RESEND_FROM || 'NEA Cargo Xpress <adan@neacargoxpress.com>',
       to: [email],
       subject: 'Tu direcci\u00f3n en Miami \u2014 NEA Cargo Xpress',
       html,
