@@ -5,7 +5,6 @@ const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
-const { enviarFacturaPorWhatsapp } = require('../../utils/whatsapp');
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
@@ -146,7 +145,7 @@ router.post(
       await client.query('COMMIT');
       const paquete = actualizado.rows[0];
 
-      const envios = { correo_enviado: false, whatsapp_enviado: false };
+      const envios = { correo_enviado: false };
       if (factura_id) {
         try {
           const datosCompletos = await pool.query(
@@ -172,15 +171,6 @@ router.post(
               envios.correo_enviado = true;
             } catch (errorCorreo) {
               console.error('Error enviando factura tras entrega (correo):', errorCorreo);
-            }
-            if (facturaCompleta.cliente_telefono && facturaCompleta.token_pdf) {
-              try {
-                const urlPdfPublica = `${process.env.BASE_URL}/api/public/facturas/${facturaCompleta.token_pdf}/pdf`;
-                await enviarFacturaPorWhatsapp(facturaCompleta.cliente_telefono, facturaCompleta, urlPdfPublica);
-                envios.whatsapp_enviado = true;
-              } catch (errorWhatsapp) {
-                console.error('Error enviando factura tras entrega (WhatsApp):', errorWhatsapp);
-              }
             }
           }
         } catch (errorFactura) {
