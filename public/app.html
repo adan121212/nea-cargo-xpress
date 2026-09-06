@@ -614,6 +614,35 @@
   @media (max-width:620px){ .campo-l{ width:100%; } .campo-row{ flex-wrap:wrap; } }
   .modal-overlay{ position:fixed; inset:0; background:rgba(12,27,51,0.55); z-index:200; display:none; align-items:center; justify-content:center; padding:16px; }
   .modal-overlay .modal-box{ background:#fff; border-radius:14px; padding:22px; max-width:420px; width:100%; max-height:90vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+
+  /* ---------- Toast flotante (confirmaciones y avisos cortos) ---------- */
+  .toast-flotante{
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
+    background: var(--ink); color:#fff; padding:12px 18px; border-radius:10px;
+    font-size:13.5px; line-height:1.45; max-width:min(420px, 90vw);
+    box-shadow:0 8px 24px rgba(0,0,0,.25); z-index:9999; opacity:0;
+    transition: opacity .25s ease, transform .25s ease; pointer-events:none;
+  }
+  .toast-flotante.show{ opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+  .toast-flotante.success{ background: var(--cargo-green); }
+  .toast-flotante.error{ background:#a32d2d; }
+
+  /* ---------- Ícono de ayuda "?" (explica términos confusos al tocarlo) ---------- */
+  .ayuda-ico{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:16px; height:16px; border-radius:50%; background: var(--line);
+    color: var(--ink-soft); font-size:11px; font-weight:700; cursor:pointer;
+    margin-left:5px; vertical-align:middle; border:none; line-height:1; flex-shrink:0;
+  }
+  .ayuda-ico:hover, .ayuda-ico:active{ background: var(--ink); color:#fff; }
+
+  /* ---------- Bienvenida (primera vez que entra al panel) ---------- */
+  .bienvenida-paso{ display:none; }
+  .bienvenida-paso.activo{ display:block; }
+  .bienvenida-ico{ font-size:34px; text-align:center; margin-bottom:10px; }
+  .bienvenida-puntos{ display:flex; justify-content:center; gap:6px; margin:16px 0; }
+  .bienvenida-punto{ width:7px; height:7px; border-radius:50%; background: var(--line); }
+  .bienvenida-punto.activo{ background: var(--ink); }
   .btn-reportar-problema{ background:#fff; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:9px 12px; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; }
   .btn-reportar-problema:hover{ border-color:#c0392b; color:#c0392b; }
   </style>
@@ -761,6 +790,39 @@
 </div><!-- /wrap -->
 
 <!-- ======================= VISTA: APP (dashboard con menú lateral) ======================= -->
+  <div class="modal-overlay" id="modalBienvenida">
+    <div class="modal-box" style="max-width:380px;text-align:center;">
+      <div class="bienvenida-paso activo" data-paso="1">
+        <div class="bienvenida-ico">📍</div>
+        <h3 style="margin:0 0 8px;">Te damos una dirección en Miami</h3>
+        <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin:0;">Es tu casillero: una dirección propia para que compres en cualquier tienda de EE.UU. como si vivieras allá.</p>
+      </div>
+      <div class="bienvenida-paso" data-paso="2">
+        <div class="bienvenida-ico">🛒</div>
+        <h3 style="margin:0 0 8px;">Comprás donde quieras</h3>
+        <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin:0;">Amazon, Shein, eBay, la tienda que sea. Usás esa dirección al pagar, igual que cualquier compra online.</p>
+      </div>
+      <div class="bienvenida-paso" data-paso="3">
+        <div class="bienvenida-ico">📢</div>
+        <h3 style="margin:0 0 8px;">Nos avisás con "Prealertar"</h3>
+        <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin:0;">En cuanto compres, contanos qué es y su número de tracking. Así lo reconocemos apenas llegue a la bodega.</p>
+      </div>
+      <div class="bienvenida-paso" data-paso="4">
+        <div class="bienvenida-ico">📦</div>
+        <h3 style="margin:0 0 8px;">Te llega a Panamá</h3>
+        <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin:0;">Te avisamos por correo en cada paso, y cuando esté listo lo retirás o pedís que te lo llevemos a domicilio.</p>
+      </div>
+      <div class="bienvenida-puntos">
+        <span class="bienvenida-punto activo" data-punto="1"></span>
+        <span class="bienvenida-punto" data-punto="2"></span>
+        <span class="bienvenida-punto" data-punto="3"></span>
+        <span class="bienvenida-punto" data-punto="4"></span>
+      </div>
+      <button class="btn-primary" id="btnBienvenidaSiguiente" style="width:100%;">Siguiente</button>
+      <button class="link-olvide" id="btnBienvenidaSaltar" type="button" style="margin-top:10px;">Saltar</button>
+    </div>
+  </div>
+
   <div id="vistaApp" class="app-shell">
     <div class="sidebar-scrim" id="sidebarScrim"></div>
     <aside class="sidebar" id="sidebar">
@@ -816,7 +878,7 @@
         <div class="seccion-app" id="seccionInicio">
           <div class="grid2">
             <div class="card reveal">
-              <h2>Mi dirección de casillero</h2>
+              <h2>Mi dirección de casillero<button type="button" class="ayuda-ico" data-ayuda="Es tu dirección propia en Miami. La usás al pagar en cualquier tienda de EE.UU., como si vivieras ahí — nosotros recibimos el paquete y te lo traemos a Panamá.">?</button></h2>
               <p class="card-sub">Usa esta dirección al comprar en tiendas de EE.UU.</p>
               <div class="address-block" id="bloqueDireccion">Cargando…</div>
               <button class="copy-btn" id="btnCopiar">Copiar dirección</button>
@@ -908,11 +970,11 @@
                   <input id="paqTienda" type="text" placeholder="Amazon">
                 </div>
                 <div>
-                  <label for="paqTracking"># de tracking</label>
+                  <label for="paqTracking"># de tracking<button type="button" class="ayuda-ico" data-ayuda="Es el código que te da la tienda para rastrear tu compra (lo ves en el correo de confirmación o en 'Mis pedidos'). Ejemplo: 1Z999AA10123456784">?</button></label>
                   <input id="paqTracking" type="text" placeholder="1Z999AA10123456784">
                 </div>
                 <div>
-                  <label for="paqValor">Valor declarado (USD)</label>
+                  <label for="paqValor">Valor declarado (USD)<button type="button" class="ayuda-ico" data-ayuda="Es lo que pagaste por el producto (sin envío ni impuestos). Aduana lo usa para calcular si tu paquete debe pagar impuesto de importación.">?</button></label>
                   <input id="paqValor" type="number" step="0.01" min="0" placeholder="45.99">
                 </div>
                 <div>
@@ -1163,6 +1225,7 @@
     'perfil': { titulo: () => 'Mi perfil', sub: 'Actualiza tu información de contacto y contraseña.' },
   };
   let nombreUsuarioActual = '';
+  let usuarioIdActual = null;
 
   const MAPA_SECCION_DIV = {
     'inicio': 'seccionInicio',
@@ -1332,6 +1395,50 @@
     el.textContent = mensaje;
     el.className = 'banner show ' + tipo;
   }
+
+  // ---------- Toast flotante (confirmaciones cortas, no bloquean la pantalla) ----------
+  let toastTimer = null;
+  function mostrarToast(mensaje, tipo){
+    let el = document.getElementById('toastFlotante');
+    if (!el){
+      el = document.createElement('div');
+      el.id = 'toastFlotante';
+      document.body.appendChild(el);
+    }
+    el.textContent = mensaje;
+    el.className = 'toast-flotante show ' + (tipo || '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.classList.remove('show'); }, 4200);
+  }
+
+  // ---------- Íconos de ayuda "?" (explican un término al tocarlos) ----------
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('.ayuda-ico');
+    if (b) mostrarToast(b.dataset.ayuda, '');
+  });
+
+  // ---------- Bienvenida (4 pasos, solo la primera vez por cuenta) ----------
+  let bienvenidaPaso = 1;
+  function mostrarBienvenidaSiNecesario(usuarioId){
+    if (localStorage.getItem('nea_bienvenida_vista_' + usuarioId)) return;
+    bienvenidaPaso = 1;
+    actualizarPasoBienvenida();
+    document.getElementById('modalBienvenida').style.display = 'flex';
+  }
+  function cerrarBienvenida(usuarioId){
+    document.getElementById('modalBienvenida').style.display = 'none';
+    localStorage.setItem('nea_bienvenida_vista_' + usuarioId, '1');
+  }
+  function actualizarPasoBienvenida(){
+    document.querySelectorAll('.bienvenida-paso').forEach(p => p.classList.toggle('activo', Number(p.dataset.paso) === bienvenidaPaso));
+    document.querySelectorAll('.bienvenida-punto').forEach(p => p.classList.toggle('activo', Number(p.dataset.punto) === bienvenidaPaso));
+    document.getElementById('btnBienvenidaSiguiente').textContent = bienvenidaPaso === 4 ? '¡Entendido!' : 'Siguiente';
+  }
+  document.getElementById('btnBienvenidaSiguiente').addEventListener('click', () => {
+    if (bienvenidaPaso < 4){ bienvenidaPaso++; actualizarPasoBienvenida(); }
+    else cerrarBienvenida(usuarioIdActual);
+  });
+  document.getElementById('btnBienvenidaSaltar').addEventListener('click', () => cerrarBienvenida(usuarioIdActual));
 
   // ---------- Selector Personal / Empresa en el registro ----------
   document.querySelectorAll('.reg-tipo-btn').forEach(btn => {
@@ -1539,6 +1646,8 @@
     const data = await res.json();
     const { usuario } = data;
     nombreUsuarioActual = usuario.nombre;
+    usuarioIdActual = usuario.id;
+    mostrarBienvenidaSiNecesario(usuario.id);
     $('#saludoNombre').textContent = `Hola, ${usuario.nombre}`;
     $('#pillCasillero').textContent = 'Cliente ' + usuario.numero_casillero;
 
@@ -1810,8 +1919,8 @@
       try{
         const res=await apiAutenticado(`/paquetes/${btn.dataset.id}`,{method:'DELETE'});
         if(res.ok||res.status===204){ paquetesCache=paquetesCache.filter(p=>String(p.id)!==btn.dataset.id); renderPaquetes(); renderPaquetesInicio(); document.getElementById('statTotal').textContent=paquetesCache.length; document.getElementById('statActivos').textContent=paquetesCache.filter(p=>p.estado!=='entregado').length; }
-        else{ const d=await res.json().catch(()=>({})); alert(d.mensaje||'No se pudo eliminar.'); btn.disabled=false; btn.textContent='🗑 Cancelar'; }
-      }catch(err){ alert('No pudimos conectar.'); btn.disabled=false; btn.textContent='🗑 Cancelar'; }
+        else{ const d=await res.json().catch(()=>({})); mostrarToast(d.mensaje||'No se pudo eliminar.', 'error'); btn.disabled=false; btn.textContent='🗑 Cancelar'; }
+      }catch(err){ mostrarToast('No pudimos conectar. Intenta de nuevo.', 'error'); btn.disabled=false; btn.textContent='🗑 Cancelar'; }
     }));
     cont.querySelectorAll('.btn-reportar-problema').forEach(btn => {
       btn.addEventListener('click', () => abrirModalReporte(btn.dataset.id, btn.dataset.tienda));
@@ -1879,7 +1988,7 @@
         });
         if (res.ok){
           modal.style.display = 'none';
-          alert('✓ Tu reporte fue enviado. Te contactaremos pronto.');
+          mostrarToast('✓ Listo, ya quedó tu reporte. Te contactaremos pronto.', 'success');
         } else {
           const d = await res.json().catch(()=>({}));
           err.textContent = d.mensaje || 'No se pudo enviar el reporte.'; err.style.display = 'block';
@@ -2011,7 +2120,7 @@
         });
         if (res.ok){
           modal.style.display = 'none';
-          alert('✓ Delivery solicitado. Te avisaremos cuando el mensajero esté en camino.');
+          mostrarToast('✓ Listo, ya quedó pedido tu delivery. Te avisamos cuando el mensajero esté en camino.', 'success');
           cargarDeliveries();
         } else {
           const d = await res.json().catch(() => ({}));
@@ -2080,8 +2189,8 @@
         try {
           const res = await apiAutenticado(`/deliveries/${btn.dataset.id}`, { method: 'DELETE' });
           if (res.ok || res.status === 204) cargarDeliveries();
-          else { const d = await res.json().catch(()=>({})); alert(d.mensaje || 'No se pudo cancelar.'); btn.disabled = false; btn.textContent = 'Cancelar solicitud'; }
-        } catch (e){ alert('No pudimos conectar.'); btn.disabled = false; btn.textContent = 'Cancelar solicitud'; }
+          else { const d = await res.json().catch(()=>({})); mostrarToast(d.mensaje || 'No se pudo cancelar.', 'error'); btn.disabled = false; btn.textContent = 'Cancelar solicitud'; }
+        } catch (e){ mostrarToast('No pudimos conectar. Intenta de nuevo.', 'error'); btn.disabled = false; btn.textContent = 'Cancelar solicitud'; }
       });
     });
   }
@@ -2210,7 +2319,7 @@
   }
 
   function usarMiUbicacionDelivery(){
-    if (!navigator.geolocation){ alert('Tu navegador no permite compartir ubicación.'); return; }
+    if (!navigator.geolocation){ mostrarToast('Tu navegador no permite compartir ubicación.', 'error'); return; }
     const btn = document.getElementById('delUsarUbicacion');
     const original = btn.textContent;
     btn.textContent = '📍 Ubicando...';
@@ -2220,7 +2329,7 @@
         reverseGeocodeDelivery(pos.coords.latitude, pos.coords.longitude);
         btn.textContent = original;
       },
-      () => { alert('No pudimos obtener tu ubicación. Búscala manualmente arriba.'); btn.textContent = original; }
+      () => { mostrarToast('No pudimos obtener tu ubicación. Búscala manualmente arriba.', 'error'); btn.textContent = original; }
     );
   }
 
@@ -2396,9 +2505,9 @@
         window.location.href = data.url; // el cliente sale a la app de Banco General / Yappy
         return;
       }
-      alert(data.mensaje || 'No se pudo iniciar el pago con Yappy. Intenta de nuevo.');
+      mostrarToast(data.mensaje || 'No se pudo iniciar el pago con Yappy. Intenta de nuevo.', 'error');
     } catch (err) {
-      alert('No pudimos conectar con el servidor.');
+      mostrarToast('No pudimos conectar con el servidor.', 'error');
     } finally {
       btn.textContent = textoOriginal;
       btn.disabled = false;
@@ -2416,7 +2525,7 @@
       const url = window.URL.createObjectURL(blob);
       window.open(url, '_blank');
     } catch (err) {
-      alert('No se pudo descargar el PDF. Intenta de nuevo.');
+      mostrarToast('No se pudo descargar el PDF. Intenta de nuevo.', 'error');
     } finally {
       btn.textContent = textoOriginal;
       btn.disabled = false;
