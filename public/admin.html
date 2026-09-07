@@ -45,6 +45,7 @@
   @media (max-width: 680px){
     /* números largos (tracking) no deben desbordar la tarjeta en la vista móvil */
     .tabla-responsive td .mono{ word-break: break-all; text-align:right; }
+    .tabla-responsive td > div{ word-break: break-word; max-width:100%; }
     .tabla-responsive thead{
       position:absolute; width:1px; height:1px; padding:0; margin:-1px;
       overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
@@ -1918,7 +1919,7 @@
           ${p.notas ? `<div style="margin-top:5px;font-size:11px;color:var(--accent-dark);background:var(--amber-bg);padding:3px 8px;border-radius:6px;max-width:100%;word-break:break-word;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 4 H16 L20 8 V20 H4 Z"/><path d="M16 4 V8 H20"/><path d="M8 12 H16 M8 16 H13"/></svg> ${escapeHtml(p.notas)}</div>` : ''}
         </div></td>
         <td data-label="Casillero" class="mono">${escapeHtml(p.numero_casillero)}</td>
-        <td data-label="Tienda / Tracking">${escapeHtml(p.tienda)}<br><span class="mono muted">${escapeHtml(p.numero_tracking)}</span></td>
+        <td data-label="Tienda / Tracking"><div>${escapeHtml(p.tienda)}<br><span class="mono muted">${escapeHtml(p.numero_tracking)}</span></div></td>
         <td data-label="Valor" class="mono">$${Number(p.valor_declarado).toFixed(2)}</td>
         <td data-label="Peso real (lb)">
           ${p.peso_confirmado ? `
@@ -2349,8 +2350,8 @@
         return `
         <tr${anulada ? ' style="background:rgba(192,57,43,.03);"' : ''}>
           <td data-label="Factura" class="mono"${anulada ? ' style="text-decoration:line-through;opacity:.6;"' : ''}>${escapeHtml(f.numero_factura)}</td>
-          <td data-label="Cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}<br><span class="muted">${escapeHtml(f.cliente_email)}</span></td>
-          <td data-label="Paquete">${escapeHtml(f.tienda)}<br><span class="mono muted">${escapeHtml(f.numero_tracking)}</span></td>
+          <td data-label="Cliente"><div>${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}<br><span class="muted">${escapeHtml(f.cliente_email)}</span></div></td>
+          <td data-label="Paquete"><div>${escapeHtml(f.tienda)}<br><span class="mono muted">${escapeHtml(f.numero_tracking)}</span></div></td>
           <td data-label="Total" class="mono"${anulada ? ' style="text-decoration:line-through;opacity:.6;"' : ''}>$${Number(f.total).toFixed(2)}</td>
           <td data-label="Estado">
             ${anulada
@@ -4300,19 +4301,19 @@
       $('#tbodyGastos').innerHTML = lista.map(g => `
         <tr>
           <td data-label="Fecha" class="muted">${formatearFechaSolo(g.fecha)}</td>
-          <td data-label="Categoría">
+          <td data-label="Categoría"><div>
             ${escapeHtml(gastosCategorias[g.categoria] || g.categoria)}
             ${g.es_recurrente ? '<div style="font-size:10.5px;color:var(--ink-soft);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 12 A9 9 0 0 1 12 3 C15 3 17.5 4.5 19 7"/><path d="M19 3 V7 H15"/><path d="M21 12 A9 9 0 0 1 12 21 C9 21 6.5 19.5 5 17"/><path d="M5 21 V17 H9"/></svg> fijo</div>' : ''}
-          </td>
-          <td data-label="Descripción">
+          </div></td>
+          <td data-label="Descripción"><div>
             ${escapeHtml(g.descripcion)}
             ${g.sale_de_caja ? '<div style="font-size:10.5px;color:var(--accent-dark);">salió de caja</div>' : ''}
             ${g.notas ? `<div style="font-size:11px;color:var(--ink-soft);">${escapeHtml(g.notas)}</div>` : ''}
-          </td>
-          <td data-label="Proveedor" class="muted">
+          </div></td>
+          <td data-label="Proveedor" class="muted"><div>
             ${escapeHtml(g.proveedor || '—')}
             ${g.numero_documento ? `<div class="mono" style="font-size:11px;">${escapeHtml(g.numero_documento)}</div>` : ''}
-          </td>
+          </div></td>
           <td data-label="Monto" class="mono" style="font-weight:700;">$${Number(g.monto).toFixed(2)}</td>
           <td data-label="">
             <div class="row-actions">
