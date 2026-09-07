@@ -84,12 +84,17 @@
     .tabla-responsive td[data-label=""]{
       justify-content:stretch; padding-top:10px;
     }
-    .tabla-responsive td:not([data-label]) button,
-    .tabla-responsive td[data-label=""] button,
+    .tabla-responsive td:not([data-label]) button:not(.icon-btn),
+    .tabla-responsive td[data-label=""] button:not(.icon-btn),
     .tabla-responsive td[data-label="Actualizar"] select,
     .tabla-responsive td[data-label="Actualizar"] button{
       width:100%; min-height:40px;
     }
+    .tabla-responsive td:not([data-label]),
+    .tabla-responsive td[data-label=""]{
+      justify-content:flex-start;
+    }
+    .barra-iconos{ min-width:0; }
     .tabla-responsive{ min-width:0 !important; }
   }
   @media (prefers-reduced-motion: reduce){
