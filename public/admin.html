@@ -746,7 +746,7 @@
       <button class="notif-btn" id="btnCampana" title="Notificaciones">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M6 10 C6 6 8.5 3.5 12 3.5 C15.5 3.5 18 6 18 10 C18 14 19.5 15.5 20 16.5 H4 C4.5 15.5 6 14 6 10 Z"/><path d="M10 19.5 C10 20.6 10.9 21.5 12 21.5 C13.1 21.5 14 20.6 14 19.5"/></svg><span class="notif-badge" id="notifBadge">0</span>
       </button>
-      <button class="sb-logout" id="btnLogout" style="margin-top:0;">⬖ Salir</button>
+      <button class="sb-logout" id="btnLogout" style="margin-top:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M9 21 H5 A2 2 0 0 1 3 19 V5 A2 2 0 0 1 5 3 H9"/><path d="M16 17 L21 12 L16 7"/><path d="M21 12 H9"/></svg> Salir</button>
     </div>
     <div class="sb-user">
       <div class="sb-avatar" id="sbAvatarLetra">A</div>
@@ -789,7 +789,7 @@
         <label for="loginPassword">Contraseña</label>
         <div class="pw-wrap">
           <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password">
-          <button type="button" id="btnVerPassword" class="pw-toggle" tabindex="-1" aria-label="Mostrar contraseña">👁</button>
+          <button type="button" id="btnVerPassword" class="pw-toggle" tabindex="-1" aria-label="Mostrar contraseña"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;"><path d="M1 12 C4 6 9 3 12 3 C15 3 20 6 23 12 C20 18 15 21 12 21 C9 21 4 18 1 12 Z"/><circle cx="12" cy="12" r="3"/></svg></button>
         </div>
         <button class="btn-primary" type="submit" id="btnLogin">
           <span class="spinner"></span><span>Entrar</span>
@@ -821,10 +821,10 @@
         <div id="avisoCajaPendiente" class="aviso-caja" style="display:none;"></div>
         <div class="dash-topbar">
           <div class="dash-search">
-            🔍 <input type="text" id="dashBuscar" placeholder="Buscar por tracking o correo del cliente…">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20 L15.5 15.5"/></svg> <input type="text" id="dashBuscar" placeholder="Buscar por tracking o correo del cliente…">
           </div>
           <div class="dash-topbar-actions">
-            <button type="button" class="btn-secondary" id="dashBtnEscanear">📷 Escanear</button>
+            <button type="button" class="btn-secondary" id="dashBtnEscanear"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 8 H7 L9 5 H15 L17 8 H20 A1 1 0 0 1 21 9 V18 A1 1 0 0 1 20 19 H4 A1 1 0 0 1 3 18 V9 A1 1 0 0 1 4 8 Z"/><circle cx="12" cy="13.5" r="3.5"/></svg> Escanear</button>
             <button type="button" class="btn-primary" id="dashBtnNuevo">+ Nuevo paquete</button>
           </div>
         </div>
@@ -832,9 +832,9 @@
         <p>Vista general de operaciones — actualizado al instante.</p>
       </div>
       <div class="kpi-grid">
-        <div class="kpi-card"><div class="kpi-icon">👥</div><div class="kpi-label">Clientes totales</div><div class="kpi-num" id="kpiClientes">—</div><div class="kpi-sub" id="kpiClientesSub">registrados</div><div class="kpi-bar"><div class="kpi-bar-fill" id="kpiClientesBar" style="width:0%"></div></div></div>
-        <div class="kpi-card"><div class="kpi-icon">📦</div><div class="kpi-label">Paquetes este mes</div><div class="kpi-num blue" id="kpiPaquetesMes">—</div><div class="kpi-sub" id="kpiPaquetesMesSub">paquetes nuevos</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:#2563eb;width:0%" id="kpiPaquetesMesBar"></div></div></div>
-        <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-label">Ingresos este mes</div><div class="kpi-num green" id="kpiIngresosMes">—</div><div class="kpi-sub" id="kpiIngresosMesSub">cobrados</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:var(--cargo-green);width:0%" id="kpiIngresosMesBar"></div></div></div>
+        <div class="kpi-card"><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="9" cy="7" r="3.5"/><path d="M2 21 C2 16.5 5 14 9 14 C13 14 16 16.5 16 21"/><circle cx="17" cy="8" r="2.6"/><path d="M22 21 C22 17.5 20.2 15.3 17.5 14.7"/></svg></div><div class="kpi-label">Clientes totales</div><div class="kpi-num" id="kpiClientes">—</div><div class="kpi-sub" id="kpiClientesSub">registrados</div><div class="kpi-bar"><div class="kpi-bar-fill" id="kpiClientesBar" style="width:0%"></div></div></div>
+        <div class="kpi-card"><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/><path d="M12 13 V21"/></svg></div><div class="kpi-label">Paquetes este mes</div><div class="kpi-num blue" id="kpiPaquetesMes">—</div><div class="kpi-sub" id="kpiPaquetesMesSub">paquetes nuevos</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:#2563eb;width:0%" id="kpiPaquetesMesBar"></div></div></div>
+        <div class="kpi-card"><div class="kpi-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M9 3 H15 L13.5 6.5 A7 7 0 1 1 10.5 6.5 Z"/><path d="M12 10 V16 M10 12 H14 M10 14 H14"/></svg></div><div class="kpi-label">Ingresos este mes</div><div class="kpi-num green" id="kpiIngresosMes">—</div><div class="kpi-sub" id="kpiIngresosMesSub">cobrados</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:var(--cargo-green);width:0%" id="kpiIngresosMesBar"></div></div></div>
         <div class="kpi-card"><div class="kpi-icon">⏳</div><div class="kpi-label">Por cobrar</div><div class="kpi-num amber" id="kpiPendiente">—</div><div class="kpi-sub" id="kpiPendienteSub">pendientes</div><div class="kpi-bar"><div class="kpi-bar-fill" style="background:var(--accent);width:0%" id="kpiPendienteBar"></div></div></div>
       </div>
       <div class="card paquete-destacado" id="paqueteDestacadoBox" style="display:none;">
@@ -901,10 +901,10 @@
           <div class="fac-panel-right">
             <div class="fac-panel-titulo">Método de pago</div>
             <div class="fac-pago-grid">
-              <button type="button" class="ft-pago-btn" data-metodo="efectivo">💵 Efectivo</button>
-              <button type="button" class="ft-pago-btn" data-metodo="tarjeta">💳 Tarjeta</button>
-              <button type="button" class="ft-pago-btn" data-metodo="transferencia">🏦 Transferencia</button>
-              <button type="button" class="ft-pago-btn" data-metodo="yappy">📱 Yappy</button>
+              <button type="button" class="ft-pago-btn" data-metodo="efectivo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg> Efectivo</button>
+              <button type="button" class="ft-pago-btn" data-metodo="tarjeta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10 H22"/><path d="M6 15 H10"/></svg> Tarjeta</button>
+              <button type="button" class="ft-pago-btn" data-metodo="transferencia"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M2 9 L12 3 L22 9"/><path d="M4 9 V19 M9 9 V19 M15 9 V19 M20 9 V19"/><path d="M2 19 H22 M2 22 H22"/></svg> Transferencia</button>
+              <button type="button" class="ft-pago-btn" data-metodo="yappy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18 H13"/></svg> Yappy</button>
             </div>
             <div class="ft-efectivo-box" id="ftEfectivoBox" style="display:none;">
               <label for="ftMontoRecibido">Monto recibido</label>
@@ -933,7 +933,7 @@
           <div>Fecha</div><div>Monto</div><div>Acción</div>
         </div>
         <div id="pendientesMostrador"></div>
-        <div class="empty" id="emptyPendientesMostrador" style="display:none;">No hay facturas pendientes. 🎉</div>
+        <div class="empty" id="emptyPendientesMostrador" style="display:none;">No hay facturas pendientes. <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="12" cy="12" r="9.5"/><path d="M8 12.5 L11 15.5 L16 9"/></svg></div>
       </div>
     </div>
     <!-- ---- TAB: Recepción ---- -->
@@ -953,12 +953,12 @@
       <form id="formRecepcion" style="display:flex;gap:8px;margin-bottom:12px;">
         <div style="position:relative;flex:1;">
           <input type="text" id="recepcionTracking" placeholder="Escanea o escribe el tracking…" autocomplete="off" style="width:100%;padding-right:36px;">
-          <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;">📦</span>
+          <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/><path d="M12 13 V21"/></svg></span>
         </div>
         <button class="btn-primary" type="submit" id="btnRecepcion" style="white-space:nowrap;width:auto;">
           <span class="spinner"></span><span>Buscar</span>
         </button>
-        <button type="button" id="btnCamara" style="background:var(--ink);color:#fff;border:none;padding:0 14px;border-radius:8px;cursor:pointer;font-size:18px;" title="Escanear con cámara">📷</button>
+        <button type="button" id="btnCamara" style="background:var(--ink);color:#fff;border:none;padding:0 14px;border-radius:8px;cursor:pointer;font-size:18px;" title="Escanear con cámara"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 8 H7 L9 5 H15 L17 8 H20 A1 1 0 0 1 21 9 V18 A1 1 0 0 1 20 19 H4 A1 1 0 0 1 3 18 V9 A1 1 0 0 1 4 8 Z"/><circle cx="12" cy="13.5" r="3.5"/></svg></button>
       </form>
       <div id="camaraRecepcion" style="display:none;margin-bottom:12px;border-radius:12px;overflow:hidden;background:#000;position:relative;aspect-ratio:4/3;max-height:280px;">
         <video id="camaraVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;"></video>
@@ -970,7 +970,7 @@
       <div id="recepcionResultado" style="display:none;"></div>
       <div id="recepcionFormNuevo" style="display:none;">
         <div class="card" style="border:2px dashed var(--accent);margin-top:12px;">
-          <h3 style="margin:0 0 4px;color:var(--accent);">📦 Sin prealerta — crear paquete</h3>
+          <h3 style="margin:0 0 4px;color:var(--accent);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/><path d="M12 13 V21"/></svg> Sin prealerta — crear paquete</h3>
           <p class="card-sub" style="margin:0 0 14px;">Este tracking no tiene prealerta. Busca al cliente por casillero y completa los datos.</p>
           <div class="form-grid" style="margin-bottom:12px;">
             <div>
@@ -998,17 +998,17 @@
       </div>
       <div id="pasoFoto" style="display:none;">
         <div class="card" style="border:2px dashed #2563eb;margin-top:12px;">
-          <h3 style="margin:0 0 4px;color:#2563eb;">📷 Paso 1 de 2 — Foto del paquete</h3>
+          <h3 style="margin:0 0 4px;color:#2563eb;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 8 H7 L9 5 H15 L17 8 H20 A1 1 0 0 1 21 9 V18 A1 1 0 0 1 20 19 H4 A1 1 0 0 1 3 18 V9 A1 1 0 0 1 4 8 Z"/><circle cx="12" cy="13.5" r="3.5"/></svg> Paso 1 de 2 — Foto del paquete</h3>
           <p class="card-sub" style="margin:0 0 14px;" id="pasoFotoSub">Toma una foto de cómo llegó el paquete.</p>
           <input type="file" id="pasoFotoInput" accept="image/*" capture="environment" style="display:none;">
-          <button class="btn-primary" id="btnAbrirCamaraFoto" style="width:auto;">📷 Tomar foto</button>
+          <button class="btn-primary" id="btnAbrirCamaraFoto" style="width:auto;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 8 H7 L9 5 H15 L17 8 H20 A1 1 0 0 1 21 9 V18 A1 1 0 0 1 20 19 H4 A1 1 0 0 1 3 18 V9 A1 1 0 0 1 4 8 Z"/><circle cx="12" cy="13.5" r="3.5"/></svg> Tomar foto</button>
           <button type="button" onclick="saltarPasoFoto()" class="btn-secondary" style="margin-left:8px;">Saltar este paso</button>
           <div class="banner" id="bannerPasoFoto"></div>
         </div>
       </div>
       <div id="pasoDimensiones" style="display:none;">
         <div class="card" style="border:2px dashed #7c3aed;margin-top:12px;">
-          <h3 style="margin:0 0 4px;color:#7c3aed;">📐 Paso 2 de 2 — Dimensiones</h3>
+          <h3 style="margin:0 0 4px;color:#7c3aed;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 21 L21 3"/><path d="M7 17 L9 15 M10 14 L12 12 M13 11 L15 9 M16 8 L18 6"/></svg> Paso 2 de 2 — Dimensiones</h3>
           <p class="card-sub" style="margin:0 0 14px;">Mide el paquete en pulgadas — se calcula el peso volumétrico automáticamente.</p>
           <div class="form-grid" style="margin-bottom:12px;">
             <div><label for="dimLargo">Largo (in)</label><input id="dimLargo" type="number" step="0.1" min="0" placeholder="12"></div>
@@ -1111,7 +1111,7 @@
               <input id="compraCliente" type="text" placeholder="Casillero, nombre o correo — o presiona 1" autocomplete="off">
               <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none;">1</span>
             </div>
-            <button type="button" id="btnAbrirListaClientesCompra" class="btn-icon-people" title="Ver todos los clientes">👥</button>
+            <button type="button" id="btnAbrirListaClientesCompra" class="btn-icon-people" title="Ver todos los clientes"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="9" cy="7" r="3.5"/><path d="M2 21 C2 16.5 5 14 9 14 C13 14 16 16.5 16 21"/><circle cx="17" cy="8" r="2.6"/><path d="M22 21 C22 17.5 20.2 15.3 17.5 14.7"/></svg></button>
             <button type="button" id="btnBuscarClienteCompra" class="btn-secondary" style="white-space:nowrap;">Buscar</button>
           </div>
           <div id="compraClienteEncontrado" style="display:none;margin-top:6px;padding:8px 12px;background:var(--paper);border-radius:8px;font-size:12.5px;"></div>
@@ -1187,7 +1187,7 @@
     <!-- ---- TAB: Deliveries ---- -->
     <div class="tab-panel" id="tabDeliveries" style="display:none;">
       <div class="card" style="margin-bottom:20px;">
-        <h2 style="margin:0 0 2px;">🚚 Deliveries</h2>
+        <h2 style="margin:0 0 2px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="1" y="7" width="13" height="10"/><path d="M14 10 H19 L22 13 V17 H14 Z"/><circle cx="6" cy="19" r="1.8"/><circle cx="18" cy="19" r="1.8"/></svg> Deliveries</h2>
         <p class="card-sub" style="margin:0 0 18px;">Paquetes que el cliente pidió que le llevaran en vez de retirar en sucursal.</p>
         <div id="deliveriesResumen" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;"></div>
         <div class="banner" id="bannerDelivery"></div>
@@ -1410,10 +1410,10 @@
         </div>
       </div>
       <div class="dash-cards">
-        <div class="dash-card green"><div class="dash-icon">💰</div><div class="dash-info"><div class="dash-label">Ingresos cobrados</div><div class="dash-num" id="repIngresos">$0.00</div><div class="dash-sub" id="repIngresosCant">0 facturas</div></div></div>
+        <div class="dash-card green"><div class="dash-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M9 3 H15 L13.5 6.5 A7 7 0 1 1 10.5 6.5 Z"/><path d="M12 10 V16 M10 12 H14 M10 14 H14"/></svg></div><div class="dash-info"><div class="dash-label">Ingresos cobrados</div><div class="dash-num" id="repIngresos">$0.00</div><div class="dash-sub" id="repIngresosCant">0 facturas</div></div></div>
         <div class="dash-card amber"><div class="dash-icon">⏳</div><div class="dash-info"><div class="dash-label">Por cobrar</div><div class="dash-num" id="repPendiente">$0.00</div><div class="dash-sub" id="repPendienteCant">0 facturas</div></div></div>
-        <div class="dash-card blue"><div class="dash-icon">📦</div><div class="dash-info"><div class="dash-label">Paquetes nuevos</div><div class="dash-num" id="repPaquetesNuevos">0</div><div class="dash-sub">en el período</div></div></div>
-        <div class="dash-card navy"><div class="dash-icon">👥</div><div class="dash-info"><div class="dash-label">Clientes nuevos</div><div class="dash-num" id="repClientesNuevos">0</div><div class="dash-sub">en el período</div></div></div>
+        <div class="dash-card blue"><div class="dash-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/><path d="M12 13 V21"/></svg></div><div class="dash-info"><div class="dash-label">Paquetes nuevos</div><div class="dash-num" id="repPaquetesNuevos">0</div><div class="dash-sub">en el período</div></div></div>
+        <div class="dash-card navy"><div class="dash-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="9" cy="7" r="3.5"/><path d="M2 21 C2 16.5 5 14 9 14 C13 14 16 16.5 16 21"/><circle cx="17" cy="8" r="2.6"/><path d="M22 21 C22 17.5 20.2 15.3 17.5 14.7"/></svg></div><div class="dash-info"><div class="dash-label">Clientes nuevos</div><div class="dash-num" id="repClientesNuevos">0</div><div class="dash-sub">en el período</div></div></div>
       </div>
       <div class="dash-section">
         <h3 class="dash-section-title">Ingresos por día</h3>
@@ -1426,7 +1426,7 @@
     </div>
     <!-- ---- TAB: Reportes de problemas ---- -->
     <div class="card tab-panel" id="tabReportesPaquete" style="display:none;">
-      <h2 style="margin:0 0 4px;">⚠️ Reclamos</h2>
+      <h2 style="margin:0 0 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg> Reclamos</h2>
       <p class="card-sub" style="margin:0 0 18px;">Reclamos que los clientes reportaron sobre sus paquetes.</p>
       <div class="banner" id="bannerReportesPaq"></div>
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
@@ -1439,14 +1439,14 @@
     </div>
     <!-- ---- TAB: PTY Cargo Express ---- -->
     <div class="card tab-panel" id="tabPty" style="display:none;">
-      <h2 style="margin:0 0 4px;">🚢 PTY Cargo Express</h2>
+      <h2 style="margin:0 0 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 14 H21 L18.5 20 H5.5 Z"/><path d="M6 14 V9 H11 V14"/><path d="M15 14 V6"/><path d="M15 6 L19 8.5 L15 9.8 Z" fill="currentColor" stroke="none"/></svg> PTY Cargo Express</h2>
       <p class="card-sub" style="margin:0 0 22px;">Pega la lista copiada de carga.ptycargoexpress.com. Solo se importan los paquetes con estado <strong>EN BODEGA</strong>. Los demás se omiten automáticamente.</p>
       <div class="banner" id="bannerPtyTexto"></div>
 
       <textarea id="ptyTexto" rows="10" placeholder="Pega aquí la lista de paquetes de PTY Cargo… Solo se importan los EN BODEGA." style="width:100%;padding:14px;border:1.5px solid var(--line);border-radius:10px;font-family:var(--font-mono);font-size:12px;color:var(--ink);background:var(--panel);resize:vertical;line-height:1.7;margin-bottom:12px;"></textarea>
       <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
         <button class="btn-primary" id="btnProcesarTexto" style="width:auto;">
-          <span class="spinner"></span><span>🔍 Procesar lista</span>
+          <span class="spinner"></span><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20 L15.5 15.5"/></svg> Procesar lista</span>
         </button>
         <div id="ptyTextoResumen" style="font-size:12.5px;color:var(--ink-soft);"></div>
       </div>
@@ -1513,7 +1513,7 @@
 <div id="modalF1Clientes" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-start;justify-content:center;padding-top:80px;">
   <div style="background:#fff;border-radius:14px;width:560px;max-width:calc(100vw - 32px);overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);">
     <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;">
-      <span style="font-size:18px;color:var(--ink-soft);">🔍</span>
+      <span style="font-size:18px;color:var(--ink-soft);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20 L15.5 15.5"/></svg></span>
       <input type="text" id="f1SearchInput" placeholder="Nombre, casillero o correo..." autocomplete="off" style="flex:1;border:none;background:transparent;font-size:14px;outline:none;color:var(--ink);">
       <kbd style="font-size:11px;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:2px 7px;color:var(--ink-soft);">Esc</kbd>
     </div>
@@ -1558,6 +1558,15 @@
   const API_URL = '/api';
   const TOKEN_KEY = 'nea_cargo_admin_token';
   const $ = (sel) => document.querySelector(sel);
+
+  // Iconos SVG (reemplazan a los emoji, que en algunas PCs con Windows salen
+  // como cuadritos vacíos por no tener la fuente de emojis completa).
+  const ICONOS = {
+    ojo: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;"><path d="M1 12 C4 6 9 3 12 3 C15 3 20 6 23 12 C20 18 15 21 12 21 C9 21 4 18 1 12 Z"/><circle cx="12" cy="12" r="3"/></svg>',
+    ojoTachado: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;"><path d="M3 3 L21 21"/><path d="M10.6 5.2 C11 5.1 11.5 5 12 5 C15 5 20 8 23 12 C22.2 13.2 21.2 14.3 20.1 15.3"/><path d="M6.5 6.9 C4.2 8.4 2.3 10.4 1 12 C4 16 9 19 12 19 C13.4 19 15 18.5 16.5 17.6"/><path d="M9.9 10 A3 3 0 0 0 14 14.1"/></svg>',
+    portapapeles: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg>',
+    buzon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="4" y="9" width="16" height="11" rx="2"/><path d="M4 9 C4 5 7 3 12 3 C17 3 20 5 20 9"/><path d="M2 13 H4 M20 13 H22"/></svg>',
+  };
   const ESTADOS = ['prealertado','en_bodega_miami','en_transito','en_panama','listo_para_retiro','entregado'];
   const ESTADO_LABEL = {
     prealertado: 'Prealertado', en_bodega_miami: 'En bodega Miami', en_transito: 'En tránsito',
@@ -1715,7 +1724,7 @@
     const btn = $('#btnVerPassword');
     const oculto = input.type === 'password';
     input.type = oculto ? 'text' : 'password';
-    btn.textContent = oculto ? '🙈' : '👁';
+    btn.innerHTML = oculto ? ICONOS.ojoTachado : ICONOS.ojo;
     btn.setAttribute('aria-label', oculto ? 'Ocultar contraseña' : 'Mostrar contraseña');
   });
   $('#btnVolverLogin').addEventListener('click', () => {
@@ -1854,10 +1863,10 @@
           ${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}<br>
           <span class="muted">${escapeHtml(p.cliente_email)}</span>` : `
           <span style="display:inline-flex;align-items:center;gap:5px;background:var(--amber-bg);color:var(--accent-dark);font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid rgba(255,106,26,0.3);">
-            ⚠ Sin cliente
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg> Sin cliente
           </span>
           <div style="font-size:11px;color:var(--ink-soft);margin-top:3px;">Importado de PTY</div>`}
-          ${p.notas ? `<div style="margin-top:5px;font-size:11px;color:var(--accent-dark);background:var(--amber-bg);padding:3px 8px;border-radius:6px;display:inline-block;max-width:220px;">📝 ${escapeHtml(p.notas)}</div>` : ''}
+          ${p.notas ? `<div style="margin-top:5px;font-size:11px;color:var(--accent-dark);background:var(--amber-bg);padding:3px 8px;border-radius:6px;display:inline-block;max-width:220px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 4 H16 L20 8 V20 H4 Z"/><path d="M16 4 V8 H20"/><path d="M8 12 H16 M8 16 H13"/></svg> ${escapeHtml(p.notas)}</div>` : ''}
         </td>
         <td data-label="Casillero" class="mono">${escapeHtml(p.numero_casillero)}</td>
         <td data-label="Tienda / Tracking">${escapeHtml(p.tienda)}<br><span class="mono muted">${escapeHtml(p.numero_tracking)}</span></td>
@@ -1866,7 +1875,7 @@
           ${p.peso_confirmado ? `
             <div style="display:flex;align-items:center;gap:5px;">
               <span class="mono" style="font-weight:700;">${Number(p.peso_real_lb).toFixed(2)} lb</span>
-              <span title="Peso confirmado — bloqueado" style="font-size:12px;">🔒</span>
+              <span title="Peso confirmado — bloqueado" style="font-size:12px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11 V7 A4 4 0 0 1 16 7 V11"/></svg></span>
             </div>
           ` : `
             <div style="display:flex;gap:5px;">
@@ -1877,9 +1886,9 @@
           `}
         </td>
         <td data-label="Días">${celdaDias(p)}</td>
-        <td data-label="Estado"><span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span><button class="btn-ruta" data-id="${p.id}" data-estado="${p.estado}" title="Ver ruta MIA → PTY">🛣</button></td>
+        <td data-label="Estado"><span class="badge badge-${p.estado}">${ESTADO_LABEL[p.estado] || p.estado}</span><button class="btn-ruta" data-id="${p.id}" data-estado="${p.estado}" title="Ver ruta MIA → PTY"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M8 21 L10 3 M16 21 L14 3"/><path d="M12 3 V6 M12 9.5 V12.5 M12 16 V19"/></svg></button></td>
         <td data-label="Actualizar">
-          ${p.estado === 'entregado' ? `<span class="estado-bloqueado" title="Ya entregado">🔒 Entregado</span>` : `
+          ${p.estado === 'entregado' ? `<span class="estado-bloqueado" title="Ya entregado"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11 V7 A4 4 0 0 1 16 7 V11"/></svg> Entregado</span>` : `
             <select class="estado-select" data-id="${p.id}">
               ${ESTADOS.map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${ESTADO_LABEL[e]}</option>`).join('')}
             </select>
@@ -1887,16 +1896,16 @@
         </td>
         <td data-label="">
           <div class="row-actions">
-            <button class="btn-secondary btn-fotos" data-id="${p.id}">📷 Fotos</button>
-            <button class="btn-secondary btn-dimensiones" data-id="${p.id}" data-largo="${p.largo_in || ''}" data-ancho="${p.ancho_in || ''}" data-alto="${p.alto_in || ''}">📐 Medidas</button>
-            <button class="btn-secondary btn-nota" data-id="${p.id}" data-notas="${escapeHtml(p.notas || '')}">📝 ${p.notas ? 'Editar nota' : 'Nota'}</button>
+            <button class="btn-secondary btn-fotos" data-id="${p.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 8 H7 L9 5 H15 L17 8 H20 A1 1 0 0 1 21 9 V18 A1 1 0 0 1 20 19 H4 A1 1 0 0 1 3 18 V9 A1 1 0 0 1 4 8 Z"/><circle cx="12" cy="13.5" r="3.5"/></svg> Fotos</button>
+            <button class="btn-secondary btn-dimensiones" data-id="${p.id}" data-largo="${p.largo_in || ''}" data-ancho="${p.ancho_in || ''}" data-alto="${p.alto_in || ''}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 21 L21 3"/><path d="M7 17 L9 15 M10 14 L12 12 M13 11 L15 9 M16 8 L18 6"/></svg> Medidas</button>
+            <button class="btn-secondary btn-nota" data-id="${p.id}" data-notas="${escapeHtml(p.notas || '')}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 4 H16 L20 8 V20 H4 Z"/><path d="M16 4 V8 H20"/><path d="M8 12 H16 M8 16 H13"/></svg> ${p.notas ? 'Editar nota' : 'Nota'}</button>
             ${p.estado === 'listo_para_retiro' && enlaceWhatsappRetiro(p)
               ? `<a class="btn-wa" href="${enlaceWhatsappRetiro(p)}" target="_blank" rel="noopener" title="Avisar al cliente por WhatsApp">
                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm0 2a8 8 0 0 1 6.5 12.6l-.3.4.6 2.2-2.3-.6-.4.2A8 8 0 1 1 12 4zm-3 4c-.2 0-.5 0-.7.4-.3.3-.9.9-.9 2.1s.9 2.4 1 2.6c.2.2 1.8 3 4.4 4 2.2.9 2.6.7 3.1.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3s-1.4-.7-1.6-.8c-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-.2-.1-1-.4-2-1.2-.7-.7-1.2-1.5-1.4-1.7-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4l-.8-1.9c-.2-.4-.4-.4-.5-.4z"/></svg>
                    WhatsApp
                  </a>`
               : ''}
-            <button class="btn-secondary btn-danger btn-eliminar-paq" data-id="${p.id}" data-info="${escapeHtml((p.cliente_nombre || '') + ' · ' + (p.tienda || '') + ' · ' + (p.numero_tracking || ''))}">🗑 Eliminar</button>
+            <button class="btn-secondary btn-danger btn-eliminar-paq" data-id="${p.id}" data-info="${escapeHtml((p.cliente_nombre || '') + ' · ' + (p.tienda || '') + ' · ' + (p.numero_tracking || ''))}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 7 H20 M9 7 V4 H15 V7 M6 7 L7 21 H17 L18 7"/><path d="M10 11 V17 M14 11 V17"/></svg> Eliminar</button>
           </div>
         </td>
       </tr>
@@ -1961,7 +1970,7 @@
           if (res.ok){
             mostrarBanner('#bannerPaquetes', 'success', '✓ Peso confirmado y factura generada.');
             const celda = btn.closest('td');
-            celda.innerHTML = `<div style="display:flex;align-items:center;gap:5px;"><span class="mono" style="font-weight:700;">${peso.toFixed(2)} lb</span><span style="font-size:12px;">🔒</span></div>`;
+            celda.innerHTML = `<div style="display:flex;align-items:center;gap:5px;"><span class="mono" style="font-weight:700;">${peso.toFixed(2)} lb</span><span style="font-size:12px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11 V7 A4 4 0 0 1 16 7 V11"/></svg></span></div>`;
           } else if (res.status === 409){ mostrarBanner('#bannerPaquetes', 'error', data.mensaje || 'Este peso ya fue confirmado.'); cargarPaquetes();
           } else { mostrarBanner('#bannerPaquetes', 'error', data.mensaje || 'No se pudo guardar el peso.'); btn.disabled = false; }
         } catch (err) { mostrarBanner('#bannerPaquetes', 'error', 'No pudimos conectar con el servidor.'); btn.disabled = false; }
@@ -2050,7 +2059,7 @@
           <td data-label="Verificado">${u.verificado ? '✓' : '—'}</td>
           <td data-label="Paquetes">${u.total_paquetes}</td>
           <td data-label="Registrado" class="muted">${fecha}</td>
-          <td><button class="btn-secondary btn-editar-cliente" data-id="${u.id}" style="font-size:12px;padding:5px 10px;">✏ Editar</button></td>
+          <td><button class="btn-secondary btn-editar-cliente" data-id="${u.id}" style="font-size:12px;padding:5px 10px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 20 H21"/><path d="M16.5 3.5 A2.1 2.1 0 0 1 19.5 6.5 L7 19 L3 20 L4 16 Z"/></svg> Editar</button></td>
         </tr>`;
       }).join('');
       $('#tbodyClientes').querySelectorAll('.btn-editar-cliente').forEach(btn=>{
@@ -2176,7 +2185,7 @@
       popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
       popup.innerHTML = `
         <div style="background:#fff;border-radius:14px;padding:24px;width:400px;max-width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);">
-          <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:4px;color:#c0392b;">⚠ Anular factura ${escapeHtml(factura.numero_factura)}</div>
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:4px;color:#c0392b;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg> Anular factura ${escapeHtml(factura.numero_factura)}</div>
           <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;">
             Total: <strong>$${Number(factura.total).toFixed(2)}</strong> · Cliente: ${escapeHtml(factura.cliente_nombre)} ${escapeHtml(factura.cliente_apellido)}
             ${factura.estado === 'pagada' ? '<br><span style="color:#c0392b;font-weight:600;">Esta factura ya está pagada — se registrará un ajuste en el cierre de caja.</span>' : ''}
@@ -2424,7 +2433,7 @@
         return `<div class="fac-grid-row" data-factura-pendiente="${f.id}" data-paquete-id="${f.paquete_id}" data-ya-entregado="${yaEntregado}" data-total="${Number(f.total)}" style="${!esDelCliente?'opacity:.35;pointer-events:none;':''}">
           <div class="fac-num">${escapeHtml(f.numero_factura)}</div>
           <div><div class="fac-cliente">${escapeHtml(f.cliente_nombre)} ${escapeHtml(f.cliente_apellido)}</div><div class="fac-casillero">${escapeHtml(f.cliente_email)}</div></div>
-          <div><div style="font-weight:500;font-size:13px;">${escapeHtml(f.tienda)}</div><div class="fac-tracking">#${escapeHtml(f.numero_tracking)}</div>${!yaEntregado?'<div style="font-size:11px;color:#d97706;margin-top:2px;">📦 pendiente entrega</div>':''}</div>
+          <div><div style="font-weight:500;font-size:13px;">${escapeHtml(f.tienda)}</div><div class="fac-tracking">#${escapeHtml(f.numero_tracking)}</div>${!yaEntregado?'<div style="font-size:11px;color:#d97706;margin-top:2px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/><path d="M12 13 V21"/></svg> pendiente entrega</div>':''}</div>
           <div class="fac-fecha">${fecha}</div>
           <div class="fac-monto">$${Number(f.total).toFixed(2)}</div>
           <div><button class="${yaEntregado?'btn-cobrar':'btn-cobrar-entrega'}">${yaEntregado?'Cobrar':'Cobrar y entregar'}</button></div>
@@ -2458,9 +2467,9 @@
     const sinFactura=sinFacturaTodos.filter(p=>Number(p.peso_real_lb||p.peso_lb||0)>0&&Number(p.valor_declarado||0)>0);
     const noListos=sinFacturaTodos.length-sinFactura.length;
     if(sinFacturaTodos.length===0){ html+='<div class="empty">Este cliente no tiene paquetes pendientes de facturar.</div>'; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
-    if(sinFactura.length===0){ html+=`<div class="empty">⚠ Este cliente tiene ${noListos} paquete(s) sin peso o valor declarado.</div>`; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
+    if(sinFactura.length===0){ html+=`<div class="empty"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg> Este cliente tiene ${noListos} paquete(s) sin peso o valor declarado.</div>`; cont.innerHTML=html; $('#facturadorResumen').style.display='none'; return; }
     html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-weight:600;font-size:13px;">Paquetes listos para facturar</div><button class="ft-select-all" id="btnSelectAll">Seleccionar todos</button></div>`;
-    if(noListos>0) html+=`<div class="empty" style="margin-bottom:10px;padding:10px 14px;">⚠ ${noListos} paquete(s) más sin peso o valor declarado.</div>`;
+    if(noListos>0) html+=`<div class="empty" style="margin-bottom:10px;padding:10px 14px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg> ${noListos} paquete(s) más sin peso o valor declarado.</div>`;
     html+=sinFactura.map((p,i)=>{
       const peso=Number(p.peso_real_lb||p.peso_lb||0).toFixed(2), valor=Number(p.valor_declarado||0).toFixed(2);
       const statusClass=p.estado==='listo_para_retiro'?'listo':p.estado==='en_transito'?'transito':'bodega';
@@ -2607,7 +2616,7 @@
       popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;';
       const cerrar=(valor)=>{ popup.remove(); resolve(valor); };
       const pintarPasoMetodos=()=>{
-        popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px 24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,.25);"><div style="font-weight:700;font-size:15px;margin-bottom:14px;">Método de pago</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;"><button class="pop-pay" data-m="efectivo" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">💵 Efectivo</button><button class="pop-pay" data-m="tarjeta" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">💳 Tarjeta</button><button class="pop-pay" data-m="transferencia" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">🏦 Transferencia</button><button class="pop-pay" data-m="yappy" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;">📱 Yappy</button></div><button id="popCancelar" style="width:100%;padding:9px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:13px;color:#6b7280;">Cancelar</button></div>`;
+        popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px 24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,.25);"><div style="font-weight:700;font-size:15px;margin-bottom:14px;">Método de pago</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;"><button class="pop-pay" data-m="efectivo" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg> Efectivo</button><button class="pop-pay" data-m="tarjeta" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10 H22"/><path d="M6 15 H10"/></svg> Tarjeta</button><button class="pop-pay" data-m="transferencia" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M2 9 L12 3 L22 9"/><path d="M4 9 V19 M9 9 V19 M15 9 V19 M20 9 V19"/><path d="M2 19 H22 M2 22 H22"/></svg> Transferencia</button><button class="pop-pay" data-m="yappy" style="padding:10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-weight:600;font-size:13px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18 H13"/></svg> Yappy</button></div><button id="popCancelar" style="width:100%;padding:9px;border-radius:8px;border:1px solid #e5e7eb;background:none;cursor:pointer;font-size:13px;color:#6b7280;">Cancelar</button></div>`;
         popup.querySelectorAll('.pop-pay').forEach(b=>{
           b.addEventListener('click',()=>{
             if(b.dataset.m==='efectivo' && totalMonto>0){ pintarPasoEfectivo(); }
@@ -2618,7 +2627,7 @@
       };
       const pintarPasoEfectivo=()=>{
         popup.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px 24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,.25);">
-          <div style="font-weight:700;font-size:15px;margin-bottom:4px;">💵 Cobro en efectivo</div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg> Cobro en efectivo</div>
           <div style="font-size:12.5px;color:#6b7280;margin-bottom:14px;">Total a cobrar: <strong>$${totalMonto.toFixed(2)}</strong></div>
           <label style="font-size:11.5px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;">Monto recibido</label>
           <input type="number" id="popMontoRecibido" step="0.01" min="0" placeholder="0.00" inputmode="decimal" style="width:100%;padding:9px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;margin-top:4px;box-sizing:border-box;">
@@ -2692,13 +2701,13 @@
       if(res.status===404){
         $('#recepcionFormNuevo').style.display='block';
         $('#recNuevoTienda').value=''; $('#recNuevoValor').value=''; $('#recNuevoPeso').value=''; $('#recNuevoDesc').value=''; $('#recNuevoCasillero').value=''; $('#recClienteEncontrado').style.display='none'; clienteRecepcionId=null; $('#btnCrearPaquete').disabled=true;
-        mostrarBanner('#bannerRecepcion','error',`⚠ "${tracking}" no tiene prealerta — completa los datos para crearlo manualmente.`);
+        mostrarBanner('#bannerRecepcion','error',`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg> "${tracking}" no tiene prealerta — completa los datos para crearlo manualmente.`);
       } else if(res.ok&&data.ya_recibido){ mostrarBanner('#bannerRecepcion','error',`Este paquete ya fue recibido (estado: ${data.paquete.estado}).`);
       } else if(res.ok&&data.sin_cliente){
         const p=data.paquete;
         $('#recepcionResultado').style.display='block';
         $('#recepcionResultado').innerHTML=`<div style="background:var(--amber-bg);border-radius:10px;padding:16px 18px;border:1.5px solid rgba(255,106,26,0.4);">
-          <div style="font-weight:700;font-size:15px;margin-bottom:4px;">📦 Paquete PTY — sin cliente asignado</div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/><path d="M12 13 V21"/></svg> Paquete PTY — sin cliente asignado</div>
           <div style="font-size:13px;color:var(--ink-soft);">${escapeHtml(p.numero_tracking)} · ${p.peso_lb||'?'} lb</div>
           <div style="margin-top:14px;">
             <label style="font-size:12.5px;font-weight:600;margin-bottom:6px;display:block;">Buscar cliente por casillero</label>
@@ -2744,7 +2753,7 @@
       } else if(res.ok){
         const p=data.paquete;
         $('#recepcionResultado').style.display='block';
-        $('#recepcionResultado').innerHTML=`<div style="background:var(--paper);border-radius:10px;padding:16px 18px;border:1.5px solid #b8e3d1;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;"><div><div style="font-weight:700;font-size:15px;">✓ Prealerta encontrada</div><div style="font-size:13px;color:var(--ink-soft);">${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)} · ${escapeHtml(p.numero_casillero)}</div><div style="font-size:12.5px;color:var(--ink-soft);">${escapeHtml(p.tienda)} · #${escapeHtml(p.numero_tracking)}</div>${p.valor_declarado?`<div style="font-size:12px;color:var(--ink-soft);">Valor declarado: $${Number(p.valor_declarado).toFixed(2)}</div>`:''}</div><div style="display:flex;flex-direction:column;gap:6px;align-items:stretch;"><button class="btn-primary" id="btnConfirmarRecepcion" data-id="${p.id}" data-tracking="${escapeHtml(p.numero_tracking)}" data-cliente="${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}" style="margin-top:0;"><span class="spinner"></span><span>Confirmar recepción</span></button><button class="btn-secondary" id="btnCambiarClientePaq" data-id="${p.id}" style="font-size:12px;padding:7px 12px;">👤 ¿Es de otro cliente?</button></div></div></div>`;
+        $('#recepcionResultado').innerHTML=`<div style="background:var(--paper);border-radius:10px;padding:16px 18px;border:1.5px solid #b8e3d1;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;"><div><div style="font-weight:700;font-size:15px;">✓ Prealerta encontrada</div><div style="font-size:13px;color:var(--ink-soft);">${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)} · ${escapeHtml(p.numero_casillero)}</div><div style="font-size:12.5px;color:var(--ink-soft);">${escapeHtml(p.tienda)} · #${escapeHtml(p.numero_tracking)}</div>${p.valor_declarado?`<div style="font-size:12px;color:var(--ink-soft);">Valor declarado: $${Number(p.valor_declarado).toFixed(2)}</div>`:''}</div><div style="display:flex;flex-direction:column;gap:6px;align-items:stretch;"><button class="btn-primary" id="btnConfirmarRecepcion" data-id="${p.id}" data-tracking="${escapeHtml(p.numero_tracking)}" data-cliente="${escapeHtml(p.cliente_nombre)} ${escapeHtml(p.cliente_apellido)}" style="margin-top:0;"><span class="spinner"></span><span>Confirmar recepción</span></button><button class="btn-secondary" id="btnCambiarClientePaq" data-id="${p.id}" style="font-size:12px;padding:7px 12px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="12" cy="8" r="4"/><path d="M4 21 C4 16.5 7.5 14 12 14 C16.5 14 20 16.5 20 21"/></svg> ¿Es de otro cliente?</button></div></div></div>`;
         $('#btnCambiarClientePaq').addEventListener('click', () => f1Abrir('reasignar', p.id));
         $('#btnConfirmarRecepcion').addEventListener('click', async ()=>{
           const btn2=$('#btnConfirmarRecepcion'); setCargando(btn2,true);
@@ -2934,7 +2943,7 @@
   }
   function inicializarFechaCaja(){ if($('#cajaFecha').value) return; $('#cajaFecha').value=fechaISOCaja(new Date()); }
   async function cargarCaja(){ inicializarFechaCaja(); const fecha=$('#cajaFecha').value; try { const res=await apiAdmin(`/admin/caja/dia?fecha=${fecha}`); const data=await res.json(); renderCaja(data); } catch(err){} }
-  const METODO_ICONO = { efectivo:'💵', tarjeta:'💳', transferencia:'🏦', yappy:'📱' };
+  const METODO_ICONO = { efectivo:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>', tarjeta:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10 H22"/><path d="M6 15 H10"/></svg>', transferencia:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M2 9 L12 3 L22 9"/><path d="M4 9 V19 M9 9 V19 M15 9 V19 M20 9 V19"/><path d="M2 19 H22 M2 22 H22"/></svg>', yappy:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18 H13"/></svg>' };
   const METODO_COLOR = { efectivo:'green', tarjeta:'blue', transferencia:'navy', yappy:'amber' };
   function renderCaja(data){
     const total = Number(data.total_general);
@@ -2942,19 +2951,19 @@
     const metodos = data.detalle_por_metodo || [];
    $('#cajaResumenCards').innerHTML = `
       <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;">💰</div>
+        <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M9 3 H15 L13.5 6.5 A7 7 0 1 1 10.5 6.5 Z"/><path d="M12 10 V16 M10 12 H14 M10 14 H14"/></svg></div>
         <div class="dash-label">Total cobrado</div>
         <div class="dash-num" style="font-size:18px;">$${total.toFixed(2)}</div>
         <div class="dash-sub">${facturas} fact.</div>
       </div>
       <div class="dash-card blue" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;">📋</div>
+        <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg></div>
         <div class="dash-label">Métodos</div>
         <div class="dash-num" style="font-size:18px;">${metodos.length}</div>
         <div class="dash-sub">usados</div>
       </div>
       <div class="dash-card ${data.cerrado?'navy':'amber'}" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;">${data.cerrado?'🔒':'⏳'}</div>
+        <div style="font-size:20px;">${data.cerrado?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11 V7 A4 4 0 0 1 16 7 V11"/></svg>':'⏳'}</div>
         <div class="dash-label">Estado</div>
         <div class="dash-num" style="font-size:15px;">${data.cerrado?'Cerrado':'Abierto'}</div>
         <div class="dash-sub">${data.cerrado?'cerrada':'pendiente'}</div>
@@ -2966,7 +2975,7 @@
       $('#cajaMetodosCards').innerHTML = metodos.map(m => {
         const clave = (m.metodo_pago||'').toLowerCase();
         const color = METODO_COLOR[clave] || 'navy';
-        const icono = METODO_ICONO[clave] || '💳';
+        const icono = METODO_ICONO[clave] || '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10 H22"/><path d="M6 15 H10"/></svg>';
         return `<div class="dash-card ${color}" style="flex-direction:column;align-items:flex-start;gap:4px;padding:16px 14px;">
           <div style="font-size:22px;">${icono}</div>
           <div class="dash-label">${escapeHtml(m.etiqueta||clave)}</div>
@@ -3015,7 +3024,7 @@
     if(data.cerrado){
       const c=data.cierre;
       const hora=new Date(c.fecha_cierre).toLocaleString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      estadoDiv.innerHTML=`<div class="banner show success" style="margin-bottom:16px;">🔒 Caja cerrada el ${hora} por ${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}.</div>`;
+      estadoDiv.innerHTML=`<div class="banner show success" style="margin-bottom:16px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11 V7 A4 4 0 0 1 16 7 V11"/></svg> Caja cerrada el ${hora} por ${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}.</div>`;
       cierreBox.innerHTML='';
     } else {
       estadoDiv.innerHTML='';
@@ -3049,8 +3058,8 @@
           <div data-label="Cerrado por" class="chr-cerrado">${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</div>
           <div data-label="Hora" class="chr-hora muted">${hora}</div>
           <div class="chr-acciones">
-            <button class="btn-secondary btn-ver-facturas-dia" data-fecha="${fechaCruda(c)}" title="Ver facturas del día">🧾</button>
-            <button class="btn-secondary btn-reenviar-cierre" data-fecha="${fechaCruda(c)}" title="Reenviar cierre por correo">📧</button>
+            <button class="btn-secondary btn-ver-facturas-dia" data-fecha="${fechaCruda(c)}" title="Ver facturas del día"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 7 L3 19 C3 20 3.8 20.5 4.5 20 L8 18 L11.5 20 C11.8 20.2 12.2 20.2 12.5 20 L16 18 L19.5 20 C20.2 20.5 21 20 21 19 L21 7 Z"/><path d="M7 4 H17 M7 4 V7 M17 4 V7"/></svg></button>
+            <button class="btn-secondary btn-reenviar-cierre" data-fecha="${fechaCruda(c)}" title="Reenviar cierre por correo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 6 L12 13 L22 6"/></svg></button>
           </div>
         </div>`;
       }).join('');
@@ -3173,7 +3182,7 @@
   }
   $('#btnActualizarReporte').addEventListener('click',cargarReporte);
   let filtroReportesPaq = '';
-  const REP_TIPO_LABEL = { no_reconozco:'📦 No reconoce el paquete', danado:'💔 Llegó dañado o abierto', peso_precio:'⚖️ Peso o precio no cuadra', otro:'❓ Otro problema' };
+  const REP_TIPO_LABEL = { no_reconozco:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/><path d="M12 13 V21"/></svg> No reconoce el paquete', danado:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 21 C7 17 3 13.5 3 9.5 A4.5 4.5 0 0 1 12 8 A4.5 4.5 0 0 1 21 9.5 C21 13.5 17 17 12 21 Z"/><path d="M12 8 L10.5 11 L13 13 L11 17"/></svg> Llegó dañado o abierto', peso_precio:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 3 V21 M7 21 H17"/><path d="M12 6 L5 6 L2.5 11.5 A3 3 0 0 0 8.5 11.5 Z"/><path d="M12 6 L19 6 L21.5 11.5 A3 3 0 0 1 15.5 11.5 Z"/></svg> Peso o precio no cuadra', otro:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.2 C9.2 7.8 10.4 7 12 7 C13.7 7 15 7.9 15 9.2 C15 12 9.2 11 9.2 14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg> Otro problema' };
   const REP_ESTADO_LABEL = { nuevo:'Nuevo', en_proceso:'En proceso', resuelto:'Resuelto' };
   const REP_ESTADO_COLOR = { nuevo:'background:#f5c542;color:#5a4a00;', en_proceso:'background:#4a90d9;color:#fff;', resuelto:'background:#177a63;color:#fff;' };
   async function cargarReportesPaq(){
@@ -3819,7 +3828,7 @@
       }
       $('#comprasResumen').innerHTML = `
         <div class="dash-card amber" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
-          <div style="font-size:20px;">🛒</div>
+          <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/><path d="M2 3 H5 L7.4 15 H18.5 L21 6 H6.2"/></svg></div>
           <div class="dash-label">Por comprar</div>
           <div class="dash-num" style="font-size:20px;">${r.por_comprar || 0}</div>
         </div>
@@ -3830,13 +3839,13 @@
           <div class="dash-sub">$${Number(r.monto_por_cobrar||0).toFixed(2)}</div>
         </div>
         <div class="dash-card navy" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
-          <div style="font-size:20px;">💳</div>
+          <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10 H22"/><path d="M6 15 H10"/></svg></div>
           <div class="dash-label">Adelantado</div>
           <div class="dash-num" style="font-size:20px;">$${Number(r.adelantado_tarjeta||0).toFixed(2)}</div>
           <div class="dash-sub">sin recuperar</div>
         </div>
         <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
-          <div style="font-size:20px;">📦</div>
+          <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/><path d="M12 13 V21"/></svg></div>
           <div class="dash-label">Total</div>
           <div class="dash-num" style="font-size:20px;">${compras.length}</div>
           <div class="dash-sub">en la lista</div>
@@ -3850,7 +3859,7 @@
           acciones = `<button class="btn-secondary btn-compra-comprada" data-id="${c.id}">✓ Ya la compré</button>
                       <button class="btn-secondary btn-danger btn-compra-cancelar" data-id="${c.id}">Cancelar</button>`;
         } else if(c.estado === 'pagada'){
-          acciones = `<button class="btn-secondary btn-compra-wa" data-id="${c.id}" style="border-color:#25d366;color:#128c4a;">💬 Agradecer por WhatsApp</button>`;
+          acciones = `<button class="btn-secondary btn-compra-wa" data-id="${c.id}" style="border-color:#25d366;color:#128c4a;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:-2px;"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm0 2a8 8 0 0 1 6.5 12.6l-.3.4.6 2.2-2.3-.6-.4.2A8 8 0 1 1 12 4zm-3 4c-.2 0-.5 0-.7.4-.3.3-.9.9-.9 2.1s.9 2.4 1 2.6c.2.2 1.8 3 4.4 4 2.2.9 2.6.7 3.1.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3s-1.4-.7-1.6-.8c-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-.2-.1-1-.4-2-1.2-.7-.7-1.2-1.5-1.4-1.7-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4l-.8-1.9c-.2-.4-.4-.4-.5-.4z"/></svg> Agradecer por WhatsApp</button>`;
         } else if(c.estado === 'comprada'){
           acciones = `<button class="btn-cobrar btn-compra-pagada" data-id="${c.id}" style="width:auto;padding:7px 14px;">Cobrar $${Number(c.total_cobrado).toFixed(2)}</button>
                       <button class="btn-secondary btn-danger btn-compra-cancelar" data-id="${c.id}">Cancelar</button>`;
@@ -3862,7 +3871,7 @@
               <div class="mi-tienda">${escapeHtml(c.descripcion)}</div>
               <div class="mi-tracking">${escapeHtml(c.tienda)} · ${escapeHtml(c.cliente_nombre)} ${escapeHtml(c.cliente_apellido)} · ${fecha}</div>
               ${c.numero_orden ? `<div class="mi-tracking">Orden: ${escapeHtml(c.numero_orden)}${c.numero_tracking ? ' · Tracking: '+escapeHtml(c.numero_tracking) : ''}</div>` : ''}
-              ${c.notas ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">📝 ${escapeHtml(c.notas)}</div>` : ''}
+              ${c.notas ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 4 H16 L20 8 V20 H4 Z"/><path d="M16 4 V8 H20"/><path d="M8 12 H16 M8 16 H13"/></svg> ${escapeHtml(c.notas)}</div>` : ''}
               ${c.motivo_cancelacion ? `<div style="font-size:12px;color:#c0392b;margin-top:4px;">Cancelada: ${escapeHtml(c.motivo_cancelacion)}</div>` : ''}
               ${c.enlace ? `<a href="${escapeHtml(c.enlace)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent-dark);">Ver producto ↗</a>` : ''}
             </div>
@@ -3957,17 +3966,17 @@
       }
       $('#deliveriesResumen').innerHTML = `
         <div class="dash-card amber" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
-          <div style="font-size:20px;">🚚</div>
+          <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="1" y="7" width="13" height="10"/><path d="M14 10 H19 L22 13 V17 H14 Z"/><circle cx="6" cy="19" r="1.8"/><circle cx="18" cy="19" r="1.8"/></svg></div>
           <div class="dash-label">Por asignar</div>
           <div class="dash-num" style="font-size:20px;">${r.pendientes || 0}</div>
         </div>
         <div class="dash-card blue" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
-          <div style="font-size:20px;">🛵</div>
+          <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="1" y="7" width="13" height="10"/><path d="M14 10 H19 L22 13 V17 H14 Z"/><circle cx="6" cy="19" r="1.8"/><circle cx="18" cy="19" r="1.8"/></svg></div>
           <div class="dash-label">En camino</div>
           <div class="dash-num" style="font-size:20px;">${r.en_camino || 0}</div>
         </div>
         <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;">
-          <div style="font-size:20px;">✅</div>
+          <div style="font-size:20px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;"><circle cx="12" cy="12" r="9.5"/><path d="M8 12.5 L11 15.5 L16 9"/></svg></div>
           <div class="dash-label">Entregados hoy</div>
           <div class="dash-num" style="font-size:20px;">${r.entregados_hoy || 0}</div>
           <div class="dash-sub">$${Number(r.cobrado_delivery_hoy||0).toFixed(2)} en delivery</div>
@@ -3980,7 +3989,7 @@
         const mapaUrl = (d.latitud && d.longitud) ? `https://www.google.com/maps?q=${d.latitud},${d.longitud}` : null;
         let acciones = '';
         if(d.estado === 'solicitado'){
-          acciones = `<button class="btn-secondary btn-delivery-asignar" data-id="${d.id}">🛵 Asignar mensajero</button>
+          acciones = `<button class="btn-secondary btn-delivery-asignar" data-id="${d.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="1" y="7" width="13" height="10"/><path d="M14 10 H19 L22 13 V17 H14 Z"/><circle cx="6" cy="19" r="1.8"/><circle cx="18" cy="19" r="1.8"/></svg> Asignar mensajero</button>
                       <button class="btn-secondary btn-danger btn-delivery-cancelar" data-id="${d.id}">Cancelar</button>`;
         } else if(d.estado === 'asignado'){
           acciones = `<button class="btn-cobrar btn-delivery-entregado" data-id="${d.id}" style="width:auto;padding:7px 14px;">✓ Marcar entregado</button>
@@ -3993,14 +4002,14 @@
               <div class="mi-tienda">${escapeHtml(d.cliente_nombre)} ${escapeHtml(d.cliente_apellido)} · ${escapeHtml(d.numero_casillero||'')}</div>
               <div class="mi-tracking">${escapeHtml(d.tienda)} · #${escapeHtml(d.numero_tracking)} · ${fecha}</div>
               <div style="font-size:12.5px;margin-top:4px;">
-                📞 ${telWa ? `<a href="https://wa.me/${telWa}" target="_blank" rel="noopener" style="color:var(--ink);font-weight:600;text-decoration:none;">${escapeHtml(d.telefono)}</a>` : escapeHtml(d.telefono)}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 3 H8 L10 8 L7.5 9.8 C8.5 12 11 14.5 13.2 15.5 L15 13 L20 15 V19 C20 20 19 21 18 21 C10 21 3 14 3 6 C3 5 4 4 4 3 Z"/></svg> ${telWa ? `<a href="https://wa.me/${telWa}" target="_blank" rel="noopener" style="color:var(--ink);font-weight:600;text-decoration:none;">${escapeHtml(d.telefono)}</a>` : escapeHtml(d.telefono)}
               </div>
               <div style="font-size:12.5px;color:var(--ink-soft);margin-top:2px;">
-                📍 ${escapeHtml(d.zona_nombre)} — ${escapeHtml(d.direccion_texto)}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 21 C12 21 19 14.5 19 9.5 A7 7 0 0 0 5 9.5 C5 14.5 12 21 12 21 Z"/><circle cx="12" cy="9.5" r="2.3"/></svg> ${escapeHtml(d.zona_nombre)} — ${escapeHtml(d.direccion_texto)}
                 ${mapaUrl ? ` · <a href="${mapaUrl}" target="_blank" rel="noopener" style="color:var(--accent-dark);">Ver en mapa ↗</a>` : ''}
               </div>
-              ${d.referencia ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">📝 ${escapeHtml(d.referencia)}</div>` : ''}
-              ${d.mensajero_nombre ? `<div style="font-size:12.5px;color:#3a6ea5;margin-top:4px;">🛵 ${escapeHtml(d.mensajero_nombre)}${d.mensajero_telefono ? ' · '+escapeHtml(d.mensajero_telefono) : ''}</div>` : ''}
+              ${d.referencia ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:2px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 4 H16 L20 8 V20 H4 Z"/><path d="M16 4 V8 H20"/><path d="M8 12 H16 M8 16 H13"/></svg> ${escapeHtml(d.referencia)}</div>` : ''}
+              ${d.mensajero_nombre ? `<div style="font-size:12.5px;color:#3a6ea5;margin-top:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="1" y="7" width="13" height="10"/><path d="M14 10 H19 L22 13 V17 H14 Z"/><circle cx="6" cy="19" r="1.8"/><circle cx="18" cy="19" r="1.8"/></svg> ${escapeHtml(d.mensajero_nombre)}${d.mensajero_telefono ? ' · '+escapeHtml(d.mensajero_telefono) : ''}</div>` : ''}
               ${d.motivo_cancelacion ? `<div style="font-size:12px;color:#c0392b;margin-top:4px;">Cancelado: ${escapeHtml(d.motivo_cancelacion)}</div>` : ''}
             </div>
             <div style="text-align:right;flex-shrink:0;">
@@ -4153,23 +4162,23 @@
       const colorU = u >= 0 ? 'green' : 'amber';
       $('#gastosResumen').innerHTML = `
         <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:3px;padding:15px 16px;">
-          <div style="font-size:20px;">💰</div><div class="dash-label">Cobrado</div>
+          <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M9 3 H15 L13.5 6.5 A7 7 0 1 1 10.5 6.5 Z"/><path d="M12 10 V16 M10 12 H14 M10 14 H14"/></svg></div><div class="dash-label">Cobrado</div>
           <div class="dash-num" style="font-size:20px;">$${Number(res.ingresos.total).toFixed(2)}</div>
           <div class="dash-sub">${res.ingresos.facturas} fact. · ${res.ingresos.compras} compras</div>
         </div>
         <div class="dash-card amber" style="flex-direction:column;align-items:flex-start;gap:3px;padding:15px 16px;">
-          <div style="font-size:20px;">💸</div><div class="dash-label">Gastado</div>
+          <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 2 V6 M12 22 V18"/><path d="M17 6.5 C17 4.5 14.8 3.5 12 3.5 C9 3.5 7 4.8 7 7 C7 9.5 9.5 10 12 10.5 C15 11 17 12 17 14.5 C17 17 15 18.5 12 18.5 C9.2 18.5 7 17.5 7 15.5"/></svg></div><div class="dash-label">Gastado</div>
           <div class="dash-num" style="font-size:20px;">$${Number(res.gastos.total).toFixed(2)}</div>
           <div class="dash-sub">${lista.length} registros</div>
         </div>
         <div class="dash-card ${colorU}" style="flex-direction:column;align-items:flex-start;gap:3px;padding:15px 16px;">
-          <div style="font-size:20px;">${u >= 0 ? '📈' : '📉'}</div>
+          <div style="font-size:20px;">${u >= 0 ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 17 L9 11 L13 15 L21 6"/><path d="M15 6 H21 V12"/></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 7 L9 13 L13 9 L21 18"/><path d="M15 18 H21 V12"/></svg>'}</div>
           <div class="dash-label">${u >= 0 ? 'Ganancia' : 'Pérdida'}</div>
           <div class="dash-num" style="font-size:20px;">$${Math.abs(u).toFixed(2)}</div>
           <div class="dash-sub">${Number(res.margen).toFixed(1)}% de margen</div>
         </div>
         <div class="dash-card navy" style="flex-direction:column;align-items:flex-start;gap:3px;padding:15px 16px;">
-          <div style="font-size:20px;">🔁</div><div class="dash-label">Gastos fijos</div>
+          <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 12 A9 9 0 0 1 12 3 C15 3 17.5 4.5 19 7"/><path d="M19 3 V7 H15"/><path d="M21 12 A9 9 0 0 1 12 21 C9 21 6.5 19.5 5 17"/><path d="M5 21 V17 H9"/></svg></div><div class="dash-label">Gastos fijos</div>
           <div class="dash-num" style="font-size:20px;">$${Number(res.gastos.recurrentes).toFixed(2)}</div>
           <div class="dash-sub">se repiten cada mes</div>
         </div>`;
@@ -4193,7 +4202,7 @@
           <td data-label="Fecha" class="muted">${formatearFechaSolo(g.fecha)}</td>
           <td data-label="Categoría">
             ${escapeHtml(gastosCategorias[g.categoria] || g.categoria)}
-            ${g.es_recurrente ? '<div style="font-size:10.5px;color:var(--ink-soft);">🔁 fijo</div>' : ''}
+            ${g.es_recurrente ? '<div style="font-size:10.5px;color:var(--ink-soft);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 12 A9 9 0 0 1 12 3 C15 3 17.5 4.5 19 7"/><path d="M19 3 V7 H15"/><path d="M21 12 A9 9 0 0 1 12 21 C9 21 6.5 19.5 5 17"/><path d="M5 21 V17 H9"/></svg> fijo</div>' : ''}
           </td>
           <td data-label="Descripción">
             ${escapeHtml(g.descripcion)}
@@ -4207,7 +4216,7 @@
           <td data-label="Monto" class="mono" style="font-weight:700;">$${Number(g.monto).toFixed(2)}</td>
           <td data-label="">
             <div class="row-actions">
-              ${g.comprobante_url ? `<a href="${escapeHtml(g.comprobante_url)}" target="_blank" rel="noopener" class="btn-secondary" style="text-decoration:none;">🧾</a>` : ''}
+              ${g.comprobante_url ? `<a href="${escapeHtml(g.comprobante_url)}" target="_blank" rel="noopener" class="btn-secondary" style="text-decoration:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 7 L3 19 C3 20 3.8 20.5 4.5 20 L8 18 L11.5 20 C11.8 20.2 12.2 20.2 12.5 20 L16 18 L19.5 20 C20.2 20.5 21 20 21 19 L21 7 Z"/><path d="M7 4 H17 M7 4 V7 M17 4 V7"/></svg></a>` : ''}
               <button class="btn-secondary btn-danger btn-borrar-gasto" data-id="${g.id}">Borrar</button>
             </div>
           </td>
@@ -4280,7 +4289,7 @@
       aviso.innerHTML = `
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;">
           <div style="flex:1;min-width:240px;">
-            <div class="av-titulo">⚠ ${n} día${n===1?'':'s'} sin cerrar caja</div>
+            <div class="av-titulo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg> ${n} día${n===1?'':'s'} sin cerrar caja</div>
             <div class="av-sub">Hubo cobros esos días y nadie cerró la caja. Mientras no se cierre, el corte queda incompleto.</div>
             <div class="av-lista">${lista}</div>
           </div>
@@ -4309,7 +4318,7 @@
 </script>
 <div class="notif-panel" id="notifPanel">
   <div class="notif-panel-head">
-    <span>🔔 Notificaciones</span>
+    <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M6 10 C6 6 8.5 3.5 12 3.5 C15.5 3.5 18 6 18 10 C18 14 19.5 15.5 20 16.5 H4 C4.5 15.5 6 14 6 10 Z"/><path d="M10 19.5 C10 20.6 10.9 21.5 12 21.5 C13.1 21.5 14 20.6 14 19.5"/></svg> Notificaciones</span>
     <div style="display:flex;gap:6px;">
       <button id="btnMarcarTodasLeidas" title="Marcar todas como leídas">✓ Todo leído</button>
       <button id="btnCerrarNotif">✕</button>
@@ -4336,7 +4345,7 @@
     <input id="editClienteTelefono" type="tel" placeholder="6123-4567">
     <label for="editClienteCasillero">Número de casillero</label>
     <input id="editClienteCasillero" type="text" placeholder="PTY-00042" style="font-family:var(--font-mono);">
-    <p style="font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;">⚠ Cambiar el casillero actualiza la dirección que el cliente usa para sus compras.</p>
+    <p style="font-size:11.5px;color:var(--ink-soft);margin:6px 0 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg> Cambiar el casillero actualiza la dirección que el cliente usa para sus compras.</p>
     <button class="btn-primary" id="btnGuardarEditCliente" style="margin-top:18px;">
       <span class="spinner"></span><span>Guardar cambios</span>
     </button>
@@ -4414,7 +4423,7 @@
       El casillero PTY-14981 es igual para todos. Lo que identifica al cliente es su nombre en la primera línea.
     </div>
     <div style="display:flex;gap:8px;">
-      <button onclick="copiarCasillero(this)" style="flex:1;background:#ff6a1a;color:#fff;border:0;border-radius:10px;padding:11px;font-weight:600;font-size:14px;cursor:pointer;">📋 Copiar</button>
+      <button onclick="copiarCasillero(this)" style="flex:1;background:#ff6a1a;color:#fff;border:0;border-radius:10px;padding:11px;font-weight:600;font-size:14px;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar</button>
       <button onclick="cerrarCasillero()" style="flex:1;background:#e2e8f0;color:#0c1b33;border:0;border-radius:10px;padding:11px;font-weight:600;font-size:14px;cursor:pointer;">Cerrar</button>
     </div>
   </div>
@@ -4433,7 +4442,7 @@ function verCasillero(nombreCliente){
 function cerrarCasillero(){
   document.getElementById('modalCasillero').style.display = 'none';
   var b = document.querySelector('#modalCasillero button');
-  if (b) b.textContent = '📋 Copiar';
+  if (b) b.innerHTML = ICONOS.portapapeles + ' Copiar';
 }
 function copiarCasillero(btn){
   var t = document.getElementById('casilleroTexto').textContent;
@@ -4474,7 +4483,7 @@ function copiarCasillero(btn){
       var b = document.createElement('button');
       b.className = 'btn-casillero';
       b.type = 'button';
-      b.textContent = '📮 Casillero';
+      b.innerHTML = ICONOS.buzon + ' Casillero';
       b.style.cssText = 'margin-left:6px;background:#0c1b33;color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;';
       (function(n){ b.onclick = function(){ verCasillero(n); }; })(nombre);
       destino.appendChild(b);
