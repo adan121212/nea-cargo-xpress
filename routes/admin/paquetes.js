@@ -355,6 +355,30 @@ router.patch(
   }
 );
 
+// --- PATCH /api/admin/paquetes/:id/notas ---
+// Nota/observación libre del administrador — para casos como un paquete que
+// es un favor a alguien que no está registrado como cliente, o cualquier
+// aclaración interna. No la ve el cliente, es solo para uso del equipo.
+router.patch(
+  '/:id/notas',
+  [ body('notas').isString().isLength({ max: 2000 }) ],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
+    try {
+      const resultado = await pool.query(
+        `UPDATE paquetes SET notas=$1, fecha_actualizacion=NOW() WHERE id=$2 RETURNING *`,
+        [req.body.notas.trim() || null, req.params.id]
+      );
+      if (resultado.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
+      return res.json({ mensaje: 'Nota guardada', paquete: resultado.rows[0] });
+    } catch (error) {
+      console.error('Error en PATCH /admin/paquetes/:id/notas:', error);
+      return res.status(500).json({ mensaje: 'Error interno al guardar la nota' });
+    }
+  }
+);
+
 // --- POST /api/admin/paquetes/:id/fotos ---
 router.post('/:id/fotos', upload.array('fotos', 5), async (req, res) => {
   if (!req.files || req.files.length === 0) return res.status(400).json({ mensaje: 'Sube al menos una foto.' });
