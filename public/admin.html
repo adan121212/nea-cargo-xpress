@@ -1425,6 +1425,7 @@
         </div>
       </div>
       <div id="cajaEstadoDia"></div>
+      <div id="cajaAperturaBox" style="margin-bottom:20px;"></div>
       <div id="cajaResumenCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;"></div>
       <div id="cajaMétodosGrid" style="display:none;margin-bottom:20px;">
         <h3 class="dash-section-title">Desglose por método de pago</h3>
@@ -3048,6 +3049,7 @@
   const METODO_ICONO = { efectivo:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>', tarjeta:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10 H22"/><path d="M6 15 H10"/></svg>', transferencia:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M2 9 L12 3 L22 9"/><path d="M4 9 V19 M9 9 V19 M15 9 V19 M20 9 V19"/><path d="M2 19 H22 M2 22 H22"/></svg>', yappy:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18 H13"/></svg>' };
   const METODO_COLOR = { efectivo:'green', tarjeta:'blue', transferencia:'navy', yappy:'amber' };
   function renderCaja(data){
+    renderAperturaCaja(data);
     const total = Number(data.total_general);
     const facturas = data.cantidad_facturas;
     const metodos = data.detalle_por_metodo || [];
@@ -3088,14 +3090,18 @@
     } else {
       metodosGrid.style.display = 'none';
     }
-    const ef = data.efectivo || { cobrado: 0, salidas: 0, en_gaveta: 0 };
+    const ef = data.efectivo || { fondo_inicial: 0, cobrado: 0, salidas: 0, en_gaveta: 0 };
     const sal = (data.salidas_efectivo && data.salidas_efectivo.detalle) || [];
     const cajaEf = $('#cajaEfectivoBox');
     if (cajaEf) {
-      if (ef.cobrado > 0 || ef.salidas > 0) {
+      if (ef.cobrado > 0 || ef.salidas > 0 || Number(ef.fondo_inicial) > 0) {
         cajaEf.innerHTML = `
           <h3 class="dash-section-title">Cuadre del efectivo</h3>
           <div style="background:var(--paper);border-radius:12px;padding:18px 20px;border:1px solid var(--line);">
+            <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;">
+              <span>Fondo inicial (apertura)</span>
+              <span class="mono">$${Number(ef.fondo_inicial).toFixed(2)}</span>
+            </div>
             <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;">
               <span>Cobrado en efectivo</span>
               <span class="mono">$${Number(ef.cobrado).toFixed(2)}</span>
@@ -3143,6 +3149,75 @@
     }
   }
   async function cerrarCaja(fecha){ if(!confirm(`¿Confirmas cerrar la caja del ${fecha}?`)) return; const btn=$('#btnCerrarCaja'); setCargando(btn,true); try { const res=await apiAdmin('/admin/caja/cerrar',{method:'POST',body:JSON.stringify({fecha,notas:$('#cajaNotas')?.value.trim()||undefined})}); const data=await res.json().catch(()=>({})); if(res.status===201){ mostrarBanner('#bannerCaja','success','✓ Caja cerrada.'); await cargarCaja(); await cargarHistorialCaja(); revisarCajasPendientes(); } else { mostrarBanner('#bannerCaja','error',data.mensaje||'No se pudo cerrar.'); } } catch(err){ mostrarBanner('#bannerCaja','error','No pudimos conectar.'); } finally { setCargando(btn,false); } }
+  function renderAperturaCaja(data){
+    const box = $('#cajaAperturaBox');
+    if (!box) return;
+    const ap = data.apertura;
+    if (ap) {
+      const monto = Number(ap.monto).toFixed(2);
+      const quien = `${escapeHtml(ap.abierto_por_nombre||'')} ${escapeHtml(ap.abierto_por_apellido||'')}`.trim();
+      box.innerHTML = `
+        <div style="background:var(--paper);border-radius:12px;padding:14px 18px;border:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:11px;color:var(--ink-soft);">Fondo inicial de caja (hoy)</div>
+            <div class="mono" style="font-size:18px;font-weight:700;">$${monto}</div>
+            ${quien ? `<div style="font-size:11px;color:var(--ink-soft);">Abierto por ${quien}</div>` : ''}
+          </div>
+          <button class="btn-secondary" id="btnCorregirApertura" style="height:32px;font-size:12px;">✏️ Corregir monto</button>
+        </div>
+        <div id="cajaAperturaForm" style="display:none;margin-top:10px;"></div>
+      `;
+      $('#btnCorregirApertura').addEventListener('click', () => mostrarFormApertura(data.fecha, ap.monto));
+    } else {
+      box.innerHTML = `
+        <div style="background:var(--amber-bg);border:1.5px solid rgba(255,106,26,0.4);border-radius:12px;padding:16px 18px;">
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:6px;color:var(--accent-dark);">⚠ Falta registrar el fondo inicial de este día</div>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;">Escribe con cuánto efectivo se abrió la gaveta hoy, para que el cuadre de caja salga correcto.</p>
+          <div id="cajaAperturaForm"></div>
+        </div>
+      `;
+      mostrarFormApertura(data.fecha, '');
+    }
+  }
+  function mostrarFormApertura(fecha, montoActual){
+    const cont = $('#cajaAperturaForm');
+    if (!cont) return;
+    cont.style.display = 'block';
+    const valorInicial = montoActual !== '' && montoActual !== undefined ? Number(montoActual).toFixed(2) : '';
+    cont.innerHTML = `
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+        <div>
+          <label for="cajaAperturaMonto" style="font-size:11px;">Monto ($)</label><br>
+          <input type="number" id="cajaAperturaMonto" step="0.01" min="0" placeholder="0.00" value="${valorInicial}" style="padding:7px 10px;width:120px;">
+        </div>
+        <button class="btn-primary" id="btnGuardarApertura" style="height:36px;max-width:220px;">
+          <span class="spinner"></span><span>Guardar fondo inicial</span>
+        </button>
+      </div>
+    `;
+    $('#btnGuardarApertura').addEventListener('click', () => guardarApertura(fecha));
+  }
+  async function guardarApertura(fecha){
+    const inp = $('#cajaAperturaMonto');
+    const monto = parseFloat(inp?.value);
+    if (isNaN(monto) || monto < 0) { mostrarBanner('#bannerCaja','error','Escribe un monto válido.'); return; }
+    const btn = $('#btnGuardarApertura');
+    setCargando(btn, true);
+    try {
+      const res = await apiAdmin('/admin/caja/apertura', { method:'POST', body: JSON.stringify({ fecha, monto }) });
+      const data = await res.json().catch(()=>({}));
+      if (res.status === 201) {
+        mostrarBanner('#bannerCaja','success','✓ Fondo inicial guardado.');
+        await cargarCaja();
+      } else {
+        mostrarBanner('#bannerCaja','error', data.mensaje || 'No se pudo guardar el fondo inicial.');
+      }
+    } catch(err) {
+      mostrarBanner('#bannerCaja','error','No pudimos conectar.');
+    } finally {
+      setCargando(btn, false);
+    }
+  }
   async function cargarHistorialCaja(){
     try {
       const res=await apiAdmin('/admin/caja/historial');
