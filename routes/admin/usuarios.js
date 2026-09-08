@@ -19,13 +19,14 @@ router.get('/', async (req, res) => {
              u.saldo_a_favor, COUNT(p.id) AS total_paquetes
       FROM usuarios u
       LEFT JOIN paquetes p ON p.usuario_id = u.id
+      WHERE u.rol = 'cliente'
     `;
     const valores = [];
     if (q) {
       valores.push(`%${q}%`);
-      queryStr += ` WHERE u.numero_casillero ILIKE $1
+      queryStr += ` AND (u.numero_casillero ILIKE $1
                       OR u.email ILIKE $1
-                      OR CONCAT(u.nombre, ' ', u.apellido) ILIKE $1`;
+                      OR CONCAT(u.nombre, ' ', u.apellido) ILIKE $1)`;
     }
     queryStr += ` GROUP BY u.id ORDER BY u.fecha_registro DESC LIMIT 300`;
 
@@ -43,7 +44,7 @@ router.get('/:id', async (req, res) => {
     const usuario = await pool.query(
       `SELECT id, nombre, apellido, email, telefono, numero_casillero, verificado, rol,
               fecha_registro, activo, fecha_desactivacion
-       FROM usuarios WHERE id = $1`,
+       FROM usuarios WHERE id = $1 AND rol = 'cliente'`,
       [req.params.id]
     );
 
@@ -176,7 +177,7 @@ router.put(
     const { nombre, apellido, email, telefono, numero_casillero } = req.body;
 
     try {
-      const existe = await pool.query('SELECT id FROM usuarios WHERE id = $1', [req.params.id]);
+      const existe = await pool.query("SELECT id FROM usuarios WHERE id = $1 AND rol = 'cliente'", [req.params.id]);
       if (existe.rows.length === 0) {
         return res.status(404).json({ mensaje: 'Cliente no encontrado' });
       }
@@ -250,6 +251,11 @@ router.delete('/:id', async (req, res) => {
         mensaje: 'No se puede eliminar una cuenta de administrador. Quítale el rol primero.',
       });
     }
+    if (usuario.rol === 'trabajador') {
+      return res.status(409).json({
+        mensaje: 'Esta es una cuenta de trabajador. Adminístrala desde la pantalla Trabajadores, no desde Clientes.',
+      });
+    }
 
     const paquetes = await client.query(
       'SELECT COUNT(*)::int AS n FROM paquetes WHERE usuario_id = $1',
@@ -315,7 +321,7 @@ router.patch('/:id/activar', async (req, res) => {
     const resultado = await pool.query(
       `UPDATE usuarios
        SET activo = TRUE, fecha_desactivacion = NULL
-       WHERE id = $1
+       WHERE id = $1 AND rol = 'cliente'
        RETURNING id, nombre, apellido, activo`,
       [id]
     );
