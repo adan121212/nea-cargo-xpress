@@ -2557,7 +2557,8 @@
           } catch(err){ mostrarBanner('#bannerMostrador','error','No pudimos conectar.'); btn.disabled=false; }
         });
       });
-    } catch(err){ cont.innerHTML=''; }
+    } catch(err){ cont.innerHTML=''; return false; }
+    return true;
   }
   let facturadorMetodoPago='', facturadorCliente=null, facturadorTarifas=[], ftTotalNum=0;
   function renderResultadoMostrador(cliente, paquetes, facturasPendientes, autorizados){
@@ -3603,6 +3604,13 @@
     $('#btnCerrarNotif').addEventListener('click',()=>{ $('#notifPanel').classList.remove('open'); $('#notifOverlay').style.display='none'; });
     $('#notifOverlay').addEventListener('click',()=>{ $('#notifPanel').classList.remove('open'); $('#notifOverlay').style.display='none'; });
     $('#btnMarcarTodasLeidas').addEventListener('click',()=>{ notifLista.forEach(n=>n.leida=true); guardarNotificaciones(); renderNotifBadge(); renderNotifLista(); });
+    $('#btnBorrarNotifs').addEventListener('click',()=>{
+      if(!confirm('¿Borrar todo el historial de notificaciones? No se puede deshacer.')) return;
+      notifLista = [];
+      guardarNotificaciones();
+      renderNotifBadge();
+      renderNotifLista();
+    });
     $('#btnGuardarAutorizadosAdmin').addEventListener('click', async()=>{
       if(!clienteEditandoId) return;
       const btn=$('#btnGuardarAutorizadosAdmin');
@@ -3685,7 +3693,14 @@
   let _ultimoTotalPendientes = localStorage.getItem(ULTIMO_TOTAL_KEY);
   _ultimoTotalPendientes = _ultimoTotalPendientes === null ? null : parseInt(_ultimoTotalPendientes);
   cargarPendientesMostrador = async function(){
-    await _cargarPendientesOriginal();
+    const exito = await _cargarPendientesOriginal();
+    // Si la carga falló (por ejemplo, el servidor gratis de Render estaba
+    // "despertando" y la petición no respondió a tiempo), NO tocamos el
+    // contador guardado. Antes, un fallo se trataba como "0 facturas", y
+    // cuando el servidor despertaba y encontraba la misma factura de
+    // siempre, el sistema creía que era nueva y avisaba con una campana
+    // falsa — de ahí las notificaciones repetidas sin que nada cambiara.
+    if(!exito) return;
     const total = parseInt($('#facBadgeCount').textContent)||0;
     // _ultimoTotalPendientes se guarda en localStorage para que sobreviva a un refresh
     // de la página. Si no, cada recarga reiniciaba el contador en 0 y avisaba "facturas
@@ -4429,6 +4444,7 @@
     <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M6 10 C6 6 8.5 3.5 12 3.5 C15.5 3.5 18 6 18 10 C18 14 19.5 15.5 20 16.5 H4 C4.5 15.5 6 14 6 10 Z"/><path d="M10 19.5 C10 20.6 10.9 21.5 12 21.5 C13.1 21.5 14 20.6 14 19.5"/></svg> Notificaciones</span>
     <div style="display:flex;gap:6px;">
       <button id="btnMarcarTodasLeidas" title="Marcar todas como leídas">✓ Todo leído</button>
+      <button id="btnBorrarNotifs" title="Borrar todo el historial"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M4 7 H20 M9 7 V4 H15 V7 M6 7 L7 21 H17 L18 7"/><path d="M10 11 V17 M14 11 V17"/></svg> Vaciar</button>
       <button id="btnCerrarNotif">✕</button>
     </div>
   </div>
