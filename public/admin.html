@@ -416,7 +416,8 @@
   .caja-badge-estado.abierta{ background:#fff3e8; color:#c2470a; border:1px solid rgba(255,106,26,.3); }
   .caja-badge-estado.cerrada{ background:#e7f6ef; color:#177a63; border:1px solid rgba(23,122,99,.25); }
   .caja-lista-box{ background:var(--paper); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-  .caja-lista-fila{ display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid var(--line); }
+  .caja-lista-fila{ display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap; gap:6px; }
+  .caja-lista-fila > span:first-child{ flex-wrap:wrap; }
   .caja-lista-fila:last-child{ border-bottom:none; }
   .caja-metodo-icono{ width:28px; height:28px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
   .chart-box{ background: var(--paper); border-radius: var(--radius-md); padding:18px; height:220px; position:relative; }
@@ -611,8 +612,9 @@
   .chr-facturas{ color:var(--ink-soft); }
   .chr-hora{ font-size:12px; }
   @media (max-width:760px){
-    #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; }
-    #cajaMetodosCards{ grid-template-columns:repeat(2,1fr) !important; }
+    #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; gap:8px !important; }
+    #cajaResumenCards .caja-stat{ padding:12px 10px !important; }
+    #cajaResumenCards .caja-stat-num{ font-size:16px !important; }
     #comprasResumen{ grid-template-columns:repeat(2,1fr) !important; }
     #gastosResumen{ grid-template-columns:repeat(2,1fr) !important; }
     #deliveriesResumen{ grid-template-columns:repeat(2,1fr) !important; }
@@ -633,8 +635,9 @@
   }
   @media (max-width:520px){
     .dash-cards{ grid-template-columns:1fr; }
-    #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; }
-    #cajaMetodosCards{ grid-template-columns:1fr 1fr !important; }
+    #cajaResumenCards{ grid-template-columns:1fr !important; gap:10px !important; }
+    #cajaResumenCards .caja-stat{ padding:14px 16px !important; }
+    #cajaResumenCards .caja-stat-num{ font-size:20px !important; }
     #comprasResumen{ grid-template-columns:1fr 1fr !important; }
     #gastosResumen{ grid-template-columns:1fr 1fr !important; }
     #deliveriesResumen{ grid-template-columns:1fr !important; }
@@ -828,7 +831,6 @@
         <div class="sb-urole">Administrador</div>
       </div>
     </div>
-    <div id="sbMiCasillero" style="margin-top:8px;font-size:11.5px;"></div>
   </div>
 </div>
 <!-- Overlay para móvil -->
@@ -2459,33 +2461,6 @@
     });
     const cajaParent = $('#sbCajaParent');
     if (cajaParent) cajaParent.style.display = (esAdmin || tienePermiso('caja')) ? 'flex' : 'none';
-    renderMiCasillero();
-  }
-  function renderMiCasillero(){
-    const cont = $('#sbMiCasillero');
-    if (!cont) return;
-    if (usuarioActual.rol !== 'admin'){ cont.innerHTML = ''; return; }
-    if (usuarioActual.numero_casillero){
-      cont.innerHTML = `<span style="color:rgba(255,255,255,.55);">Cliente: <span class="mono">${escapeHtml(usuarioActual.numero_casillero)}</span></span> · <a href="#" id="btnQuitarMiCasillero" style="color:var(--accent);text-decoration:underline;">quitar</a>`;
-      $('#btnQuitarMiCasillero')?.addEventListener('click', (e) => { e.preventDefault(); toggleMiCasillero(false); });
-    } else {
-      cont.innerHTML = `<a href="#" id="btnActivarMiCasillero" style="color:rgba(255,255,255,.55);text-decoration:underline;">Activar mi casillero de cliente</a>`;
-      $('#btnActivarMiCasillero')?.addEventListener('click', (e) => { e.preventDefault(); toggleMiCasillero(true); });
-    }
-  }
-  async function toggleMiCasillero(activar){
-    try {
-      const res = await apiAdmin('/admin/mi-cuenta/casillero', { method:'PATCH', body: JSON.stringify({ activar }) });
-      const d = await res.json().catch(()=>({}));
-      if (res.ok){
-        usuarioActual.numero_casillero = d.usuario.numero_casillero;
-        localStorage.setItem(SESION_KEY, JSON.stringify(usuarioActual));
-        renderMiCasillero();
-        if (activar) alert(d.mensaje);
-      } else {
-        alert(d.mensaje || 'No se pudo actualizar.');
-      }
-    } catch(err){ alert('No pudimos conectar.'); }
   }
   async function cargarSucursales(){
     try {

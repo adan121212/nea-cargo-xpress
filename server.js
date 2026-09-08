@@ -163,7 +163,6 @@ app.use('/api/pagos', pagosRoutes);
 app.use('/api/admin/paquetes', adminPaquetesRoutes);
 app.use('/api/admin/usuarios', adminUsuariosRoutes);
 app.use('/api/admin/trabajadores', require('./routes/admin/trabajadores'));
-app.use('/api/admin/mi-cuenta', require('./routes/admin/miCuenta'));
 app.use('/api/admin/sucursales', adminSucursalesRoutes);
 app.use('/api/admin/tarifas', adminTarifasRoutes);
 app.use('/api/admin/facturas', adminFacturasRoutes);

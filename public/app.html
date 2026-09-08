@@ -1579,7 +1579,7 @@
 
       if (res.ok){
         const esClientePleno = data.usuario.rol === 'cliente';
-        const esStaffConCasillero = (data.usuario.rol === 'trabajador' || data.usuario.rol === 'admin') && !!data.usuario.numero_casillero;
+        const esStaffConCasillero = data.usuario.rol === 'trabajador' && !!data.usuario.numero_casillero;
         if (!esClientePleno && !esStaffConCasillero){
           mostrarBanner('#bannerLogin', 'error', 'Esta cuenta es de administración, no de cliente. Usa el panel de administración para entrar.');
           return;
