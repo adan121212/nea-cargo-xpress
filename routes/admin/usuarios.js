@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
              u.saldo_a_favor, COUNT(p.id) AS total_paquetes
       FROM usuarios u
       LEFT JOIN paquetes p ON p.usuario_id = u.id
-      WHERE u.rol = 'cliente'
+      WHERE (u.rol = 'cliente' OR (u.rol = 'admin' AND u.numero_casillero IS NOT NULL))
     `;
     const valores = [];
     if (q) {
@@ -44,7 +44,7 @@ router.get('/:id', async (req, res) => {
       `SELECT id, nombre, apellido, email, telefono, numero_casillero, verificado, rol,
               fecha_registro, activo, fecha_desactivacion
        FROM usuarios
-       WHERE id = $1 AND rol = 'cliente'`,
+       WHERE id = $1 AND (rol = 'cliente' OR (rol = 'admin' AND numero_casillero IS NOT NULL))`,
       [req.params.id]
     );
 
@@ -178,7 +178,7 @@ router.put(
 
     try {
       const existe = await pool.query(
-        "SELECT id FROM usuarios WHERE id = $1 AND rol = 'cliente'",
+        "SELECT id FROM usuarios WHERE id = $1 AND (rol = 'cliente' OR (rol = 'admin' AND numero_casillero IS NOT NULL))",
         [req.params.id]
       );
       if (existe.rows.length === 0) {
