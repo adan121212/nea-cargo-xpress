@@ -765,10 +765,19 @@
     <button class="tab-nav-btn" data-tab="reportes">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="4" y="12" width="4" height="9" rx="0.5"/><rect x="10" y="6" width="4" height="15" rx="0.5"/><rect x="16" y="2" width="4" height="19" rx="0.5"/></svg></span> Reportes
     </button>
-    <button class="tab-nav-btn" data-tab="caja">
+    <button class="tab-nav-btn tab-nav-parent" id="sbCajaParent" type="button">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9 L12 3 L22 9"/><path d="M4 9 V19 M9 9 V19 M15 9 V19 M20 9 V19"/><path d="M2 19 H22 M2 22 H22"/></svg></span> Apertura y Cierre caja
-    <span class="sb-badge" id="sbBadgeCaja" style="display:none;background:rgba(192,57,43,.3);color:#ff9a8f;">0</span>
+      <span class="sb-badge" id="sbBadgeCaja" style="display:none;background:rgba(192,57,43,.3);color:#ff9a8f;">0</span>
+      <span id="sbCajaArrow" style="margin-left:auto;font-size:11px;transition:transform .15s;">▸</span>
     </button>
+    <div id="sbCajaSubmenu" style="display:none;">
+      <button class="tab-nav-btn" data-tab="cajaApertura" style="padding-left:46px;font-size:13px;">
+        🔓 Abrir caja
+      </button>
+      <button class="tab-nav-btn" data-tab="cajaCierre" style="padding-left:46px;font-size:13px;">
+        🔒 Cerrar caja
+      </button>
+    </div>
     <button class="tab-nav-btn" data-tab="reportesPaquete">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg></span> Reclamos <span class="sb-badge" id="badgeReportes" style="display:none;">0</span>
     </button>
@@ -1413,23 +1422,34 @@
       <div class="empty" id="emptySucursales" style="display:none;">Aún no hay sucursales creadas.</div>
     </div>
     <!-- ---- TAB: Apertura y Cierre caja ---- -->
-    <div class="card tab-panel" id="tabCaja" style="display:none;">
+    <!-- ---- TAB: Abrir caja ---- -->
+    <div class="card tab-panel" id="tabCajaApertura" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
         <div>
-          <h2 style="margin:0 0 2px;">Apertura y Cierre caja</h2>
+          <h2 style="margin:0 0 2px;">Abrir caja</h2>
+          <p class="card-sub" style="margin:0;">Registra con cuánto efectivo se abre la gaveta hoy.</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <div><label for="cajaAperturaFecha" style="font-size:11px;">Fecha</label><br><input type="date" id="cajaAperturaFecha" style="padding:7px 10px;width:auto;"></div>
+          <button class="btn-secondary" id="btnVerCajaApertura" style="height:36px;">Ver día</button>
+        </div>
+      </div>
+      <div id="cajaAperturaBox" style="margin-bottom:4px;"></div>
+    </div>
+    <!-- ---- TAB: Cerrar caja ---- -->
+    <div class="card tab-panel" id="tabCajaCierre" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+        <div>
+          <h2 style="margin:0 0 2px;">Cerrar caja</h2>
           <p class="card-sub" style="margin:0;">Total cobrado en el día, desglosado por método de pago.</p>
         </div>
         <div style="display:flex;gap:8px;align-items:flex-end;">
-          <div><label for="cajaFecha" style="font-size:11px;">Fecha</label><br><input type="date" id="cajaFecha" style="padding:7px 10px;width:auto;"></div>
-          <button class="btn-secondary" id="btnVerCaja" style="height:36px;">Ver día</button>
+          <div><label for="cajaCierreFecha" style="font-size:11px;">Fecha</label><br><input type="date" id="cajaCierreFecha" style="padding:7px 10px;width:auto;"></div>
+          <button class="btn-secondary" id="btnVerCajaCierre" style="height:36px;">Ver día</button>
         </div>
       </div>
       <div id="cajaEstadoDia"></div>
 
-      <h3 class="dash-section-title" style="margin-top:0;">1 · Apertura</h3>
-      <div id="cajaAperturaBox" style="margin-bottom:20px;"></div>
-
-      <h3 class="dash-section-title" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);">2 · Resumen del día</h3>
       <div id="cajaResumenCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;"></div>
       <div id="cajaMétodosGrid" style="display:none;margin-bottom:20px;">
         <h3 class="dash-section-title">Desglose por método de pago</h3>
@@ -1438,7 +1458,7 @@
       <div id="cajaEfectivoBox" style="margin-bottom:20px;"></div>
       <div class="empty" id="emptyCajaDetalle" style="display:none;">No hay cobros registrados este día.</div>
 
-      <h3 class="dash-section-title" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);">3 · Cierre</h3>
+      <h3 class="dash-section-title" style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);">Cerrar el día</h3>
       <div id="cajaCierreBox" style="margin-top:4px;"></div>
       <div class="banner" id="bannerCaja"></div>
       <div style="margin-top:28px;">
@@ -1824,10 +1844,11 @@
     if (res.status === 401 || res.status === 403){ localStorage.removeItem(TOKEN_KEY); mostrarAdmin(false); throw new Error('Sesión inválida'); }
     return res;
   }
-  document.querySelectorAll('.tab-nav-btn').forEach(btn => {
+  document.querySelectorAll('.tab-nav-btn:not(.tab-nav-parent)').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-nav-btn:not(.tab-nav-parent)').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      document.getElementById('sbCajaParent')?.classList.remove('active');
       document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
       const tab = btn.dataset.tab;
       if (tab === 'dashboard'){ $('#tabDashboard').style.display = 'block'; cargarDashboard(); }
@@ -1841,7 +1862,8 @@
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
       if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); }
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
-      if (tab === 'caja'){ $('#tabCaja').style.display = 'block'; cargarCaja(); cargarHistorialCaja(); }
+      if (tab === 'cajaApertura'){ $('#tabCajaApertura').style.display = 'block'; toggleSubmenuCaja(true); document.getElementById('sbCajaParent')?.classList.add('active'); cargarCaja(); }
+      if (tab === 'cajaCierre'){ $('#tabCajaCierre').style.display = 'block'; toggleSubmenuCaja(true); document.getElementById('sbCajaParent')?.classList.add('active'); cargarCaja(); cargarHistorialCaja(); }
       if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
       if (tab === 'reportesPaquete'){ $('#tabReportesPaquete').style.display = 'block'; cargarReportesPaq(); }
       if (tab === 'pty'){ $('#tabPty').style.display = 'block'; }
@@ -1851,6 +1873,15 @@
       }
     });
   });
+  function toggleSubmenuCaja(forzarAbierto){
+    const sub = document.getElementById('sbCajaSubmenu');
+    const arrow = document.getElementById('sbCajaArrow');
+    if (!sub) return;
+    const abierto = forzarAbierto !== undefined ? forzarAbierto : (sub.style.display === 'none');
+    sub.style.display = abierto ? 'block' : 'none';
+    if (arrow) arrow.style.transform = abierto ? 'rotate(90deg)' : 'rotate(0deg)';
+  }
+  document.getElementById('sbCajaParent')?.addEventListener('click', () => toggleSubmenuCaja());
 </script>
 <script>
   let paginaActualPaquetes = 1;
@@ -3050,8 +3081,14 @@
     const dia = String(d.getDate()).padStart(2,'0');
     return `${anio}-${mes}-${dia}`;
   }
-  function inicializarFechaCaja(){ if($('#cajaFecha').value) return; $('#cajaFecha').value=fechaISOCaja(new Date()); }
-  async function cargarCaja(){ inicializarFechaCaja(); const fecha=$('#cajaFecha').value; try { const res=await apiAdmin(`/admin/caja/dia?fecha=${fecha}`); const data=await res.json(); renderCaja(data); } catch(err){} }
+  let cajaFechaActual = null;
+  async function cargarCaja(fechaNueva){
+    if (fechaNueva) cajaFechaActual = fechaNueva;
+    const fecha = cajaFechaActual || fechaISOCaja(new Date());
+    const inputA = $('#cajaAperturaFecha'); if (inputA) inputA.value = fecha;
+    const inputC = $('#cajaCierreFecha'); if (inputC) inputC.value = fecha;
+    try { const res=await apiAdmin(`/admin/caja/dia?fecha=${fecha}`); const data=await res.json(); cajaFechaActual = data.fecha; renderCaja(data); } catch(err){}
+  }
   const METODO_ICONO = { efectivo:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>', tarjeta:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10 H22"/><path d="M6 15 H10"/></svg>', transferencia:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M2 9 L12 3 L22 9"/><path d="M4 9 V19 M9 9 V19 M15 9 V19 M20 9 V19"/><path d="M2 19 H22 M2 22 H22"/></svg>', yappy:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18 H13"/></svg>' };
   const METODO_COLOR = { efectivo:'green', tarjeta:'blue', transferencia:'navy', yappy:'amber' };
   function renderCaja(data){
@@ -3336,7 +3373,8 @@
       alert('No se pudo cargar el cierre para reenviar.');
     }
   }
-  $('#btnVerCaja').addEventListener('click',(e)=>{ e.preventDefault(); cargarCaja(); });
+  $('#btnVerCajaApertura')?.addEventListener('click',(e)=>{ e.preventDefault(); cargarCaja($('#cajaAperturaFecha').value); });
+  $('#btnVerCajaCierre')?.addEventListener('click',(e)=>{ e.preventDefault(); cargarCaja($('#cajaCierreFecha').value); });
   const ESTADO_LABEL_REPORTE={prealertado:'Prealertado',en_bodega_miami:'En bodega Miami',en_transito:'En tránsito',en_panama:'En Panamá',listo_para_retiro:'Listo para retiro',entregado:'Entregado'};
   let ultimoReporte=null;
   function fechaISO(d){
@@ -4494,12 +4532,9 @@
       aviso.style.display = 'block';
       document.getElementById('btnIrACaja')?.addEventListener('click', () => {
         const masViejo = d.pendientes[0]?.fecha;
-        document.querySelector('.tab-nav-btn[data-tab="caja"]')?.click();
+        document.querySelector('.tab-nav-btn[data-tab="cajaCierre"]')?.click();
         if(masViejo){
-          setTimeout(() => {
-            const inp = document.getElementById('cajaFecha');
-            if(inp){ inp.value = String(masViejo).slice(0,10); cargarCaja(); }
-          }, 120);
+          setTimeout(() => { cargarCaja(String(masViejo).slice(0,10)); }, 120);
         }
       });
     } catch(e){ console.error('Error revisando cajas pendientes:', e); }
