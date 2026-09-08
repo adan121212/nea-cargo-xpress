@@ -393,6 +393,29 @@
   .dash-sub{ font-size:11px; opacity:.75; margin-top:3px; }
   .dash-section{ margin-bottom:24px; }
   .dash-section-title{ font-family: var(--font-display); font-size:14px; margin:0 0 12px; color: var(--ink); }
+  .caja-stat{ border-radius:12px; padding:16px; }
+  .caja-stat-label{ font-size:12px; }
+  .caja-stat-num{ font-family: var(--font-display); font-size:22px; font-weight:700; margin-top:4px; }
+  .caja-stat-sub{ font-size:12px; margin-top:2px; }
+  .caja-stat.navy{ background:var(--ink); }
+  .caja-stat.navy .caja-stat-label{ color:rgba(255,255,255,.6); }
+  .caja-stat.navy .caja-stat-num{ color:#fff; }
+  .caja-stat.navy .caja-stat-sub{ color:rgba(255,255,255,.5); }
+  .caja-stat.blanco{ background:var(--paper); border:1px solid var(--line); }
+  .caja-stat.blanco .caja-stat-label{ color:var(--ink-soft); }
+  .caja-stat.blanco .caja-stat-num{ color:var(--ink); }
+  .caja-stat.blanco .caja-stat-sub{ color:var(--ink-soft); opacity:.8; }
+  .caja-stat.naranja{ background:var(--accent); }
+  .caja-stat.naranja .caja-stat-label{ color:rgba(255,255,255,.85); }
+  .caja-stat.naranja .caja-stat-num{ color:#fff; }
+  .caja-stat.naranja .caja-stat-sub{ color:rgba(255,255,255,.75); }
+  .caja-badge-estado{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; padding:6px 13px; border-radius:8px; }
+  .caja-badge-estado.abierta{ background:#fff3e8; color:#c2470a; border:1px solid rgba(255,106,26,.3); }
+  .caja-badge-estado.cerrada{ background:#e7f6ef; color:#177a63; border:1px solid rgba(23,122,99,.25); }
+  .caja-lista-box{ background:var(--paper); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .caja-lista-fila{ display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid var(--line); }
+  .caja-lista-fila:last-child{ border-bottom:none; }
+  .caja-metodo-icono{ width:28px; height:28px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
   .chart-box{ background: var(--paper); border-radius: var(--radius-md); padding:18px; height:220px; position:relative; }
   .chart-box canvas{ max-height:190px; }
   .dash-grid2{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
@@ -1424,13 +1447,13 @@
     <!-- ---- TAB: Apertura y Cierre caja ---- -->
     <!-- ---- TAB: Abrir caja ---- -->
     <div class="card tab-panel" id="tabCajaApertura" style="display:none;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
         <div>
           <h2 style="margin:0 0 2px;">Abrir caja</h2>
-          <p class="card-sub" style="margin:0;">Registra con cuánto efectivo se abre la gaveta hoy.</p>
+          <p class="card-sub" id="cajaAperturaFechaLegible" style="margin:0;">Registra con cuánto efectivo se abre la gaveta hoy.</p>
         </div>
-        <div style="display:flex;gap:8px;align-items:flex-end;">
-          <div><label for="cajaAperturaFecha" style="font-size:11px;">Fecha</label><br><input type="date" id="cajaAperturaFecha" style="padding:7px 10px;width:auto;"></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="date" id="cajaAperturaFecha" style="padding:7px 10px;width:auto;">
           <button class="btn-secondary" id="btnVerCajaApertura" style="height:36px;">Ver día</button>
         </div>
       </div>
@@ -1438,22 +1461,23 @@
     </div>
     <!-- ---- TAB: Cerrar caja ---- -->
     <div class="card tab-panel" id="tabCajaCierre" style="display:none;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
         <div>
           <h2 style="margin:0 0 2px;">Cerrar caja</h2>
-          <p class="card-sub" style="margin:0;">Total cobrado en el día, desglosado por método de pago.</p>
+          <p class="card-sub" id="cajaCierreFechaLegible" style="margin:0;">Total cobrado en el día, desglosado por método de pago.</p>
         </div>
-        <div style="display:flex;gap:8px;align-items:flex-end;">
-          <div><label for="cajaCierreFecha" style="font-size:11px;">Fecha</label><br><input type="date" id="cajaCierreFecha" style="padding:7px 10px;width:auto;"></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="date" id="cajaCierreFecha" style="padding:7px 10px;width:auto;">
           <button class="btn-secondary" id="btnVerCajaCierre" style="height:36px;">Ver día</button>
+          <span class="caja-badge-estado" id="cajaEstadoBadge" style="display:none;"></span>
         </div>
       </div>
       <div id="cajaEstadoDia"></div>
 
-      <div id="cajaResumenCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;"></div>
+      <div id="cajaResumenCards" style="display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:12px;margin-bottom:20px;"></div>
       <div id="cajaMétodosGrid" style="display:none;margin-bottom:20px;">
         <h3 class="dash-section-title">Desglose por método de pago</h3>
-        <div id="cajaMetodosCards" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;"></div>
+        <div class="caja-lista-box" id="cajaMetodosCards"></div>
       </div>
       <div id="cajaEfectivoBox" style="margin-bottom:20px;"></div>
       <div class="empty" id="emptyCajaDetalle" style="display:none;">No hay cobros registrados este día.</div>
@@ -1685,6 +1709,16 @@
     return div.innerHTML;
   }
   const MESES_CORTOS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const DIAS_LARGOS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const MESES_LARGOS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  function formatearFechaLarga(fechaStr){
+    if(!fechaStr) return '';
+    const soloFecha = String(fechaStr).slice(0,10);
+    const [anio, mes, dia] = soloFecha.split('-').map(Number);
+    if(!anio||!mes||!dia) return '';
+    const d = new Date(anio, mes-1, dia);
+    return `${DIAS_LARGOS[d.getDay()]}, ${dia} de ${MESES_LARGOS[mes-1]} de ${anio}`;
+  }
   function formatearFechaSolo(fechaStr){
     if(!fechaStr) return '—';
     const soloFecha = String(fechaStr).slice(0,10);
@@ -3087,6 +3121,9 @@
     const fecha = cajaFechaActual || fechaISOCaja(new Date());
     const inputA = $('#cajaAperturaFecha'); if (inputA) inputA.value = fecha;
     const inputC = $('#cajaCierreFecha'); if (inputC) inputC.value = fecha;
+    const legible = formatearFechaLarga(fecha);
+    const elA = $('#cajaAperturaFechaLegible'); if (elA) elA.textContent = legible;
+    const elC = $('#cajaCierreFechaLegible'); if (elC) elC.textContent = legible;
     try { const res=await apiAdmin(`/admin/caja/dia?fecha=${fecha}`); const data=await res.json(); cajaFechaActual = data.fecha; renderCaja(data); } catch(err){}
   }
   const METODO_ICONO = { efectivo:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>', tarjeta:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10 H22"/><path d="M6 15 H10"/></svg>', transferencia:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M2 9 L12 3 L22 9"/><path d="M4 9 V19 M9 9 V19 M15 9 V19 M20 9 V19"/><path d="M2 19 H22 M2 22 H22"/></svg>', yappy:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18 H13"/></svg>' };
@@ -3096,24 +3133,29 @@
     const total = Number(data.total_general);
     const facturas = data.cantidad_facturas;
     const metodos = data.detalle_por_metodo || [];
-   $('#cajaResumenCards').innerHTML = `
-      <div class="dash-card green" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M9 3 H15 L13.5 6.5 A7 7 0 1 1 10.5 6.5 Z"/><path d="M12 10 V16 M10 12 H14 M10 14 H14"/></svg></div>
-        <div class="dash-label">Total cobrado</div>
-        <div class="dash-num" style="font-size:18px;">$${total.toFixed(2)}</div>
-        <div class="dash-sub">${facturas} fact.</div>
+    const badge = $('#cajaEstadoBadge');
+    if (badge) {
+      badge.style.display = 'inline-flex';
+      badge.className = 'caja-badge-estado ' + (data.cerrado ? 'cerrada' : 'abierta');
+      badge.innerHTML = data.cerrado
+        ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11 V7 A4 4 0 0 1 16 7 V11"/></svg> Cerrada'
+        : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L15.5 14"/></svg> Abierta';
+    }
+    $('#cajaResumenCards').innerHTML = `
+      <div class="caja-stat navy">
+        <div class="caja-stat-label">Total cobrado</div>
+        <div class="caja-stat-num">$${total.toFixed(2)}</div>
+        <div class="caja-stat-sub">${facturas} factura${facturas==1?'':'s'}</div>
       </div>
-      <div class="dash-card blue" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg></div>
-        <div class="dash-label">Métodos</div>
-        <div class="dash-num" style="font-size:18px;">${metodos.length}</div>
-        <div class="dash-sub">usados</div>
+      <div class="caja-stat blanco">
+        <div class="caja-stat-label">Métodos usados</div>
+        <div class="caja-stat-num">${metodos.length}</div>
+        <div class="caja-stat-sub">${metodos.map(m=>escapeHtml((m.etiqueta||'').toLowerCase())).join(', ') || 'ninguno aún'}</div>
       </div>
-      <div class="dash-card ${data.cerrado?'navy':'amber'}" style="flex-direction:column;align-items:flex-start;gap:4px;padding:14px 12px;">
-        <div style="font-size:20px;">${data.cerrado?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11 V7 A4 4 0 0 1 16 7 V11"/></svg>':'⏳'}</div>
-        <div class="dash-label">Estado</div>
-        <div class="dash-num" style="font-size:15px;">${data.cerrado?'Cerrado':'Abierto'}</div>
-        <div class="dash-sub">${data.cerrado?'cerrada':'pendiente'}</div>
+      <div class="caja-stat naranja">
+        <div class="caja-stat-label">Debe haber en gaveta</div>
+        <div class="caja-stat-num">$${Number((data.efectivo||{}).en_gaveta||0).toFixed(2)}</div>
+        <div class="caja-stat-sub">efectivo esperado</div>
       </div>
     `;
     const metodosGrid = $('#cajaMétodosGrid');
@@ -3122,12 +3164,14 @@
       $('#cajaMetodosCards').innerHTML = metodos.map(m => {
         const clave = (m.metodo_pago||'').toLowerCase();
         const color = METODO_COLOR[clave] || 'navy';
-        const icono = METODO_ICONO[clave] || '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10 H22"/><path d="M6 15 H10"/></svg>';
-        return `<div class="dash-card ${color}" style="flex-direction:column;align-items:flex-start;gap:4px;padding:16px 14px;">
-          <div style="font-size:22px;">${icono}</div>
-          <div class="dash-label">${escapeHtml(m.etiqueta||clave)}</div>
-          <div class="dash-num" style="font-size:20px;">$${Number(m.total).toFixed(2)}</div>
-          <div class="dash-sub">${m.cantidad} factura${m.cantidad==1?'':'s'}</div>
+        const icono = METODO_ICONO[clave] || '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10 H22"/><path d="M6 15 H10"/></svg>';
+        return `<div class="caja-lista-fila">
+          <span style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink);">
+            <span class="caja-metodo-icono dash-card ${color}" style="box-shadow:none;">${icono}</span>
+            ${escapeHtml(m.etiqueta||clave)}
+            <span style="font-size:12px;color:var(--ink-soft);">${m.cantidad} factura${m.cantidad==1?'':'s'}</span>
+          </span>
+          <span class="mono" style="font-size:14px;font-weight:700;color:var(--ink);">$${Number(m.total).toFixed(2)}</span>
         </div>`;
       }).join('');
     } else {
@@ -3146,7 +3190,7 @@
               <span class="mono">$${Number(ef.fondo_inicial).toFixed(2)}</span>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;">
-              <span>Cobrado en efectivo</span>
+              <span>+ Cobrado en efectivo</span>
               <span class="mono">$${Number(ef.cobrado).toFixed(2)}</span>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;color:var(--accent-dark);">
@@ -3199,22 +3243,27 @@
       const monto = Number(ap.monto).toFixed(2);
       const quien = `${escapeHtml(ap.abierto_por_nombre||'')} ${escapeHtml(ap.abierto_por_apellido||'')}`.trim();
       box.innerHTML = `
-        <div style="background:var(--paper);border-radius:12px;padding:14px 18px;border:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div class="caja-stat navy" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
           <div>
-            <div style="font-size:11px;color:var(--ink-soft);">Fondo inicial de caja (hoy)</div>
-            <div class="mono" style="font-size:18px;font-weight:700;">$${monto}</div>
-            ${quien ? `<div style="font-size:11px;color:var(--ink-soft);">Abierto por ${quien}</div>` : ''}
+            <div class="caja-stat-label">Fondo inicial de caja</div>
+            <div class="caja-stat-num mono">$${monto}</div>
+            ${quien ? `<div class="caja-stat-sub">Abierto por ${quien}</div>` : ''}
           </div>
-          <button class="btn-secondary" id="btnCorregirApertura" style="height:32px;font-size:12px;">✏️ Corregir monto</button>
+          <button class="btn-secondary" id="btnCorregirApertura" style="height:32px;font-size:12px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 20 H21"/><path d="M16.5 3.5 A2.1 2.1 0 0 1 19.5 6.5 L7 19 L3 20 L4 16 Z"/></svg> Corregir monto
+          </button>
         </div>
         <div id="cajaAperturaForm" style="display:none;margin-top:10px;"></div>
       `;
       $('#btnCorregirApertura').addEventListener('click', () => mostrarFormApertura(data.fecha, ap.monto));
     } else {
       box.innerHTML = `
-        <div style="background:var(--amber-bg);border:1.5px solid rgba(255,106,26,0.4);border-radius:12px;padding:16px 18px;">
-          <div style="font-weight:700;font-size:13.5px;margin-bottom:6px;color:var(--accent-dark);">⚠ Falta registrar el fondo inicial de este día</div>
-          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;">Escribe con cuánto efectivo se abrió la gaveta hoy, para que el cuadre de caja salga correcto.</p>
+        <div class="caja-stat naranja">
+          <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg>
+            Falta registrar el fondo inicial de este día
+          </div>
+          <p style="font-size:12.5px;color:rgba(255,255,255,.85);margin:0 0 12px;">Escribe con cuánto efectivo se abrió la gaveta hoy, para que el cuadre de caja salga correcto.</p>
           <div id="cajaAperturaForm"></div>
         </div>
       `;
