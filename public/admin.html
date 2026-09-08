@@ -409,6 +409,9 @@
   .caja-stat.naranja .caja-stat-label{ color:rgba(255,255,255,.85); }
   .caja-stat.naranja .caja-stat-num{ color:#fff; }
   .caja-stat.naranja .caja-stat-sub{ color:rgba(255,255,255,.75); }
+  .caja-aviso-suave{ background:var(--amber-bg); border:1.5px solid rgba(255,106,26,.3); border-radius:12px; padding:16px 18px; }
+  .caja-aviso-suave .caja-stat-label{ color:var(--accent-dark); font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .caja-aviso-suave .caja-stat-sub{ color:var(--ink-soft); font-size:12.5px; }
   .caja-badge-estado{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; padding:6px 13px; border-radius:8px; }
   .caja-badge-estado.abierta{ background:#fff3e8; color:#c2470a; border:1px solid rgba(255,106,26,.3); }
   .caja-badge-estado.cerrada{ background:#e7f6ef; color:#177a63; border:1px solid rgba(23,122,99,.25); }
@@ -3473,12 +3476,12 @@
       $('#btnCorregirApertura').addEventListener('click', () => mostrarFormApertura(data.fecha, ap.monto));
     } else {
       box.innerHTML = `
-        <div class="caja-stat naranja">
-          <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:6px;">
+        <div class="caja-aviso-suave">
+          <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--accent-dark);margin-bottom:6px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L22 20 H2 Z"/><path d="M12 9 V14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg>
             Falta registrar el fondo inicial de este día
           </div>
-          <p style="font-size:12.5px;color:rgba(255,255,255,.85);margin:0 0 12px;">Escribe con cuánto efectivo se abrió la gaveta hoy, para que el cuadre de caja salga correcto.</p>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;">Escribe con cuánto efectivo se abrió la gaveta hoy, para que el cuadre de caja salga correcto.</p>
           <div id="cajaAperturaForm"></div>
         </div>
       `;
