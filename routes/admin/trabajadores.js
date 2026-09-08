@@ -27,8 +27,8 @@ function limpiarPermisos(lista) {
 router.get('/', async (req, res) => {
   try {
     const resultado = await pool.query(
-      `SELECT id, nombre, apellido, email, permisos_admin, activo, creado_en
-       FROM usuarios WHERE rol = 'trabajador' ORDER BY creado_en DESC`
+      `SELECT id, nombre, apellido, email, permisos_admin, activo, fecha_registro
+       FROM usuarios WHERE rol = 'trabajador' ORDER BY fecha_registro DESC`
     );
     return res.json({ trabajadores: resultado.rows, claves_disponibles: CLAVES_VALIDAS });
   } catch (error) {
@@ -61,7 +61,7 @@ router.post(
       const resultado = await pool.query(
         `INSERT INTO usuarios (nombre, apellido, email, password_hash, rol, verificado, permisos_admin, tipo_cuenta)
          VALUES ($1, $2, $3, $4, 'trabajador', TRUE, $5, 'personal')
-         RETURNING id, nombre, apellido, email, permisos_admin, activo, creado_en`,
+         RETURNING id, nombre, apellido, email, permisos_admin, activo, fecha_registro`,
         [nombre.trim(), apellido.trim(), email, hash, permisos]
       );
       return res.status(201).json({ mensaje: 'Trabajador creado correctamente', trabajador: resultado.rows[0] });
