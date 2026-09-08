@@ -4,11 +4,10 @@ const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
-const { requierePermiso } = require("../../middleware/permiso");
 const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudinary');
 const { ZONA, fechaPanama, inicioMes } = require('../../utils/fechas');
 const router = express.Router();
-router.use(requiereAutenticacion, requiereAdmin, requierePermiso("gastos"));
+router.use(requiereAutenticacion, requiereAdmin);
 
 
 const upload = multer({

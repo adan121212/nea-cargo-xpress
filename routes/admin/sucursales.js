@@ -3,10 +3,9 @@ const { body, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
-const { requierePermiso } = require("../../middleware/permiso");
 
 const router = express.Router();
-router.use(requiereAutenticacion, requiereAdmin, requierePermiso("sucursales"));
+router.use(requiereAutenticacion, requiereAdmin);
 
 // --- GET /api/admin/sucursales ---
 router.get('/', async (req, res) => {

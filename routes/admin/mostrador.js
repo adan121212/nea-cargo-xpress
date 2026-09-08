@@ -3,12 +3,11 @@ const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
-const { requierePermiso } = require("../../middleware/permiso");
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
 const { activarCreditoSiCorresponde } = require('../../utils/referidos');
 const router = express.Router();
-router.use(requiereAutenticacion, requiereAdmin, requierePermiso("mostrador"));
+router.use(requiereAutenticacion, requiereAdmin);
 
 // --- GET /api/admin/mostrador/buscar?q=... ---
 router.get(

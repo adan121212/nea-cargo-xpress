@@ -791,9 +791,6 @@
     <button class="tab-nav-btn" data-tab="sucursales">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 L4 3 H20 L21 9"/><path d="M3 9 V21 H21 V9"/><path d="M3 9 C3 10.5 4.3 11.5 6 11.5 C7.7 11.5 9 10.5 9 9 C9 10.5 10.3 11.5 12 11.5 C13.7 11.5 15 10.5 15 9 C15 10.5 16.3 11.5 18 11.5 C19.7 11.5 21 10.5 21 9"/><rect x="10" y="14" width="4" height="7"/></svg></span> Sucursales
     </button>
-    <button class="tab-nav-btn" data-tab="trabajadores" id="sbTrabajadoresBtn" style="display:none;">
-      <span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="7" r="3.2"/><path d="M2.5 20 C2.5 15.8 5 13.5 8 13.5 C11 13.5 13.5 15.8 13.5 20"/><path d="M16 4.3 A3.2 3.2 0 0 1 16 10.7"/><path d="M15 13.7 C18.5 14.2 21.5 16.3 21.5 20"/></svg></span> Trabajadores
-    </button>
     <button class="tab-nav-btn" data-tab="reportes">
       <span class="sb-icon"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="4" y="12" width="4" height="9" rx="0.5"/><rect x="10" y="6" width="4" height="15" rx="0.5"/><rect x="16" y="2" width="4" height="19" rx="0.5"/></svg></span> Reportes
     </button>
@@ -1505,35 +1502,6 @@
         </div>
       </div>
     </div>
-    <!-- ---- TAB: Trabajadores ---- -->
-    <div class="card tab-panel" id="tabTrabajadores" style="display:none;">
-      <div style="margin-bottom:20px;">
-        <h2 style="margin:0 0 2px;">Trabajadores</h2>
-        <p class="card-sub" style="margin:0;">Crea cuentas para tu equipo y define qué pantallas puede ver cada uno.</p>
-      </div>
-      <h3 class="dash-section-title">Crear trabajador</h3>
-      <div style="background:var(--paper);border-radius:12px;padding:18px;border:1px solid var(--line);margin-bottom:24px;">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px;">
-          <div><label for="trabNombre" style="font-size:11px;">Nombre</label><input id="trabNombre" type="text" placeholder="Nombre"></div>
-          <div><label for="trabApellido" style="font-size:11px;">Apellido</label><input id="trabApellido" type="text" placeholder="Apellido"></div>
-          <div><label for="trabEmail" style="font-size:11px;">Correo</label><input id="trabEmail" type="email" placeholder="correo@ejemplo.com"></div>
-          <div><label for="trabPassword" style="font-size:11px;">Contraseña</label><input id="trabPassword" type="text" placeholder="Mínimo 8 caracteres"></div>
-        </div>
-        <label style="font-size:11px;display:block;margin-bottom:6px;">Pantallas que puede ver</label>
-        <div id="trabPermisosNuevo" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px 14px;margin-bottom:14px;"></div>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;margin-bottom:14px;">
-          <input type="checkbox" id="trabTambienCliente" style="width:auto;">
-          También darle casillero de cliente (para que envíe/reciba sus propios paquetes con el mismo correo)
-        </label>
-        <button class="btn-primary" id="btnCrearTrabajador" style="max-width:220px;">
-          <span class="spinner"></span><span>Crear trabajador</span>
-        </button>
-        <div class="banner" id="bannerTrabajadorNuevo" style="margin-top:10px;"></div>
-      </div>
-      <h3 class="dash-section-title">Equipo</h3>
-      <div id="trabajadoresLista"></div>
-      <div class="empty" id="emptyTrabajadores" style="display:none;">Aún no has creado ningún trabajador.</div>
-    </div>
     <!-- ---- TAB: Reportes ---- -->
     <div class="card tab-panel" id="tabReportes" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
@@ -1696,20 +1664,7 @@
 <script>
   const API_URL = '/api';
   const TOKEN_KEY = 'nea_cargo_admin_token';
-  const SESION_KEY = 'nea_cargo_admin_sesion';
   const $ = (sel) => document.querySelector(sel);
-  let usuarioActual = { rol: null, permisos: [] };
-  function tienePermiso(clave){ return usuarioActual.rol === 'admin' || (usuarioActual.permisos||[]).includes(clave); }
-  function guardarSesion(usuario){
-    usuarioActual = { rol: usuario.rol, permisos: usuario.permisos || [], numero_casillero: usuario.numero_casillero || null };
-    localStorage.setItem(SESION_KEY, JSON.stringify(usuarioActual));
-  }
-  function cargarSesionGuardada(){
-    try {
-      const guardada = JSON.parse(localStorage.getItem(SESION_KEY));
-      usuarioActual = (guardada && guardada.rol) ? guardada : { rol: 'admin', permisos: [], numero_casillero: null };
-    } catch(e){ usuarioActual = { rol: 'admin', permisos: [], numero_casillero: null }; }
-  }
 
   // Iconos SVG (reemplazan a los emoji, que en algunas PCs con Windows salen
   // como cuadritos vacíos por no tener la fuente de emojis completa).
@@ -1854,9 +1809,8 @@
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok){ mostrarBanner('#bannerLogin', 'error', data.mensaje || 'Correo o contraseña incorrectos.'); return; }
-      if (data.usuario.rol !== 'admin' && data.usuario.rol !== 'trabajador'){ mostrarBanner('#bannerLogin', 'error', 'Esta cuenta no tiene permisos de administrador.'); return; }
+      if (data.usuario.rol !== 'admin'){ mostrarBanner('#bannerLogin', 'error', 'Esta cuenta no tiene permisos de administrador.'); return; }
       localStorage.setItem(TOKEN_KEY, data.token);
-      guardarSesion(data.usuario);
       const nombreAdmin = data.usuario.nombre;
       $('#saludoAdmin').textContent = `Hola, ${nombreAdmin} — Panel de operaciones`;
       $('#sbNombreUsuario').textContent = `${nombreAdmin} ${data.usuario.apellido || ''}`.trim();
@@ -1871,7 +1825,6 @@
   });
   $('#btnLogout').addEventListener('click', () => {
     localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(SESION_KEY);
     window.location.replace('index.html');
   });
   window.addEventListener('pageshow', (event) => {
@@ -1920,8 +1873,7 @@
       ...opciones,
       headers: { 'Content-Type': 'application/json', ...(opciones.headers || {}), Authorization: `Bearer ${token}` },
     });
-    if (res.status === 401 || res.status === 403){ localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(SESION_KEY); mostrarAdmin(false); throw new Error('Sesión inválida'); }
-    if (res.status === 423){ throw new Error('Sin permiso para esta pantalla'); }
+    if (res.status === 401 || res.status === 403){ localStorage.removeItem(TOKEN_KEY); mostrarAdmin(false); throw new Error('Sesión inválida'); }
     return res;
   }
   async function apiAdminFormData(path, formData){
@@ -1929,8 +1881,7 @@
     const res = await fetch(`${API_URL}${path}`, {
       method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData,
     });
-    if (res.status === 401 || res.status === 403){ localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(SESION_KEY); mostrarAdmin(false); throw new Error('Sesión inválida'); }
-    if (res.status === 423){ throw new Error('Sin permiso para esta pantalla'); }
+    if (res.status === 401 || res.status === 403){ localStorage.removeItem(TOKEN_KEY); mostrarAdmin(false); throw new Error('Sesión inválida'); }
     return res;
   }
   document.querySelectorAll('.tab-nav-btn:not(.tab-nav-parent)').forEach(btn => {
@@ -1949,7 +1900,6 @@
       if (tab === 'deliveries'){ $('#tabDeliveries').style.display = 'block'; cargarDeliveries(); }
       if (tab === 'gastos'){ $('#tabGastos').style.display = 'block'; iniciarGastos(); }
       if (tab === 'sucursales'){ $('#tabSucursales').style.display = 'block'; cargarSucursales(); }
-      if (tab === 'trabajadores'){ $('#tabTrabajadores').style.display = 'block'; cargarTrabajadores(); }
       if (tab === 'facturas'){ $('#tabFacturas').style.display = 'block'; cargarFacturas(); }
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
       if (tab === 'cajaApertura'){ $('#tabCajaApertura').style.display = 'block'; toggleSubmenuCaja(true); document.getElementById('sbCajaParent')?.classList.add('active'); cargarCaja(); }
@@ -2297,171 +2247,6 @@
   $('#btnClientesPagAnterior').addEventListener('click', () => { paginaActualClientes--; renderPaginaClientes(); });
   $('#btnClientesPagSiguiente').addEventListener('click', () => { paginaActualClientes++; renderPaginaClientes(); });
   let sucursalEditando = null;
-  const CLAVES_LABEL = {
-    mostrador: 'Facturador', recepcion: 'Recepción', paquetes: 'Paquetes', clientes: 'Clientes',
-    compras: 'Compras', deliveries: 'Deliveries', gastos: 'Gastos', facturas: 'Facturas',
-    tarifas: 'Tarifas', sucursales: 'Sucursales', reportes: 'Reportes', caja: 'Apertura y Cierre caja',
-    pty: 'PTY Cargo',
-  };
-  function checkboxesPermisos(idPrefijo, claves, seleccionados){
-    const sel = new Set(seleccionados || []);
-    return claves.map(c => `
-      <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;">
-        <input type="checkbox" id="${idPrefijo}_${c}" value="${c}" ${sel.has(c)?'checked':''} style="width:auto;">
-        ${escapeHtml(CLAVES_LABEL[c] || c)}
-      </label>`).join('');
-  }
-  function leerPermisosMarcados(idPrefijo, claves){
-    return claves.filter(c => $(`#${idPrefijo}_${c}`)?.checked);
-  }
-  let clavesDisponiblesCache = Object.keys(CLAVES_LABEL);
-  async function cargarTrabajadores(){
-    try {
-      const res = await apiAdmin('/admin/trabajadores');
-      const data = await res.json();
-      const trabajadores = data.trabajadores || [];
-      clavesDisponiblesCache = data.claves_disponibles || clavesDisponiblesCache;
-      $('#trabPermisosNuevo').innerHTML = checkboxesPermisos('trabNuevo', clavesDisponiblesCache, []);
-      $('#emptyTrabajadores').style.display = trabajadores.length ? 'none' : 'block';
-      $('#trabajadoresLista').innerHTML = trabajadores.map(t => {
-        const idp = `trab${t.id}`;
-        return `
-        <div style="background:var(--paper);border-radius:12px;padding:16px 18px;border:1px solid var(--line);margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
-            <div>
-              <div style="font-weight:700;font-size:14px;">${escapeHtml(t.nombre)} ${escapeHtml(t.apellido||'')} ${t.activo?'':'<span style="color:var(--ink-soft);font-weight:400;font-size:12px;">(desactivado)</span>'}</div>
-              <div style="font-size:12px;color:var(--ink-soft);">${escapeHtml(t.email)}</div>
-              <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">
-                ${t.numero_casillero ? `También es cliente · casillero <span class="mono">${escapeHtml(t.numero_casillero)}</span>` : 'No tiene casillero de cliente'}
-              </div>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button class="btn-secondary" id="btnCasillero_${t.id}" style="height:32px;font-size:12px;">${t.numero_casillero?'Quitar casillero':'Darle casillero de cliente'}</button>
-              <button class="btn-secondary" id="btnPass_${t.id}" style="height:32px;font-size:12px;">Restablecer contraseña</button>
-              <button class="btn-secondary" id="btnActivo_${t.id}" style="height:32px;font-size:12px;">${t.activo?'Desactivar':'Reactivar'}</button>
-              <button class="btn-secondary" id="btnEliminar_${t.id}" style="height:32px;font-size:12px;color:#c0392b;border-color:rgba(192,57,43,.4);">Eliminar</button>
-            </div>
-          </div>
-          <label style="font-size:11px;display:block;margin-bottom:6px;">Pantallas permitidas</label>
-          <div id="permisos_${idp}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px 14px;margin-bottom:10px;">
-            ${checkboxesPermisos(idp, clavesDisponiblesCache, t.permisos_admin)}
-          </div>
-          <button class="btn-primary" id="btnGuardarPermisos_${t.id}" style="height:32px;font-size:12px;max-width:200px;">
-            <span class="spinner"></span><span>Guardar permisos</span>
-          </button>
-          <div class="banner" id="bannerTrab_${t.id}" style="margin-top:8px;"></div>
-        </div>`;
-      }).join('');
-      trabajadores.forEach(t => {
-        const idp = `trab${t.id}`;
-        $(`#btnGuardarPermisos_${t.id}`)?.addEventListener('click', async () => {
-          const btn = $(`#btnGuardarPermisos_${t.id}`);
-          setCargando(btn, true);
-          try {
-            const permisos = leerPermisosMarcados(idp, clavesDisponiblesCache);
-            const res = await apiAdmin(`/admin/trabajadores/${t.id}/permisos`, { method:'PATCH', body: JSON.stringify({ permisos }) });
-            const d = await res.json().catch(()=>({}));
-            mostrarBanner(`#bannerTrab_${t.id}`, res.ok?'success':'error', res.ok?'✓ Permisos guardados.':(d.mensaje||'No se pudo guardar.'));
-          } catch(err){ mostrarBanner(`#bannerTrab_${t.id}`,'error','No pudimos conectar.'); }
-          finally { setCargando(btn, false); }
-        });
-        $(`#btnActivo_${t.id}`)?.addEventListener('click', async () => {
-          const nuevoEstado = !t.activo;
-          if(!confirm(nuevoEstado ? `¿Reactivar a ${t.nombre}?` : `¿Desactivar a ${t.nombre}? No podrá iniciar sesión hasta que lo reactives.`)) return;
-          try {
-            const res = await apiAdmin(`/admin/trabajadores/${t.id}/activo`, { method:'PATCH', body: JSON.stringify({ activo: nuevoEstado }) });
-            if(res.ok) cargarTrabajadores();
-          } catch(err){}
-        });
-        $(`#btnCasillero_${t.id}`)?.addEventListener('click', async () => {
-          const activar = !t.numero_casillero;
-          if(!activar && !confirm(`¿Quitarle el casillero de cliente a ${t.nombre}? Ya no podrá entrar a la app de clientes.`)) return;
-          const btn = $(`#btnCasillero_${t.id}`);
-          setCargando(btn, true);
-          try {
-            const res = await apiAdmin(`/admin/trabajadores/${t.id}/casillero`, { method:'PATCH', body: JSON.stringify({ activar }) });
-            const d = await res.json().catch(()=>({}));
-            if(res.ok){ cargarTrabajadores(); }
-            else { mostrarBanner(`#bannerTrab_${t.id}`,'error', d.mensaje || 'No se pudo actualizar.'); setCargando(btn, false); }
-          } catch(err){ mostrarBanner(`#bannerTrab_${t.id}`,'error','No pudimos conectar.'); setCargando(btn, false); }
-        });
-        $(`#btnPass_${t.id}`)?.addEventListener('click', async () => {
-          const nueva = prompt(`Nueva contraseña para ${t.nombre} (mínimo 8 caracteres):`);
-          if(!nueva) return;
-          if(nueva.length < 8){ alert('La contraseña debe tener al menos 8 caracteres.'); return; }
-          try {
-            const res = await apiAdmin(`/admin/trabajadores/${t.id}/password`, { method:'PATCH', body: JSON.stringify({ password: nueva }) });
-            const d = await res.json().catch(()=>({}));
-            mostrarBanner(`#bannerTrab_${t.id}`, res.ok?'success':'error', res.ok?'✓ Contraseña actualizada.':(d.mensaje||'No se pudo actualizar.'));
-          } catch(err){ mostrarBanner(`#bannerTrab_${t.id}`,'error','No pudimos conectar.'); }
-        });
-        $(`#btnEliminar_${t.id}`)?.addEventListener('click', async () => {
-          if(!confirm(`¿Eliminar a ${t.nombre} ${t.apellido||''}? Si tiene historial (cajas, gastos, compras), se desactivará en vez de borrarse.`)) return;
-          const btn = $(`#btnEliminar_${t.id}`);
-          setCargando(btn, true);
-          try {
-            const res = await apiAdmin(`/admin/trabajadores/${t.id}`, { method:'DELETE' });
-            const d = await res.json().catch(()=>({}));
-            if(res.ok){
-              mostrarBanner('#bannerTrabajadorNuevo','success', d.mensaje || '✓ Listo.');
-              cargarTrabajadores();
-            } else {
-              mostrarBanner(`#bannerTrab_${t.id}`,'error', d.mensaje || 'No se pudo eliminar.');
-              setCargando(btn, false);
-            }
-          } catch(err){ mostrarBanner(`#bannerTrab_${t.id}`,'error','No pudimos conectar.'); setCargando(btn, false); }
-        });
-      });
-    } catch(err){}
-  }
-  $('#btnCrearTrabajador')?.addEventListener('click', async () => {
-    const btn = $('#btnCrearTrabajador');
-    const nombre = $('#trabNombre').value.trim();
-    const apellido = $('#trabApellido').value.trim();
-    const email = $('#trabEmail').value.trim();
-    const password = $('#trabPassword').value;
-    const permisos = leerPermisosMarcados('trabNuevo', clavesDisponiblesCache);
-    const tambien_cliente = $('#trabTambienCliente')?.checked || false;
-    if(!nombre || !apellido || !email || password.length < 8){
-      mostrarBanner('#bannerTrabajadorNuevo','error','Completa nombre, apellido, correo y una contraseña de al menos 8 caracteres.');
-      return;
-    }
-    setCargando(btn, true);
-    try {
-      const res = await apiAdmin('/admin/trabajadores', { method:'POST', body: JSON.stringify({ nombre, apellido, email, password, permisos, tambien_cliente }) });
-      const d = await res.json().catch(()=>({}));
-      if(res.status === 201){
-        const avisoCasillero = d.trabajador?.numero_casillero ? ` Su casillero de cliente es ${d.trabajador.numero_casillero}.` : '';
-        mostrarBanner('#bannerTrabajadorNuevo','success','✓ Trabajador creado. Avísale su correo y contraseña.'+avisoCasillero);
-        $('#trabNombre').value=''; $('#trabApellido').value=''; $('#trabEmail').value=''; $('#trabPassword').value=''; $('#trabTambienCliente').checked=false;
-        clavesDisponiblesCache.forEach(c => { const el=$(`#trabNuevo_${c}`); if(el) el.checked=false; });
-        cargarTrabajadores();
-      } else {
-        const msg = d.errores?.map(x=>x.msg).join(' · ') || d.mensaje || 'No se pudo crear.';
-        mostrarBanner('#bannerTrabajadorNuevo','error', msg);
-      }
-    } catch(err){ mostrarBanner('#bannerTrabajadorNuevo','error','No pudimos conectar.'); }
-    finally { setCargando(btn, false); }
-  });
-  function aplicarPermisosSidebar(){
-    const MAPA_TAB_PERMISO = {
-      mostrador:'mostrador', recepcion:'recepcion', paquetes:'paquetes', clientes:'clientes',
-      compras:'compras', deliveries:'deliveries', gastos:'gastos', facturas:'facturas',
-      tarifas:'tarifas', sucursales:'sucursales', reportes:'reportes', reportesPaquete:'reportes',
-      cajaApertura:'caja', cajaCierre:'caja', pty:'pty',
-    };
-    const esAdmin = usuarioActual.rol === 'admin';
-    $('#sbTrabajadoresBtn').style.display = esAdmin ? 'flex' : 'none';
-    document.querySelectorAll('.tab-nav-btn[data-tab]').forEach(btn => {
-      const tab = btn.dataset.tab;
-      if (tab === 'dashboard' || tab === 'trabajadores') return;
-      const clave = MAPA_TAB_PERMISO[tab];
-      if (!clave) return;
-      btn.style.display = (esAdmin || tienePermiso(clave)) ? 'flex' : 'none';
-    });
-    const cajaParent = $('#sbCajaParent');
-    if (cajaParent) cajaParent.style.display = (esAdmin || tienePermiso('caja')) ? 'flex' : 'none';
-  }
   async function cargarSucursales(){
     try {
       const res = await apiAdmin('/admin/sucursales');
@@ -4810,19 +4595,19 @@
     } catch(e){ console.error('Error revisando cajas pendientes:', e); }
   }
   async function iniciarAdmin(){
-    if (!usuarioActual.rol) cargarSesionGuardada();
-    aplicarPermisosSidebar();
-    mostrarAdmin(true);
     cargarNotificacionesGuardadas();
-    if (usuarioActual.rol === 'admin' || tienePermiso('caja')) revisarCajasPendientes();
+    revisarCajasPendientes();
     renderNotifBadge();
-    if (usuarioActual.rol === 'admin' || tienePermiso('reportes')) actualizarBadgeReportes();
-    await cargarDashboard();
-    if (usuarioActual.rol === 'admin' || tienePermiso('mostrador')) cargarPendientesMostrador();
-    if (usuarioActual.rol === 'admin' || tienePermiso('compras')) cargarCompras();
-    if (usuarioActual.rol === 'admin' || tienePermiso('deliveries')) cargarDeliveries();
+    actualizarBadgeReportes();
+    try {
+      await cargarDashboard();
+      cargarPendientesMostrador();
+      cargarCompras();
+      cargarDeliveries();
+      mostrarAdmin(true);
+    } catch(err){ mostrarAdmin(false); }
   }
-  if(localStorage.getItem(TOKEN_KEY)){ cargarSesionGuardada(); iniciarAdmin(); }
+  if(localStorage.getItem(TOKEN_KEY)){ iniciarAdmin(); }
 </script>
 <div class="notif-panel" id="notifPanel">
   <div class="notif-panel-head">

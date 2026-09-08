@@ -3,11 +3,10 @@ const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
-const { requierePermiso } = require("../../middleware/permiso");
 const { enviarCorreoGenerico } = require('../../utils/mailer');
 const { ZONA } = require('../../utils/fechas');
 const router = express.Router();
-router.use(requiereAutenticacion, requiereAdmin, requierePermiso("compras"));
+router.use(requiereAutenticacion, requiereAdmin);
 
 const ESTADOS = ['solicitada', 'comprada', 'pagada', 'cancelada'];
 const METODOS = ['efectivo', 'tarjeta', 'transferencia', 'yappy'];

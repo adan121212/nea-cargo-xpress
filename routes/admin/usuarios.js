@@ -3,11 +3,10 @@ const { body, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
-const { requierePermiso } = require("../../middleware/permiso");
 
 const router = express.Router();
 
-router.use(requiereAutenticacion, requiereAdmin, requierePermiso("clientes"));
+router.use(requiereAutenticacion, requiereAdmin);
 
 // --- GET /api/admin/usuarios ---
 router.get('/', async (req, res) => {
@@ -19,7 +18,7 @@ router.get('/', async (req, res) => {
              u.saldo_a_favor, COUNT(p.id) AS total_paquetes
       FROM usuarios u
       LEFT JOIN paquetes p ON p.usuario_id = u.id
-      WHERE (u.rol = 'cliente' OR (u.rol = 'trabajador' AND u.numero_casillero IS NOT NULL))
+      WHERE u.rol = 'cliente'
     `;
     const valores = [];
     if (q) {
@@ -45,7 +44,7 @@ router.get('/:id', async (req, res) => {
       `SELECT id, nombre, apellido, email, telefono, numero_casillero, verificado, rol,
               fecha_registro, activo, fecha_desactivacion
        FROM usuarios
-       WHERE id = $1 AND (rol = 'cliente' OR (rol = 'trabajador' AND numero_casillero IS NOT NULL))`,
+       WHERE id = $1 AND rol = 'cliente'`,
       [req.params.id]
     );
 
@@ -179,7 +178,7 @@ router.put(
 
     try {
       const existe = await pool.query(
-        "SELECT id FROM usuarios WHERE id = $1 AND (rol = 'cliente' OR (rol = 'trabajador' AND numero_casillero IS NOT NULL))",
+        "SELECT id FROM usuarios WHERE id = $1 AND rol = 'cliente'",
         [req.params.id]
       );
       if (existe.rows.length === 0) {
@@ -253,11 +252,6 @@ router.delete('/:id', async (req, res) => {
     if (usuario.rol === 'admin') {
       return res.status(409).json({
         mensaje: 'No se puede eliminar una cuenta de administrador. Quítale el rol primero.',
-      });
-    }
-    if (usuario.rol === 'trabajador') {
-      return res.status(409).json({
-        mensaje: 'Esta es una cuenta de trabajador. Adminístrala desde la pantalla Trabajadores, no desde Clientes.',
       });
     }
 

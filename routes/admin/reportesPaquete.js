@@ -3,10 +3,9 @@ const { body, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
-const { requierePermiso } = require("../../middleware/permiso");
 const router = express.Router();
 
-router.use(requiereAutenticacion, requiereAdmin, requierePermiso("reportes"));
+router.use(requiereAutenticacion, requiereAdmin);
 
 // --- GET /api/admin/reportes-paquete --- lista de reportes (opcional ?estado=)
 router.get('/', async (req, res) => {

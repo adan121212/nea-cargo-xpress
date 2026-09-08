@@ -227,7 +227,7 @@ router.post(
     try {
       const resultado = await pool.query(
         `SELECT id, nombre, apellido, email, password_hash, verificado,
-                numero_casillero, rol, tipo_cuenta, permisos_admin, activo
+                numero_casillero, rol, tipo_cuenta
          FROM usuarios WHERE email = $1`,
         [email]
       );
@@ -244,10 +244,6 @@ router.post(
         return res.status(403).json({
           mensaje: 'Debes confirmar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.',
         });
-      }
-
-      if (usuario.activo === false) {
-        return res.status(403).json({ mensaje: 'Esta cuenta está desactivada.' });
       }
 
       const token = jwt.sign(
@@ -267,7 +263,6 @@ router.post(
           numero_casillero: usuario.numero_casillero,
           rol: usuario.rol,
           tipo_cuenta: usuario.tipo_cuenta,
-          permisos: usuario.permisos_admin || [],
         },
       });
     } catch (error) {
