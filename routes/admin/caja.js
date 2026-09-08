@@ -90,6 +90,58 @@ async function calcularResumenDia(fecha) {
   };
 }
 
+// --- GET /api/admin/caja/apertura?fecha=2026-09-08 ---
+// El fondo inicial (monto con el que la cajera abre la gaveta) para un día.
+router.get(
+  '/apertura',
+  [query('fecha').optional().isISO8601().withMessage('Fecha inválida')],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
+    const fecha = req.query.fecha || fechaPanama();
+    try {
+      const resultado = await pool.query(
+        `SELECT a.*, u.nombre AS abierto_por_nombre, u.apellido AS abierto_por_apellido
+         FROM aperturas_caja a LEFT JOIN usuarios u ON u.id = a.abierto_por
+         WHERE a.fecha = $1`,
+        [fecha]
+      );
+      return res.json({ fecha, apertura: resultado.rows[0] || null });
+    } catch (error) {
+      console.error('Error en GET /admin/caja/apertura:', error);
+      return res.status(500).json({ mensaje: 'Error interno al buscar la apertura de caja' });
+    }
+  }
+);
+
+// --- POST /api/admin/caja/apertura ---
+// Registra (o corrige) el fondo inicial de un día. Un solo monto por fecha.
+router.post(
+  '/apertura',
+  [
+    body('fecha').isISO8601().withMessage('Fecha inválida'),
+    body('monto').isFloat({ min: 0 }).withMessage('El monto debe ser un número mayor o igual a 0'),
+  ],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
+    const { fecha, monto } = req.body;
+    try {
+      const resultado = await pool.query(
+        `INSERT INTO aperturas_caja (fecha, monto, abierto_por, creado_en)
+         VALUES ($1, $2, $3, NOW())
+         ON CONFLICT (fecha) DO UPDATE SET monto = EXCLUDED.monto, abierto_por = EXCLUDED.abierto_por, creado_en = NOW()
+         RETURNING *`,
+        [fecha, monto, req.usuario.id]
+      );
+      return res.status(201).json({ mensaje: 'Fondo inicial registrado correctamente', apertura: resultado.rows[0] });
+    } catch (error) {
+      console.error('Error en POST /admin/caja/apertura:', error);
+      return res.status(500).json({ mensaje: 'Error interno al registrar el fondo inicial' });
+    }
+  }
+);
+
 // --- GET /api/admin/caja/dia?fecha=2026-08-19 ---
 router.get(
   '/dia',
@@ -115,6 +167,22 @@ router.get(
         };
       } catch (e) { /* tabla gastos aún no creada */ }
 
+      // Fondo inicial con el que se abrió la gaveta ese día.
+      // La tabla aperturas_caja puede no existir todavía: si falla, seguimos con $0.
+      let fondoInicial = 0;
+      let aperturaInfo = null;
+      try {
+        const a = await pool.query(
+          `SELECT a.monto, a.abierto_por, a.creado_en, u.nombre AS abierto_por_nombre, u.apellido AS abierto_por_apellido
+           FROM aperturas_caja a LEFT JOIN usuarios u ON u.id = a.abierto_por
+           WHERE a.fecha = $1`, [fecha]
+        );
+        if (a.rows.length > 0) {
+          fondoInicial = Number(a.rows[0].monto);
+          aperturaInfo = a.rows[0];
+        }
+      } catch (e) { /* tabla aperturas_caja aún no creada */ }
+
       const cobradoEfectivo = (detalle.find(d => d.metodo_pago === 'efectivo') || {}).total || 0;
 
       const cierreExistente = await pool.query('SELECT id FROM cierres_caja WHERE fecha = $1', [fecha]);
@@ -135,10 +203,12 @@ router.get(
         fecha, detalle_por_metodo: detalle, total_general: totalGeneral,
         cantidad_facturas: cantidadFacturas, desglose,
         salidas_efectivo: salidas,
+        apertura: aperturaInfo,
         efectivo: {
+          fondo_inicial: fondoInicial,
           cobrado: cobradoEfectivo,
           salidas: salidas.total,
-          en_gaveta: cobradoEfectivo - salidas.total,
+          en_gaveta: fondoInicial + cobradoEfectivo - salidas.total,
         },
         cerrado: cierreActualizado !== null, cierre: cierreActualizado,
       });

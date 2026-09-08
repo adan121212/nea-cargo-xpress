@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS aperturas_caja (
+  id SERIAL PRIMARY KEY,
+  fecha DATE NOT NULL UNIQUE,
+  monto NUMERIC(10,2) NOT NULL,
+  abierto_por INTEGER REFERENCES usuarios(id),
+  creado_en TIMESTAMP NOT NULL DEFAULT NOW()
+);
