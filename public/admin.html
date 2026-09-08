@@ -2276,7 +2276,7 @@
     $('#tbodyClientes').innerHTML = usuarios.map(u => {
       const fecha = new Date(u.fecha_registro).toLocaleDateString('es-PA', { day:'2-digit', month:'short', year:'numeric' });
       return `<tr data-uid="${u.id}">
-        <td data-label="Nombre">${escapeHtml(u.nombre)} ${escapeHtml(u.apellido)}</td>
+        <td data-label="Nombre">${escapeHtml(u.nombre)} ${escapeHtml(u.apellido)} ${u.rol !== 'cliente' ? `<span style="font-size:10px;background:var(--amber-bg);color:var(--accent-dark);padding:2px 7px;border-radius:20px;font-weight:700;">${u.rol === 'admin' ? 'ADMIN' : 'TRABAJADOR'}</span>` : ''}</td>
         <td data-label="Correo">${escapeHtml(u.email)}</td>
         <td data-label="Casillero" class="mono">${escapeHtml(u.numero_casillero || '—')}</td>
         <td data-label="Verificado">${u.verificado ? '<span class="badge badge-listo_para_retiro">Verificado</span>' : '<span class="badge" style="background:var(--paper);color:var(--ink-soft);border:1px solid var(--line);">Pendiente</span>'}</td>

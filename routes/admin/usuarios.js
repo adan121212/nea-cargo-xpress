@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
              u.saldo_a_favor, COUNT(p.id) AS total_paquetes
       FROM usuarios u
       LEFT JOIN paquetes p ON p.usuario_id = u.id
-      WHERE u.rol = 'cliente'
+      WHERE (u.rol = 'cliente' OR (u.rol IN ('admin', 'trabajador') AND u.numero_casillero IS NOT NULL))
     `;
     const valores = [];
     if (q) {
@@ -44,7 +44,8 @@ router.get('/:id', async (req, res) => {
     const usuario = await pool.query(
       `SELECT id, nombre, apellido, email, telefono, numero_casillero, verificado, rol,
               fecha_registro, activo, fecha_desactivacion
-       FROM usuarios WHERE id = $1 AND rol = 'cliente'`,
+       FROM usuarios
+       WHERE id = $1 AND (rol = 'cliente' OR (rol IN ('admin', 'trabajador') AND numero_casillero IS NOT NULL))`,
       [req.params.id]
     );
 
@@ -177,7 +178,10 @@ router.put(
     const { nombre, apellido, email, telefono, numero_casillero } = req.body;
 
     try {
-      const existe = await pool.query("SELECT id FROM usuarios WHERE id = $1 AND rol = 'cliente'", [req.params.id]);
+      const existe = await pool.query(
+        "SELECT id FROM usuarios WHERE id = $1 AND (rol = 'cliente' OR (rol IN ('admin','trabajador') AND numero_casillero IS NOT NULL))",
+        [req.params.id]
+      );
       if (existe.rows.length === 0) {
         return res.status(404).json({ mensaje: 'Cliente no encontrado' });
       }
