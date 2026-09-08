@@ -1578,7 +1578,9 @@
       const data = await res.json().catch(() => ({}));
 
       if (res.ok){
-        if (data.usuario.rol !== 'cliente'){
+        const esCliente = data.usuario.rol === 'cliente';
+        const esAdminConCasillero = data.usuario.rol === 'admin' && !!data.usuario.numero_casillero;
+        if (!esCliente && !esAdminConCasillero){
           mostrarBanner('#bannerLogin', 'error', 'Esta cuenta es de administración, no de cliente. Usa el panel de administración para entrar.');
           return;
         }
