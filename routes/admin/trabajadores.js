@@ -4,6 +4,7 @@ const { body, param, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereSoloAdmin } = require('../../middleware/permiso');
+const { generarNumeroCasillero } = require('../../utils/casillero');
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ function limpiarPermisos(lista) {
 router.get('/', async (req, res) => {
   try {
     const resultado = await pool.query(
-      `SELECT id, nombre, apellido, email, permisos_admin, activo, fecha_registro
+      `SELECT id, nombre, apellido, email, permisos_admin, activo, fecha_registro, numero_casillero
        FROM usuarios WHERE rol = 'trabajador' ORDER BY fecha_registro DESC`
     );
     return res.json({ trabajadores: resultado.rows, claves_disponibles: CLAVES_VALIDAS });
@@ -46,12 +47,14 @@ router.post(
     body('email').isEmail().withMessage('Email inválido').normalizeEmail(),
     body('password').isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres'),
     body('permisos').optional().isArray().withMessage('Los permisos deben ser una lista'),
+    body('tambien_cliente').optional().isBoolean().withMessage('Valor inválido'),
   ],
   async (req, res) => {
     const errores = validationResult(req);
     if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
     const { nombre, apellido, email, password } = req.body;
     const permisos = limpiarPermisos(req.body.permisos);
+    const tambienCliente = req.body.tambien_cliente === true;
     try {
       const existente = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
       if (existente.rows.length > 0) {
@@ -64,7 +67,17 @@ router.post(
          RETURNING id, nombre, apellido, email, permisos_admin, activo, fecha_registro`,
         [nombre.trim(), apellido.trim(), email, hash, permisos]
       );
-      return res.status(201).json({ mensaje: 'Trabajador creado correctamente', trabajador: resultado.rows[0] });
+      let trabajador = resultado.rows[0];
+      if (tambienCliente) {
+        const casillero = generarNumeroCasillero(trabajador.id);
+        const conCasillero = await pool.query(
+          `UPDATE usuarios SET numero_casillero = $1 WHERE id = $2
+           RETURNING id, nombre, apellido, email, permisos_admin, activo, fecha_registro, numero_casillero`,
+          [casillero, trabajador.id]
+        );
+        trabajador = conCasillero.rows[0];
+      }
+      return res.status(201).json({ mensaje: 'Trabajador creado correctamente', trabajador });
     } catch (error) {
       console.error('Error en POST /admin/trabajadores:', error);
       return res.status(500).json({ mensaje: 'Error interno al crear el trabajador' });
@@ -95,6 +108,40 @@ router.patch(
     } catch (error) {
       console.error('Error en PATCH /admin/trabajadores/:id/permisos:', error);
       return res.status(500).json({ mensaje: 'Error interno al actualizar permisos' });
+    }
+  }
+);
+
+// --- PATCH /api/admin/trabajadores/:id/casillero ---
+// Le da (o quita) al trabajador su propio número de casillero, para que
+// pueda entrar también como cliente con el mismo correo y contraseña.
+router.patch(
+  '/:id/casillero',
+  [param('id').isInt().withMessage('Id inválido'), body('activar').isBoolean().withMessage('Valor inválido')],
+  async (req, res) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
+    try {
+      if (req.body.activar) {
+        const casillero = generarNumeroCasillero(req.params.id);
+        const resultado = await pool.query(
+          `UPDATE usuarios SET numero_casillero = $1 WHERE id = $2 AND rol = 'trabajador'
+           RETURNING id, nombre, apellido, email, permisos_admin, activo, numero_casillero`,
+          [casillero, req.params.id]
+        );
+        if (resultado.rows.length === 0) return res.status(404).json({ mensaje: 'Trabajador no encontrado' });
+        return res.json({ mensaje: `Ahora también es cliente, con casillero ${casillero}.`, trabajador: resultado.rows[0] });
+      }
+      const resultado = await pool.query(
+        `UPDATE usuarios SET numero_casillero = NULL WHERE id = $1 AND rol = 'trabajador'
+         RETURNING id, nombre, apellido, email, permisos_admin, activo, numero_casillero`,
+        [req.params.id]
+      );
+      if (resultado.rows.length === 0) return res.status(404).json({ mensaje: 'Trabajador no encontrado' });
+      return res.json({ mensaje: 'Se le quitó el casillero de cliente.', trabajador: resultado.rows[0] });
+    } catch (error) {
+      console.error('Error en PATCH /admin/trabajadores/:id/casillero:', error);
+      return res.status(500).json({ mensaje: 'Error interno al cambiar el casillero' });
     }
   }
 );
@@ -175,13 +222,16 @@ router.delete('/:id', [param('id').isInt().withMessage('Id inválido')], async (
     }
     const trabajador = encontrado.rows[0];
 
-    const [aperturas, compras, gastos, facturas] = await Promise.all([
+    const [aperturas, compras, gastos, facAnuladas, paquetesCliente, facCliente] = await Promise.all([
       client.query('SELECT COUNT(*)::int AS n FROM aperturas_caja WHERE abierto_por = $1', [id]),
       client.query('SELECT COUNT(*)::int AS n FROM compras WHERE registrada_por = $1 OR comprada_por = $1', [id]),
       client.query('SELECT COUNT(*)::int AS n FROM gastos WHERE registrado_por = $1', [id]),
       client.query('SELECT COUNT(*)::int AS n FROM facturas WHERE anulada_por = $1', [id]),
+      client.query('SELECT COUNT(*)::int AS n FROM paquetes WHERE usuario_id = $1', [id]),
+      client.query('SELECT COUNT(*)::int AS n FROM facturas WHERE usuario_id = $1', [id]),
     ]);
-    const totalHistorial = aperturas.rows[0].n + compras.rows[0].n + gastos.rows[0].n + facturas.rows[0].n;
+    const totalHistorial = aperturas.rows[0].n + compras.rows[0].n + gastos.rows[0].n + facAnuladas.rows[0].n
+      + paquetesCliente.rows[0].n + facCliente.rows[0].n;
 
     if (totalHistorial > 0) {
       await client.query(

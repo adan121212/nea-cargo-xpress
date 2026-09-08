@@ -1515,6 +1515,10 @@
         </div>
         <label style="font-size:11px;display:block;margin-bottom:6px;">Pantallas que puede ver</label>
         <div id="trabPermisosNuevo" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px 14px;margin-bottom:14px;"></div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;margin-bottom:14px;">
+          <input type="checkbox" id="trabTambienCliente" style="width:auto;">
+          También darle casillero de cliente (para que envíe/reciba sus propios paquetes con el mismo correo)
+        </label>
         <button class="btn-primary" id="btnCrearTrabajador" style="max-width:220px;">
           <span class="spinner"></span><span>Crear trabajador</span>
         </button>
@@ -2321,8 +2325,12 @@
             <div>
               <div style="font-weight:700;font-size:14px;">${escapeHtml(t.nombre)} ${escapeHtml(t.apellido||'')} ${t.activo?'':'<span style="color:var(--ink-soft);font-weight:400;font-size:12px;">(desactivado)</span>'}</div>
               <div style="font-size:12px;color:var(--ink-soft);">${escapeHtml(t.email)}</div>
+              <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">
+                ${t.numero_casillero ? `También es cliente · casillero <span class="mono">${escapeHtml(t.numero_casillero)}</span>` : 'No tiene casillero de cliente'}
+              </div>
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn-secondary" id="btnCasillero_${t.id}" style="height:32px;font-size:12px;">${t.numero_casillero?'Quitar casillero':'Darle casillero de cliente'}</button>
               <button class="btn-secondary" id="btnPass_${t.id}" style="height:32px;font-size:12px;">Restablecer contraseña</button>
               <button class="btn-secondary" id="btnActivo_${t.id}" style="height:32px;font-size:12px;">${t.activo?'Desactivar':'Reactivar'}</button>
               <button class="btn-secondary" id="btnEliminar_${t.id}" style="height:32px;font-size:12px;color:#c0392b;border-color:rgba(192,57,43,.4);">Eliminar</button>
@@ -2358,6 +2366,18 @@
             const res = await apiAdmin(`/admin/trabajadores/${t.id}/activo`, { method:'PATCH', body: JSON.stringify({ activo: nuevoEstado }) });
             if(res.ok) cargarTrabajadores();
           } catch(err){}
+        });
+        $(`#btnCasillero_${t.id}`)?.addEventListener('click', async () => {
+          const activar = !t.numero_casillero;
+          if(!activar && !confirm(`¿Quitarle el casillero de cliente a ${t.nombre}? Ya no podrá entrar a la app de clientes.`)) return;
+          const btn = $(`#btnCasillero_${t.id}`);
+          setCargando(btn, true);
+          try {
+            const res = await apiAdmin(`/admin/trabajadores/${t.id}/casillero`, { method:'PATCH', body: JSON.stringify({ activar }) });
+            const d = await res.json().catch(()=>({}));
+            if(res.ok){ cargarTrabajadores(); }
+            else { mostrarBanner(`#bannerTrab_${t.id}`,'error', d.mensaje || 'No se pudo actualizar.'); setCargando(btn, false); }
+          } catch(err){ mostrarBanner(`#bannerTrab_${t.id}`,'error','No pudimos conectar.'); setCargando(btn, false); }
         });
         $(`#btnPass_${t.id}`)?.addEventListener('click', async () => {
           const nueva = prompt(`Nueva contraseña para ${t.nombre} (mínimo 8 caracteres):`);
@@ -2395,17 +2415,19 @@
     const email = $('#trabEmail').value.trim();
     const password = $('#trabPassword').value;
     const permisos = leerPermisosMarcados('trabNuevo', clavesDisponiblesCache);
+    const tambien_cliente = $('#trabTambienCliente')?.checked || false;
     if(!nombre || !apellido || !email || password.length < 8){
       mostrarBanner('#bannerTrabajadorNuevo','error','Completa nombre, apellido, correo y una contraseña de al menos 8 caracteres.');
       return;
     }
     setCargando(btn, true);
     try {
-      const res = await apiAdmin('/admin/trabajadores', { method:'POST', body: JSON.stringify({ nombre, apellido, email, password, permisos }) });
+      const res = await apiAdmin('/admin/trabajadores', { method:'POST', body: JSON.stringify({ nombre, apellido, email, password, permisos, tambien_cliente }) });
       const d = await res.json().catch(()=>({}));
       if(res.status === 201){
-        mostrarBanner('#bannerTrabajadorNuevo','success','✓ Trabajador creado. Avísale su correo y contraseña.');
-        $('#trabNombre').value=''; $('#trabApellido').value=''; $('#trabEmail').value=''; $('#trabPassword').value='';
+        const avisoCasillero = d.trabajador?.numero_casillero ? ` Su casillero de cliente es ${d.trabajador.numero_casillero}.` : '';
+        mostrarBanner('#bannerTrabajadorNuevo','success','✓ Trabajador creado. Avísale su correo y contraseña.'+avisoCasillero);
+        $('#trabNombre').value=''; $('#trabApellido').value=''; $('#trabEmail').value=''; $('#trabPassword').value=''; $('#trabTambienCliente').checked=false;
         clavesDisponiblesCache.forEach(c => { const el=$(`#trabNuevo_${c}`); if(el) el.checked=false; });
         cargarTrabajadores();
       } else {
