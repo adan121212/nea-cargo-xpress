@@ -4,6 +4,7 @@ const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
+const { requierePermiso } = require("../../middleware/permiso");
 const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
@@ -13,7 +14,7 @@ const { aplicarSaldoAFavor, activarCreditoSiCorresponde } = require('../../utils
 const router = express.Router();
 
 
-router.use(requiereAutenticacion, requiereAdmin);
+router.use(requiereAutenticacion, requiereAdmin, requierePermiso("facturas"));
 
 // Código para autorizar anulaciones. Se puede cambiar en Render
 // con la variable de entorno CODIGO_ANULACION sin tocar el código.

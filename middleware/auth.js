@@ -27,7 +27,7 @@ async function requiereAutenticacion(req, res, next) {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
     const resultado = await pool.query(
-      'SELECT token_valido_desde, rol FROM usuarios WHERE id = $1',
+      'SELECT token_valido_desde, rol, permisos_admin, activo FROM usuarios WHERE id = $1',
       [payload.id]
     );
 
@@ -35,8 +35,12 @@ async function requiereAutenticacion(req, res, next) {
       return res.status(401).json({ mensaje: 'Token inválido o expirado. Vuelve a iniciar sesión.' });
     }
 
-    const { token_valido_desde: tokenValidoDesde, rol: rolActual } = resultado.rows[0];
+    const { token_valido_desde: tokenValidoDesde, rol: rolActual, permisos_admin: permisosActuales, activo } = resultado.rows[0];
     const tokenEmitidoEn = new Date(payload.iat * 1000); // jwt.iat viene en segundos
+
+    if (activo === false) {
+      return res.status(401).json({ mensaje: 'Esta cuenta está desactivada.' });
+    }
 
     if (tokenEmitidoEn < tokenValidoDesde) {
       return res.status(401).json({
@@ -44,7 +48,7 @@ async function requiereAutenticacion(req, res, next) {
       });
     }
 
-    req.usuario = { ...payload, rol: rolActual };
+    req.usuario = { ...payload, rol: rolActual, permisos: permisosActuales || [] };
     next();
   } catch (error) {
     return res.status(401).json({ mensaje: 'Token inválido o expirado. Vuelve a iniciar sesión.' });

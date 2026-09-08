@@ -2,10 +2,11 @@ const express = require('express');
 const cheerio = require('cheerio');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
+const { requierePermiso } = require("../../middleware/permiso");
 const pool = require('../../db');
 const router = express.Router();
 
-router.use(requiereAutenticacion, requiereAdmin);
+router.use(requiereAutenticacion, requiereAdmin, requierePermiso("pty"));
 
 const PTY_BASE = 'https://carga.ptycargoexpress.com';
 const PTY_TRACK_URL = `${PTY_BASE}/ajax.php`;

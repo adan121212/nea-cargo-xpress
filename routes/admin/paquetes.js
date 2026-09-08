@@ -5,6 +5,7 @@ const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
+const { requierePermiso } = require("../../middleware/permiso");
 const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudinary');
 const { enviarCorreoCambioEstado, enviarFacturaListaParaRetiro } = require('../../utils/mailer');
 const { generarNumeroFactura } = require('../../utils/factura');
@@ -28,7 +29,7 @@ const ESTADO_LABEL = {
 };
 
 const router = express.Router();
-router.use(requiereAutenticacion, requiereAdmin);
+router.use(requiereAutenticacion, requiereAdmin, requierePermiso("paquetes"));
 
 const ESTADOS_VALIDOS = [
   'prealertado','en_bodega_miami','en_transito',
