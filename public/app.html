@@ -1578,6 +1578,10 @@
       const data = await res.json().catch(() => ({}));
 
       if (res.ok){
+        if (data.usuario.rol !== 'cliente'){
+          mostrarBanner('#bannerLogin', 'error', 'Esta cuenta es de administración, no de cliente. Usa el panel de administración para entrar.');
+          return;
+        }
         localStorage.setItem(TOKEN_KEY, data.token);
         mostrarBanner('#bannerLogin', 'success', '');
         $('#bannerLogin').className = 'banner';
