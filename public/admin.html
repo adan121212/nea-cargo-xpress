@@ -2325,6 +2325,7 @@
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="btn-secondary" id="btnPass_${t.id}" style="height:32px;font-size:12px;">Restablecer contraseña</button>
               <button class="btn-secondary" id="btnActivo_${t.id}" style="height:32px;font-size:12px;">${t.activo?'Desactivar':'Reactivar'}</button>
+              <button class="btn-secondary" id="btnEliminar_${t.id}" style="height:32px;font-size:12px;color:#c0392b;border-color:rgba(192,57,43,.4);">Eliminar</button>
             </div>
           </div>
           <label style="font-size:11px;display:block;margin-bottom:6px;">Pantallas permitidas</label>
@@ -2367,6 +2368,22 @@
             const d = await res.json().catch(()=>({}));
             mostrarBanner(`#bannerTrab_${t.id}`, res.ok?'success':'error', res.ok?'✓ Contraseña actualizada.':(d.mensaje||'No se pudo actualizar.'));
           } catch(err){ mostrarBanner(`#bannerTrab_${t.id}`,'error','No pudimos conectar.'); }
+        });
+        $(`#btnEliminar_${t.id}`)?.addEventListener('click', async () => {
+          if(!confirm(`¿Eliminar a ${t.nombre} ${t.apellido||''}? Si tiene historial (cajas, gastos, compras), se desactivará en vez de borrarse.`)) return;
+          const btn = $(`#btnEliminar_${t.id}`);
+          setCargando(btn, true);
+          try {
+            const res = await apiAdmin(`/admin/trabajadores/${t.id}`, { method:'DELETE' });
+            const d = await res.json().catch(()=>({}));
+            if(res.ok){
+              mostrarBanner('#bannerTrabajadorNuevo','success', d.mensaje || '✓ Listo.');
+              cargarTrabajadores();
+            } else {
+              mostrarBanner(`#bannerTrab_${t.id}`,'error', d.mensaje || 'No se pudo eliminar.');
+              setCargando(btn, false);
+            }
+          } catch(err){ mostrarBanner(`#bannerTrab_${t.id}`,'error','No pudimos conectar.'); setCargando(btn, false); }
         });
       });
     } catch(err){}

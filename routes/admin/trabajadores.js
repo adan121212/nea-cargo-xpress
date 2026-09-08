@@ -150,4 +150,62 @@ router.patch(
   }
 );
 
+// --- DELETE /api/admin/trabajadores/:id ---
+// Si el trabajador ya cerró cajas, registró gastos/compras o anuló facturas,
+// esos registros necesitan seguir apuntando a alguien: en ese caso se
+// desactiva en vez de borrar. Solo se borra de verdad si no tiene historial.
+router.delete('/:id', [param('id').isInt().withMessage('Id inválido')], async (req, res) => {
+  const errores = validationResult(req);
+  if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
+  const id = req.params.id;
+
+  if (req.usuario && String(req.usuario.id) === String(id)) {
+    return res.status(409).json({ mensaje: 'No puedes eliminar tu propia cuenta' });
+  }
+
+  const client = await pool.connect();
+  try {
+    const encontrado = await client.query(
+      "SELECT id, nombre, apellido FROM usuarios WHERE id = $1 AND rol = 'trabajador'",
+      [id]
+    );
+    if (encontrado.rows.length === 0) {
+      client.release();
+      return res.status(404).json({ mensaje: 'Trabajador no encontrado' });
+    }
+    const trabajador = encontrado.rows[0];
+
+    const [aperturas, compras, gastos, facturas] = await Promise.all([
+      client.query('SELECT COUNT(*)::int AS n FROM aperturas_caja WHERE abierto_por = $1', [id]),
+      client.query('SELECT COUNT(*)::int AS n FROM compras WHERE registrada_por = $1 OR comprada_por = $1', [id]),
+      client.query('SELECT COUNT(*)::int AS n FROM gastos WHERE registrado_por = $1', [id]),
+      client.query('SELECT COUNT(*)::int AS n FROM facturas WHERE anulada_por = $1', [id]),
+    ]);
+    const totalHistorial = aperturas.rows[0].n + compras.rows[0].n + gastos.rows[0].n + facturas.rows[0].n;
+
+    if (totalHistorial > 0) {
+      await client.query(
+        `UPDATE usuarios SET activo = FALSE, token_valido_desde = NOW() WHERE id = $1`,
+        [id]
+      );
+      client.release();
+      return res.json({
+        accion: 'desactivado',
+        mensaje: `${trabajador.nombre} ${trabajador.apellido} tiene actividad registrada en el sistema (cajas, gastos o compras), así que se desactivó en vez de borrarse: no puede iniciar sesión, pero su historial se conserva.`,
+      });
+    }
+
+    await client.query('DELETE FROM usuarios WHERE id = $1', [id]);
+    client.release();
+    return res.json({
+      accion: 'eliminado',
+      mensaje: `La cuenta de ${trabajador.nombre} ${trabajador.apellido} fue eliminada.`,
+    });
+  } catch (error) {
+    client.release();
+    console.error('Error en DELETE /admin/trabajadores/:id:', error);
+    return res.status(500).json({ mensaje: 'Error interno al eliminar el trabajador' });
+  }
+});
+
 module.exports = router;
