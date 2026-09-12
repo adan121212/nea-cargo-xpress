@@ -250,9 +250,8 @@ router.post('/importar', async (req, res) => {
         'Listo': 'listo_para_retiro',
       };
       const estadoNea = estadoMap[p.Status] || 'en_bodega_miami';
-      // Tienda: intentar extraer de Referencias, si no usar 'PTY Cargo'
-      // Tienda: PTY no la da, usar el consignatario o valor por defecto
-      const tienda = 'PTY Cargo Express';
+      // Tienda: mostrar el nombre de la propia empresa en vez de PTY Cargo Express
+      const tienda = 'NEA Cargo Xpress';
       const pesoLb = p.Peso ? parseFloat(parseFloat(p.Peso).toFixed(2)) : null;
       // Combinar WHR + Referencias + Comentario en descripcion
       const partes = [];
