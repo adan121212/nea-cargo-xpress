@@ -148,9 +148,8 @@
   .nav-inner{ max-width: 1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; }
   .brand{ display:flex; align-items:center; gap:10px; font-family: var(--font-display); font-weight:700; font-size:16px; }
   .brand .mark{
-    width:30px; height:30px; border-radius:8px; background: var(--accent);
-    display:flex; align-items:center; justify-content:center; color: var(--ink); font-weight:700; font-size:14px;
-    box-shadow: 0 0 0 1px rgba(255,106,26,0.3), 0 2px 16px var(--accent-glow);
+    width:31px; height:31px; border-radius:50%; background: var(--accent);
+    display:flex; align-items:center; justify-content:center; color: var(--ink); font-weight:700; font-size:15px;
   }
   .brand small{ display:block; font-weight:400; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color: rgba(241,243,242,0.5); font-family: var(--font-body); }
 
@@ -166,8 +165,7 @@
   .nav-btn .caret{ font-size:9px; transition: transform .15s ease; opacity:.6; }
   .nav-item.open .caret{ transform: rotate(180deg); }
   .nav-btn.cta{
-    background: var(--accent); color:#fff; font-weight:700; padding: 9px 18px; opacity:1;
-    box-shadow: 0 2px 20px var(--accent-glow);
+    background: var(--accent); color:#fff; font-weight:600; padding: 10px 18px; opacity:1; border-radius:9px;
   }
   .nav-btn.cta:hover{ background: var(--accent-dark); }
 
@@ -214,48 +212,35 @@
 
   /* ============ HERO con fondo de red de partículas ============ */
   .hero-shell{ position: relative; overflow: hidden; background: var(--ink); }
-  .hero-shell::before{
-    content:''; position:absolute; inset:0;
-    background:
-      radial-gradient(ellipse 60% 50% at 15% 10%, rgba(255,106,26,0.16), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 90% 80%, rgba(23,122,99,0.14), transparent 60%);
-    pointer-events:none; z-index:0;
-  }
+  .hero-shell::before{ content:none; }
   #networkCanvas{ position:absolute; inset:0; z-index:0; opacity:.85; }
   .hero{
-    max-width: 1180px; margin: 0 auto; padding: 88px 26px 74px;
+    max-width: 1180px; margin: 0 auto; padding: 96px 26px 104px;
     display:grid; grid-template-columns: 1.15fr .85fr; gap: 56px; align-items:center;
     position: relative; z-index: 2; color:#f1f3f2;
   }
   .eyebrow{
-    font-family: var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
-    color: var(--accent); display:inline-flex; align-items:center; gap:8px;
+    font-family: var(--font-body); font-size:13.5px; font-weight:500; letter-spacing:0; text-transform:none;
+    color: rgba(241,243,242,0.62); display:inline-flex; align-items:center; gap:8px;
   }
-  .eyebrow::before{ content:''; width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; box-shadow: 0 0 10px var(--accent-glow); animation: pulseDot 1.8s ease-in-out infinite; }
+  .eyebrow::before{ content:''; width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; }
   @keyframes pulseDot{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
   .hero h1{
-    font-family: var(--font-display); font-size: clamp(32px, 4.6vw, 52px);
-    line-height:1.06; letter-spacing:-0.015em; margin: 16px 0 18px;
+    font-family: var(--font-display); font-size: clamp(38px, 5.2vw, 62px);
+    line-height:1.04; letter-spacing:-0.025em; margin: 20px 0 20px;
   }
-  .hero h1 .glow-word{ color: var(--accent); text-shadow: 0 0 34px var(--accent-glow); }
-  .hero p.lead{ font-size:16px; line-height:1.65; color: rgba(241,243,242,0.68); max-width: 46ch; margin: 0 0 28px; }
+  .hero p.lead{ font-size:18px; line-height:1.6; color: rgba(241,243,242,0.72); max-width: 46ch; margin: 0 0 30px; }
+  .hero-micro{ font-size:13.5px; color: rgba(241,243,242,0.5); margin: 16px 0 0; }
   .hero-ctas{ display:flex; gap:12px; flex-wrap:wrap; }
   .btn-solid{
-    position:relative; background: var(--accent); color:#fff; font-weight:700; font-size:14px;
-    padding: 14px 24px; border-radius: var(--radius-sm); display:inline-block; overflow:hidden;
-    box-shadow: 0 4px 24px var(--accent-glow);
-    transition: transform .15s ease, box-shadow .15s ease;
+    position:relative; background: var(--accent); color:#fff; font-weight:600; font-size:15px;
+    padding: 14px 24px; border-radius: 10px; display:inline-block;
+    transition: background .15s ease;
   }
-  .btn-solid::after{
-    content:''; position:absolute; inset:0; translate: -120% 0;
-    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%);
-    transition: translate .5s ease;
-  }
-  .btn-solid:hover{ transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
-  .btn-solid:hover::after{ translate: 120% 0; }
+  .btn-solid:hover{ background: var(--accent-dark); }
   .btn-outline{
-    border: 1.5px solid rgba(241,243,242,0.25); color:#f1f3f2; font-weight:600; font-size:14px;
-    padding: 13px 24px; border-radius: var(--radius-sm); display:inline-block;
+    border: 1.5px solid rgba(241,243,242,0.3); color:#f1f3f2; font-weight:600; font-size:15px;
+    padding: 13px 24px; border-radius: 10px; display:inline-block;
     transition: border-color .15s ease, background .15s ease;
   }
   .btn-outline:hover{ border-color: rgba(241,243,242,0.6); background: rgba(241,243,242,0.06); }
@@ -410,36 +395,34 @@
   .rt-error{ background: var(--amber-bg); border:1px solid rgba(255,106,26,0.3); color: var(--accent-dark); border-radius: var(--radius-md); padding:17px; font-size:13.5px; }
 
   /* ============ SECCIONES GENERALES ============ */
-  .section{ max-width: 1180px; margin: 0 auto; padding: 78px 26px; }
-  .section-head{ max-width: 580px; margin: 0 0 38px; }
-  .section-head .eyebrow{ color: var(--accent-dark); margin-bottom:12px; }
-  .section-head .eyebrow::before{ box-shadow:none; animation:none; }
-  .section-head h2{ font-family: var(--font-display); font-size: clamp(23px, 3.1vw, 32px); letter-spacing:-0.01em; margin:0 0 11px; }
-  .section-head p{ color: var(--ink-soft); font-size:14.5px; line-height:1.6; margin:0; }
+  .section{ max-width: 1180px; margin: 0 auto; padding: 96px 26px; }
+  .section-head{ max-width: 620px; margin: 0 0 44px; }
+  .section-head .eyebrow{ color: var(--ink-soft); margin-bottom:14px; }
+  .section-head h2{ font-family: var(--font-display); font-size: clamp(30px, 4vw, 44px); letter-spacing:-0.025em; line-height:1.05; margin:0 0 14px; }
+  .section-head p{ color: var(--ink-soft); font-size:17px; line-height:1.6; margin:0; }
 
   .steps-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; perspective: 1000px; }
   .step-card{
-    background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:22px;
-    box-shadow: var(--shadow-card); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-    position: relative; transform-style: preserve-3d;
+    background: var(--panel); border:1px solid var(--line); border-radius: 16px; padding:28px 26px;
+    box-shadow: var(--shadow-card); transition: transform .25s ease, box-shadow .25s ease;
+    position: relative;
   }
-  .step-card:hover{ transform: translateY(-4px) rotateX(4deg); box-shadow: var(--shadow-card-hover); border-color: rgba(255,106,26,0.35); }
+  .step-card:hover{ transform: translateY(-3px); box-shadow: var(--shadow-card-hover); }
   .step-card:not(:last-child)::after{
     content:''; position:absolute; top:50%; right:-9px; width:8px; height:1px;
     background-image: linear-gradient(to right, rgba(12,27,51,0.25) 50%, transparent 0%);
     background-size: 4px 1px; background-repeat: repeat-x;
   }
-  .step-card .num{ font-family: var(--font-display); font-size:23px; color: var(--accent); }
-  .step-card h3{ font-family: var(--font-display); font-size:14.5px; margin: 11px 0 6px; }
-  .step-card p{ font-size:12.5px; color: var(--ink-soft); line-height:1.55; margin:0; }
+  .step-card .num{ font-family: var(--font-display); font-size:34px; color: var(--accent); opacity:.6; line-height:1; }
+  .step-card h3{ font-family: var(--font-display); font-size:18px; margin: 14px 0 8px; letter-spacing:-.01em; }
+  .step-card p{ font-size:14.5px; color: var(--ink-soft); line-height:1.6; margin:0; }
   @media (max-width: 860px){ .steps-grid{ grid-template-columns: 1fr 1fr; } .step-card::after{ display:none; } }
   @media (max-width: 520px){ .steps-grid{ grid-template-columns: 1fr; } }
 
   .tarifas-band{ background: var(--ink); color:#f1f3f2; position: relative; overflow:hidden; }
-  .tarifas-band::before{ content:''; position:absolute; top:-20%; left:-10%; width:50%; height:80%; background: radial-gradient(circle, rgba(255,106,26,0.12), transparent 70%); pointer-events:none; }
-  .tarifas-band::after{ content:''; position:absolute; bottom:-30%; right:-15%; width:55%; height:80%; background: radial-gradient(circle, rgba(23,122,99,0.14), transparent 70%); pointer-events:none; }
+  .tarifas-band::before, .tarifas-band::after{ content:none; }
   .tarifas-band .section-head p{ color: rgba(241,243,242,0.6); }
-  .tarifas-band .section-head .eyebrow{ color: var(--accent); }
+  .tarifas-band .section-head .eyebrow{ color: rgba(241,243,242,0.62); }
   .tarifas-band > *{ position: relative; }
   .tarifas-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
   .tarifa-n{ background:#fff; border:1px solid rgba(12,27,51,0.1); border-radius:16px; padding:28px;
@@ -453,7 +436,7 @@
   .tarifa-n li{ padding:8px 0; border-top:1px solid rgba(12,27,51,0.1); color: rgba(12,27,51,0.62); }
   .tarifa-n.destacada{ background:#0c1b33; border-color: rgba(255,106,26,0.4); }
   .tarifa-n.destacada h3{ color:#fff; }
-  .tarifa-n.destacada .precio-n{ color: var(--accent); text-shadow: 0 0 24px var(--accent-glow); }
+  .tarifa-n.destacada .precio-n{ color: var(--accent); }
   .tarifa-n.destacada .precio-n em{ color: rgba(241,243,242,0.6); }
   .tarifa-n.destacada li{ color: rgba(241,243,242,0.75); border-color: rgba(241,243,242,0.14); }
   @media (max-width: 860px){ .tarifas-grid{ grid-template-columns:1fr; } }
@@ -536,7 +519,7 @@
   @media (max-width: 760px){ .contacto-grid{ grid-template-columns: 1fr; } }
 
   /* Footer */
-  footer{ background: var(--ink); color: rgba(241,243,242,0.6); padding: 38px 26px; position:relative; overflow:hidden; }
+  footer{ background: var(--ink); color: rgba(241,243,242,0.6); padding: 56px 26px 34px; position:relative; overflow:hidden; border-top:1px solid rgba(241,243,242,0.08); }
   .footer-inner{ max-width: 1180px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; font-size:12.5px; position:relative; }
   .footer-inner .brand{ color:#f1f3f2; }
 
@@ -546,12 +529,39 @@
     width: 58px; height:58px; border-radius:50%;
     background: var(--whatsapp); display:flex; align-items:center; justify-content:center;
     box-shadow: 0 8px 24px rgba(37,211,102,0.4);
-    animation: pulse-wsp 2.4s ease-in-out infinite; transition: transform .15s ease;
+    transition: transform .15s ease;
   }
   .whatsapp-float:hover{ transform: scale(1.08); }
   @keyframes pulse-wsp{ 0%,100%{ box-shadow: 0 8px 24px rgba(37,211,102,0.4); } 50%{ box-shadow: 0 8px 24px rgba(37,211,102,0.7), 0 0 0 8px rgba(37,211,102,0.12); } }
 
   a:focus-visible, button:focus-visible{ outline: 2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+
+  /* ===== Franja de confianza ===== */
+  .franja{ background:#fff; border-bottom:1px solid var(--line); }
+  .franja-inner{ max-width:1180px; margin:0 auto; padding:0 26px; display:grid; grid-template-columns:repeat(4,1fr); }
+  .franja-item{ padding:24px 22px; border-right:1px solid var(--line); display:flex; flex-direction:column; gap:3px; }
+  .franja-item:first-child{ padding-left:0; }
+  .franja-item:last-child{ border-right:0; }
+  .franja-k{ font-family: var(--font-display); font-weight:700; font-size:16px; letter-spacing:-.01em; }
+  .franja-v{ font-size:13.5px; color: var(--ink-soft); }
+  [data-theme="dark"] .franja{ background: var(--panel); }
+  @media (max-width: 860px){ .franja-inner{ grid-template-columns:1fr 1fr; } .franja-item:nth-child(2){ border-right:0; } .franja-item:nth-child(3){ padding-left:0; } }
+  @media (max-width: 520px){ .franja-inner{ grid-template-columns:1fr; } .franja-item{ border-right:0; border-bottom:1px solid var(--line); padding:16px 0; } .franja-item:last-child{ border-bottom:0; } }
+
+  /* ===== CTA final ===== */
+  .cta-band{ background: var(--ink); color:#f1f3f2; padding:104px 26px; text-align:center; }
+  .cta-inner{ max-width:640px; margin:0 auto; }
+  .cta-band h2{ font-family: var(--font-display); font-size: clamp(32px, 4.6vw, 52px); letter-spacing:-.025em; line-height:1.04; margin:0 0 18px; }
+  .cta-band p{ color: rgba(241,243,242,0.66); font-size:18px; line-height:1.6; margin:0 0 34px; }
+
+  /* ===== Pie ===== */
+  .footer-grid{ max-width:1180px; margin:0 auto; display:grid; grid-template-columns: 1.4fr 1fr 1fr; gap:40px; padding-bottom:34px; border-bottom:1px solid rgba(241,243,242,0.1); margin-bottom:22px; position:relative; }
+  .footer-brand{ font-family: var(--font-display); font-weight:700; font-size:18px; color:#f1f3f2; margin-bottom:10px; }
+  .footer-grid p{ font-size:14px; line-height:1.6; margin:0; max-width:36ch; }
+  .footer-h{ font-family: var(--font-display); font-weight:700; font-size:13.5px; color:#f1f3f2; margin-bottom:12px; }
+  .footer-grid a{ display:block; font-size:14px; padding:4px 0; color: rgba(241,243,242,0.62); }
+  .footer-grid a:hover{ color:#fff; }
+  @media (max-width: 760px){ .footer-grid{ grid-template-columns:1fr; gap:28px; } }
 /* ===== MODO OSCURO ===== */
 [data-theme="dark"]{
   --ink:#e4eaf5; --ink-soft:rgba(228,234,245,0.62);
@@ -684,7 +694,7 @@
   <div class="nav-inner">
     <a href="index.html" class="brand">
       <div class="mark">N</div>
-      <div>NEA CARGO XPRESS<small>Miami → Panamá</small></div>
+      <div>NEA Cargo Xpress<small>Miami → Panamá</small></div>
     </a>
     <button class="nav-toggle" id="navToggle">☰</button>
     <div class="nav-menu" id="navMenu">
@@ -693,7 +703,6 @@
         <div class="dropdown" id="ddSesion">
           <a href="app.html" class="dropdown-link">Iniciar sesión<span class="item-sub">Ya tengo un casillero</span></a>
           <a href="app.html?registro" class="dropdown-link">Crear casillero<span class="item-sub">Es gratis, toma 2 minutos</span></a>
-          <a href="admin.html" class="dropdown-link">Acceso staff<span class="item-sub">Panel de operaciones</span></a>
         </div>
       </div>
       <div class="nav-item">
@@ -715,7 +724,6 @@
           <a href="#sucursales" class="dropdown-link">Nuestras sucursales<span class="item-sub">Puntos de retiro en Panamá</span></a>
         </div>
       </div>
-      <a href="restringida.html" class="nav-btn" style="color:rgba(255,190,170,0.9);font-size:13px;">🚫 Restringidos</a>
       <a href="app.html?registro" class="nav-btn cta">Crear casillero gratis</a>
       <button id="btnLang" class="nav-btn" title="Cambiar idioma" style="font-size:12px;padding:7px 11px;opacity:.8;">🌐 <span id="langLabel">EN</span></button>
       <button id="btnTheme" class="nav-btn" title="Modo claro/oscuro" style="font-size:15px;padding:7px 10px;opacity:.8;"><span id="themeIcon">🌙</span></button>
@@ -725,22 +733,21 @@
 
 <!-- ============ HERO ============ -->
 <div class="hero-shell">
-  <canvas id="networkCanvas"></canvas>
   <section class="hero">
     <div>
-      <div class="eyebrow">Casillero virtual · Estados Unidos y China → Panamá</div>
-      <h1>Compra en EE.UU. y China.<br>Recíbelo en <span class="glow-word">Panamá</span>.</h1>
+      <div class="eyebrow">Casillero en Miami · Retiro en Sabanitas, Colón</div>
+      <h1>Tu dirección en Miami, gratis.<br>Tus compras en Panamá en 4 a 7 días.</h1>
       <p class="lead">
-        Te damos una dirección en Miami, tú compras en Amazon, eBay, Shein, Alibaba o donde quieras
-        — también traemos mercancía directo desde China. Nosotros lo recibimos, te avisamos, y lo
-        traemos hasta tus manos — con seguimiento en cada paso.
+        Compra en Amazon, eBay, Shein, Temu o Alibaba con una dirección real en Estados Unidos.
+        Nosotros recibimos, fotografiamos, pesamos y te lo traemos. Tú solo lo retiras.
       </p>
       <div class="hero-ctas">
         <a href="app.html?registro" class="btn-solid">Crear mi casillero gratis</a>
-        <a href="#rastreo" class="btn-outline">Rastrear mi paquete</a>
+        <a href="#tarifas" class="btn-outline">Calcular cuánto me costaría</a>
       </div>
+      <p class="hero-micro">Sin mensualidad. Toma 2 minutos. Tu dirección lista al instante.</p>
       <div class="route-strip">
-        <span class="city">MIAMI / CHINA</span>
+        <span class="city">MIAMI</span>
         <svg viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
           <line class="route-line" x1="2" y1="7" x2="138" y2="7"/>
           <circle class="route-dot" cx="2" cy="7" r="2.5"/>
@@ -771,114 +778,18 @@
   </section>
 </div>
 
-<!-- ============ RASTREO PÚBLICO ============ -->
-<section class="section reveal" id="rastreo">
-  <div class="section-head">
-    <div class="eyebrow">Rastreo</div>
-    <h2>¿Dónde está mi paquete?</h2>
-    <p>No necesitas iniciar sesión para rastrear.</p>
-  </div>
-
-  <div class="rastreo-tabs">
-    <button class="rastreo-tab-btn active" data-rtab="nea">Mi paquete NEA Cargo Xpress</button>
-    <button class="rastreo-tab-btn" data-rtab="mundial">Rastreo mundial (cualquier courier)</button>
-  </div>
-
-  <div class="rastreo-box" id="panelRastreoNea">
-    <p class="rastreo-hint">Para paquetes que ya prealertaste con nosotros.</p>
-    <form id="formRastreo" class="rastreo-form">
-      <input type="text" id="inputTracking" placeholder="Ej. 1Z999AA10123456784" autocomplete="off">
-      <button class="btn-solid" type="submit" id="btnRastreo">
-        <span class="spinner-rastreo"></span><span>Rastrear</span>
-      </button>
-    </form>
-    <div id="resultadoRastreo"></div>
-  </div>
-
-  <div class="rastreo-box" id="panelRastreoMundial" style="display:none;">
-    <p class="rastreo-hint">Para cualquier número de tracking (USPS, UPS, DHL, FedEx, UniUni, y +3,400 transportistas más), aunque no sea de NEA Cargo Xpress. Te abrimos el resultado en 17TRACK, el rastreador universal más usado.</p>
-    <form id="formMundial" class="rastreo-form">
-      <input type="text" id="inputMundial" maxlength="50" placeholder="Ej. RR123456789CN o UUS6467670502776182" autocomplete="off">
-      <button class="btn-solid" type="submit" style="color:#fff;">Rastrear en el mundo ↗</button>
-    </form>
-  </div>
-</section>
 
 <!-- ============ FOTOS DEL PROCESO ============ -->
-<section class="foto-banda reveal">
-  <div class="foto-item">
-    <img src="/img/proceso-01-compras.svg" alt="Cajas de compras en línea listas para envío" loading="lazy">
-    <div class="foto-caption"><span class="foto-num">01</span>Compras en Amazon, eBay y más</div>
-  </div>
-  <div class="foto-item">
-    <img src="/img/proceso-02-transporte.svg" alt="Barco de carga con contenedores en el puerto" loading="lazy">
-    <div class="foto-caption"><span class="foto-num">02</span>Viaja por avión hasta Panamá</div>
-  </div>
-  <div class="foto-item">
-    <img src="/img/proceso-03-sucursal.svg" alt="Entrega en tu sucursal más cercana" loading="lazy">
-    <div class="foto-caption"><span class="foto-num">03</span>Lo recibes en tu sucursal más cercana</div>
-  </div>
-</section>
 
-<!-- ============ CÓMO FUNCIONA ============ -->
-<section class="section reveal" id="como-funciona">
-  <div class="section-head">
-    <div class="eyebrow">Proceso</div>
-    <h2>Cuatro pasos, sin complicaciones</h2>
-    <p>Desde que compras hasta que retiras tu paquete, siempre sabes en qué punto va.</p>
-  </div>
-  <div class="steps-grid">
-    <div class="step-card">
-      <div class="num">01</div>
-      <h3>Crea tu casillero</h3>
-      <p>Regístrate gratis y te asignamos una dirección personal en Miami al instante.</p>
-    </div>
-    <div class="step-card">
-      <div class="num">02</div>
-      <h3>Compra y prealerta</h3>
-      <p>Compra en la tienda que quieras usando tu dirección, y avísanos qué compraste en la app.</p>
-    </div>
-    <div class="step-card">
-      <div class="num">03</div>
-      <h3>Lo recibimos y pesamos</h3>
-      <p>Tu paquete llega a nuestra bodega, lo fotografiamos, pesamos y actualizamos su estado.</p>
-    </div>
-    <div class="step-card">
-      <div class="num">04</div>
-      <h3>Retira en Panamá</h3>
-      <p>Te avisamos por correo, con tu factura adjunta, cuando esté listo en tu sucursal más cercana.</p>
-    </div>
-  </div>
-</section>
 
-<!-- ============ COMPARACIÓN ============ -->
-<section class="section reveal" id="comparar">
-  <div class="section-head">
-    <div class="eyebrow">Por qué NEA</div>
-    <h2>Lo que cambia cuando dejas de improvisar</h2>
-    <p>La mayoría de la gente compra pidiéndole el favor a un familiar en Estados Unidos. Así se ve la diferencia.</p>
-  </div>
-  <div class="vs-grid">
-    <div class="vs-card">
-      <h3>Pidiéndole el favor a alguien</h3>
-      <ul>
-        <li class="vs-no"><span class="vs-mk">&#10005;</span> Esperas a que alguien viaje</li>
-        <li class="vs-no"><span class="vs-mk">&#10005;</span> No sabes dónde está tu caja</li>
-        <li class="vs-no"><span class="vs-mk">&#10005;</span> Si se pierde, no hay a quién reclamar</li>
-        <li class="vs-no"><span class="vs-mk">&#10005;</span> Le quedas debiendo el favor</li>
-        <li class="vs-no"><span class="vs-mk">&#10005;</span> Sin factura ni respaldo</li>
-      </ul>
-    </div>
-    <div class="vs-card vs-win">
-      <h3>Con tu casillero NEA</h3>
-      <ul>
-        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Compras hoy, llega en 4 a 7 días</li>
-        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Ves la foto y el peso de tu caja</li>
-        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Pagas al retirar, no por adelantado</li>
-        <li class="vs-yes"><span class="vs-mk">&#10003;</span> No le debes nada a nadie</li>
-        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Factura en PDF con el detalle completo</li>
-      </ul>
-    </div>
+
+<!-- ============ FRANJA DE CONFIANZA ============ -->
+<section class="franja" aria-label="Garantías">
+  <div class="franja-inner">
+    <div class="franja-item"><span class="franja-k">Foto de tu paquete</span><span class="franja-v">apenas llega a Miami</span></div>
+    <div class="franja-item"><span class="franja-k">Peso verificado</span><span class="franja-v">en balanza, con el detalle en tu factura</span></div>
+    <div class="franja-item"><span class="franja-k">Local físico</span><span class="franja-v">en Sabanitas, Colón</span></div>
+    <div class="franja-item"><span class="franja-k">WhatsApp directo</span><span class="franja-v">con quien maneja tu paquete</span></div>
   </div>
 </section>
 
@@ -913,7 +824,98 @@
     </div>
   </div>
 </section>
+<!-- ============ COMPARACIÓN ============ -->
+<section class="section reveal" id="comparar">
+  <div class="section-head">
+    <div class="eyebrow">Por qué NEA</div>
+    <h2>Lo que cambia cuando dejas de improvisar</h2>
+    <p>La mayoría de la gente compra pidiéndole el favor a un familiar en Estados Unidos. Así se ve la diferencia.</p>
+  </div>
+  <div class="vs-grid">
+    <div class="vs-card">
+      <h3>Pidiéndole el favor a alguien</h3>
+      <ul>
+        <li class="vs-no"><span class="vs-mk">&#10005;</span> Esperas a que alguien viaje</li>
+        <li class="vs-no"><span class="vs-mk">&#10005;</span> No sabes dónde está tu caja</li>
+        <li class="vs-no"><span class="vs-mk">&#10005;</span> Si se pierde, no hay a quién reclamar</li>
+        <li class="vs-no"><span class="vs-mk">&#10005;</span> Le quedas debiendo el favor</li>
+        <li class="vs-no"><span class="vs-mk">&#10005;</span> Sin factura ni respaldo</li>
+      </ul>
+    </div>
+    <div class="vs-card vs-win">
+      <h3>Con tu casillero NEA</h3>
+      <ul>
+        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Compras hoy, llega en 4 a 7 días</li>
+        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Ves la foto y el peso de tu caja</li>
+        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Pagas al retirar, no por adelantado</li>
+        <li class="vs-yes"><span class="vs-mk">&#10003;</span> No le debes nada a nadie</li>
+        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Factura en PDF con el detalle completo</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<!-- ============ CÓMO FUNCIONA ============ -->
+<section class="section reveal" id="como-funciona">
+  <div class="section-head">
+    <div class="eyebrow">Proceso</div>
+    <h2>Cuatro pasos, sin complicaciones</h2>
+    <p>Desde que compras hasta que retiras tu paquete, siempre sabes en qué punto va.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="num">01</div>
+      <h3>Crea tu casillero</h3>
+      <p>Regístrate gratis y te asignamos una dirección personal en Miami al instante.</p>
+    </div>
+    <div class="step-card">
+      <div class="num">02</div>
+      <h3>Compra y prealerta</h3>
+      <p>Compra en la tienda que quieras usando tu dirección, y avísanos qué compraste en la app.</p>
+    </div>
+    <div class="step-card">
+      <div class="num">03</div>
+      <h3>Lo recibimos y pesamos</h3>
+      <p>Tu paquete llega a nuestra bodega, lo fotografiamos, pesamos y actualizamos su estado.</p>
+    </div>
+    <div class="step-card">
+      <div class="num">04</div>
+      <h3>Retira en Panamá</h3>
+      <p>Te avisamos por correo, con tu factura adjunta, cuando esté listo en tu sucursal más cercana.</p>
+    </div>
+  </div>
+</section>
+<!-- ============ RASTREO PÚBLICO ============ -->
+<section class="section reveal" id="rastreo">
+  <div class="section-head">
+    <div class="eyebrow">Rastreo</div>
+    <h2>¿Dónde está mi paquete?</h2>
+    <p>No necesitas iniciar sesión para rastrear.</p>
+  </div>
 
+  <div class="rastreo-tabs">
+    <button class="rastreo-tab-btn active" data-rtab="nea">Mi paquete NEA Cargo Xpress</button>
+    <button class="rastreo-tab-btn" data-rtab="mundial">Rastreo mundial (cualquier courier)</button>
+  </div>
+
+  <div class="rastreo-box" id="panelRastreoNea">
+    <p class="rastreo-hint">Para paquetes que ya prealertaste con nosotros.</p>
+    <form id="formRastreo" class="rastreo-form">
+      <input type="text" id="inputTracking" placeholder="Ej. 1Z999AA10123456784" autocomplete="off">
+      <button class="btn-solid" type="submit" id="btnRastreo">
+        <span class="spinner-rastreo"></span><span>Rastrear</span>
+      </button>
+    </form>
+    <div id="resultadoRastreo"></div>
+  </div>
+
+  <div class="rastreo-box" id="panelRastreoMundial" style="display:none;">
+    <p class="rastreo-hint">Para cualquier número de tracking (USPS, UPS, DHL, FedEx, UniUni, y +3,400 transportistas más), aunque no sea de NEA Cargo Xpress. Te abrimos el resultado en 17TRACK, el rastreador universal más usado.</p>
+    <form id="formMundial" class="rastreo-form">
+      <input type="text" id="inputMundial" maxlength="50" placeholder="Ej. RR123456789CN o UUS6467670502776182" autocomplete="off">
+      <button class="btn-solid" type="submit" style="color:#fff;">Rastrear en el mundo ↗</button>
+    </form>
+  </div>
+</section>
 <!-- ============ SUCURSALES ============ -->
 <section class="section reveal" id="sucursales">
   <div class="section-head">
@@ -984,11 +986,38 @@
   </div>
 </section>
 
+<!-- ============ CTA FINAL ============ -->
+<section class="cta-band">
+  <div class="cta-inner">
+    <h2>Tu próxima compra puede llegar esta semana</h2>
+    <p>Crear tu casillero es gratis y no te compromete a nada. Lo usas solo cuando lo necesites.</p>
+    <a href="app.html?registro" class="btn-solid">Crear mi casillero gratis</a>
+  </div>
+</section>
+
 <!-- ============ FOOTER ============ -->
 <footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">NEA Cargo Xpress</div>
+      <p>Casillero en Miami con retiro en Sabanitas, Colón. Compra en Estados Unidos y China, recíbelo en Panamá.</p>
+    </div>
+    <div>
+      <div class="footer-h">Contacto</div>
+      <a href="https://wa.me/50762937497" target="_blank" rel="noopener">WhatsApp +507 6293-7497</a>
+      <a href="mailto:adan@neacargoxpress.com">adan@neacargoxpress.com</a>
+      <a href="#sucursales">Sucursal en Sabanitas</a>
+    </div>
+    <div>
+      <div class="footer-h">Información</div>
+      <a href="restringida.html">Mercancía restringida</a>
+      <a href="#preguntas">Preguntas frecuentes</a>
+      <a href="admin.html">Acceso para el equipo</a>
+    </div>
+  </div>
   <div class="footer-inner">
-    <div class="brand" style="font-family: var(--font-display); font-weight:700;">NEA CARGO XPRESS</div>
-    <div>© <span id="anioActual"></span> NEA Cargo Xpress. Miami → Panamá.</div>
+    <div>© <span id="anioActual"></span> NEA Cargo Xpress</div>
+    <div>Miami → Panamá</div>
   </div>
 </footer>
 
@@ -1008,6 +1037,7 @@
   // ---------- Fondo: red de partículas conectadas (hero) ----------
   (function redParticulas(){
     const canvas = document.getElementById('networkCanvas');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const heroShell = canvas.parentElement;
     const prefiereReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1535,10 +1565,12 @@ const I18N = {
     'dd-login':'Iniciar sesión','dd-login-sub':'Ya tengo un casillero',
     'dd-crear':'Crear casillero','dd-crear-sub':'Es gratis, toma 2 minutos',
     'dd-staff':'Acceso staff','dd-staff-sub':'Panel de operaciones',
-    'hero-eyebrow':'Casillero virtual · EE.UU. y China → Panamá',
-    'hero-h1':'Compra en EE.UU.<br>Recíbelo en <span class="hl">Panamá</span>.',
-    'hero-lead':'Te damos una dirección en Miami, tú compras en Amazon, eBay, Shein, Alibaba o donde quieras. Nosotros lo recibimos, fotografiamos, pesamos y lo traemos hasta tus manos — con seguimiento en cada paso.',
-    'hero-cta1':'🚀 Crear mi casillero gratis','hero-cta2':'Rastrear mi paquete',
+    'hero-eyebrow':'Casillero en Miami · Retiro en Sabanitas, Colón',
+    'hero-h1':'Tu dirección en Miami, gratis.<br>Tus compras en Panamá en 4 a 7 días.',
+    'hero-lead':'Compra en Amazon, eBay, Shein, Temu o Alibaba con una dirección real en Estados Unidos. Nosotros recibimos, fotografiamos, pesamos y te lo traemos. Tú solo lo retiras.',
+    'hero-cta1':'Crear mi casillero gratis','hero-cta2':'Calcular cuánto me costaría',
+    'hero-micro':'Sin mensualidad. Toma 2 minutos. Tu dirección lista al instante.',
+    'fr-0k':'Foto de tu paquete','fr-0v':'apenas llega a Miami','fr-1k':'Peso verificado','fr-1v':'en balanza, con el detalle en tu factura','fr-2k':'Local físico','fr-2v':'en Sabanitas, Colón','fr-3k':'WhatsApp directo','fr-3v':'con quien maneja tu paquete',
     'trust-0':'Paquetes entregados','trust-1':'Clientes activos','trust-2':'Días de tránsito','trust-3':'Paquetes asegurados','trust-4':'Fotografiados en bodega',
     'rastreo-ey':'Rastreo en tiempo real','rastreo-h2':'¿Dónde está mi paquete?',
     'rastreo-p':'No necesitas iniciar sesión. Ingresa tu número de tracking y te decimos en qué punto va.',
@@ -1567,7 +1599,7 @@ const I18N = {
     'con-ey':'Contáctanos','con-h2':'Estamos para ayudarte','con-p':'Elige el canal que prefieras. Respondemos rápido.',
     'con-wa-h':'WhatsApp','con-wa-p':'La forma más rápida de resolver dudas, dar seguimiento a tu paquete o coordinar una importación desde China.',
     'con-em-h':'Correo electrónico','con-em-p':'Para consultas más detalladas, temas de facturación o documentación de importación.',
-    'cta-h2':'¿Listo para empezar?','cta-p':'Crea tu casillero gratis en 2 minutos y empieza a comprar desde EE.UU. hoy mismo.',
+    'cta-h2':'Tu próxima compra puede llegar esta semana','cta-p':'Crear tu casillero es gratis y no te compromete a nada. Lo usas solo cuando lo necesites.',
     'cta-btn':'Crear mi casillero gratis →',
   },
   en: {
@@ -1576,10 +1608,12 @@ const I18N = {
     'dd-login':'Sign in','dd-login-sub':'I already have a mailbox',
     'dd-crear':'Create mailbox','dd-crear-sub':"It's free, takes 2 minutes",
     'dd-staff':'Staff access','dd-staff-sub':'Operations panel',
-    'hero-eyebrow':'Virtual mailbox · USA & China → Panama',
-    'hero-h1':'Shop in the USA.<br>Receive it in <span class="hl">Panama</span>.',
-    'hero-lead':"We give you a Miami address. Shop at Amazon, eBay, Shein, Alibaba or anywhere. We receive, photograph, weigh and bring it to Panama — with tracking at every step.",
-    'hero-cta1':'🚀 Create my free mailbox','hero-cta2':'Track my package',
+    'hero-eyebrow':'Miami mailbox · Pickup in Sabanitas, Colón',
+    'hero-h1':'Your Miami address, free.<br>Your purchases in Panama in 4 to 7 days.',
+    'hero-lead':'Shop at Amazon, eBay, Shein, Temu or Alibaba with a real US address. We receive, photograph, weigh and bring it to you. You just pick it up.',
+    'hero-cta1':'Create my free mailbox','hero-cta2':'See what it would cost',
+    'hero-micro':'No monthly fee. Takes 2 minutes. Your address ready instantly.',
+    'fr-0k':'Photo of your package','fr-0v':'as soon as it lands in Miami','fr-1k':'Verified weight','fr-1v':'on a scale, itemized on your invoice','fr-2k':'Physical store','fr-2v':'in Sabanitas, Colón','fr-3k':'Direct WhatsApp','fr-3v':'with the people handling your package',
     'trust-0':'Packages delivered','trust-1':'Active customers','trust-2':'Transit days','trust-3':'Packages insured','trust-4':'Photographed in warehouse',
     'rastreo-ey':'Real-time tracking','rastreo-h2':'Where is my package?',
     'rastreo-p':"No login needed. Enter your tracking number and we'll tell you where it is.",
@@ -1608,7 +1642,7 @@ const I18N = {
     'con-ey':'Contact us','con-h2':"We're here to help",'con-p':'Choose your preferred channel. We respond fast.',
     'con-wa-h':'WhatsApp','con-wa-p':'The fastest way to resolve questions, track your package or coordinate a China import.',
     'con-em-h':'Email','con-em-p':'For detailed inquiries, billing questions or import documentation.',
-    'cta-h2':'Ready to start?','cta-p':'Create your free mailbox in 2 minutes and start shopping from the USA today.',
+    'cta-h2':'Your next purchase can arrive this week','cta-p':"Creating your mailbox is free and commits you to nothing. Use it only when you need it.",
     'cta-btn':'Create my free mailbox →',
   }
 };
@@ -1632,10 +1666,12 @@ function aplicarIdioma(l){
   htm(qs('.hero h1'),t['hero-h1']);
   txt(qs('.hero .lead'),t['hero-lead']);
   const hCtas=qsa('.hero-ctas a'); txt(hCtas[0],t['hero-cta1']); txt(hCtas[1],t['hero-cta2']);
+  txt(qs('.hero-micro'),t['hero-micro']);
+  qsa('.franja-item').forEach((el,i)=>{ txt(qs('.franja-k',el),t['fr-'+i+'k']); txt(qs('.franja-v',el),t['fr-'+i+'v']); });
   // Trust
   qsa('.trust-lbl').forEach((el,i)=>txt(el,t['trust-'+i]));
   // Rastreo
-  const rHead=qs('#rastreo .sec-head');
+  const rHead=qs('#rastreo .section-head');
   if(rHead){ htm(qs('.eyebrow',rHead),'<span class="pulse"></span> '+t['rastreo-ey']); txt(qs('h2',rHead),t['rastreo-h2']); txt(qs('p',rHead),t['rastreo-p']); }
   qsa('.rtab').forEach((el,i)=>txt(el,t['rtab-'+i]));
   txt(qs('#panelNea .rhint'),t['rhint-nea']);
@@ -1647,24 +1683,24 @@ function aplicarIdioma(l){
   // Fotos
   qsa('.foto-cap').forEach((el,i)=>{ htm(el,`<span class="foto-cap-num">${t['foto-'+i+'-n']}</span>${t['foto-'+i+'-c']}`); });
   // Cómo funciona
-  const cHead=qs('#como-funciona .sec-head');
+  const cHead=qs('#como-funciona .section-head');
   if(cHead){ htm(qs('.eyebrow',cHead),'<span class="pulse"></span> '+t['como-ey']); txt(qs('h2',cHead),t['como-h2']); txt(qs('p',cHead),t['como-p']); }
   qsa('.step-body').forEach((s,i)=>{ txt(qs('h3',s),t['step-'+i+'-h']); txt(qs('p',s),t['step-'+i+'-p']); });
   // Tarifas
-  const tHead=qs('#tarifas .sec-head');
+  const tHead=qs('#tarifas .section-head');
   if(tHead){ htm(qs('.eyebrow',tHead),'<span class="pulse"></span> '+t['tar-ey']); txt(qs('h2',tHead),t['tar-h2']); txt(qs('p',tHead),t['tar-p']); }
   txt(qs('.calc-box h3'),t['calc-h']);
   qsa('.calc-field label').forEach((el,i)=>txt(el,t['calc-l-'+i]));
   const ck=qs('.calc-check'); if(ck&&ck.lastChild) ck.lastChild.textContent=' '+t['calc-seg'];
   // Sucursales
-  const sHead=qs('#sucursales .sec-head');
+  const sHead=qs('#sucursales .section-head');
   if(sHead){ htm(qs('.eyebrow',sHead),'<span class="pulse"></span> '+t['suc-ey']); txt(qs('h2',sHead),t['suc-h2']); txt(qs('p',sHead),t['suc-p']); }
   // FAQ
-  const fHead=qs('#preguntas .sec-head');
+  const fHead=qs('#preguntas .section-head');
   if(fHead){ htm(qs('.eyebrow',fHead),'<span class="pulse"></span> '+t['faq-ey']); txt(qs('h2',fHead),t['faq-h2']); txt(qs('p',fHead),t['faq-p']); }
   const fSr=qs('#faqSearch'); if(fSr) fSr.placeholder=t['faq-ph'];
   // Contacto
-  const cnHead=qs('#contacto .sec-head');
+  const cnHead=qs('#contacto .section-head');
   if(cnHead){ htm(qs('.eyebrow',cnHead),'<span class="pulse"></span> '+t['con-ey']); txt(qs('h2',cnHead),t['con-h2']); txt(qs('p',cnHead),t['con-p']); }
   const cc=qsa('.contact-card');
   if(cc[0]){ txt(qs('h3',cc[0]),t['con-wa-h']); txt(qs('p',cc[0]),t['con-wa-p']); }
