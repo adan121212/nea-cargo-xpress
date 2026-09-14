@@ -65,7 +65,7 @@
       "name": "¿Cómo pago mi factura?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Te enviamos la factura por correo con el PDF adjunto apenas se genera. Puedes pagarla en cualquiera de nuestras sucursales."
+        "text": "Te enviamos la factura por correo con PDF adjunto y por WhatsApp apenas se genera. Puedes pagarla en cualquiera de nuestras sucursales."
       }
     },
     {
@@ -81,7 +81,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEA Cargo Xpress — Casillero Aéreo y Marítimo | Miami → Panamá</title>
+<title>NEA Cargo Xpress — Compra en EE.UU., recibe en Panamá</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
@@ -148,8 +148,9 @@
   .nav-inner{ max-width: 1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; }
   .brand{ display:flex; align-items:center; gap:10px; font-family: var(--font-display); font-weight:700; font-size:16px; }
   .brand .mark{
-    width:31px; height:31px; border-radius:50%; background: var(--accent);
-    display:flex; align-items:center; justify-content:center; color: var(--ink); font-weight:700; font-size:15px;
+    width:30px; height:30px; border-radius:8px; background: var(--accent);
+    display:flex; align-items:center; justify-content:center; color: var(--ink); font-weight:700; font-size:14px;
+    box-shadow: 0 0 0 1px rgba(255,106,26,0.3), 0 2px 16px var(--accent-glow);
   }
   .brand small{ display:block; font-weight:400; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color: rgba(241,243,242,0.5); font-family: var(--font-body); }
 
@@ -165,7 +166,8 @@
   .nav-btn .caret{ font-size:9px; transition: transform .15s ease; opacity:.6; }
   .nav-item.open .caret{ transform: rotate(180deg); }
   .nav-btn.cta{
-    background: var(--accent); color:#fff; font-weight:600; padding: 10px 18px; opacity:1; border-radius:9px;
+    background: var(--accent); color:#fff; font-weight:700; padding: 9px 18px; opacity:1;
+    box-shadow: 0 2px 20px var(--accent-glow);
   }
   .nav-btn.cta:hover{ background: var(--accent-dark); }
 
@@ -212,35 +214,48 @@
 
   /* ============ HERO con fondo de red de partículas ============ */
   .hero-shell{ position: relative; overflow: hidden; background: var(--ink); }
-  .hero-shell::before{ content:none; }
+  .hero-shell::before{
+    content:''; position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 10%, rgba(255,106,26,0.16), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 90% 80%, rgba(23,122,99,0.14), transparent 60%);
+    pointer-events:none; z-index:0;
+  }
   #networkCanvas{ position:absolute; inset:0; z-index:0; opacity:.85; }
   .hero{
-    max-width: 1180px; margin: 0 auto; padding: 96px 26px 104px;
+    max-width: 1180px; margin: 0 auto; padding: 88px 26px 74px;
     display:grid; grid-template-columns: 1.15fr .85fr; gap: 56px; align-items:center;
     position: relative; z-index: 2; color:#f1f3f2;
   }
   .eyebrow{
-    font-family: var(--font-body); font-size:13.5px; font-weight:500; letter-spacing:0; text-transform:none;
-    color: rgba(241,243,242,0.62); display:inline-flex; align-items:center; gap:8px;
+    font-family: var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color: var(--accent); display:inline-flex; align-items:center; gap:8px;
   }
-  .eyebrow::before{ content:''; width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; }
+  .eyebrow::before{ content:''; width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; box-shadow: 0 0 10px var(--accent-glow); animation: pulseDot 1.8s ease-in-out infinite; }
   @keyframes pulseDot{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
   .hero h1{
-    font-family: var(--font-display); font-size: clamp(38px, 5.2vw, 62px);
-    line-height:1.04; letter-spacing:-0.025em; margin: 20px 0 20px;
+    font-family: var(--font-display); font-size: clamp(32px, 4.6vw, 52px);
+    line-height:1.06; letter-spacing:-0.015em; margin: 16px 0 18px;
   }
-  .hero p.lead{ font-size:18px; line-height:1.6; color: rgba(241,243,242,0.72); max-width: 46ch; margin: 0 0 30px; }
-  .hero-micro{ font-size:13.5px; color: rgba(241,243,242,0.5); margin: 16px 0 0; }
+  .hero h1 .glow-word{ color: var(--accent); text-shadow: 0 0 34px var(--accent-glow); }
+  .hero p.lead{ font-size:16px; line-height:1.65; color: rgba(241,243,242,0.68); max-width: 46ch; margin: 0 0 28px; }
   .hero-ctas{ display:flex; gap:12px; flex-wrap:wrap; }
   .btn-solid{
-    position:relative; background: var(--accent); color:#fff; font-weight:600; font-size:15px;
-    padding: 14px 24px; border-radius: 10px; display:inline-block;
-    transition: background .15s ease;
+    position:relative; background: var(--accent); color:#fff; font-weight:700; font-size:14px;
+    padding: 14px 24px; border-radius: var(--radius-sm); display:inline-block; overflow:hidden;
+    box-shadow: 0 4px 24px var(--accent-glow);
+    transition: transform .15s ease, box-shadow .15s ease;
   }
-  .btn-solid:hover{ background: var(--accent-dark); }
+  .btn-solid::after{
+    content:''; position:absolute; inset:0; translate: -120% 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%);
+    transition: translate .5s ease;
+  }
+  .btn-solid:hover{ transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+  .btn-solid:hover::after{ translate: 120% 0; }
   .btn-outline{
-    border: 1.5px solid rgba(241,243,242,0.3); color:#f1f3f2; font-weight:600; font-size:15px;
-    padding: 13px 24px; border-radius: 10px; display:inline-block;
+    border: 1.5px solid rgba(241,243,242,0.25); color:#f1f3f2; font-weight:600; font-size:14px;
+    padding: 13px 24px; border-radius: var(--radius-sm); display:inline-block;
     transition: border-color .15s ease, background .15s ease;
   }
   .btn-outline:hover{ border-color: rgba(241,243,242,0.6); background: rgba(241,243,242,0.06); }
@@ -291,50 +306,6 @@
   .stat-mini{ flex:1; background: rgba(0,0,0,0.2); border-radius:10px; padding: 13px; border: 1px solid rgba(241,243,242,0.1); }
   .stat-mini .n{ font-family: var(--font-display); font-size:21px; color: var(--accent); text-shadow: 0 0 18px var(--accent-glow); }
   .stat-mini .l{ font-size:10.5px; color: rgba(241,243,242,0.5); text-transform:uppercase; letter-spacing:.04em; }
-
-  /* ---- Etiqueta de envío del hero ---- */
-  .label-card{ background:#fff; color:#0C1B33; border-radius:5px; position:relative;
-    transform: rotate(-2.2deg); box-shadow: 0 30px 62px rgba(0,0,0,0.42); }
-  .label-card::after{ content:""; position:absolute; inset:8px; border:1.5px dashed rgba(12,27,51,0.2);
-    border-radius:3px; pointer-events:none; }
-  .label-top{ background: var(--accent, #FF6A1A); color:#fff; padding:11px 20px; border-radius:5px 5px 0 0;
-    display:flex; justify-content:space-between; gap:10px;
-    font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size:11.5px; font-weight:700; letter-spacing:.08em; }
-  .label-body{ padding:22px 26px 16px; }
-  .label-to{ font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size:10.5px;
-    letter-spacing:.16em; color:#5A6B82; margin-bottom:11px; }
-  .label-addr{ font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size:14px;
-    line-height:1.85; font-weight:700; text-transform:uppercase; color:#0C1B33; }
-  .label-you{ background: rgba(255,106,26,0.22); padding:1px 5px; border-radius:3px; }
-  .label-barcode{ display:flex; gap:2px; align-items:flex-end; height:42px; margin-top:16px;
-    padding-top:14px; border-top:1px solid rgba(12,27,51,0.13); }
-  .label-barcode i{ background:#0C1B33; width:2px; height:100%; display:block; }
-  .label-barcode i:nth-child(3n){ width:4px; }
-  .label-barcode i:nth-child(4n){ height:68%; }
-  .label-foot{ font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size:10.5px;
-    letter-spacing:.1em; color:#5A6B82; padding:6px 26px 18px; }
-  @media (max-width: 900px){ .label-card{ transform: rotate(-1.2deg); } }
-
-  /* ---- Comparación NEA vs pedir el favor ---- */
-  .vs-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-  .vs-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-lg);
-    padding:32px; box-shadow: var(--shadow-card); }
-  .vs-card h3{ font-family: var(--font-display); font-size:21px; margin:0 0 20px; }
-  .vs-card ul{ list-style:none; margin:0; padding:0; }
-  .vs-card li{ display:flex; gap:12px; align-items:flex-start; padding:12px 0; font-size:15.5px;
-    border-top:1px solid var(--line); color: var(--ink-soft); }
-  .vs-card li:first-child{ border-top:0; }
-  .vs-mk{ flex:0 0 20px; height:20px; border-radius:50%; display:flex; align-items:center;
-    justify-content:center; font-size:11px; font-weight:700; margin-top:3px; }
-  .vs-no .vs-mk{ background: rgba(12,27,51,0.08); color: var(--ink-faint); }
-  .vs-win{ background:#0c1b33; border-color:#0c1b33; }
-  .vs-win h3{ color:#fff; }
-  .vs-win li{ color: rgba(228,234,245,0.82); border-color: rgba(255,255,255,0.12); }
-  .vs-yes .vs-mk{ background: var(--accent); color:#fff; }
-  [data-theme="dark"] .vs-card{ background: var(--panel); border-color: var(--line); }
-  [data-theme="dark"] .vs-no .vs-mk{ background: rgba(228,234,245,0.1); color: rgba(228,234,245,0.45); }
-  [data-theme="dark"] .vs-win{ background:#060d18; border-color: rgba(228,234,245,0.09); }
-  @media (max-width: 800px){ .vs-grid{ grid-template-columns:1fr; } .vs-card{ padding:26px; } }
 
   @media (max-width: 860px){ .hero{ grid-template-columns: 1fr; padding-top: 48px; gap: 40px; } }
 
@@ -395,51 +366,38 @@
   .rt-error{ background: var(--amber-bg); border:1px solid rgba(255,106,26,0.3); color: var(--accent-dark); border-radius: var(--radius-md); padding:17px; font-size:13.5px; }
 
   /* ============ SECCIONES GENERALES ============ */
-  .section{ max-width: 1180px; margin: 0 auto; padding: 96px 26px; }
-  .section-head{ max-width: 620px; margin: 0 0 44px; }
-  .section-head .eyebrow{ color: var(--ink-soft); margin-bottom:14px; }
-  .section-head h2{ font-family: var(--font-display); font-size: clamp(30px, 4vw, 44px); letter-spacing:-0.025em; line-height:1.05; margin:0 0 14px; }
-  .section-head p{ color: var(--ink-soft); font-size:17px; line-height:1.6; margin:0; }
+  .section{ max-width: 1180px; margin: 0 auto; padding: 78px 26px; }
+  .section-head{ max-width: 580px; margin: 0 0 38px; }
+  .section-head .eyebrow{ color: var(--accent-dark); margin-bottom:12px; }
+  .section-head .eyebrow::before{ box-shadow:none; animation:none; }
+  .section-head h2{ font-family: var(--font-display); font-size: clamp(23px, 3.1vw, 32px); letter-spacing:-0.01em; margin:0 0 11px; }
+  .section-head p{ color: var(--ink-soft); font-size:14.5px; line-height:1.6; margin:0; }
 
   .steps-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; perspective: 1000px; }
   .step-card{
-    background: var(--panel); border:1px solid var(--line); border-radius: 16px; padding:28px 26px;
-    box-shadow: var(--shadow-card); transition: transform .25s ease, box-shadow .25s ease;
-    position: relative;
+    background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:22px;
+    box-shadow: var(--shadow-card); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    position: relative; transform-style: preserve-3d;
   }
-  .step-card:hover{ transform: translateY(-3px); box-shadow: var(--shadow-card-hover); }
+  .step-card:hover{ transform: translateY(-4px) rotateX(4deg); box-shadow: var(--shadow-card-hover); border-color: rgba(255,106,26,0.35); }
   .step-card:not(:last-child)::after{
     content:''; position:absolute; top:50%; right:-9px; width:8px; height:1px;
     background-image: linear-gradient(to right, rgba(12,27,51,0.25) 50%, transparent 0%);
     background-size: 4px 1px; background-repeat: repeat-x;
   }
-  .step-card .num{ font-family: var(--font-display); font-size:34px; color: var(--accent); opacity:.6; line-height:1; }
-  .step-card h3{ font-family: var(--font-display); font-size:18px; margin: 14px 0 8px; letter-spacing:-.01em; }
-  .step-card p{ font-size:14.5px; color: var(--ink-soft); line-height:1.6; margin:0; }
+  .step-card .num{ font-family: var(--font-display); font-size:23px; color: var(--accent); }
+  .step-card h3{ font-family: var(--font-display); font-size:14.5px; margin: 11px 0 6px; }
+  .step-card p{ font-size:12.5px; color: var(--ink-soft); line-height:1.55; margin:0; }
   @media (max-width: 860px){ .steps-grid{ grid-template-columns: 1fr 1fr; } .step-card::after{ display:none; } }
   @media (max-width: 520px){ .steps-grid{ grid-template-columns: 1fr; } }
 
   .tarifas-band{ background: var(--ink); color:#f1f3f2; position: relative; overflow:hidden; }
-  .tarifas-band::before, .tarifas-band::after{ content:none; }
+  .tarifas-band::before{ content:''; position:absolute; top:-20%; left:-10%; width:50%; height:80%; background: radial-gradient(circle, rgba(255,106,26,0.12), transparent 70%); pointer-events:none; }
+  .tarifas-band::after{ content:''; position:absolute; bottom:-30%; right:-15%; width:55%; height:80%; background: radial-gradient(circle, rgba(23,122,99,0.14), transparent 70%); pointer-events:none; }
   .tarifas-band .section-head p{ color: rgba(241,243,242,0.6); }
-  .tarifas-band .section-head .eyebrow{ color: rgba(241,243,242,0.62); }
+  .tarifas-band .section-head .eyebrow{ color: var(--accent); }
   .tarifas-band > *{ position: relative; }
   .tarifas-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
-  .tarifa-n{ background:#fff; border:1px solid rgba(12,27,51,0.1); border-radius:16px; padding:28px;
-    transition: transform .2s ease, box-shadow .2s ease; }
-  .tarifa-n:hover{ transform: translateY(-3px); box-shadow: 0 18px 40px rgba(0,0,0,0.28); }
-  .tarifa-n h3{ font-family: var(--font-display); font-size:19px; margin:0; color:#0c1b33; }
-  .tarifa-n .precio-n{ font-family: var(--font-display); font-size:48px; line-height:1; margin:14px 0 4px;
-    letter-spacing:-.03em; color:#0c1b33; }
-  .tarifa-n .precio-n em{ font-style:normal; font-size:16px; font-weight:500; color: rgba(12,27,51,0.55); }
-  .tarifa-n ul{ list-style:none; margin:16px 0 0; padding:0; font-size:14.5px; }
-  .tarifa-n li{ padding:8px 0; border-top:1px solid rgba(12,27,51,0.1); color: rgba(12,27,51,0.62); }
-  .tarifa-n.destacada{ background:#0c1b33; border-color: rgba(255,106,26,0.4); }
-  .tarifa-n.destacada h3{ color:#fff; }
-  .tarifa-n.destacada .precio-n{ color: var(--accent); }
-  .tarifa-n.destacada .precio-n em{ color: rgba(241,243,242,0.6); }
-  .tarifa-n.destacada li{ color: rgba(241,243,242,0.75); border-color: rgba(241,243,242,0.14); }
-  @media (max-width: 860px){ .tarifas-grid{ grid-template-columns:1fr; } }
   .tarifa-card{ background: rgba(241,243,242,0.05); border:1px solid rgba(241,243,242,0.14); border-radius: var(--radius-md); padding:24px; transition: border-color .2s ease, background .2s ease, transform .2s ease; backdrop-filter: blur(6px); }
   .tarifa-card:hover{ border-color: rgba(255,106,26,0.45); background: rgba(241,243,242,0.08); transform: translateY(-3px); }
   .tarifa-card .precio{ font-family: var(--font-display); font-size:29px; color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
@@ -466,29 +424,6 @@
   .calc-nota-vol{ font-size:12px; color: rgba(241,243,242,0.6); margin:12px 2px 0; line-height:1.5; }
   .calc-nota-vol b{ color:#f1f3f2; }
   @media (max-width: 760px){ .calc-row{ grid-template-columns: 1fr; } .calc-row-dim{ grid-template-columns:1fr 1fr 1fr; } }
-
-  /* ---- Calculadora rediseñada ---- */
-  .calc-card{ margin-top:38px; background:#fff; border-radius: var(--radius-lg); padding:32px 34px;
-    display:grid; grid-template-columns: 1fr 280px; gap:34px; align-items:center;
-    box-shadow: 0 20px 50px rgba(12,27,51,0.25); }
-  .calc-card h3{ font-family: var(--font-display); font-size:25px; margin:0 0 6px; color:#0c1b33; }
-  .calc-sub{ color: rgba(12,27,51,0.62); font-size:15px; margin:0 0 20px; }
-  .calc-fields{ display:flex; gap:12px; flex-wrap:wrap; }
-  .calc-f{ flex:1; min-width:120px; }
-  .calc-f label{ display:block; font-size:12.5px; font-weight:600; color: rgba(12,27,51,0.62); margin-bottom:6px; }
-  .calc-f input{ width:100%; height:46px; border:1.5px solid rgba(12,27,51,0.13); border-radius:10px;
-    padding:0 12px; font-family: var(--font-body); font-size:15px; background:#fff; color:#0c1b33; }
-  .calc-f input:focus{ outline:none; border-color: var(--accent); }
-  .calc-nota{ margin:16px 0 0; font-size:13.5px; color: rgba(12,27,51,0.62); line-height:1.55; }
-  .calc-out{ background:#0c1b33; border-radius:14px; padding:26px; text-align:center; }
-  .calc-out-lbl{ font-size:12.5px; letter-spacing:.12em; color: rgba(241,243,242,0.6); display:block; margin-bottom:6px; }
-  .calc-out-big{ font-family: var(--font-display); font-size:46px; line-height:1; color: var(--accent); }
-  .calc-out-det{ font-size:12.5px; margin-top:10px; color: rgba(241,243,242,0.6); }
-  [data-theme="dark"] .calc-card{ background: var(--panel); }
-  [data-theme="dark"] .calc-card h3{ color: var(--ink); }
-  [data-theme="dark"] .calc-sub, [data-theme="dark"] .calc-nota, [data-theme="dark"] .calc-f label{ color: var(--ink-soft); }
-  [data-theme="dark"] .calc-f input{ background:#1a2436; border-color: rgba(228,234,245,0.15); color: var(--ink); }
-  @media (max-width: 880px){ .calc-card{ grid-template-columns:1fr; padding:26px 22px; } }
 
   /* ============ SUCURSALES ============ */
   .sucursales-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
@@ -519,7 +454,7 @@
   @media (max-width: 760px){ .contacto-grid{ grid-template-columns: 1fr; } }
 
   /* Footer */
-  footer{ background: var(--ink); color: rgba(241,243,242,0.6); padding: 56px 26px 34px; position:relative; overflow:hidden; border-top:1px solid rgba(241,243,242,0.08); }
+  footer{ background: var(--ink); color: rgba(241,243,242,0.6); padding: 38px 26px; position:relative; overflow:hidden; }
   .footer-inner{ max-width: 1180px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; font-size:12.5px; position:relative; }
   .footer-inner .brand{ color:#f1f3f2; }
 
@@ -529,68 +464,12 @@
     width: 58px; height:58px; border-radius:50%;
     background: var(--whatsapp); display:flex; align-items:center; justify-content:center;
     box-shadow: 0 8px 24px rgba(37,211,102,0.4);
-    transition: transform .15s ease;
+    animation: pulse-wsp 2.4s ease-in-out infinite; transition: transform .15s ease;
   }
   .whatsapp-float:hover{ transform: scale(1.08); }
   @keyframes pulse-wsp{ 0%,100%{ box-shadow: 0 8px 24px rgba(37,211,102,0.4); } 50%{ box-shadow: 0 8px 24px rgba(37,211,102,0.7), 0 0 0 8px rgba(37,211,102,0.12); } }
 
   a:focus-visible, button:focus-visible{ outline: 2px solid var(--accent); outline-offset:2px; border-radius:4px; }
-
-  /* ===== Franja de confianza ===== */
-  .franja{ background:#fff; border-bottom:1px solid var(--line); }
-  .franja-inner{ max-width:1180px; margin:0 auto; padding:0 26px; display:grid; grid-template-columns:repeat(4,1fr); }
-  .franja-item{ padding:24px 22px; border-right:1px solid var(--line); display:flex; flex-direction:column; gap:3px; }
-  .franja-item:first-child{ padding-left:0; }
-  .franja-item:last-child{ border-right:0; }
-  .franja-k{ font-family: var(--font-display); font-weight:700; font-size:16px; letter-spacing:-.01em; }
-  .franja-v{ font-size:13.5px; color: var(--ink-soft); }
-  [data-theme="dark"] .franja{ background: var(--panel); }
-  @media (max-width: 860px){ .franja-inner{ grid-template-columns:1fr 1fr; } .franja-item:nth-child(2){ border-right:0; } .franja-item:nth-child(3){ padding-left:0; } }
-  @media (max-width: 520px){ .franja-inner{ grid-template-columns:1fr; } .franja-item{ border-right:0; border-bottom:1px solid var(--line); padding:16px 0; } .franja-item:last-child{ border-bottom:0; } }
-
-  /* ===== CTA final ===== */
-  .cta-band{ background: var(--ink); color:#f1f3f2; padding:104px 26px; text-align:center; }
-  .cta-inner{ max-width:640px; margin:0 auto; }
-  .cta-band h2{ font-family: var(--font-display); font-size: clamp(32px, 4.6vw, 52px); letter-spacing:-.025em; line-height:1.04; margin:0 0 18px; }
-  .cta-band p{ color: rgba(241,243,242,0.66); font-size:18px; line-height:1.6; margin:0 0 34px; }
-
-  /* ===== Pie ===== */
-  .footer-grid{ max-width:1180px; margin:0 auto; display:grid; grid-template-columns: 1.4fr 1fr 1fr; gap:40px; padding-bottom:34px; border-bottom:1px solid rgba(241,243,242,0.1); margin-bottom:22px; position:relative; }
-  .footer-brand{ font-family: var(--font-display); font-weight:700; font-size:18px; color:#f1f3f2; margin-bottom:10px; }
-  .footer-grid p{ font-size:14px; line-height:1.6; margin:0; max-width:36ch; }
-  .footer-h{ font-family: var(--font-display); font-weight:700; font-size:13.5px; color:#f1f3f2; margin-bottom:12px; }
-  .footer-grid a{ display:block; font-size:14px; padding:4px 0; color: rgba(241,243,242,0.62); }
-  .footer-grid a:hover{ color:#fff; }
-  @media (max-width: 760px){ .footer-grid{ grid-template-columns:1fr; gap:28px; } }
-
-  /* ===== Ajustes finos para celular ===== */
-  @media (max-width: 640px){
-    .section{ padding: 64px 20px; }
-    .section-head{ margin-bottom: 30px; }
-    .section-head h2{ font-size: clamp(27px, 8vw, 34px); }
-    .section-head p{ font-size: 15.5px; }
-    .hero{ padding: 44px 20px 64px; gap: 36px; }
-    .hero h1{ font-size: clamp(31px, 8.6vw, 40px); }
-    .hero p.lead{ font-size: 16px; }
-    .hero-ctas a{ width:100%; text-align:center; }
-    .label-card{ transform: rotate(0deg); }
-    .label-addr{ font-size: 12.5px; }
-    .franja-inner{ padding: 0 20px; }
-    .calc-card{ padding: 22px 18px; gap: 22px; }
-    .calc-card h3{ font-size: 21px; }
-    .calc-f{ min-width: calc(50% - 6px); }
-    .calc-out-big{ font-size: 40px; }
-    .tarifa-n{ padding: 22px; }
-    .tarifa-n .precio-n{ font-size: 42px; }
-    .vs-card{ padding: 22px 20px; }
-    .step-card{ padding: 22px; }
-    .cta-band{ padding: 72px 20px; }
-    .cta-band h2{ font-size: clamp(28px, 8vw, 36px); }
-    .cta-band .btn-solid{ width:100%; text-align:center; }
-    footer{ padding: 44px 20px 28px; }
-    .footer-inner{ flex-direction:column; align-items:flex-start; gap:6px; }
-    .whatsapp-float{ width:52px; height:52px; bottom:16px; right:16px; }
-  }
 /* ===== MODO OSCURO ===== */
 [data-theme="dark"]{
   --ink:#e4eaf5; --ink-soft:rgba(228,234,245,0.62);
@@ -682,69 +561,6 @@
   .spgl-carga .estado span{ color:var(--accent); font-weight:700; }
   @media (prefers-reduced-motion: reduce){ #splash{ transition-duration:.01ms; } .spgl-continentes, .spgl-avion-wrap, .spgl-punto-ciudad-halo{ animation-duration:.01ms !important; } }
 </style>
-
-<style id="nea-aereo-maritimo-theme">
-/* ===== NEA CARGO XPRESS — TEMA AÉREO + MARÍTIMO ===== */
-.hero-shell{
-  background:
-    linear-gradient(90deg,rgba(4,14,29,.96) 0%,rgba(4,14,29,.82) 42%,rgba(4,14,29,.40) 100%),
-    url('https://images.unsplash.com/photo-1494412651409-8963ce7935a7?auto=format&fit=crop&w=1800&q=85') center/cover no-repeat !important;
-}
-.hero-shell::after{
-  content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(4,14,29,.05),rgba(4,14,29,.38));
-  pointer-events:none;z-index:1;
-}
-.hero{z-index:2;}
-.cargo-mode-badge{
-  display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;
-  margin:0 0 12px;padding:7px 11px;border:1px solid rgba(255,255,255,.18);
-  border-radius:999px;background:rgba(4,14,29,.48);backdrop-filter:blur(8px);
-  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-}
-.cargo-mode-badge b{color:#ff6a1a}.cargo-mode-badge span{color:rgba(255,255,255,.72)}
-.cargo-photo-section{padding:0 26px 88px;max-width:1180px;margin:auto}
-.cargo-photo-grid{display:grid;grid-template-columns:1.45fr .9fr .9fr;gap:12px}
-.cargo-photo{position:relative;min-height:245px;overflow:hidden;border-radius:18px;box-shadow:0 18px 45px rgba(12,27,51,.16)}
-.cargo-photo:first-child{min-height:390px;grid-row:span 2}
-.cargo-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
-.cargo-photo:hover img{transform:scale(1.055)}
-.cargo-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(4,14,29,.82))}
-.cargo-photo-copy{position:absolute;z-index:2;left:22px;right:22px;bottom:18px;color:#fff}
-.cargo-photo-copy .tag{font:700 10px var(--font-mono);letter-spacing:.12em;color:#ff6a1a;text-transform:uppercase}
-.cargo-photo-copy h3{font:700 22px var(--font-display);margin:5px 0 0}
-.cargo-photo-copy p{font-size:12.5px;color:rgba(255,255,255,.74);margin:5px 0 0;line-height:1.45}
-.cargo-services{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
-.cargo-service{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow-card)}
-.cargo-service .ico{font-size:27px}
-.cargo-service h3{font:700 18px var(--font-display);margin:10px 0 6px}
-.cargo-service p{font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0}
-.cargo-route-banner{
-  margin:0 0 0;padding:0;position:relative;overflow:hidden;
-  background:#071426;color:#fff;
-}
-.cargo-route-inner{max-width:1180px;margin:auto;padding:72px 26px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
-.cargo-route-visual{min-height:300px;border-radius:20px;overflow:hidden;background:url('https://images.unsplash.com/photo-1605733160314-4fc7dac4bb16?auto=format&fit=crop&w=1800&q=85') center/cover;position:relative}
-.cargo-route-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(4,14,29,.15),rgba(4,14,29,.72))}
-.cargo-route-copy .eyebrow{color:rgba(255,255,255,.65)}
-.cargo-route-copy h2{font:700 clamp(30px,4vw,46px)/1.05 var(--font-display);margin:10px 0 15px;letter-spacing:-.025em}
-.cargo-route-copy p{font-size:16px;line-height:1.65;color:rgba(255,255,255,.67);max-width:55ch}
-.route-pill-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
-.route-pill{padding:9px 13px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);border-radius:999px;font:600 11px var(--font-mono)}
-@media(max-width:800px){
- .cargo-photo-grid{grid-template-columns:1fr 1fr}
- .cargo-photo:first-child{grid-column:1/-1;grid-row:auto;min-height:300px}
- .cargo-services,.cargo-route-inner{grid-template-columns:1fr}
-}
-@media(max-width:560px){
- .cargo-photo-section{padding:0 20px 60px}
- .cargo-photo-grid{grid-template-columns:1fr}
- .cargo-photo:first-child{grid-column:auto}
- .cargo-photo{min-height:220px}
- .cargo-route-inner{padding:55px 20px}
-}
-</style>
-
 </head>
 <body>
 
@@ -786,7 +602,7 @@
   <div class="nav-inner">
     <a href="index.html" class="brand">
       <div class="mark">N</div>
-      <div>NEA Cargo Xpress<small>Miami → Panamá</small></div>
+      <div>NEA CARGO XPRESS<small>Miami → Panamá</small></div>
     </a>
     <button class="nav-toggle" id="navToggle">☰</button>
     <div class="nav-menu" id="navMenu">
@@ -817,6 +633,7 @@
           <a href="#sucursales" class="dropdown-link">Nuestras sucursales<span class="item-sub">Puntos de retiro en Panamá</span></a>
         </div>
       </div>
+      <a href="restringida.html" class="nav-btn" style="color:rgba(255,190,170,0.9);font-size:13px;">🚫 Restringidos</a>
       <a href="app.html?registro" class="nav-btn cta">Crear casillero gratis</a>
       <button id="btnLang" class="nav-btn" title="Cambiar idioma" style="font-size:12px;padding:7px 11px;opacity:.8;">🌐 <span id="langLabel">EN</span></button>
       <button id="btnTheme" class="nav-btn" title="Modo claro/oscuro" style="font-size:15px;padding:7px 10px;opacity:.8;"><span id="themeIcon">🌙</span></button>
@@ -826,22 +643,22 @@
 
 <!-- ============ HERO ============ -->
 <div class="hero-shell">
+  <canvas id="networkCanvas"></canvas>
   <section class="hero">
     <div>
-      <div class="cargo-mode-badge"><b>✈ AÉREA</b><span>•</span><b>⚓ MARÍTIMA</b><span>•</span><span>CARGA INTERNACIONAL</span></div>
-      <div class="eyebrow">Casillero en Miami · Retiro en Sabanitas, Colón</div>
-      <h1>Tu dirección en Miami, gratis.<br>Tus compras en Panamá en 4 a 7 días.</h1>
+      <div class="eyebrow">Casillero virtual · Estados Unidos y China → Panamá</div>
+      <h1>Compra en EE.UU. y China.<br>Recíbelo en <span class="glow-word">Panamá</span>.</h1>
       <p class="lead">
-        Compra en Amazon, eBay, Shein, Temu o Alibaba con una dirección real en Estados Unidos.
-        Nosotros recibimos, fotografiamos, pesamos y te lo traemos. Tú solo lo retiras.
+        Te damos una dirección en Miami, tú compras en Amazon, eBay, Shein, Alibaba o donde quieras
+        — también traemos mercancía directo desde China. Nosotros lo recibimos, te avisamos, y lo
+        traemos hasta tus manos — con seguimiento en cada paso.
       </p>
       <div class="hero-ctas">
         <a href="app.html?registro" class="btn-solid">Crear mi casillero gratis</a>
-        <a href="#tarifas" class="btn-outline">Calcular cuánto me costaría</a>
+        <a href="#rastreo" class="btn-outline">Rastrear mi paquete</a>
       </div>
-      <p class="hero-micro">Sin mensualidad. Toma 2 minutos. Tu dirección lista al instante.</p>
       <div class="route-strip">
-        <span class="city">MIAMI</span>
+        <span class="city">MIAMI / CHINA</span>
         <svg viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
           <line class="route-line" x1="2" y1="7" x2="138" y2="7"/>
           <circle class="route-dot" cx="2" cy="7" r="2.5"/>
@@ -853,168 +670,25 @@
     </div>
 
     <div class="tilt-wrap">
-      <div class="label-card reveal" id="heroCard">
-        <div class="label-top"><span>NEA CARGO XPRESS</span><span>PTY-14981</span></div>
-        <div class="label-body">
-          <div class="label-to">ENVIAR A / SHIP TO</div>
-          <div class="label-addr">
-            PTY-14981 <span class="label-you">TU NOMBRE</span><br>
-            NEA CARGO XPRESS<br>
-            8610 NW 72 STREET<br>
-            MIAMI, FLORIDA 33195<br>
-            ESTADOS UNIDOS
-          </div>
-          <div class="label-barcode" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="hero-card reveal" id="heroCard">
+        <h3>Tu casillero se ve así</h3>
+        <p class="small">Lo usas como tu dirección de envío en cualquier tienda de EE.UU.</p>
+        <div class="casillero-mock">
+          <span class="suite">PTY-14981</span> &nbsp; Tu Nombre &nbsp; NEA CARGO XPRESS<br>
+          8610 NW 72 STREET<br>
+          MIAMI, FLORIDA 33195<br>
+          ESTADOS UNIDOS<br>
+          1-305-406-3654
         </div>
-        <div class="label-foot">TEL 1-305-406-3654 · MIA → PTY</div>
+        <div class="stat-mini-row">
+          <div class="stat-mini"><div class="n" data-count-to="4">0</div><div class="l">Días Miami–PTY (min)</div></div>
+          <div class="stat-mini"><div class="n" data-count-to="100" data-suffix="%">0%</div><div class="l">Con seguimiento</div></div>
+        </div>
       </div>
     </div>
   </section>
 </div>
 
-
-
-<!-- ============ GALERÍA CARGO AÉREO + MARÍTIMO ============ -->
-<section class="cargo-photo-section reveal" aria-label="Servicios de carga aérea y marítima">
-  <div class="cargo-photo-grid">
-    <article class="cargo-photo">
-      <img src="https://images.unsplash.com/photo-1494412651409-8963ce7935a7?auto=format&fit=crop&w=1800&q=85" alt="Buque portacontenedores en transporte internacional" loading="lazy">
-      <div class="cargo-photo-copy"><div class="tag">CARGA MARÍTIMA</div><h3>Contenedores rumbo a Panamá</h3><p>Soluciones para carga consolidada y mercancía de mayor volumen.</p></div>
-    </article>
-    <article class="cargo-photo">
-      <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1800&q=85" alt="Avión de transporte aéreo" loading="lazy">
-      <div class="cargo-photo-copy"><div class="tag">CARGA AÉREA</div><h3>Rapidez cuando la necesitas</h3><p>Tu mercancía viaja por vía aérea con seguimiento.</p></div>
-    </article>
-    <article class="cargo-photo">
-      <img src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=1800&q=85" alt="Contenedores de carga" loading="lazy">
-      <div class="cargo-photo-copy"><div class="tag">LOGÍSTICA</div><h3>Control de tu mercancía</h3><p>Recepción, clasificación y preparación de la carga.</p></div>
-    </article>
-  </div>
-  <div class="cargo-services">
-    <div class="cargo-service"><div class="ico">✈️</div><h3>Casillero aéreo</h3><p>Recibimos tus compras en Miami, las identificamos y coordinamos su llegada a Panamá.</p></div>
-    <div class="cargo-service"><div class="ico">🚢</div><h3>Casillero marítimo</h3><p>Una opción para mercancía voluminosa o cargas que conviene mover por barco.</p></div>
-    <div class="cargo-service"><div class="ico">📦</div><h3>Recepción y control</h3><p>Fotos, peso, estado del paquete y seguimiento desde tu cuenta NEA.</p></div>
-  </div>
-</section>
-
-
-
-
-<!-- ============ FRANJA DE CONFIANZA ============ -->
-<section class="franja" aria-label="Garantías">
-  <div class="franja-inner">
-    <div class="franja-item"><span class="franja-k">Foto de tu paquete</span><span class="franja-v">apenas llega a Miami</span></div>
-    <div class="franja-item"><span class="franja-k">Peso verificado</span><span class="franja-v">en balanza, con el detalle en tu factura</span></div>
-    <div class="franja-item"><span class="franja-k">Local físico</span><span class="franja-v">en Sabanitas, Colón</span></div>
-    <div class="franja-item"><span class="franja-k">WhatsApp directo</span><span class="franja-v">con quien maneja tu paquete</span></div>
-  </div>
-</section>
-
-
-<!-- ============ RUTA INTERNACIONAL ============ -->
-<section class="cargo-route-banner reveal">
-  <div class="cargo-route-inner">
-    <div class="cargo-route-copy">
-      <div class="eyebrow">Logística internacional</div>
-      <h2>Miami → Panamá por aire o por mar.</h2>
-      <p>NEA Cargo Xpress combina casillero, recepción y gestión logística para que tengas una sola operación y mayor control de tu mercancía.</p>
-      <div class="route-pill-row"><span class="route-pill">MIAMI 🇺🇸</span><span class="route-pill">✈ AÉREO</span><span class="route-pill">🚢 MARÍTIMO</span><span class="route-pill">PANAMÁ 🇵🇦</span></div>
-    </div>
-    <div class="cargo-route-visual" role="img" aria-label="Puerto y operación de carga"></div>
-  </div>
-</section>
-
-<!-- ============ TARIFAS ============ -->
-<section class="section tarifas-band reveal" id="tarifas">
-  <div class="section-head">
-    <div class="eyebrow">Tarifas</div>
-    <h2>Dos tarifas, y siempre sabes cuál te tocó</h2>
-    <p>Se cobra por peso o por volumen, la que dé más. Te lo explicamos antes de comprar, no después de pesar.</p>
-  </div>
-
-  <div class="tarifas-grid" id="tarifasGrid">
-    <div class="tarifa-card"><p>Cargando tarifas…</p></div>
-  </div>
-
-  <div class="calc-card">
-    <div class="calc-left">
-      <h3>Haz la cuenta antes de comprar</h3>
-      <p class="calc-sub">Escribe el peso y te damos el estimado. Sin registrarte.</p>
-      <div class="calc-fields">
-        <div class="calc-f"><label for="calcPeso">Peso en balanza (lb)</label><input type="number" id="calcPeso" min="0" step="0.5" value="5"></div>
-        <div class="calc-f"><label for="calcLargo">Largo (in)</label><input type="number" id="calcLargo" min="0" step="1" placeholder="Opcional"></div>
-        <div class="calc-f"><label for="calcAncho">Ancho (in)</label><input type="number" id="calcAncho" min="0" step="1" placeholder="Opcional"></div>
-        <div class="calc-f"><label for="calcAlto">Alto (in)</label><input type="number" id="calcAlto" min="0" step="1" placeholder="Opcional"></div>
-      </div>
-      <p class="calc-nota" id="calcNota"></p>
-    </div>
-    <div class="calc-out">
-      <span class="calc-out-lbl">TE COSTARÍA</span>
-      <div class="calc-out-big" id="calcTotal">—</div>
-      <div class="calc-out-det" id="calcDetalle">Cargando tarifas…</div>
-    </div>
-  </div>
-</section>
-<!-- ============ COMPARACIÓN ============ -->
-<section class="section reveal" id="comparar">
-  <div class="section-head">
-    <div class="eyebrow">Por qué NEA</div>
-    <h2>Lo que cambia cuando dejas de improvisar</h2>
-    <p>La mayoría de la gente compra pidiéndole el favor a un familiar en Estados Unidos. Así se ve la diferencia.</p>
-  </div>
-  <div class="vs-grid">
-    <div class="vs-card">
-      <h3>Pidiéndole el favor a alguien</h3>
-      <ul>
-        <li class="vs-no"><span class="vs-mk">&#10005;</span> Esperas a que alguien viaje</li>
-        <li class="vs-no"><span class="vs-mk">&#10005;</span> No sabes dónde está tu caja</li>
-        <li class="vs-no"><span class="vs-mk">&#10005;</span> Si se pierde, no hay a quién reclamar</li>
-        <li class="vs-no"><span class="vs-mk">&#10005;</span> Le quedas debiendo el favor</li>
-        <li class="vs-no"><span class="vs-mk">&#10005;</span> Sin factura ni respaldo</li>
-      </ul>
-    </div>
-    <div class="vs-card vs-win">
-      <h3>Con tu casillero NEA</h3>
-      <ul>
-        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Compras hoy, llega en 4 a 7 días</li>
-        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Ves la foto y el peso de tu caja</li>
-        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Pagas al retirar, no por adelantado</li>
-        <li class="vs-yes"><span class="vs-mk">&#10003;</span> No le debes nada a nadie</li>
-        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Factura en PDF con el detalle completo</li>
-      </ul>
-    </div>
-  </div>
-</section>
-<!-- ============ CÓMO FUNCIONA ============ -->
-<section class="section reveal" id="como-funciona">
-  <div class="section-head">
-    <div class="eyebrow">Proceso</div>
-    <h2>Cuatro pasos, sin complicaciones</h2>
-    <p>Desde que compras hasta que retiras tu paquete, siempre sabes en qué punto va.</p>
-  </div>
-  <div class="steps-grid">
-    <div class="step-card">
-      <div class="num">01</div>
-      <h3>Crea tu casillero</h3>
-      <p>Regístrate gratis y te asignamos una dirección personal en Miami al instante.</p>
-    </div>
-    <div class="step-card">
-      <div class="num">02</div>
-      <h3>Compra y prealerta</h3>
-      <p>Compra en la tienda que quieras usando tu dirección, y avísanos qué compraste en la app.</p>
-    </div>
-    <div class="step-card">
-      <div class="num">03</div>
-      <h3>Lo recibimos y pesamos</h3>
-      <p>Tu paquete llega a nuestra bodega, lo fotografiamos, pesamos y actualizamos su estado.</p>
-    </div>
-    <div class="step-card">
-      <div class="num">04</div>
-      <h3>Retira en Panamá</h3>
-      <p>Te avisamos por correo, con tu factura adjunta, cuando esté listo en tu sucursal más cercana.</p>
-    </div>
-  </div>
-</section>
 <!-- ============ RASTREO PÚBLICO ============ -->
 <section class="section reveal" id="rastreo">
   <div class="section-head">
@@ -1047,6 +721,86 @@
     </form>
   </div>
 </section>
+
+<!-- ============ FOTOS DEL PROCESO ============ -->
+<section class="foto-banda reveal">
+  <div class="foto-item">
+    <img src="/img/proceso-01-compras.svg" alt="Cajas de compras en línea listas para envío" loading="lazy">
+    <div class="foto-caption"><span class="foto-num">01</span>Compras en Amazon, eBay y más</div>
+  </div>
+  <div class="foto-item">
+    <img src="/img/proceso-02-transporte.svg" alt="Barco de carga con contenedores en el puerto" loading="lazy">
+    <div class="foto-caption"><span class="foto-num">02</span>Viaja por mar o aire hasta Panamá</div>
+  </div>
+  <div class="foto-item">
+    <img src="/img/proceso-03-sucursal.svg" alt="Entrega en tu sucursal más cercana" loading="lazy">
+    <div class="foto-caption"><span class="foto-num">03</span>Lo recibes en tu sucursal más cercana</div>
+  </div>
+</section>
+
+<!-- ============ CÓMO FUNCIONA ============ -->
+<section class="section reveal" id="como-funciona">
+  <div class="section-head">
+    <div class="eyebrow">Proceso</div>
+    <h2>Cuatro pasos, sin complicaciones</h2>
+    <p>Desde que compras hasta que retiras tu paquete, siempre sabes en qué punto va.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="num">01</div>
+      <h3>Crea tu casillero</h3>
+      <p>Regístrate gratis y te asignamos una dirección personal en Miami al instante.</p>
+    </div>
+    <div class="step-card">
+      <div class="num">02</div>
+      <h3>Compra y prealerta</h3>
+      <p>Compra en la tienda que quieras usando tu dirección, y avísanos qué compraste en la app.</p>
+    </div>
+    <div class="step-card">
+      <div class="num">03</div>
+      <h3>Lo recibimos y pesamos</h3>
+      <p>Tu paquete llega a nuestra bodega, lo fotografiamos, pesamos y actualizamos su estado.</p>
+    </div>
+    <div class="step-card">
+      <div class="num">04</div>
+      <h3>Retira en Panamá</h3>
+      <p>Te avisamos por correo y WhatsApp cuando esté listo en tu sucursal más cercana.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TARIFAS ============ -->
+<section class="section tarifas-band reveal" id="tarifas">
+  <div class="section-head">
+    <div class="eyebrow">Tarifas</div>
+    <h2>Precios claros, sin sorpresas</h2>
+    <p>Pagas por lo que pesa tu paquete. Sin cargos escondidos.</p>
+  </div>
+
+  <div class="tarifas-grid" id="tarifasGrid">
+    <div class="tarifa-card"><p>Cargando tarifas…</p></div>
+  </div>
+
+  <div class="calculadora-box">
+    <h3>Calcula el costo estimado de tu envío</h3>
+    <div class="calc-row">
+      <div><label for="calcTarifa">Tarifa</label><select id="calcTarifa"></select></div>
+      <div><label for="calcPeso">Peso estimado (lb)</label><input type="number" id="calcPeso" min="0" step="0.1" placeholder="Ej. 3.5"></div>
+      <div><label for="calcValor">Valor declarado (USD, opcional)</label><input type="number" id="calcValor" min="0" step="0.01" placeholder="Ej. 60"></div>
+    </div>
+    <div id="calcDimensiones" style="display:none;">
+      <p class="calc-dim-nota">📐 Esta tarifa cobra por volumen. Ingresa las medidas de la caja (en pulgadas) para un estimado exacto.</p>
+      <div class="calc-row calc-row-dim">
+        <div><label for="calcLargo">Largo (in)</label><input type="number" id="calcLargo" min="0" step="0.1" placeholder="Ej. 18"></div>
+        <div><label for="calcAncho">Ancho (in)</label><input type="number" id="calcAncho" min="0" step="0.1" placeholder="Ej. 12"></div>
+        <div><label for="calcAlto">Alto (in)</label><input type="number" id="calcAlto" min="0" step="0.1" placeholder="Ej. 10"></div>
+      </div>
+    </div>
+    <label class="calc-check"><input type="checkbox" id="calcSeguro"> Agregar seguro sobre el valor declarado</label>
+    <div id="calcResultado"></div>
+  </div>
+</section>
+
 <!-- ============ SUCURSALES ============ -->
 <section class="section reveal" id="sucursales">
   <div class="section-head">
@@ -1085,7 +839,7 @@
     </div>
     <div class="faq-item">
       <div class="faq-q"><span>¿Cómo pago mi factura?</span><span class="plus">+</span></div>
-      <div class="faq-a">Te enviamos la factura por correo, con el PDF adjunto, apenas se genera. Puedes pagarla en cualquiera de nuestras sucursales. Si tienes alguna duda, escríbenos por WhatsApp.</div>
+      <div class="faq-a">Te enviamos la factura por correo (con PDF adjunto) y por WhatsApp apenas se genera. Puedes pagarla en cualquiera de nuestras sucursales.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q"><span>¿Qué no puedo enviar?</span><span class="plus">+</span></div>
@@ -1117,38 +871,11 @@
   </div>
 </section>
 
-<!-- ============ CTA FINAL ============ -->
-<section class="cta-band">
-  <div class="cta-inner">
-    <h2>Tu próxima compra puede llegar esta semana</h2>
-    <p>Crear tu casillero es gratis y no te compromete a nada. Lo usas solo cuando lo necesites.</p>
-    <a href="app.html?registro" class="btn-solid">Crear mi casillero gratis</a>
-  </div>
-</section>
-
 <!-- ============ FOOTER ============ -->
 <footer>
-  <div class="footer-grid">
-    <div>
-      <div class="footer-brand">NEA Cargo Xpress</div>
-      <p>Casillero en Miami con retiro en Sabanitas, Colón. Compra en Estados Unidos y China, recíbelo en Panamá.</p>
-    </div>
-    <div>
-      <div class="footer-h">Contacto</div>
-      <a href="https://wa.me/50762937497" target="_blank" rel="noopener">WhatsApp +507 6293-7497</a>
-      <a href="mailto:adan@neacargoxpress.com">adan@neacargoxpress.com</a>
-      <a href="#sucursales">Sucursal en Sabanitas</a>
-    </div>
-    <div>
-      <div class="footer-h">Información</div>
-      <a href="restringida.html">Mercancía restringida</a>
-      <a href="#preguntas">Preguntas frecuentes</a>
-      <a href="admin.html">Acceso para el equipo</a>
-    </div>
-  </div>
   <div class="footer-inner">
-    <div>© <span id="anioActual"></span> NEA Cargo Xpress</div>
-    <div>Miami → Panamá</div>
+    <div class="brand" style="font-family: var(--font-display); font-weight:700;">NEA CARGO XPRESS</div>
+    <div>© <span id="anioActual"></span> NEA Cargo Xpress. Miami → Panamá.</div>
   </div>
 </footer>
 
@@ -1168,7 +895,6 @@
   // ---------- Fondo: red de partículas conectadas (hero) ----------
   (function redParticulas(){
     const canvas = document.getElementById('networkCanvas');
-    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const heroShell = canvas.parentElement;
     const prefiereReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1477,6 +1203,7 @@
 
   async function cargarTarifas(){
     const grid = $('#tarifasGrid');
+    const select = $('#calcTarifa');
     grid.innerHTML = '<div class="tarifa-card"><p>Cargando tarifas…</p></div>';
     try {
       const data = await fetchConReintentos('/api/public/tarifas');
@@ -1484,40 +1211,24 @@
 
       if (tarifasCache.length === 0){
         grid.innerHTML = '<div class="tarifa-card"><p>Muy pronto publicaremos nuestras tarifas.</p></div>';
-        const d = document.getElementById('calcDetalle');
-        if (d) d.textContent = 'Tarifas no disponibles por ahora';
+        select.innerHTML = '<option value="">No hay tarifas disponibles</option>';
         return;
       }
 
-      const VINETAS_VOL = ['Largo × ancho × alto ÷ 166','Para cajas grandes y livianas','Se aplica cuando sale más que el peso'];
-      const VINETAS_PESO = ['El peso real de la balanza','Ropa, electrónica, repuestos','Desde Estados Unidos y China'];
-
-      const tarjetas = tarifasCache.map((t, i) => {
-        const esVolumen = /volum/i.test(t.nombre);
-        const unidad = esVolumen ? '/ lb vol.' : '/ lb';
-        const vinetas = esVolumen ? VINETAS_VOL : VINETAS_PESO;
-        return `
-        <div class="tarifa-n${i === 0 ? ' destacada' : ''}">
+      grid.innerHTML = tarifasCache.map(t => `
+        <div class="tarifa-card">
+          <div class="precio">$${Number(t.precio_libra).toFixed(2)}<span>/lb</span></div>
           <h3>${escapeHtml(t.nombre)}</h3>
-          <div class="precio-n">$${Number(t.precio_libra).toFixed(2)} <em>${unidad}</em></div>
-          <ul>${vinetas.map(v => `<li>${v}</li>`).join('')}</ul>
-        </div>`;
-      });
+          <p>Cargo mínimo $${Number(t.cargo_minimo).toFixed(2)} · Manejo $${Number(t.cargo_manejo).toFixed(2)}${Number(t.pct_seguro) > 0 ? ` · Seguro opcional ${Number(t.pct_seguro)}%` : ''}</p>
+        </div>
+      `).join('');
 
-      tarjetas.push(`
-        <div class="tarifa-n">
-          <h3>Sin cargo mínimo</h3>
-          <div class="precio-n">$0.00 <em>fijo</em></div>
-          <ul>
-            <li>No cobramos por abrir cuenta</li>
-            <li>No hay mensualidad</li>
-            <li>Pagas solo cuando envías</li>
-          </ul>
-        </div>`);
-
-      grid.innerHTML = tarjetas.join('');
+      select.innerHTML = tarifasCache.map(t =>
+        `<option value="${t.id}">${escapeHtml(t.nombre)} — $${Number(t.precio_libra).toFixed(2)}/lb</option>`
+      ).join('');
 
       calcularEstimado();
+      actualizarVisibilidadDimensiones();
     } catch (err) {
       grid.innerHTML = '<div class="tarifa-card"><p>No se pudieron cargar las tarifas.</p><button type="button" onclick="cargarTarifas()" style="margin-top:8px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:13px;">↻ Reintentar</button></div>';
     }
@@ -1532,64 +1243,74 @@
   }
 
   function calcularEstimado(){
-    const elTotal = document.getElementById('calcTotal');
-    const elDet   = document.getElementById('calcDetalle');
-    const elNota  = document.getElementById('calcNota');
-    if (!elTotal) return;
+    const cont = $('#calcResultado');
+    const tarifa = tarifasCache.find(t => t.id == $('#calcTarifa').value);
+    const peso = parseFloat($('#calcPeso').value);
+    const valor = parseFloat($('#calcValor').value);
+    const conSeguro = $('#calcSeguro').checked;
 
-    if (!tarifasCache.length){ elDet.textContent = 'Cargando tarifas…'; return; }
+    if (!tarifa){ cont.innerHTML = ''; return; }
 
-    const peso  = parseFloat(document.getElementById('calcPeso').value);
-    const largo = document.getElementById('calcLargo').value;
-    const ancho = document.getElementById('calcAncho').value;
-    const alto  = document.getElementById('calcAlto').value;
-    const pesoVol = pesoVolumetrico(largo, ancho, alto);
+    const esVolumen = /volum/i.test(tarifa.nombre);
+    const pesoVol = esVolumen ? pesoVolumetrico($('#calcLargo').value, $('#calcAncho').value, $('#calcAlto').value) : null;
     const hayPeso = !isNaN(peso) && peso > 0;
 
-    if (!hayPeso && !pesoVol){
-      elTotal.textContent = '—';
-      elDet.textContent = 'Escribe el peso o las medidas';
-      elNota.textContent = '';
-      return;
-    }
-
-    // Se evalúa cada tarifa activa y se aplica la que genera el cobro mayor,
-    // igual que hace el facturador del panel administrativo.
-    let mejor = null;
-    tarifasCache.forEach(t => {
-      const esVolumen = /volum/i.test(t.nombre);
-      const lbs = esVolumen ? pesoVol : (hayPeso ? peso : null);
-      if (!lbs) return;
-      const envio = Math.max(lbs * Number(t.precio_libra), Number(t.cargo_minimo));
-      const total = envio + Number(t.cargo_manejo);
-      if (!mejor || total > mejor.total) mejor = { total, lbs, esVolumen, tarifa: t };
-    });
-
-    if (!mejor){
-      elTotal.textContent = '—';
-      elDet.textContent = 'Escribe el peso o las medidas';
-      elNota.textContent = '';
-      return;
-    }
-
-    elTotal.textContent = '$' + mejor.total.toFixed(2);
-    elDet.textContent = mejor.esVolumen
-      ? 'Estimado para ' + mejor.lbs + ' lb por volumen'
-      : 'Estimado para ' + mejor.lbs + ' lb de peso';
-
-    if (mejor.esVolumen){
-      elNota.textContent = 'Tu caja da ' + mejor.lbs + ' libras por volumen (' + largo + ' × ' + ancho + ' × ' + alto +
-        ' ÷ 166). Sale más que cobrarla por peso, así que se aplica la tarifa de volumen.';
-    } else if (pesoVol){
-      elNota.textContent = 'Tu caja da ' + pesoVol + ' libras por volumen, menos que su peso de balanza. Se cobra por peso.';
+    // Determinar el peso a cobrar según el caso.
+    let pesoCobrar = null;
+    let nota = '';
+    if (esVolumen){
+      if (pesoVol && hayPeso){
+        pesoCobrar = Math.max(peso, pesoVol);
+        nota = pesoVol > peso
+          ? `Se cobra el peso volumétrico (${pesoVol} lb), mayor que el real (${peso} lb). Cálculo: ${$('#calcLargo').value}×${$('#calcAncho').value}×${$('#calcAlto').value} ÷ 166.`
+          : `Se cobra el peso real (${peso} lb), mayor que el volumétrico (${pesoVol} lb).`;
+      } else if (pesoVol){
+        // Solo medidas: calcular con el volumétrico.
+        pesoCobrar = pesoVol;
+        nota = `Peso volumétrico ${pesoVol} lb (${$('#calcLargo').value}×${$('#calcAncho').value}×${$('#calcAlto').value} ÷ 166). Si el peso real en balanza es mayor, se cobrará ese.`;
+      } else if (hayPeso){
+        // Solo peso, sin medidas aún.
+        pesoCobrar = peso;
+        nota = 'Ingresa las medidas de la caja para calcular el peso volumétrico.';
+      } else {
+        cont.innerHTML = '<p class="calc-nota-vol">Ingresa las medidas de la caja (o el peso) para ver el estimado.</p>';
+        return;
+      }
     } else {
-      elNota.textContent = 'Las medidas son opcionales. Si tu caja es grande y liviana, se cobra por volumen en vez de por peso.';
+      // Tarifa normal: requiere peso.
+      if (!hayPeso){ cont.innerHTML = ''; return; }
+      pesoCobrar = peso;
     }
+
+    const seguro = conSeguro && !isNaN(valor) ? (valor * Number(tarifa.pct_seguro)) / 100 : 0;
+    const costoEnvio = Math.max(pesoCobrar * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
+    const cargoManejo = Number(tarifa.cargo_manejo);
+    const total = costoEnvio + cargoManejo + seguro;
+
+    cont.innerHTML = `
+      <div class="calc-total">
+        <div class="linea"><span>Costo de envío (${pesoCobrar} lb × $${Number(tarifa.precio_libra).toFixed(2)}/lb, mín. $${Number(tarifa.cargo_minimo).toFixed(2)})</span><span>$${costoEnvio.toFixed(2)}</span></div>
+        <div class="linea"><span>Cargo de manejo</span><span>$${cargoManejo.toFixed(2)}</span></div>
+        ${seguro > 0 ? `<div class="linea"><span>Seguro (${tarifa.pct_seguro}% del valor declarado)</span><span>$${seguro.toFixed(2)}</span></div>` : ''}
+        <div class="total-final"><span>Estimado total</span><span>$${total.toFixed(2)}</span></div>
+      </div>
+      ${nota ? `<p class="calc-nota-vol">${nota}</p>` : ''}
+    `;
   }
 
-  ['calcPeso','calcLargo','calcAncho','calcAlto'].forEach(id => {
+  function actualizarVisibilidadDimensiones(){
+    const tarifa = tarifasCache.find(t => t.id == $('#calcTarifa').value);
+    const esVolumen = tarifa && /volum/i.test(tarifa.nombre);
+    const cont = document.getElementById('calcDimensiones');
+    if (cont) cont.style.display = esVolumen ? 'block' : 'none';
+    const lblPeso = document.querySelector('label[for="calcPeso"]');
+    if (lblPeso) lblPeso.textContent = esVolumen ? 'Peso estimado (lb, opcional)' : 'Peso estimado (lb)';
+  }
+
+  ['calcTarifa','calcPeso','calcValor','calcSeguro','calcLargo','calcAncho','calcAlto'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', calcularEstimado);
   });
+  document.getElementById('calcTarifa')?.addEventListener('change', actualizarVisibilidadDimensiones);
 
   cargarTarifas();
 
@@ -1696,12 +1417,10 @@ const I18N = {
     'dd-login':'Iniciar sesión','dd-login-sub':'Ya tengo un casillero',
     'dd-crear':'Crear casillero','dd-crear-sub':'Es gratis, toma 2 minutos',
     'dd-staff':'Acceso staff','dd-staff-sub':'Panel de operaciones',
-    'hero-eyebrow':'Casillero en Miami · Retiro en Sabanitas, Colón',
-    'hero-h1':'Tu dirección en Miami, gratis.<br>Tus compras en Panamá en 4 a 7 días.',
-    'hero-lead':'Compra en Amazon, eBay, Shein, Temu o Alibaba con una dirección real en Estados Unidos. Nosotros recibimos, fotografiamos, pesamos y te lo traemos. Tú solo lo retiras.',
-    'hero-cta1':'Crear mi casillero gratis','hero-cta2':'Calcular cuánto me costaría',
-    'hero-micro':'Sin mensualidad. Toma 2 minutos. Tu dirección lista al instante.',
-    'fr-0k':'Foto de tu paquete','fr-0v':'apenas llega a Miami','fr-1k':'Peso verificado','fr-1v':'en balanza, con el detalle en tu factura','fr-2k':'Local físico','fr-2v':'en Sabanitas, Colón','fr-3k':'WhatsApp directo','fr-3v':'con quien maneja tu paquete',
+    'hero-eyebrow':'Casillero virtual · EE.UU. y China → Panamá',
+    'hero-h1':'Compra en EE.UU.<br>Recíbelo en <span class="hl">Panamá</span>.',
+    'hero-lead':'Te damos una dirección en Miami, tú compras en Amazon, eBay, Shein, Alibaba o donde quieras. Nosotros lo recibimos, fotografiamos, pesamos y lo traemos hasta tus manos — con seguimiento en cada paso.',
+    'hero-cta1':'🚀 Crear mi casillero gratis','hero-cta2':'Rastrear mi paquete',
     'trust-0':'Paquetes entregados','trust-1':'Clientes activos','trust-2':'Días de tránsito','trust-3':'Paquetes asegurados','trust-4':'Fotografiados en bodega',
     'rastreo-ey':'Rastreo en tiempo real','rastreo-h2':'¿Dónde está mi paquete?',
     'rastreo-p':'No necesitas iniciar sesión. Ingresa tu número de tracking y te decimos en qué punto va.',
@@ -1718,8 +1437,8 @@ const I18N = {
     'step-0-h':'Crea tu casillero','step-0-p':'Regístrate gratis y recibe tu dirección personal en Miami al instante. Sin costos de apertura.',
     'step-1-h':'Compra y prealerta','step-1-p':'Compra en cualquier tienda con tu dirección de Miami y avísanos qué enviaste desde la app.',
     'step-2-h':'Recibimos y fotografiamos','step-2-p':'Tu paquete llega a nuestra bodega en Miami. Lo fotografiamos, pesamos y actualizamos el estado.',
-    'step-3-h':'Retira en Panamá','step-3-p':'Te avisamos por correo, con tu factura adjunta, cuando esté listo. Retira con tu cédula o autoriza a alguien más.',
-    'tar-ey':'Tarifas','tar-h2':'Dos tarifas, y siempre sabes cuál te tocó','tar-p':'Se cobra por peso o por volumen, la que dé más. Te lo explicamos antes de comprar, no después de pesar.',
+    'step-3-h':'Retira en Panamá','step-3-p':'Te avisamos por correo y WhatsApp cuando esté listo. Retira con tu cédula o autoriza a alguien más.',
+    'tar-ey':'Tarifas','tar-h2':'Precios claros, sin sorpresas','tar-p':'Pagas por el peso real de tu paquete. Sin cargos escondidos, sin letra chica.',
     'calc-h':'🧮 Calcula el costo estimado de tu envío',
     'calc-l-0':'Tarifa','calc-l-1':'Peso estimado (lb)','calc-l-2':'Valor declarado (USD, opcional)',
     'calc-seg':'Agregar seguro sobre el valor declarado',
@@ -1730,7 +1449,7 @@ const I18N = {
     'con-ey':'Contáctanos','con-h2':'Estamos para ayudarte','con-p':'Elige el canal que prefieras. Respondemos rápido.',
     'con-wa-h':'WhatsApp','con-wa-p':'La forma más rápida de resolver dudas, dar seguimiento a tu paquete o coordinar una importación desde China.',
     'con-em-h':'Correo electrónico','con-em-p':'Para consultas más detalladas, temas de facturación o documentación de importación.',
-    'cta-h2':'Tu próxima compra puede llegar esta semana','cta-p':'Crear tu casillero es gratis y no te compromete a nada. Lo usas solo cuando lo necesites.',
+    'cta-h2':'¿Listo para empezar?','cta-p':'Crea tu casillero gratis en 2 minutos y empieza a comprar desde EE.UU. hoy mismo.',
     'cta-btn':'Crear mi casillero gratis →',
   },
   en: {
@@ -1739,12 +1458,10 @@ const I18N = {
     'dd-login':'Sign in','dd-login-sub':'I already have a mailbox',
     'dd-crear':'Create mailbox','dd-crear-sub':"It's free, takes 2 minutes",
     'dd-staff':'Staff access','dd-staff-sub':'Operations panel',
-    'hero-eyebrow':'Miami mailbox · Pickup in Sabanitas, Colón',
-    'hero-h1':'Your Miami address, free.<br>Your purchases in Panama in 4 to 7 days.',
-    'hero-lead':'Shop at Amazon, eBay, Shein, Temu or Alibaba with a real US address. We receive, photograph, weigh and bring it to you. You just pick it up.',
-    'hero-cta1':'Create my free mailbox','hero-cta2':'See what it would cost',
-    'hero-micro':'No monthly fee. Takes 2 minutes. Your address ready instantly.',
-    'fr-0k':'Photo of your package','fr-0v':'as soon as it lands in Miami','fr-1k':'Verified weight','fr-1v':'on a scale, itemized on your invoice','fr-2k':'Physical store','fr-2v':'in Sabanitas, Colón','fr-3k':'Direct WhatsApp','fr-3v':'with the people handling your package',
+    'hero-eyebrow':'Virtual mailbox · USA & China → Panama',
+    'hero-h1':'Shop in the USA.<br>Receive it in <span class="hl">Panama</span>.',
+    'hero-lead':"We give you a Miami address. Shop at Amazon, eBay, Shein, Alibaba or anywhere. We receive, photograph, weigh and bring it to Panama — with tracking at every step.",
+    'hero-cta1':'🚀 Create my free mailbox','hero-cta2':'Track my package',
     'trust-0':'Packages delivered','trust-1':'Active customers','trust-2':'Transit days','trust-3':'Packages insured','trust-4':'Photographed in warehouse',
     'rastreo-ey':'Real-time tracking','rastreo-h2':'Where is my package?',
     'rastreo-p':"No login needed. Enter your tracking number and we'll tell you where it is.",
@@ -1761,8 +1478,8 @@ const I18N = {
     'step-0-h':'Create your mailbox','step-0-p':'Register for free and get your personal Miami address instantly. No opening fees.',
     'step-1-h':'Shop and pre-alert','step-1-p':'Shop at any store using your Miami address and let us know what you sent via the app.',
     'step-2-h':'We receive and photograph','step-2-p':'Your package arrives at our Miami warehouse. We photograph, weigh it and update its status.',
-    'step-3-h':'Pick up in Panama','step-3-p':"We notify you by email, with your invoice attached, when it's ready. Pick up with your ID or authorize someone else.",
-    'tar-ey':'Rates','tar-h2':'Two rates, and you always know which one applied','tar-p':'We charge by weight or by volume, whichever is higher. We explain it before you buy, not after we weigh.',
+    'step-3-h':'Pick up in Panama','step-3-p':"We notify you by email and WhatsApp when it's ready. Pick up with your ID or authorize someone else.",
+    'tar-ey':'Rates','tar-h2':'Clear prices, no surprises','tar-p':'You pay for the actual weight. No hidden fees, no fine print.',
     'calc-h':'🧮 Calculate your estimated shipping cost',
     'calc-l-0':'Rate','calc-l-1':'Estimated weight (lb)','calc-l-2':'Declared value (USD, optional)',
     'calc-seg':'Add insurance on declared value',
@@ -1773,7 +1490,7 @@ const I18N = {
     'con-ey':'Contact us','con-h2':"We're here to help",'con-p':'Choose your preferred channel. We respond fast.',
     'con-wa-h':'WhatsApp','con-wa-p':'The fastest way to resolve questions, track your package or coordinate a China import.',
     'con-em-h':'Email','con-em-p':'For detailed inquiries, billing questions or import documentation.',
-    'cta-h2':'Your next purchase can arrive this week','cta-p':"Creating your mailbox is free and commits you to nothing. Use it only when you need it.",
+    'cta-h2':'Ready to start?','cta-p':'Create your free mailbox in 2 minutes and start shopping from the USA today.',
     'cta-btn':'Create my free mailbox →',
   }
 };
@@ -1797,12 +1514,10 @@ function aplicarIdioma(l){
   htm(qs('.hero h1'),t['hero-h1']);
   txt(qs('.hero .lead'),t['hero-lead']);
   const hCtas=qsa('.hero-ctas a'); txt(hCtas[0],t['hero-cta1']); txt(hCtas[1],t['hero-cta2']);
-  txt(qs('.hero-micro'),t['hero-micro']);
-  qsa('.franja-item').forEach((el,i)=>{ txt(qs('.franja-k',el),t['fr-'+i+'k']); txt(qs('.franja-v',el),t['fr-'+i+'v']); });
   // Trust
   qsa('.trust-lbl').forEach((el,i)=>txt(el,t['trust-'+i]));
   // Rastreo
-  const rHead=qs('#rastreo .section-head');
+  const rHead=qs('#rastreo .sec-head');
   if(rHead){ htm(qs('.eyebrow',rHead),'<span class="pulse"></span> '+t['rastreo-ey']); txt(qs('h2',rHead),t['rastreo-h2']); txt(qs('p',rHead),t['rastreo-p']); }
   qsa('.rtab').forEach((el,i)=>txt(el,t['rtab-'+i]));
   txt(qs('#panelNea .rhint'),t['rhint-nea']);
@@ -1814,24 +1529,24 @@ function aplicarIdioma(l){
   // Fotos
   qsa('.foto-cap').forEach((el,i)=>{ htm(el,`<span class="foto-cap-num">${t['foto-'+i+'-n']}</span>${t['foto-'+i+'-c']}`); });
   // Cómo funciona
-  const cHead=qs('#como-funciona .section-head');
+  const cHead=qs('#como-funciona .sec-head');
   if(cHead){ htm(qs('.eyebrow',cHead),'<span class="pulse"></span> '+t['como-ey']); txt(qs('h2',cHead),t['como-h2']); txt(qs('p',cHead),t['como-p']); }
   qsa('.step-body').forEach((s,i)=>{ txt(qs('h3',s),t['step-'+i+'-h']); txt(qs('p',s),t['step-'+i+'-p']); });
   // Tarifas
-  const tHead=qs('#tarifas .section-head');
+  const tHead=qs('#tarifas .sec-head');
   if(tHead){ htm(qs('.eyebrow',tHead),'<span class="pulse"></span> '+t['tar-ey']); txt(qs('h2',tHead),t['tar-h2']); txt(qs('p',tHead),t['tar-p']); }
   txt(qs('.calc-box h3'),t['calc-h']);
   qsa('.calc-field label').forEach((el,i)=>txt(el,t['calc-l-'+i]));
   const ck=qs('.calc-check'); if(ck&&ck.lastChild) ck.lastChild.textContent=' '+t['calc-seg'];
   // Sucursales
-  const sHead=qs('#sucursales .section-head');
+  const sHead=qs('#sucursales .sec-head');
   if(sHead){ htm(qs('.eyebrow',sHead),'<span class="pulse"></span> '+t['suc-ey']); txt(qs('h2',sHead),t['suc-h2']); txt(qs('p',sHead),t['suc-p']); }
   // FAQ
-  const fHead=qs('#preguntas .section-head');
+  const fHead=qs('#preguntas .sec-head');
   if(fHead){ htm(qs('.eyebrow',fHead),'<span class="pulse"></span> '+t['faq-ey']); txt(qs('h2',fHead),t['faq-h2']); txt(qs('p',fHead),t['faq-p']); }
   const fSr=qs('#faqSearch'); if(fSr) fSr.placeholder=t['faq-ph'];
   // Contacto
-  const cnHead=qs('#contacto .section-head');
+  const cnHead=qs('#contacto .sec-head');
   if(cnHead){ htm(qs('.eyebrow',cnHead),'<span class="pulse"></span> '+t['con-ey']); txt(qs('h2',cnHead),t['con-h2']); txt(qs('p',cnHead),t['con-p']); }
   const cc=qsa('.contact-card');
   if(cc[0]){ txt(qs('h3',cc[0]),t['con-wa-h']); txt(qs('p',cc[0]),t['con-wa-p']); }
