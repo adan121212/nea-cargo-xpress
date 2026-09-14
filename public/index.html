@@ -562,6 +562,35 @@
   .footer-grid a{ display:block; font-size:14px; padding:4px 0; color: rgba(241,243,242,0.62); }
   .footer-grid a:hover{ color:#fff; }
   @media (max-width: 760px){ .footer-grid{ grid-template-columns:1fr; gap:28px; } }
+
+  /* ===== Ajustes finos para celular ===== */
+  @media (max-width: 640px){
+    .section{ padding: 64px 20px; }
+    .section-head{ margin-bottom: 30px; }
+    .section-head h2{ font-size: clamp(27px, 8vw, 34px); }
+    .section-head p{ font-size: 15.5px; }
+    .hero{ padding: 44px 20px 64px; gap: 36px; }
+    .hero h1{ font-size: clamp(31px, 8.6vw, 40px); }
+    .hero p.lead{ font-size: 16px; }
+    .hero-ctas a{ width:100%; text-align:center; }
+    .label-card{ transform: rotate(0deg); }
+    .label-addr{ font-size: 12.5px; }
+    .franja-inner{ padding: 0 20px; }
+    .calc-card{ padding: 22px 18px; gap: 22px; }
+    .calc-card h3{ font-size: 21px; }
+    .calc-f{ min-width: calc(50% - 6px); }
+    .calc-out-big{ font-size: 40px; }
+    .tarifa-n{ padding: 22px; }
+    .tarifa-n .precio-n{ font-size: 42px; }
+    .vs-card{ padding: 22px 20px; }
+    .step-card{ padding: 22px; }
+    .cta-band{ padding: 72px 20px; }
+    .cta-band h2{ font-size: clamp(28px, 8vw, 36px); }
+    .cta-band .btn-solid{ width:100%; text-align:center; }
+    footer{ padding: 44px 20px 28px; }
+    .footer-inner{ flex-direction:column; align-items:flex-start; gap:6px; }
+    .whatsapp-float{ width:52px; height:52px; bottom:16px; right:16px; }
+  }
 /* ===== MODO OSCURO ===== */
 [data-theme="dark"]{
   --ink:#e4eaf5; --ink-soft:rgba(228,234,245,0.62);
