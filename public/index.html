@@ -469,6 +469,29 @@
   .calc-nota-vol b{ color:#f1f3f2; }
   @media (max-width: 760px){ .calc-row{ grid-template-columns: 1fr; } .calc-row-dim{ grid-template-columns:1fr 1fr 1fr; } }
 
+  /* ---- Calculadora rediseñada ---- */
+  .calc-card{ margin-top:38px; background:#fff; border-radius: var(--radius-lg); padding:32px 34px;
+    display:grid; grid-template-columns: 1fr 280px; gap:34px; align-items:center;
+    box-shadow: 0 20px 50px rgba(12,27,51,0.25); }
+  .calc-card h3{ font-family: var(--font-display); font-size:25px; margin:0 0 6px; color:#0c1b33; }
+  .calc-sub{ color: rgba(12,27,51,0.62); font-size:15px; margin:0 0 20px; }
+  .calc-fields{ display:flex; gap:12px; flex-wrap:wrap; }
+  .calc-f{ flex:1; min-width:120px; }
+  .calc-f label{ display:block; font-size:12.5px; font-weight:600; color: rgba(12,27,51,0.62); margin-bottom:6px; }
+  .calc-f input{ width:100%; height:46px; border:1.5px solid rgba(12,27,51,0.13); border-radius:10px;
+    padding:0 12px; font-family: var(--font-body); font-size:15px; background:#fff; color:#0c1b33; }
+  .calc-f input:focus{ outline:none; border-color: var(--accent); }
+  .calc-nota{ margin:16px 0 0; font-size:13.5px; color: rgba(12,27,51,0.62); line-height:1.55; }
+  .calc-out{ background:#0c1b33; border-radius:14px; padding:26px; text-align:center; }
+  .calc-out-lbl{ font-size:12.5px; letter-spacing:.12em; color: rgba(241,243,242,0.6); display:block; margin-bottom:6px; }
+  .calc-out-big{ font-family: var(--font-display); font-size:46px; line-height:1; color: var(--accent); }
+  .calc-out-det{ font-size:12.5px; margin-top:10px; color: rgba(241,243,242,0.6); }
+  [data-theme="dark"] .calc-card{ background: var(--panel); }
+  [data-theme="dark"] .calc-card h3{ color: var(--ink); }
+  [data-theme="dark"] .calc-sub, [data-theme="dark"] .calc-nota, [data-theme="dark"] .calc-f label{ color: var(--ink-soft); }
+  [data-theme="dark"] .calc-f input{ background:#1a2436; border-color: rgba(228,234,245,0.15); color: var(--ink); }
+  @media (max-width: 880px){ .calc-card{ grid-template-columns:1fr; padding:26px 22px; } }
+
   /* ============ SUCURSALES ============ */
   .sucursales-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
   .sucursal-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-md); padding:20px; box-shadow: var(--shadow-card); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
@@ -856,23 +879,23 @@
     <div class="tarifa-card"><p>Cargando tarifas…</p></div>
   </div>
 
-  <div class="calculadora-box">
-    <h3>Calcula el costo estimado de tu envío</h3>
-    <div class="calc-row">
-      <div><label for="calcTarifa">Tarifa</label><select id="calcTarifa"></select></div>
-      <div><label for="calcPeso">Peso estimado (lb)</label><input type="number" id="calcPeso" min="0" step="0.1" placeholder="Ej. 3.5"></div>
-      <div><label for="calcValor">Valor declarado (USD, opcional)</label><input type="number" id="calcValor" min="0" step="0.01" placeholder="Ej. 60"></div>
-    </div>
-    <div id="calcDimensiones" style="display:none;">
-      <p class="calc-dim-nota">📐 Esta tarifa cobra por volumen. Ingresa las medidas de la caja (en pulgadas) para un estimado exacto.</p>
-      <div class="calc-row calc-row-dim">
-        <div><label for="calcLargo">Largo (in)</label><input type="number" id="calcLargo" min="0" step="0.1" placeholder="Ej. 18"></div>
-        <div><label for="calcAncho">Ancho (in)</label><input type="number" id="calcAncho" min="0" step="0.1" placeholder="Ej. 12"></div>
-        <div><label for="calcAlto">Alto (in)</label><input type="number" id="calcAlto" min="0" step="0.1" placeholder="Ej. 10"></div>
+  <div class="calc-card">
+    <div class="calc-left">
+      <h3>Haz la cuenta antes de comprar</h3>
+      <p class="calc-sub">Escribe el peso y te damos el estimado. Sin registrarte.</p>
+      <div class="calc-fields">
+        <div class="calc-f"><label for="calcPeso">Peso en balanza (lb)</label><input type="number" id="calcPeso" min="0" step="0.5" value="5"></div>
+        <div class="calc-f"><label for="calcLargo">Largo (in)</label><input type="number" id="calcLargo" min="0" step="1" placeholder="Opcional"></div>
+        <div class="calc-f"><label for="calcAncho">Ancho (in)</label><input type="number" id="calcAncho" min="0" step="1" placeholder="Opcional"></div>
+        <div class="calc-f"><label for="calcAlto">Alto (in)</label><input type="number" id="calcAlto" min="0" step="1" placeholder="Opcional"></div>
       </div>
+      <p class="calc-nota" id="calcNota"></p>
     </div>
-    <label class="calc-check"><input type="checkbox" id="calcSeguro"> Agregar seguro sobre el valor declarado</label>
-    <div id="calcResultado"></div>
+    <div class="calc-out">
+      <span class="calc-out-lbl">TE COSTARÍA</span>
+      <div class="calc-out-big" id="calcTotal">—</div>
+      <div class="calc-out-det" id="calcDetalle">Cargando tarifas…</div>
+    </div>
   </div>
 </section>
 
@@ -1278,7 +1301,6 @@
 
   async function cargarTarifas(){
     const grid = $('#tarifasGrid');
-    const select = $('#calcTarifa');
     grid.innerHTML = '<div class="tarifa-card"><p>Cargando tarifas…</p></div>';
     try {
       const data = await fetchConReintentos('/api/public/tarifas');
@@ -1286,7 +1308,8 @@
 
       if (tarifasCache.length === 0){
         grid.innerHTML = '<div class="tarifa-card"><p>Muy pronto publicaremos nuestras tarifas.</p></div>';
-        select.innerHTML = '<option value="">No hay tarifas disponibles</option>';
+        const d = document.getElementById('calcDetalle');
+        if (d) d.textContent = 'Tarifas no disponibles por ahora';
         return;
       }
 
@@ -1298,12 +1321,7 @@
         </div>
       `).join('');
 
-      select.innerHTML = tarifasCache.map(t =>
-        `<option value="${t.id}">${escapeHtml(t.nombre)} — $${Number(t.precio_libra).toFixed(2)}/lb</option>`
-      ).join('');
-
       calcularEstimado();
-      actualizarVisibilidadDimensiones();
     } catch (err) {
       grid.innerHTML = '<div class="tarifa-card"><p>No se pudieron cargar las tarifas.</p><button type="button" onclick="cargarTarifas()" style="margin-top:8px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:13px;">↻ Reintentar</button></div>';
     }
@@ -1318,74 +1336,64 @@
   }
 
   function calcularEstimado(){
-    const cont = $('#calcResultado');
-    const tarifa = tarifasCache.find(t => t.id == $('#calcTarifa').value);
-    const peso = parseFloat($('#calcPeso').value);
-    const valor = parseFloat($('#calcValor').value);
-    const conSeguro = $('#calcSeguro').checked;
+    const elTotal = document.getElementById('calcTotal');
+    const elDet   = document.getElementById('calcDetalle');
+    const elNota  = document.getElementById('calcNota');
+    if (!elTotal) return;
 
-    if (!tarifa){ cont.innerHTML = ''; return; }
+    if (!tarifasCache.length){ elDet.textContent = 'Cargando tarifas…'; return; }
 
-    const esVolumen = /volum/i.test(tarifa.nombre);
-    const pesoVol = esVolumen ? pesoVolumetrico($('#calcLargo').value, $('#calcAncho').value, $('#calcAlto').value) : null;
+    const peso  = parseFloat(document.getElementById('calcPeso').value);
+    const largo = document.getElementById('calcLargo').value;
+    const ancho = document.getElementById('calcAncho').value;
+    const alto  = document.getElementById('calcAlto').value;
+    const pesoVol = pesoVolumetrico(largo, ancho, alto);
     const hayPeso = !isNaN(peso) && peso > 0;
 
-    // Determinar el peso a cobrar según el caso.
-    let pesoCobrar = null;
-    let nota = '';
-    if (esVolumen){
-      if (pesoVol && hayPeso){
-        pesoCobrar = Math.max(peso, pesoVol);
-        nota = pesoVol > peso
-          ? `Se cobra el peso volumétrico (${pesoVol} lb), mayor que el real (${peso} lb). Cálculo: ${$('#calcLargo').value}×${$('#calcAncho').value}×${$('#calcAlto').value} ÷ 166.`
-          : `Se cobra el peso real (${peso} lb), mayor que el volumétrico (${pesoVol} lb).`;
-      } else if (pesoVol){
-        // Solo medidas: calcular con el volumétrico.
-        pesoCobrar = pesoVol;
-        nota = `Peso volumétrico ${pesoVol} lb (${$('#calcLargo').value}×${$('#calcAncho').value}×${$('#calcAlto').value} ÷ 166). Si el peso real en balanza es mayor, se cobrará ese.`;
-      } else if (hayPeso){
-        // Solo peso, sin medidas aún.
-        pesoCobrar = peso;
-        nota = 'Ingresa las medidas de la caja para calcular el peso volumétrico.';
-      } else {
-        cont.innerHTML = '<p class="calc-nota-vol">Ingresa las medidas de la caja (o el peso) para ver el estimado.</p>';
-        return;
-      }
-    } else {
-      // Tarifa normal: requiere peso.
-      if (!hayPeso){ cont.innerHTML = ''; return; }
-      pesoCobrar = peso;
+    if (!hayPeso && !pesoVol){
+      elTotal.textContent = '—';
+      elDet.textContent = 'Escribe el peso o las medidas';
+      elNota.textContent = '';
+      return;
     }
 
-    const seguro = conSeguro && !isNaN(valor) ? (valor * Number(tarifa.pct_seguro)) / 100 : 0;
-    const costoEnvio = Math.max(pesoCobrar * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
-    const cargoManejo = Number(tarifa.cargo_manejo);
-    const total = costoEnvio + cargoManejo + seguro;
+    // Se evalúa cada tarifa activa y se aplica la que genera el cobro mayor,
+    // igual que hace el facturador del panel administrativo.
+    let mejor = null;
+    tarifasCache.forEach(t => {
+      const esVolumen = /volum/i.test(t.nombre);
+      const lbs = esVolumen ? pesoVol : (hayPeso ? peso : null);
+      if (!lbs) return;
+      const envio = Math.max(lbs * Number(t.precio_libra), Number(t.cargo_minimo));
+      const total = envio + Number(t.cargo_manejo);
+      if (!mejor || total > mejor.total) mejor = { total, lbs, esVolumen, tarifa: t };
+    });
 
-    cont.innerHTML = `
-      <div class="calc-total">
-        <div class="linea"><span>Costo de envío (${pesoCobrar} lb × $${Number(tarifa.precio_libra).toFixed(2)}/lb, mín. $${Number(tarifa.cargo_minimo).toFixed(2)})</span><span>$${costoEnvio.toFixed(2)}</span></div>
-        <div class="linea"><span>Cargo de manejo</span><span>$${cargoManejo.toFixed(2)}</span></div>
-        ${seguro > 0 ? `<div class="linea"><span>Seguro (${tarifa.pct_seguro}% del valor declarado)</span><span>$${seguro.toFixed(2)}</span></div>` : ''}
-        <div class="total-final"><span>Estimado total</span><span>$${total.toFixed(2)}</span></div>
-      </div>
-      ${nota ? `<p class="calc-nota-vol">${nota}</p>` : ''}
-    `;
+    if (!mejor){
+      elTotal.textContent = '—';
+      elDet.textContent = 'Escribe el peso o las medidas';
+      elNota.textContent = '';
+      return;
+    }
+
+    elTotal.textContent = '$' + mejor.total.toFixed(2);
+    elDet.textContent = mejor.esVolumen
+      ? 'Estimado para ' + mejor.lbs + ' lb por volumen'
+      : 'Estimado para ' + mejor.lbs + ' lb de peso';
+
+    if (mejor.esVolumen){
+      elNota.textContent = 'Tu caja da ' + mejor.lbs + ' libras por volumen (' + largo + ' × ' + ancho + ' × ' + alto +
+        ' ÷ 166). Sale más que cobrarla por peso, así que se aplica la tarifa de volumen.';
+    } else if (pesoVol){
+      elNota.textContent = 'Tu caja da ' + pesoVol + ' libras por volumen, menos que su peso de balanza. Se cobra por peso.';
+    } else {
+      elNota.textContent = 'Las medidas son opcionales. Si tu caja es grande y liviana, se cobra por volumen en vez de por peso.';
+    }
   }
 
-  function actualizarVisibilidadDimensiones(){
-    const tarifa = tarifasCache.find(t => t.id == $('#calcTarifa').value);
-    const esVolumen = tarifa && /volum/i.test(tarifa.nombre);
-    const cont = document.getElementById('calcDimensiones');
-    if (cont) cont.style.display = esVolumen ? 'block' : 'none';
-    const lblPeso = document.querySelector('label[for="calcPeso"]');
-    if (lblPeso) lblPeso.textContent = esVolumen ? 'Peso estimado (lb, opcional)' : 'Peso estimado (lb)';
-  }
-
-  ['calcTarifa','calcPeso','calcValor','calcSeguro','calcLargo','calcAncho','calcAlto'].forEach(id => {
+  ['calcPeso','calcLargo','calcAncho','calcAlto'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', calcularEstimado);
   });
-  document.getElementById('calcTarifa')?.addEventListener('change', actualizarVisibilidadDimensiones);
 
   cargarTarifas();
 
