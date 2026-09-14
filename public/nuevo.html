@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEA Cargo Xpress — Compra en EE.UU., recibe en Panamá</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Tu casillero en Miami, gratis. Compra en Amazon, Shein o Temu y te lo traemos a Sabanitas, Colón en 4 a 7 días.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0C1B33; --navy-2:#13294A; --navy-3:#1B3762;
+  --orange:#FF6A1A; --orange-d:#E25A0F;
+  --ice:#F2F5F9; --ice-2:#E6ECF4;
+  --muted:#5A6B82;
+  --line:rgba(12,27,51,.13); --line-d:rgba(255,255,255,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Inter,system-ui,sans-serif;background:#fff;color:var(--navy);line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+h1,h2,h3,h4{font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;line-height:1.04;letter-spacing:-.025em}
+a{color:inherit}
+.btn{display:inline-block;font-weight:600;font-size:15.5px;padding:14px 24px;border-radius:10px;text-decoration:none;border:1.5px solid transparent;transition:.15s}
+.btn-p{background:var(--orange);color:#fff}
+.btn-p:hover{background:var(--orange-d)}
+.btn-o{background:transparent;color:var(--navy);border-color:rgba(12,27,51,.28)}
+.btn-o:hover{border-color:var(--navy);background:var(--ice)}
+.btn-ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
+.btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+.btn-sm{padding:10px 18px;font-size:14.5px}
+
+nav{background:var(--navy);color:#fff;position:sticky;top:0;z-index:60}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:70px;gap:18px}
+.logo{font-family:'Space Grotesk';font-weight:700;font-size:18px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.logo b{background:var(--orange);color:var(--navy);width:31px;height:31px;display:grid;place-items:center;border-radius:50%;font-size:16px}
+.navlinks{display:flex;gap:26px;font-size:14.5px;color:#BCC9DA}
+.navlinks a{text-decoration:none;padding-bottom:3px;border-bottom:2px solid transparent}
+.navlinks a:hover{color:#fff;border-color:var(--orange)}
+@media(max-width:900px){.navlinks{display:none}}
+
+/* HERO */
+.hero{background:var(--navy);color:#fff;padding:72px 0 96px;position:relative;overflow:hidden}
+.hero .glow{position:absolute;right:-140px;top:-90px;width:540px;height:540px;border-radius:50%;background:var(--navy-3);opacity:.5;pointer-events:none}
+.hero svg.route{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.45}
+.hero .wrap{position:relative;z-index:2;display:grid;grid-template-columns:1.08fr .92fr;gap:56px;align-items:center}
+.flag{display:inline-flex;align-items:center;gap:9px;background:rgba(255,106,26,.15);border:1px solid rgba(255,106,26,.4);color:#FFB388;padding:7px 15px;border-radius:999px;font-size:13.5px;margin-bottom:24px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--orange)}
+.hero h1{font-size:clamp(40px,5.6vw,64px);margin-bottom:20px}
+.lede{font-size:18.5px;color:#B9C7DB;max-width:47ch;margin-bottom:30px}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.micro{font-size:13.5px;color:#8399B6;margin-top:16px}
+.pricebar{display:flex;margin-top:36px;border:1px solid var(--line-d);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.05)}
+.pricebar div{flex:1;padding:16px 20px;border-right:1px solid var(--line-d)}
+.pricebar div:last-child{border-right:0}
+.pricebar .k{font-size:12.5px;color:#8399B6;margin-bottom:2px}
+.pricebar .v{font-family:'Space Grotesk';font-weight:700;font-size:28px;letter-spacing:-.03em;color:var(--orange)}
+.pricebar .v em{font-style:normal;font-size:14px;font-weight:500;color:#8399B6}
+
+/* etiqueta */
+.label-card{background:#fff;color:var(--navy);border-radius:5px;transform:rotate(-2.2deg);box-shadow:0 30px 62px rgba(0,0,0,.4);position:relative}
+.label-card:after{content:"";position:absolute;inset:8px;border:1.5px dashed rgba(12,27,51,.2);border-radius:3px;pointer-events:none}
+.label-top{background:var(--orange);color:#fff;padding:11px 20px;border-radius:5px 5px 0 0;display:flex;justify-content:space-between;font-family:'JetBrains Mono';font-size:11.5px;font-weight:700;letter-spacing:.08em}
+.label-body{padding:22px 26px 16px}
+.label-body .to{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.16em;color:var(--muted);margin-bottom:11px}
+.addr{font-family:'JetBrains Mono';font-size:14px;line-height:1.85;font-weight:700;text-transform:uppercase}
+.addr .you{background:rgba(255,106,26,.22);padding:1px 5px;border-radius:3px}
+.barcode{display:flex;gap:2px;align-items:flex-end;height:42px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.barcode i{background:var(--navy);width:2px;height:100%;display:block}
+.barcode i:nth-child(3n){width:4px}
+.barcode i:nth-child(4n){height:68%}
+.label-foot{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.1em;color:var(--muted);padding:6px 26px 18px}
+@media(max-width:920px){.hero{padding:52px 0 72px}.hero .wrap{grid-template-columns:1fr;gap:44px}.label-card{transform:rotate(-1.2deg)}}
+
+/* CINTA */
+.tape{background:var(--orange);color:#fff;padding:13px 0;overflow:hidden;white-space:nowrap}
+.tape span{font-family:'JetBrains Mono';font-weight:700;font-size:13px;letter-spacing:.16em;padding:0 16px}
+
+/* CALCULADORA FLOTANTE */
+.calc-sec{margin-top:-64px;position:relative;z-index:5;margin-bottom:56px}
+.calcbox{background:#fff;border:1px solid var(--line);box-shadow:0 20px 50px rgba(12,27,51,.15);border-radius:18px;padding:32px 34px;display:grid;grid-template-columns:1fr 280px;gap:34px;align-items:center}
+.calcbox h3{font-size:25px;margin-bottom:6px}
+.calcbox .hint{color:var(--muted);font-size:15px;margin-bottom:20px}
+.fields{display:flex;gap:12px;flex-wrap:wrap}
+.field{flex:1;min-width:120px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.field input{width:100%;height:46px;border:1.5px solid var(--line);border-radius:10px;padding:0 12px;font:inherit;font-size:15px;background:#fff;color:var(--navy)}
+.field input:focus{outline:none;border-color:var(--orange)}
+.out{background:var(--navy);border-radius:14px;padding:26px;text-align:center;color:#fff}
+.out small{font-size:12.5px;letter-spacing:.12em;color:#93A6C0;display:block;margin-bottom:6px}
+.out .big{font-family:'Space Grotesk';font-weight:700;font-size:46px;line-height:1;letter-spacing:-.03em;color:var(--orange)}
+.out .note{font-size:12.5px;margin-top:10px;color:#93A6C0}
+#nota{margin:16px 0 0;font-size:13.5px;color:var(--muted)}
+@media(max-width:880px){.calcbox{grid-template-columns:1fr;padding:26px 22px}.calc-sec{margin-top:-44px;margin-bottom:40px}}
+
+section{padding:84px 0}
+.head{max-width:58ch;margin-bottom:44px}
+.head h2{font-size:clamp(30px,4.1vw,46px);margin-bottom:13px}
+.head p{font-size:17.5px;color:var(--muted)}
+.ice{background:var(--ice)}
+
+/* COMPARACIÓN */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.vs > div{border-radius:16px;padding:32px;border:1px solid var(--line);background:#fff}
+.vs .win{background:var(--navy);color:#fff;border-color:var(--navy)}
+.vs h3{font-size:21px;margin-bottom:20px}
+.vs ul{list-style:none}
+.vs li{display:flex;gap:12px;padding:12px 0;font-size:15.5px;border-top:1px solid var(--line);color:var(--muted)}
+.vs .win li{border-color:var(--line-d);color:#CBD7E6}
+.vs li:first-of-type{border-top:0}
+.mk{flex:0 0 20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;margin-top:3px}
+.no .mk{background:var(--ice-2);color:#8C9AAD}
+.yes .mk{background:var(--orange);color:#fff}
+@media(max-width:800px){.vs{grid-template-columns:1fr}}
+
+/* SERVICIOS */
+.svc{border-top:1px solid var(--line)}
+.svc .row{display:grid;grid-template-columns:52px 1fr auto;gap:26px;align-items:center;padding:30px 0;border-bottom:1px solid var(--line)}
+.svc .n{font-family:'JetBrains Mono';font-size:13px;font-weight:700;color:var(--orange)}
+.svc h3{font-size:24px;margin-bottom:6px}
+.svc p{color:var(--muted);font-size:16px;max-width:62ch}
+.svc .tagp{font-family:'Space Grotesk';font-weight:700;font-size:24px;white-space:nowrap;letter-spacing:-.03em;background:rgba(255,106,26,.13);padding:7px 15px;border-radius:10px}
+@media(max-width:700px){.svc .row{grid-template-columns:1fr;gap:10px}.svc .tagp{font-size:21px;justify-self:start}}
+
+/* PROCESO + RASTREO */
+.proc{display:grid;grid-template-columns:1fr 400px;gap:52px;align-items:start}
+.step{display:grid;grid-template-columns:66px 1fr;gap:20px;padding:24px 0;border-top:1px solid var(--line);align-items:start}
+.step:last-child{border-bottom:1px solid var(--line)}
+.snum{font-family:'Space Grotesk';font-size:42px;font-weight:700;color:var(--orange);opacity:.35;line-height:.9}
+.step h3{font-size:20px;margin-bottom:6px}
+.step p{color:var(--muted);font-size:15.5px}
+.track{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 14px 34px rgba(12,27,51,.12);position:sticky;top:96px}
+.track-h{background:var(--navy);color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--orange)}
+.track-h .t{font-size:12.5px;color:#93A6C0}
+.track-h .c{font-family:'JetBrains Mono';font-weight:700;font-size:14px}
+.track-b{padding:22px 24px 10px}
+.node{display:grid;grid-template-columns:26px 1fr auto;gap:14px;align-items:start;padding-bottom:22px;position:relative}
+.node:last-child{padding-bottom:10px}
+.node:before{content:"";position:absolute;left:12px;top:24px;bottom:0;width:2px;background:var(--line)}
+.node:last-child:before{display:none}
+.bulb{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:#fff;display:grid;place-items:center;font-size:12px;color:transparent;z-index:2;transition:.3s}
+.node.on .bulb{border-color:var(--navy);background:var(--navy);color:#fff}
+.node.now .bulb{border-color:var(--orange);background:var(--orange);color:#fff}
+.node h4{font-size:15px;font-family:Inter;font-weight:600}
+.node p{font-size:13.5px;color:var(--muted)}
+.node .when{font-family:'JetBrains Mono';font-size:11.5px;color:var(--muted);white-space:nowrap}
+.node:not(.on):not(.now) h4{color:#9FAFC3}
+.track-f{border-top:1px solid var(--line);padding:14px 22px;background:var(--ice);font-size:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.track-f strong{font-family:'Space Grotesk';font-size:16px}
+@media(max-width:940px){.proc{grid-template-columns:1fr;gap:40px}.track{position:static}}
+
+/* PRUEBA SOCIAL */
+.qgrid{display:grid;grid-template-columns:1.15fr 1fr;gap:48px;align-items:center;margin-bottom:44px}
+.big-quote{font-family:'Space Grotesk';font-weight:500;font-size:clamp(23px,3.1vw,34px);line-height:1.24;letter-spacing:-.02em;max-width:23ch}
+.qmeta{display:flex;align-items:center;gap:13px;margin-top:24px}
+.av{width:44px;height:44px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:600;font-size:14px}
+.ministats{display:grid;gap:13px}
+.ministat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;display:flex;justify-content:space-between;align-items:baseline;gap:14px}
+.ministat b{font-family:'Space Grotesk';font-weight:700;font-size:30px;letter-spacing:-.03em;color:var(--orange)}
+.ministat span{font-size:14px;color:var(--muted);text-align:right}
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.quote{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px;display:flex;flex-direction:column}
+.stars{color:var(--orange);font-size:13px;letter-spacing:2px;margin-bottom:10px}
+.quote p{font-size:15px;margin-bottom:16px;flex:1}
+.who b{display:block;font-size:14.5px}
+.who span{font-size:12.5px;color:var(--muted)}
+.who{display:flex;align-items:center;gap:11px}
+.rev-cta{margin-top:30px;text-align:center;font-size:15px;color:var(--muted)}
+@media(max-width:760px){.ministats{grid-template-columns:1fr !important}}
+@media(max-width:800px){.qgrid{grid-template-columns:1fr;gap:30px}}
+@media(max-width:600px){.quotes{grid-template-columns:1fr}}
+
+/* TARIFAS */
+.rates{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.rate{border:1px solid var(--line);border-radius:16px;padding:28px;background:#fff}
+.rate.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.rate h3{font-size:19px}
+.rate .p{font-family:'Space Grotesk';font-size:48px;font-weight:700;line-height:1;margin:14px 0 4px;letter-spacing:-.03em}
+.rate .p em{font-style:normal;font-size:16px;font-weight:500;color:var(--muted)}
+.rate.on .p{color:var(--orange)}
+.rate.on .p em{color:#93A6C0}
+.rate ul{list-style:none;margin-top:16px;font-size:14.5px}
+.rate li{padding:8px 0;border-top:1px solid var(--line);color:var(--muted)}
+.rate.on li{border-color:var(--line-d);color:#C2CEDE}
+@media(max-width:860px){.rates{grid-template-columns:1fr}}
+
+/* SUCURSAL */
+.branch{display:grid;grid-template-columns:1fr 1fr;gap:0;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.branch .info{padding:38px}
+.branch h3{font-size:26px;margin-bottom:10px}
+.branch p{color:var(--muted);margin-bottom:6px}
+.map{min-height:300px;background:var(--ice-2);display:grid;place-items:center;color:var(--muted);font-size:14px}
+.pin{width:22px;height:22px;border-radius:50% 50% 50% 0;background:var(--orange);transform:rotate(-45deg);box-shadow:0 0 0 9px rgba(255,106,26,.22);margin:0 auto}
+@media(max-width:860px){.branch{grid-template-columns:1fr}.branch .info{padding:28px}}
+
+details{border-bottom:1px solid var(--line);padding:20px 0}
+details:first-of-type{border-top:1px solid var(--line)}
+summary{cursor:pointer;font-family:'Space Grotesk';font-weight:500;font-size:19px;letter-spacing:-.02em;list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"+";color:var(--orange);font-size:23px;line-height:1}
+details[open] summary:after{content:"–"}
+details p{color:var(--muted);margin-top:12px;max-width:70ch;font-size:15.5px}
+
+.final{background:var(--navy);color:#fff;padding:96px 0;text-align:center}
+.final h2{font-size:clamp(31px,4.6vw,52px);margin-bottom:18px}
+.final p{color:#B4C2D4;max-width:48ch;margin:0 auto 34px;font-size:18px}
+footer{background:var(--navy);color:#7E90A8;padding:24px 0 30px;font-size:13.5px;border-top:1px solid var(--line-d)}
+footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo"><b>N</b> NEA Cargo Xpress</div>
+    <div class="navlinks">
+      <a href="#comparar">Por qué NEA</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#proceso">Cómo funciona</a>
+      <a href="#tarifas">Tarifas</a>
+      <a href="#faq">Preguntas</a>
+    </div>
+    <a href="#" class="btn btn-p btn-sm">Crear casillero</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="glow"></div>
+  <svg class="route" viewBox="0 0 1200 520" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M90 440 C 360 180, 800 150, 1120 300" fill="none" stroke="#FF6A1A" stroke-width="1.5" stroke-dasharray="6 10" opacity=".6"/>
+    <circle cx="90" cy="440" r="5" fill="#FF6A1A"/><circle cx="1120" cy="300" r="5" fill="#FF6A1A"/>
+  </svg>
+  <div class="wrap">
+    <div>
+      <span class="flag"><span class="dot"></span> Miami y China → Sabanitas, Colón</span>
+      <h1>Compra allá.<br>Recíbelo acá.</h1>
+      <p class="lede">Te damos una dirección real en Miami para comprar en Amazon, Shein, Temu o donde quieras. La recibimos, la fotografiamos, la pesamos y te la traemos en 4 a 7 días.</p>
+      <div class="cta-row">
+        <a href="#" class="btn btn-p">Crear mi casillero gratis</a>
+        <a href="#calculadora" class="btn btn-ghost">Ver cuánto cuesta</a>
+      </div>
+      <p class="micro">Sin mensualidad. Sin mínimo de compra. Tu dirección lista en 2 minutos.</p>
+      <div class="pricebar">
+        <div><div class="k">Por peso</div><div class="v">$3.00 <em>/lb</em></div></div>
+        <div><div class="k">Por volumen</div><div class="v">$2.50 <em>/lb vol.</em></div></div>
+        <div><div class="k">Entrega</div><div class="v">4–7 <em>días</em></div></div>
+      </div>
+    </div>
+
+    <div class="label-card">
+      <div class="label-top"><span>NEA CARGO XPRESS</span><span>PTY-14981</span></div>
+      <div class="label-body">
+        <div class="to">ENVIAR A / SHIP TO</div>
+        <div class="addr">
+          PTY-14981 <span class="you">TU NOMBRE</span><br>
+          NEA CARGO XPRESS<br>
+          8610 NW 72 STREET<br>
+          MIAMI, FLORIDA 33195<br>
+          ESTADOS UNIDOS
+        </div>
+        <div class="barcode" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+      </div>
+      <div class="label-foot">TEL 1-305-406-3654 · MIA → PTY</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap calc-sec" id="calculadora">
+  <div class="calcbox">
+    <div>
+      <h3>Haz la cuenta antes de comprar</h3>
+      <p class="hint">Escribe el peso y te damos el estimado. Sin registrarte.</p>
+      <div class="fields">
+        <div class="field"><label for="peso">Peso en balanza (lb)</label><input id="peso" type="number" min="0" step="0.5" value="5"></div>
+        <div class="field"><label for="dL">Largo (in)</label><input id="dL" type="number" min="0" step="1" placeholder="Opcional"></div>
+        <div class="field"><label for="dA">Ancho (in)</label><input id="dA" type="number" min="0" step="1" placeholder="Opcional"></div>
+        <div class="field"><label for="dH">Alto (in)</label><input id="dH" type="number" min="0" step="1" placeholder="Opcional"></div>
+      </div>
+      <p id="nota"></p>
+    </div>
+    <div class="out">
+      <small>TE COSTARÍA</small>
+      <div class="big" id="total">$15.00</div>
+      <div class="note" id="detalle">5 lb × $3.00</div>
+    </div>
+  </div>
+</div>
+
+<div class="tape" aria-hidden="true">
+  <span>FOTO DE TU PAQUETE</span><span>·</span><span>PESO EN BALANZA</span><span>·</span><span>LOCAL FÍSICO EN SABANITAS</span><span>·</span><span>WHATSAPP DIRECTO</span><span>·</span><span>FACTURA EN PDF</span><span>·</span><span>SIN MENSUALIDAD</span>
+</div>
+
+<section id="comparar">
+  <div class="wrap">
+    <div class="head">
+      <h2>Lo que cambia cuando dejas de improvisar</h2>
+      <p>La mayoría de la gente en Colón compra pidiéndole el favor a un familiar en Estados Unidos. Así se ve la diferencia.</p>
+    </div>
+    <div class="vs">
+      <div>
+        <h3>Pidiéndole el favor a alguien</h3>
+        <ul>
+          <li class="no"><span class="mk">✕</span> Esperas a que alguien viaje</li>
+          <li class="no"><span class="mk">✕</span> No sabes dónde está tu caja</li>
+          <li class="no"><span class="mk">✕</span> Si se pierde, no hay a quién reclamar</li>
+          <li class="no"><span class="mk">✕</span> Le quedas debiendo el favor</li>
+          <li class="no"><span class="mk">✕</span> Sin factura ni respaldo</li>
+        </ul>
+      </div>
+      <div class="win">
+        <h3>Con tu casillero NEA</h3>
+        <ul>
+          <li class="yes"><span class="mk">✓</span> Compras hoy, llega en 4 a 7 días</li>
+          <li class="yes"><span class="mk">✓</span> Ves la foto y el peso de tu caja</li>
+          <li class="yes"><span class="mk">✓</span> Pagas al retirar, no por adelantado</li>
+          <li class="yes"><span class="mk">✓</span> No le debes nada a nadie</li>
+          <li class="yes"><span class="mk">✓</span> Factura en PDF con el detalle completo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ice" id="servicios">
+  <div class="wrap">
+    <div class="head">
+      <h2>Tres cosas que la competencia no te resuelve</h2>
+      <p>Y que aquí puedes pedir desde el primer día.</p>
+    </div>
+    <div class="svc">
+      <div class="row">
+        <div class="n">01</div>
+        <div>
+          <h3>Compramos por ti</h3>
+          <p>¿No tienes tarjeta de crédito o la tienda no te la acepta? Nos mandas el enlace del producto, lo compramos con la tarjeta de la empresa y te lo entregamos aquí.</p>
+        </div>
+        <div class="tagp">$5 fijos</div>
+      </div>
+      <div class="row">
+        <div class="n">02</div>
+        <div>
+          <h3>Te lo llevamos a la casa</h3>
+          <p>Si no puedes pasar por la sucursal, lo coordinas desde la app y te lo llevamos a tu casa u oficina.</p>
+        </div>
+        <div class="tagp">Desde $3</div>
+      </div>
+      <div class="row">
+        <div class="n">03</div>
+        <div>
+          <h3>Refiere y ahorra</h3>
+          <p>Comparte tu número de casillero. Cuando esa persona hace su primer envío, tú te ahorras en el tuyo.</p>
+        </div>
+        <div class="tagp">$5 a tu favor</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="proceso">
+  <div class="wrap">
+    <div class="head">
+      <h2>Cuatro pasos, y siempre sabes dónde va</h2>
+      <p>Desde que le das clic a comprar hasta que lo tienes en la mano. Así se ve en tu cuenta.</p>
+    </div>
+    <div class="proc">
+      <div>
+        <div class="step">
+          <div class="snum">01</div>
+          <div><h3>Crea tu casillero</h3><p>Te registras gratis y te damos tu dirección en Miami al instante. La copias y la pegas en el checkout de cualquier tienda.</p></div>
+        </div>
+        <div class="step">
+          <div class="snum">02</div>
+          <div><h3>Compra y avísanos</h3><p>Compras donde quieras y nos pasas el número de tracking desde la app, para identificar tu paquete apenas entra a bodega.</p></div>
+        </div>
+        <div class="step">
+          <div class="snum">03</div>
+          <div><h3>Lo recibimos, pesamos y fotografiamos</h3><p>Ves la foto de cómo llegó tu caja y el peso exacto de la balanza en tu cuenta. Nada de cobros a ojo.</p></div>
+        </div>
+        <div class="step">
+          <div class="snum">04</div>
+          <div><h3>Lo retiras en Sabanitas</h3><p>Te llega un correo con tu factura en PDF cuando está listo. Pagas al retirar, o pides delivery si prefieres.</p></div>
+        </div>
+      </div>
+
+      <div class="track">
+        <div class="track-h">
+          <div><div class="t">Así lo ves en tu cuenta</div><div class="c">1Z 999 AA1 0123 4567</div></div>
+          <div style="font-size:21px" aria-hidden="true">📦</div>
+        </div>
+        <div class="track-b" id="tl">
+          <div class="node"><div class="bulb">✓</div><div><h4>Compraste en Amazon</h4><p>Con tu dirección de Miami</p></div><div class="when">Lun 9:12</div></div>
+          <div class="node"><div class="bulb">✓</div><div><h4>Llegó a bodega en Miami</h4><p>Fotografiado y pesado: 5.0 lb</p></div><div class="when">Mié 14:40</div></div>
+          <div class="node"><div class="bulb">✓</div><div><h4>En tránsito hacia Panamá</h4><p>Vuelo MIA → PTY</p></div><div class="when">Jue 07:05</div></div>
+          <div class="node"><div class="bulb">✓</div><div><h4>Listo para retiro</h4><p>Te avisamos por correo</p></div><div class="when">Vie 11:20</div></div>
+        </div>
+        <div class="track-f"><span>Total de tu envío</span><strong>$15.00 · 4 días</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ice">
+  <div class="wrap">
+    <div class="head">
+      <h2>Por qué puedes confiar</h2>
+      <p>Somos nuevos, así que en vez de promesas te damos números y una puerta que puedes tocar.</p>
+    </div>
+    <div class="ministats" style="grid-template-columns:repeat(3,1fr)">
+      <div class="ministat"><b>4–7</b><span>días promedio<br>Miami → Panamá</span></div>
+      <div class="ministat"><b>100%</b><span>de paquetes con<br>foto y peso verificado</span></div>
+      <div class="ministat"><b>0</b><span>paquetes<br>perdidos</span></div>
+    </div>
+    <p class="rev-cta">¿Ya enviaste con nosotros? <a href="https://wa.me/50762937497?text=Hola%2C%20quiero%20dejarles%20mi%20rese%C3%B1a" style="color:var(--orange);font-weight:600">Cuéntanos cómo te fue</a> y publicamos tu reseña aquí.</p>
+  </div>
+</section>
+
+<section id="tarifas">
+  <div class="wrap">
+    <div class="head">
+      <h2>Dos tarifas, y siempre sabes cuál te tocó</h2>
+      <p>Se cobra por peso o por volumen, la que dé más. Te lo explicamos antes de comprar, no después de pesar.</p>
+    </div>
+    <div class="rates">
+      <div class="rate on">
+        <h3>Carga por peso</h3>
+        <div class="p">$3.00 <em>/ lb</em></div>
+        <ul>
+          <li>El peso real de la balanza</li>
+          <li>Ropa, electrónica, repuestos</li>
+          <li>Desde Estados Unidos y China</li>
+        </ul>
+      </div>
+      <div class="rate">
+        <h3>Carga por volumen</h3>
+        <div class="p">$2.50 <em>/ lb vol.</em></div>
+        <ul>
+          <li>Largo × ancho × alto ÷ 166</li>
+          <li>Para cajas grandes y livianas</li>
+          <li>Se aplica cuando sale más que el peso</li>
+        </ul>
+      </div>
+      <div class="rate">
+        <h3>Sin cargo mínimo</h3>
+        <div class="p">$0.00 <em>fijo</em></div>
+        <ul>
+          <li>No cobramos por abrir cuenta</li>
+          <li>No hay mensualidad</li>
+          <li>Pagas solo cuando envías</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ice" id="sucursal">
+  <div class="wrap">
+    <div class="head">
+      <h2>Ven a conocernos</h2>
+      <p>Somos un local de verdad, con gente de verdad atendiendo.</p>
+    </div>
+    <div class="branch">
+      <div class="info">
+        <h3>Sabanitas, Colón</h3>
+        <p>Aquí recibes tu paquete, pagas tu factura y firmas la entrega.</p>
+        <p><strong>Horario:</strong> lunes a sábado, 9:00 a.m. – 6:00 p.m.</p>
+        <p><strong>WhatsApp:</strong> +507 6293-7497</p>
+        <div style="margin-top:22px"><a href="#" class="btn btn-p btn-sm">Cómo llegar</a></div>
+      </div>
+      <div class="map"><div style="text-align:center"><div class="pin"></div><div style="margin-top:18px">Aquí va el mapa de la sucursal</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="head">
+      <h2>Preguntas que todos hacen</h2>
+      <p>Si falta la tuya, escríbenos por WhatsApp.</p>
+    </div>
+    <details open>
+      <summary>¿Cómo calculan lo que me cobran?</summary>
+      <p>Tenemos dos tarifas y se aplica la que dé más: por peso, a $3.00 la libra de balanza; o por volumen, a $2.50 la libra volumétrica (largo × ancho × alto ÷ 166). Una caja chica y pesada se cobra por peso; una grande y liviana se cobra por volumen. No hay cargo mínimo ni mensualidad, y siempre ves las medidas y el detalle completo en tu factura.</p>
+    </details>
+    <details>
+      <summary>¿Dónde está mi dirección de Miami?</summary>
+      <p>Te la damos apenas te registras. Lleva tu nombre y nuestro número de casillero, y la usas tal cual en el checkout de cualquier tienda de Estados Unidos.</p>
+    </details>
+    <details>
+      <summary>¿Cuándo y cómo pago?</summary>
+      <p>Cuando el paquete está listo te llega la factura por correo con el PDF adjunto. Pagas al retirarlo en la sucursal.</p>
+    </details>
+    <details>
+      <summary>¿Hasta cuándo puedo reclamar?</summary>
+      <p>Tienes 30 días desde que el paquete entra al sistema para retirarlo o poner un reclamo.</p>
+    </details>
+    <details>
+      <summary>¿Qué no puedo traer?</summary>
+      <p>Armas, líquidos inflamables, ciertos medicamentos y todo lo restringido por la aduana panameña. Tenemos la lista completa; si tienes dudas con algo, pregúntanos antes de comprarlo.</p>
+    </details>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <h2>Tu próxima compra<br>puede llegar esta semana</h2>
+    <p>Crear el casillero es gratis y no te compromete a nada. Lo usas solo cuando lo necesites.</p>
+    <div class="cta-row" style="justify-content:center">
+      <a href="#" class="btn btn-p">Crear mi casillero gratis</a>
+      <a href="#" class="btn btn-ghost">Escribir por WhatsApp</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 NEA Cargo Xpress · Sabanitas, Colón, Panamá · +507 6293-7497</div>
+    <div>Mercancía restringida · Términos · Acceso staff</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var nodes=document.querySelectorAll('#tl .node'),i=0,arrancado=false;
+  nodes.forEach(function(n){n.classList.remove('on','now')});
+  function paso(){
+    if(i>0){nodes[i-1].classList.remove('now');nodes[i-1].classList.add('on');}
+    if(i<nodes.length){nodes[i].classList.add('now');i++;setTimeout(paso,700);}
+  }
+  var tl=document.getElementById('tl');
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(e,o){
+      if(e[0].isIntersecting&&!arrancado){arrancado=true;paso();o.disconnect();}
+    },{threshold:.35}).observe(tl);
+  }else{paso();}
+
+  var peso=document.getElementById('peso'),
+      tot=document.getElementById('total'),det=document.getElementById('detalle'),
+      nota=document.getElementById('nota'),
+      dL=document.getElementById('dL'),dA=document.getElementById('dA'),dH=document.getElementById('dH');
+  var TAR_PESO=3, MANEJO=1, TAR_VOL=2.5;
+  function n(x){return Math.round(x*10)/10}
+  function calc(){
+    var p=parseFloat(peso.value)||0;
+    var L=parseFloat(dL.value)||0, A=parseFloat(dA.value)||0, H=parseFloat(dH.value)||0;
+    var vol=(L>0&&A>0&&H>0)?(L*A*H)/166:0;
+
+    var porPeso=p*TAR_PESO+MANEJO, porVol=vol*TAR_VOL;
+    var usaVol = porVol>porPeso;
+    var total = usaVol?porVol:porPeso;
+
+    tot.textContent='$'+total.toFixed(2);
+    det.textContent = usaVol
+      ? 'Estimado para '+n(vol)+' lb por volumen'
+      : 'Estimado para '+n(p)+' lb de peso';
+
+    if(usaVol){
+      nota.textContent='Tu caja da '+n(vol)+' libras por volumen ('+L+'×'+A+'×'+H+' ÷ 166). Sale más que cobrarla por peso, así que se aplica la tarifa de volumen, a $2.50 la libra.';
+    }else if(vol>0){
+      nota.textContent='Tu caja da '+n(vol)+' libras por volumen, menos que su peso de balanza. Se cobra por peso, a $3.00 la libra.';
+    }else{
+      nota.textContent='Las medidas son opcionales. Si tu caja es grande y liviana, se cobra por volumen a $2.50 la libra en vez de por peso.';
+    }
+  }
+  [peso,dL,dA,dH].forEach(function(el){el.addEventListener('input',calc)});
+  calc();
+})();
+</script>
+</body>
+</html>
