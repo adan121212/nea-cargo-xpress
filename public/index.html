@@ -330,6 +330,27 @@
     letter-spacing:.1em; color:#5A6B82; padding:6px 26px 18px; }
   @media (max-width: 900px){ .label-card{ transform: rotate(-1.2deg); } }
 
+  /* ---- Comparación NEA vs pedir el favor ---- */
+  .vs-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .vs-card{ background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-lg);
+    padding:32px; box-shadow: var(--shadow-card); }
+  .vs-card h3{ font-family: var(--font-display); font-size:21px; margin:0 0 20px; }
+  .vs-card ul{ list-style:none; margin:0; padding:0; }
+  .vs-card li{ display:flex; gap:12px; align-items:flex-start; padding:12px 0; font-size:15.5px;
+    border-top:1px solid var(--line); color: var(--ink-soft); }
+  .vs-card li:first-child{ border-top:0; }
+  .vs-mk{ flex:0 0 20px; height:20px; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; font-size:11px; font-weight:700; margin-top:3px; }
+  .vs-no .vs-mk{ background: rgba(12,27,51,0.08); color: var(--ink-faint); }
+  .vs-win{ background:#0c1b33; border-color:#0c1b33; }
+  .vs-win h3{ color:#fff; }
+  .vs-win li{ color: rgba(228,234,245,0.82); border-color: rgba(255,255,255,0.12); }
+  .vs-yes .vs-mk{ background: var(--accent); color:#fff; }
+  [data-theme="dark"] .vs-card{ background: var(--panel); border-color: var(--line); }
+  [data-theme="dark"] .vs-no .vs-mk{ background: rgba(228,234,245,0.1); color: rgba(228,234,245,0.45); }
+  [data-theme="dark"] .vs-win{ background:#060d18; border-color: rgba(228,234,245,0.09); }
+  @media (max-width: 800px){ .vs-grid{ grid-template-columns:1fr; } .vs-card{ padding:26px; } }
+
   @media (max-width: 860px){ .hero{ grid-template-columns: 1fr; padding-top: 48px; gap: 40px; } }
 
   /* ============ BANDA DE FOTOS ============ */
@@ -788,6 +809,37 @@
       <div class="num">04</div>
       <h3>Retira en Panamá</h3>
       <p>Te avisamos por correo y WhatsApp cuando esté listo en tu sucursal más cercana.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPARACIÓN ============ -->
+<section class="section reveal" id="comparar">
+  <div class="section-head">
+    <div class="eyebrow">Por qué NEA</div>
+    <h2>Lo que cambia cuando dejas de improvisar</h2>
+    <p>La mayoría de la gente compra pidiéndole el favor a un familiar en Estados Unidos. Así se ve la diferencia.</p>
+  </div>
+  <div class="vs-grid">
+    <div class="vs-card">
+      <h3>Pidiéndole el favor a alguien</h3>
+      <ul>
+        <li class="vs-no"><span class="vs-mk">&#10005;</span> Esperas a que alguien viaje</li>
+        <li class="vs-no"><span class="vs-mk">&#10005;</span> No sabes dónde está tu caja</li>
+        <li class="vs-no"><span class="vs-mk">&#10005;</span> Si se pierde, no hay a quién reclamar</li>
+        <li class="vs-no"><span class="vs-mk">&#10005;</span> Le quedas debiendo el favor</li>
+        <li class="vs-no"><span class="vs-mk">&#10005;</span> Sin factura ni respaldo</li>
+      </ul>
+    </div>
+    <div class="vs-card vs-win">
+      <h3>Con tu casillero NEA</h3>
+      <ul>
+        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Compras hoy, llega en 4 a 7 días</li>
+        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Ves la foto y el peso de tu caja</li>
+        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Pagas al retirar, no por adelantado</li>
+        <li class="vs-yes"><span class="vs-mk">&#10003;</span> No le debes nada a nadie</li>
+        <li class="vs-yes"><span class="vs-mk">&#10003;</span> Factura en PDF con el detalle completo</li>
+      </ul>
     </div>
   </div>
 </section>
