@@ -81,7 +81,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEA Cargo Xpress — Compra en EE.UU., recibe en Panamá</title>
+<title>NEA Cargo Xpress — Casillero Aéreo y Marítimo | Miami → Panamá</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
@@ -682,6 +682,69 @@
   .spgl-carga .estado span{ color:var(--accent); font-weight:700; }
   @media (prefers-reduced-motion: reduce){ #splash{ transition-duration:.01ms; } .spgl-continentes, .spgl-avion-wrap, .spgl-punto-ciudad-halo{ animation-duration:.01ms !important; } }
 </style>
+
+<style id="nea-aereo-maritimo-theme">
+/* ===== NEA CARGO XPRESS — TEMA AÉREO + MARÍTIMO ===== */
+.hero-shell{
+  background:
+    linear-gradient(90deg,rgba(4,14,29,.96) 0%,rgba(4,14,29,.82) 42%,rgba(4,14,29,.40) 100%),
+    url('https://images.unsplash.com/photo-1494412651409-8963ce7935a7?auto=format&fit=crop&w=1800&q=85') center/cover no-repeat !important;
+}
+.hero-shell::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(4,14,29,.05),rgba(4,14,29,.38));
+  pointer-events:none;z-index:1;
+}
+.hero{z-index:2;}
+.cargo-mode-badge{
+  display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;
+  margin:0 0 12px;padding:7px 11px;border:1px solid rgba(255,255,255,.18);
+  border-radius:999px;background:rgba(4,14,29,.48);backdrop-filter:blur(8px);
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+}
+.cargo-mode-badge b{color:#ff6a1a}.cargo-mode-badge span{color:rgba(255,255,255,.72)}
+.cargo-photo-section{padding:0 26px 88px;max-width:1180px;margin:auto}
+.cargo-photo-grid{display:grid;grid-template-columns:1.45fr .9fr .9fr;gap:12px}
+.cargo-photo{position:relative;min-height:245px;overflow:hidden;border-radius:18px;box-shadow:0 18px 45px rgba(12,27,51,.16)}
+.cargo-photo:first-child{min-height:390px;grid-row:span 2}
+.cargo-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
+.cargo-photo:hover img{transform:scale(1.055)}
+.cargo-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(4,14,29,.82))}
+.cargo-photo-copy{position:absolute;z-index:2;left:22px;right:22px;bottom:18px;color:#fff}
+.cargo-photo-copy .tag{font:700 10px var(--font-mono);letter-spacing:.12em;color:#ff6a1a;text-transform:uppercase}
+.cargo-photo-copy h3{font:700 22px var(--font-display);margin:5px 0 0}
+.cargo-photo-copy p{font-size:12.5px;color:rgba(255,255,255,.74);margin:5px 0 0;line-height:1.45}
+.cargo-services{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.cargo-service{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow-card)}
+.cargo-service .ico{font-size:27px}
+.cargo-service h3{font:700 18px var(--font-display);margin:10px 0 6px}
+.cargo-service p{font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0}
+.cargo-route-banner{
+  margin:0 0 0;padding:0;position:relative;overflow:hidden;
+  background:#071426;color:#fff;
+}
+.cargo-route-inner{max-width:1180px;margin:auto;padding:72px 26px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+.cargo-route-visual{min-height:300px;border-radius:20px;overflow:hidden;background:url('https://images.unsplash.com/photo-1605733160314-4fc7dac4bb16?auto=format&fit=crop&w=1800&q=85') center/cover;position:relative}
+.cargo-route-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(4,14,29,.15),rgba(4,14,29,.72))}
+.cargo-route-copy .eyebrow{color:rgba(255,255,255,.65)}
+.cargo-route-copy h2{font:700 clamp(30px,4vw,46px)/1.05 var(--font-display);margin:10px 0 15px;letter-spacing:-.025em}
+.cargo-route-copy p{font-size:16px;line-height:1.65;color:rgba(255,255,255,.67);max-width:55ch}
+.route-pill-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.route-pill{padding:9px 13px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);border-radius:999px;font:600 11px var(--font-mono)}
+@media(max-width:800px){
+ .cargo-photo-grid{grid-template-columns:1fr 1fr}
+ .cargo-photo:first-child{grid-column:1/-1;grid-row:auto;min-height:300px}
+ .cargo-services,.cargo-route-inner{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+ .cargo-photo-section{padding:0 20px 60px}
+ .cargo-photo-grid{grid-template-columns:1fr}
+ .cargo-photo:first-child{grid-column:auto}
+ .cargo-photo{min-height:220px}
+ .cargo-route-inner{padding:55px 20px}
+}
+</style>
+
 </head>
 <body>
 
@@ -765,6 +828,7 @@
 <div class="hero-shell">
   <section class="hero">
     <div>
+      <div class="cargo-mode-badge"><b>✈ AÉREA</b><span>•</span><b>⚓ MARÍTIMA</b><span>•</span><span>CARGA INTERNACIONAL</span></div>
       <div class="eyebrow">Casillero en Miami · Retiro en Sabanitas, Colón</div>
       <h1>Tu dirección en Miami, gratis.<br>Tus compras en Panamá en 4 a 7 días.</h1>
       <p class="lead">
@@ -809,7 +873,30 @@
 </div>
 
 
-<!-- ============ FOTOS DEL PROCESO ============ -->
+
+<!-- ============ GALERÍA CARGO AÉREO + MARÍTIMO ============ -->
+<section class="cargo-photo-section reveal" aria-label="Servicios de carga aérea y marítima">
+  <div class="cargo-photo-grid">
+    <article class="cargo-photo">
+      <img src="https://images.unsplash.com/photo-1494412651409-8963ce7935a7?auto=format&fit=crop&w=1800&q=85" alt="Buque portacontenedores en transporte internacional" loading="lazy">
+      <div class="cargo-photo-copy"><div class="tag">CARGA MARÍTIMA</div><h3>Contenedores rumbo a Panamá</h3><p>Soluciones para carga consolidada y mercancía de mayor volumen.</p></div>
+    </article>
+    <article class="cargo-photo">
+      <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1800&q=85" alt="Avión de transporte aéreo" loading="lazy">
+      <div class="cargo-photo-copy"><div class="tag">CARGA AÉREA</div><h3>Rapidez cuando la necesitas</h3><p>Tu mercancía viaja por vía aérea con seguimiento.</p></div>
+    </article>
+    <article class="cargo-photo">
+      <img src="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=1800&q=85" alt="Contenedores de carga" loading="lazy">
+      <div class="cargo-photo-copy"><div class="tag">LOGÍSTICA</div><h3>Control de tu mercancía</h3><p>Recepción, clasificación y preparación de la carga.</p></div>
+    </article>
+  </div>
+  <div class="cargo-services">
+    <div class="cargo-service"><div class="ico">✈️</div><h3>Casillero aéreo</h3><p>Recibimos tus compras en Miami, las identificamos y coordinamos su llegada a Panamá.</p></div>
+    <div class="cargo-service"><div class="ico">🚢</div><h3>Casillero marítimo</h3><p>Una opción para mercancía voluminosa o cargas que conviene mover por barco.</p></div>
+    <div class="cargo-service"><div class="ico">📦</div><h3>Recepción y control</h3><p>Fotos, peso, estado del paquete y seguimiento desde tu cuenta NEA.</p></div>
+  </div>
+</section>
+
 
 
 
@@ -820,6 +907,20 @@
     <div class="franja-item"><span class="franja-k">Peso verificado</span><span class="franja-v">en balanza, con el detalle en tu factura</span></div>
     <div class="franja-item"><span class="franja-k">Local físico</span><span class="franja-v">en Sabanitas, Colón</span></div>
     <div class="franja-item"><span class="franja-k">WhatsApp directo</span><span class="franja-v">con quien maneja tu paquete</span></div>
+  </div>
+</section>
+
+
+<!-- ============ RUTA INTERNACIONAL ============ -->
+<section class="cargo-route-banner reveal">
+  <div class="cargo-route-inner">
+    <div class="cargo-route-copy">
+      <div class="eyebrow">Logística internacional</div>
+      <h2>Miami → Panamá por aire o por mar.</h2>
+      <p>NEA Cargo Xpress combina casillero, recepción y gestión logística para que tengas una sola operación y mayor control de tu mercancía.</p>
+      <div class="route-pill-row"><span class="route-pill">MIAMI 🇺🇸</span><span class="route-pill">✈ AÉREO</span><span class="route-pill">🚢 MARÍTIMO</span><span class="route-pill">PANAMÁ 🇵🇦</span></div>
+    </div>
+    <div class="cargo-route-visual" role="img" aria-label="Puerto y operación de carga"></div>
   </div>
 </section>
 
