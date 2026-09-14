@@ -442,6 +442,21 @@
   .tarifas-band .section-head .eyebrow{ color: var(--accent); }
   .tarifas-band > *{ position: relative; }
   .tarifas-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
+  .tarifa-n{ background:#fff; border:1px solid rgba(12,27,51,0.1); border-radius:16px; padding:28px;
+    transition: transform .2s ease, box-shadow .2s ease; }
+  .tarifa-n:hover{ transform: translateY(-3px); box-shadow: 0 18px 40px rgba(0,0,0,0.28); }
+  .tarifa-n h3{ font-family: var(--font-display); font-size:19px; margin:0; color:#0c1b33; }
+  .tarifa-n .precio-n{ font-family: var(--font-display); font-size:48px; line-height:1; margin:14px 0 4px;
+    letter-spacing:-.03em; color:#0c1b33; }
+  .tarifa-n .precio-n em{ font-style:normal; font-size:16px; font-weight:500; color: rgba(12,27,51,0.55); }
+  .tarifa-n ul{ list-style:none; margin:16px 0 0; padding:0; font-size:14.5px; }
+  .tarifa-n li{ padding:8px 0; border-top:1px solid rgba(12,27,51,0.1); color: rgba(12,27,51,0.62); }
+  .tarifa-n.destacada{ background:#0c1b33; border-color: rgba(255,106,26,0.4); }
+  .tarifa-n.destacada h3{ color:#fff; }
+  .tarifa-n.destacada .precio-n{ color: var(--accent); text-shadow: 0 0 24px var(--accent-glow); }
+  .tarifa-n.destacada .precio-n em{ color: rgba(241,243,242,0.6); }
+  .tarifa-n.destacada li{ color: rgba(241,243,242,0.75); border-color: rgba(241,243,242,0.14); }
+  @media (max-width: 860px){ .tarifas-grid{ grid-template-columns:1fr; } }
   .tarifa-card{ background: rgba(241,243,242,0.05); border:1px solid rgba(241,243,242,0.14); border-radius: var(--radius-md); padding:24px; transition: border-color .2s ease, background .2s ease, transform .2s ease; backdrop-filter: blur(6px); }
   .tarifa-card:hover{ border-color: rgba(255,106,26,0.45); background: rgba(241,243,242,0.08); transform: translateY(-3px); }
   .tarifa-card .precio{ font-family: var(--font-display); font-size:29px; color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
@@ -871,8 +886,8 @@
 <section class="section tarifas-band reveal" id="tarifas">
   <div class="section-head">
     <div class="eyebrow">Tarifas</div>
-    <h2>Precios claros, sin sorpresas</h2>
-    <p>Pagas por lo que pesa tu paquete. Sin cargos escondidos.</p>
+    <h2>Dos tarifas, y siempre sabes cuál te tocó</h2>
+    <p>Se cobra por peso o por volumen, la que dé más. Te lo explicamos antes de comprar, no después de pesar.</p>
   </div>
 
   <div class="tarifas-grid" id="tarifasGrid">
@@ -1313,13 +1328,33 @@
         return;
       }
 
-      grid.innerHTML = tarifasCache.map(t => `
-        <div class="tarifa-card">
-          <div class="precio">$${Number(t.precio_libra).toFixed(2)}<span>/lb</span></div>
+      const VINETAS_VOL = ['Largo × ancho × alto ÷ 166','Para cajas grandes y livianas','Se aplica cuando sale más que el peso'];
+      const VINETAS_PESO = ['El peso real de la balanza','Ropa, electrónica, repuestos','Desde Estados Unidos y China'];
+
+      const tarjetas = tarifasCache.map((t, i) => {
+        const esVolumen = /volum/i.test(t.nombre);
+        const unidad = esVolumen ? '/ lb vol.' : '/ lb';
+        const vinetas = esVolumen ? VINETAS_VOL : VINETAS_PESO;
+        return `
+        <div class="tarifa-n${i === 0 ? ' destacada' : ''}">
           <h3>${escapeHtml(t.nombre)}</h3>
-          <p>Cargo mínimo $${Number(t.cargo_minimo).toFixed(2)} · Manejo $${Number(t.cargo_manejo).toFixed(2)}${Number(t.pct_seguro) > 0 ? ` · Seguro opcional ${Number(t.pct_seguro)}%` : ''}</p>
-        </div>
-      `).join('');
+          <div class="precio-n">$${Number(t.precio_libra).toFixed(2)} <em>${unidad}</em></div>
+          <ul>${vinetas.map(v => `<li>${v}</li>`).join('')}</ul>
+        </div>`;
+      });
+
+      tarjetas.push(`
+        <div class="tarifa-n">
+          <h3>Sin cargo mínimo</h3>
+          <div class="precio-n">$0.00 <em>fijo</em></div>
+          <ul>
+            <li>No cobramos por abrir cuenta</li>
+            <li>No hay mensualidad</li>
+            <li>Pagas solo cuando envías</li>
+          </ul>
+        </div>`);
+
+      grid.innerHTML = tarjetas.join('');
 
       calcularEstimado();
     } catch (err) {
@@ -1521,7 +1556,7 @@ const I18N = {
     'step-1-h':'Compra y prealerta','step-1-p':'Compra en cualquier tienda con tu dirección de Miami y avísanos qué enviaste desde la app.',
     'step-2-h':'Recibimos y fotografiamos','step-2-p':'Tu paquete llega a nuestra bodega en Miami. Lo fotografiamos, pesamos y actualizamos el estado.',
     'step-3-h':'Retira en Panamá','step-3-p':'Te avisamos por correo, con tu factura adjunta, cuando esté listo. Retira con tu cédula o autoriza a alguien más.',
-    'tar-ey':'Tarifas','tar-h2':'Precios claros, sin sorpresas','tar-p':'Pagas por el peso real de tu paquete. Sin cargos escondidos, sin letra chica.',
+    'tar-ey':'Tarifas','tar-h2':'Dos tarifas, y siempre sabes cuál te tocó','tar-p':'Se cobra por peso o por volumen, la que dé más. Te lo explicamos antes de comprar, no después de pesar.',
     'calc-h':'🧮 Calcula el costo estimado de tu envío',
     'calc-l-0':'Tarifa','calc-l-1':'Peso estimado (lb)','calc-l-2':'Valor declarado (USD, opcional)',
     'calc-seg':'Agregar seguro sobre el valor declarado',
@@ -1562,7 +1597,7 @@ const I18N = {
     'step-1-h':'Shop and pre-alert','step-1-p':'Shop at any store using your Miami address and let us know what you sent via the app.',
     'step-2-h':'We receive and photograph','step-2-p':'Your package arrives at our Miami warehouse. We photograph, weigh it and update its status.',
     'step-3-h':'Pick up in Panama','step-3-p':"We notify you by email, with your invoice attached, when it's ready. Pick up with your ID or authorize someone else.",
-    'tar-ey':'Rates','tar-h2':'Clear prices, no surprises','tar-p':'You pay for the actual weight. No hidden fees, no fine print.',
+    'tar-ey':'Rates','tar-h2':'Two rates, and you always know which one applied','tar-p':'We charge by weight or by volume, whichever is higher. We explain it before you buy, not after we weigh.',
     'calc-h':'🧮 Calculate your estimated shipping cost',
     'calc-l-0':'Rate','calc-l-1':'Estimated weight (lb)','calc-l-2':'Declared value (USD, optional)',
     'calc-seg':'Add insurance on declared value',
