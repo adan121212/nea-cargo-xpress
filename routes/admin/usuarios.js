@@ -205,15 +205,16 @@ router.put(
   [
     body('nombre').trim().notEmpty().withMessage('El nombre es obligatorio').isLength({ max: 80 }),
     body('apellido').trim().notEmpty().withMessage('El apellido es obligatorio').isLength({ max: 80 }),
-    body('email').trim().isEmail().withMessage('Correo inválido').normalizeEmail(),
+    // NO usar .normalizeEmail(): por defecto le quita los puntos a los correos de Gmail
+    // (ej. ameb.0627@gmail.com -> ameb0627@gmail.com), así que un admin nunca podía
+    // agregarle o corregirle un punto al correo de un cliente. Solo minúsculas.
+    body('email').trim().toLowerCase().isEmail().withMessage('Correo inválido'),
     body('telefono').optional({ nullable: true }).trim().isLength({ max: 20 }),
     body('numero_casillero').optional({ nullable: true }).trim().isLength({ max: 30 }),
   ],
   async (req, res) => {
-    console.log(`PUT /admin/usuarios/${req.params.id} recibido:`, { nombre: req.body.nombre, email: req.body.email });
     const errores = validationResult(req);
     if (!errores.isEmpty()) {
-      console.log(`PUT /admin/usuarios/${req.params.id} rechazado por validación:`, errores.array());
       return res.status(400).json({ errores: errores.array() });
     }
 

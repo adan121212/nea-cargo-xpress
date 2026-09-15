@@ -213,7 +213,10 @@ router.get('/verificar/:token', async (req, res) => {
 router.post(
   '/login',
   [
-    body('email').isEmail().withMessage('Email inválido').normalizeEmail(),
+    // NO usar .normalizeEmail(): le quita los puntos a los Gmail, y como el registro
+    // SÍ guarda el correo tal cual lo escribió el cliente, un cliente con punto en su
+    // Gmail no podría iniciar sesión (el correo normalizado ya no coincidiría con el guardado).
+    body('email').trim().toLowerCase().isEmail().withMessage('Email inválido'),
     body('password').notEmpty().withMessage('La contraseña es obligatoria'),
   ],
   async (req, res) => {
@@ -275,7 +278,7 @@ router.post(
 // --- POST /api/auth/olvide-password ---
 router.post(
   '/olvide-password',
-  [body('email').isEmail().withMessage('Email inválido').normalizeEmail()],
+  [body('email').trim().toLowerCase().isEmail().withMessage('Email inválido')],
   async (req, res) => {
     const errores = validationResult(req);
     if (!errores.isEmpty()) {
