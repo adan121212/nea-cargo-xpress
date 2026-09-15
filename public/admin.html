@@ -3730,6 +3730,7 @@
     $('#editClienteEmail').value = u.email || '';
     $('#editClienteTelefono').value = u.telefono || '';
     $('#editClienteCasillero').value = u.numero_casillero || '';
+    $('#previewCorreoEditar').textContent = 'Se guardará: ' + (u.email || '');
     mostrarBanner('#bannerEditCliente','','');
     mostrarBanner('#bannerAutorizadosAdmin','','');
     $('#autorizadosAdminLista').innerHTML = '';
@@ -3826,6 +3827,9 @@
         else { mostrarBanner('#bannerAutorizadosAdmin','error',data.mensaje||'No se pudo guardar.'); }
       } catch(err){ mostrarBanner('#bannerAutorizadosAdmin','error','No pudimos conectar.'); }
       finally { setCargando(btn,false); }
+    });
+    $('#editClienteEmail').addEventListener('input', ()=>{
+      $('#previewCorreoEditar').textContent = 'Se guardará: ' + $('#editClienteEmail').value.trim();
     });
     $('#btnGuardarEditCliente').addEventListener('click', async()=>{
     const btn=$('#btnGuardarEditCliente');
@@ -4667,6 +4671,7 @@
     </div>
     <label for="editClienteEmail">Correo electrónico</label>
     <input id="editClienteEmail" type="email" placeholder="ana@ejemplo.com" autocomplete="off" name="correo_cliente_editar">
+    <div id="previewCorreoEditar" style="font-size:11.5px;color:var(--ink-soft);margin-top:4px;"></div>
     <label for="editClienteTelefono">Teléfono</label>
     <input id="editClienteTelefono" type="tel" placeholder="6123-4567">
     <label for="editClienteCasillero">Número de casillero</label>
