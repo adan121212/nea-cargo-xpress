@@ -2243,11 +2243,27 @@
         <td data-label="Verificado">${u.verificado ? '<span class="badge badge-listo_para_retiro">Verificado</span>' : '<span class="badge" style="background:var(--paper);color:var(--ink-soft);border:1px solid var(--line);">Pendiente</span>'}</td>
         <td data-label="Paquetes">${u.total_paquetes}</td>
         <td data-label="Registrado" class="muted">${fecha}</td>
-        <td><button class="btn-secondary btn-editar-cliente" data-id="${u.id}" style="font-size:12px;padding:5px 10px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 20 H21"/><path d="M16.5 3.5 A2.1 2.1 0 0 1 19.5 6.5 L7 19 L3 20 L4 16 Z"/></svg> Editar</button></td>
+        <td><div class="row-actions">
+          <button class="btn-secondary btn-editar-cliente" data-id="${u.id}" style="font-size:12px;padding:5px 10px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 20 H21"/><path d="M16.5 3.5 A2.1 2.1 0 0 1 19.5 6.5 L7 19 L3 20 L4 16 Z"/></svg> Editar</button>
+          ${!u.verificado ? `<button class="btn-secondary btn-reenviar-verif" data-id="${u.id}" title="Reenviar correo de verificación" style="font-size:12px;padding:5px 10px;">📧 Reenviar</button>` : ''}
+        </div></td>
       </tr>`;
     }).join('');
     $('#tbodyClientes').querySelectorAll('.btn-editar-cliente').forEach(btn=>{
       btn.addEventListener('click',()=>{ const u=clientesCacheFull.find(x=>x.id==btn.dataset.id); if(u) abrirEditCliente(u); });
+    });
+    $('#tbodyClientes').querySelectorAll('.btn-reenviar-verif').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(!confirm('¿Reenviar el correo de verificación a este cliente?')) return;
+        setCargando(btn, true);
+        try {
+          const res = await apiAdmin(`/admin/usuarios/${btn.dataset.id}/reenviar-verificacion`, { method: 'POST' });
+          const data = await res.json().catch(()=>({}));
+          if (res.ok) { alert('✓ Correo de verificación reenviado.'); }
+          else { alert(data.mensaje || 'No se pudo reenviar el correo.'); }
+        } catch(err) { alert('No pudimos conectar con el servidor.'); }
+        finally { setCargando(btn, false); }
+      });
     });
   }
 

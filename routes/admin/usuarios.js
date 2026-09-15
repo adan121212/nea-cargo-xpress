@@ -1,8 +1,10 @@
 const express = require('express');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
+const { enviarCorreoConfirmacion } = require('../../utils/mailer');
 
 const router = express.Router();
 
@@ -108,6 +110,45 @@ router.get('/:id/referidos', async (req, res) => {
   } catch (error) {
     console.error('Error en GET /admin/usuarios/:id/referidos:', error);
     return res.status(500).json({ mensaje: 'Error interno al listar referidos' });
+  }
+});
+
+// --- POST /api/admin/usuarios/:id/reenviar-verificacion ---
+// Reenvía el correo de verificación a un cliente que se registró pero
+// todavía no confirmó su cuenta. Genera un token nuevo (el anterior queda
+// invalidado) y usa el mismo correo de "confirma tu cuenta" del registro.
+router.post('/:id/reenviar-verificacion', async (req, res) => {
+  try {
+    const resultado = await pool.query(
+      `SELECT id, nombre, email, verificado, tipo_cuenta, razon_social
+       FROM usuarios WHERE id = $1`,
+      [req.params.id]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ mensaje: 'Cliente no encontrado' });
+    }
+
+    const cliente = resultado.rows[0];
+
+    if (cliente.verificado) {
+      return res.status(409).json({ mensaje: 'Este cliente ya tiene el correo verificado' });
+    }
+
+    const nuevoToken = crypto.randomBytes(32).toString('hex');
+    await pool.query(
+      'UPDATE usuarios SET token_verificacion = $1 WHERE id = $2',
+      [nuevoToken, cliente.id]
+    );
+
+    const nombreParaCorreo = cliente.tipo_cuenta === 'empresa' ? cliente.razon_social : cliente.nombre;
+
+    await enviarCorreoConfirmacion(cliente.email, nombreParaCorreo, nuevoToken);
+
+    return res.json({ mensaje: 'Correo de verificación reenviado correctamente' });
+  } catch (error) {
+    console.error('Error en POST /admin/usuarios/:id/reenviar-verificacion:', error);
+    return res.status(500).json({ mensaje: 'Error interno al reenviar el correo de verificación' });
   }
 });
 
