@@ -3828,27 +3828,34 @@
       finally { setCargando(btn,false); }
     });
     $('#btnGuardarEditCliente').addEventListener('click', async()=>{
-    if(!clienteEditandoId) return;
     const btn=$('#btnGuardarEditCliente');
-    const payload={
-      nombre: $('#editClienteNombre').value.trim(),
-      apellido: $('#editClienteApellido').value.trim(),
-      email: $('#editClienteEmail').value.trim(),
-      telefono: $('#editClienteTelefono').value.trim()||null,
-      numero_casillero: $('#editClienteCasillero').value.trim()||null,
-    };
-    if(!payload.nombre||!payload.apellido||!payload.email){ mostrarBanner('#bannerEditCliente','error','Nombre, apellido y correo son obligatorios.'); return; }
-    setCargando(btn,true);
     try {
-      const res=await apiAdmin(`/admin/usuarios/${clienteEditandoId}`,{method:'PUT',body:JSON.stringify(payload)});
-      const data=await res.json().catch(()=>({}));
-      if(res.ok){
-        mostrarBanner('#bannerEditCliente','success','✓ Cliente actualizado correctamente.');
-        f1ClientesCache=[];
-        setTimeout(()=>{ cerrarEditCliente(); cargarClientes(); },900);
-      } else { mostrarBanner('#bannerEditCliente','error',data.mensaje||'No se pudo guardar.'); }
-    } catch(err){ mostrarBanner('#bannerEditCliente','error','No pudimos conectar.'); }
-    finally { setCargando(btn,false); }
+      if(!clienteEditandoId){ mostrarBanner('#bannerEditCliente','error','No se pudo identificar al cliente. Cierra esta ventana y vuelve a presionar Editar.'); return; }
+      const payload={
+        nombre: $('#editClienteNombre').value.trim(),
+        apellido: $('#editClienteApellido').value.trim(),
+        email: $('#editClienteEmail').value.trim(),
+        telefono: $('#editClienteTelefono').value.trim()||null,
+        numero_casillero: $('#editClienteCasillero').value.trim()||null,
+      };
+      if(!payload.nombre||!payload.apellido||!payload.email){ mostrarBanner('#bannerEditCliente','error','Nombre, apellido y correo son obligatorios.'); return; }
+      setCargando(btn,true);
+      try {
+        const res=await apiAdmin(`/admin/usuarios/${clienteEditandoId}`,{method:'PUT',body:JSON.stringify(payload)});
+        const data=await res.json().catch(()=>({}));
+        if(res.ok){
+          mostrarBanner('#bannerEditCliente','success','✓ Cliente actualizado correctamente.');
+          f1ClientesCache=[];
+          setTimeout(()=>{ cerrarEditCliente(); cargarClientes(); },900);
+        } else { mostrarBanner('#bannerEditCliente','error',data.mensaje||('No se pudo guardar (código '+res.status+').')); }
+      } catch(err){ mostrarBanner('#bannerEditCliente','error','No pudimos conectar con el servidor.'); }
+      finally { setCargando(btn,false); }
+    } catch(errFatal){
+      // Red de seguridad: si algo falla antes de llegar al servidor, que se vea en vez de quedar en silencio.
+      console.error('Error inesperado al guardar cliente:', errFatal);
+      mostrarBanner('#bannerEditCliente','error','Ocurrió un error inesperado: '+errFatal.message);
+      setCargando(btn,false);
+    }
     });
   });
   const NOTIF_KEY = 'nea_notifs';

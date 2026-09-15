@@ -210,8 +210,10 @@ router.put(
     body('numero_casillero').optional({ nullable: true }).trim().isLength({ max: 30 }),
   ],
   async (req, res) => {
+    console.log(`PUT /admin/usuarios/${req.params.id} recibido:`, { nombre: req.body.nombre, email: req.body.email });
     const errores = validationResult(req);
     if (!errores.isEmpty()) {
+      console.log(`PUT /admin/usuarios/${req.params.id} rechazado por validación:`, errores.array());
       return res.status(400).json({ errores: errores.array() });
     }
 
