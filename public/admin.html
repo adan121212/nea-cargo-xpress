@@ -3047,8 +3047,8 @@
       if(!BF || !DHT) return undefined;
       const hints = new Map();
       hints.set(DHT.POSSIBLE_FORMATS, [
-        BF.CODE_128, BF.CODE_39, BF.ITF, BF.CODABAR,
-        BF.EAN_13, BF.UPC_A, BF.QR_CODE, BF.DATA_MATRIX,
+        BF.CODE_128, BF.CODE_39, BF.CODE_93, BF.ITF, BF.CODABAR,
+        BF.EAN_13, BF.EAN_8, BF.UPC_A, BF.UPC_E, BF.QR_CODE, BF.DATA_MATRIX, BF.PDF_417,
       ]);
       hints.set(DHT.TRY_HARDER, true);
       return hints;
@@ -3070,9 +3070,22 @@
     }
     estadoCamara('Apunta al código de barras de la etiqueta');
     try {
-      zxingReader = new ZXingBrowser.BrowserMultiFormatReader(construirHints(), { delayBetweenScanAttempts: 120 });
+      // El segundo parámetro de BrowserMultiFormatReader debe ser un NÚMERO de
+      // milisegundos (tiempo entre intentos de lectura), no un objeto — antes se
+      // mandaba { delayBetweenScanAttempts: 120 }, que la librería no reconoce y
+      // rompía el tiempo de espera interno entre intentos de lectura.
+      zxingReader = new ZXingBrowser.BrowserMultiFormatReader(construirHints(), 150);
       zxingControls = await zxingReader.decodeFromConstraints(
-        { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+        {
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            // Enfoque continuo: sin esto, muchos celulares enfocan una sola vez al
+            // abrir la cámara y el código de barras (de cerca) queda borroso.
+            advanced: [{ focusMode: 'continuous' }],
+          },
+        },
         document.getElementById('camaraVideo'),
         (resultado, error) => {
           if(!resultado) return;
