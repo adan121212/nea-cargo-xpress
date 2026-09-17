@@ -1694,12 +1694,13 @@
     if (btnAereo) btnAereo.onclick = () => copiarTexto(textoCasillero, btnAereo, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa');
 
     const textoCasilleroMaritimo = [
-      `MARITIMO/${nombreCompleto} NEA CARGO XPRESS`,
+      `PTY-14996 MARITIMO/${nombreCompleto}`,
+      'NEA CARGO XPRESS',
       '8610 NW 72 STREET',
       'MIAMI, FLORIDA 33195',
       'ESTADOS UNIDOS'
     ].join('\n');
-    const htmlCasilleroMaritimo = `<span class="suite">MARITIMO/</span>${escapeHtml(nombreCompleto)} NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS`;
+    const htmlCasilleroMaritimo = `<span class="suite">PTY-14996</span> MARITIMO/${escapeHtml(nombreCompleto)}<br>NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS`;
     const bloqueMaritimo = document.getElementById('bloqueDireccionMaritimo');
     if (bloqueMaritimo) bloqueMaritimo.innerHTML = htmlCasilleroMaritimo;
     const btnMaritimo = document.getElementById('btnCopiarMaritimo');
