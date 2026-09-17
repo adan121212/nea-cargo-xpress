@@ -53,14 +53,15 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding: 16px 28px;
-    background: rgba(12,27,51,0.92);
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    padding: 14px 28px;
+    background: linear-gradient(100deg, #0a1a33 0%, #123a63 45%, #1c5f96 85%, #2f86c2 100%);
     color: #f1f3f2;
     position: sticky; top:0; z-index: 40;
     border-bottom: 1px solid rgba(241,243,242,0.08);
+    overflow: hidden;
   }
+  .topbar-ilustracion{ position:absolute; right:230px; top:8px; opacity:.35; pointer-events:none; }
+  @media (max-width:900px){ .topbar-ilustracion{ display:none; } }
   .brand{
     display:flex;
     align-items:center;
@@ -72,51 +73,54 @@
     font-weight:700;
     font-size:17px;
     letter-spacing:.01em;
+    position:relative; z-index:1;
   }
   .brand .mark{
     width:30px; height:30px;
     border-radius:8px;
-    background: var(--accent);
+    background: linear-gradient(135deg, #ff8a3d, #e2570e);
     display:flex; align-items:center; justify-content:center;
     font-family: var(--font-display);
     font-weight:700;
     font-size:14px;
-    color: var(--ink);
+    color: #fff;
     box-shadow: 0 0 0 1px rgba(255,106,26,0.3), 0 2px 16px var(--accent-glow);
   }
   .brand small{
     display:block;
     font-family: var(--font-body);
-    font-weight:400;
+    font-weight:700;
     font-size:10px;
     letter-spacing:.14em;
     text-transform:uppercase;
-    color: rgba(241,243,242,0.55);
+    color: #7fc4ff;
   }
-  .topbar-right{ display:flex; align-items:center; gap:16px; font-size:13px; }
+  .topbar-right{ display:flex; align-items:center; gap:12px; font-size:13px; position:relative; z-index:1; }
   .casillero-pill{
-    font-family: var(--font-mono);
-    font-size:12px;
-    letter-spacing:.03em;
-    background: rgba(255,106,26,0.16);
-    color: #ffb27f;
-    padding:5px 10px;
-    border-radius:6px;
+    font-family: var(--font-body);
+    font-size:12.5px;
+    font-weight:600;
+    background: rgba(0,0,0,0.24);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    padding:8px 14px;
+    border-radius:20px;
     display:none;
-    box-shadow: 0 0 0 1px rgba(255,106,26,0.2);
+    align-items:center; gap:7px;
   }
   .btn-logout{
-    background:none;
-    border:1px solid rgba(241,243,242,0.25);
-    color:#f1f3f2;
-    padding:7px 14px;
-    border-radius:7px;
-    font-size:13px;
+    background: rgba(0,0,0,0.24);
+    border:1px solid rgba(255,255,255,0.18);
+    color:#fff;
+    padding:8px 16px;
+    border-radius:20px;
+    font-size:12.5px;
+    font-weight:600;
     cursor:pointer;
     display:none;
     transition: border-color .15s ease, background .15s ease;
   }
-  .btn-logout:hover{ border-color: rgba(241,243,242,0.5); background: rgba(241,243,242,0.06); }
+  .btn-logout:hover{ border-color: rgba(255,255,255,0.4); background: rgba(0,0,0,0.4); }
 
   .wrap{ max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
 
@@ -292,8 +296,30 @@
     padding: 22px 14px;
     position: sticky; top:63px; align-self:flex-start; height: calc(100vh - 63px);
     transition: width .2s ease;
-    overflow-x:hidden;
+    overflow-x:hidden; overflow-y:auto;
+    display:flex; flex-direction:column;
   }
+  .sidebar-perfil{
+    display:flex; align-items:center; gap:11px;
+    padding-bottom:18px; margin-bottom:14px;
+    border-bottom:1px solid rgba(241,243,242,0.1);
+  }
+  .sidebar-avatar{
+    width:40px; height:40px; border-radius:50%; flex-shrink:0;
+    background: linear-gradient(135deg,#2f86c2,#123a63);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .sidebar-perfil-nombre{ color:#fff; font-weight:700; font-size:13.5px; white-space:nowrap; }
+  .sidebar-perfil-sub{ color:rgba(241,243,242,0.5); font-size:11px; white-space:nowrap; }
+  .sidebar.collapsed .sidebar-perfil{ display:none; }
+  .sidebar-pie{ margin-top:auto; padding-top:20px; }
+  .sidebar-pie-tag{ font-family: var(--font-display); font-style:italic; color:rgba(241,243,242,0.45); font-size:12.5px; line-height:1.25; }
+  .sidebar-pie-tag strong{ display:block; font-style:normal; font-weight:800; font-size:16px; color:#fff; letter-spacing:.02em; margin-top:1px; }
+  .sidebar-pie-modos{ display:flex; gap:12px; margin-top:14px; }
+  .sidebar-pie-modo{ text-align:center; flex:1; }
+  .sidebar-pie-modo-ico{ width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; margin:0 auto 5px; }
+  .sidebar-pie-modo-l{ font-size:9px; font-weight:700; letter-spacing:.04em; color:rgba(241,243,242,0.5); }
+  .sidebar.collapsed .sidebar-pie{ display:none; }
   .sidebar-toggle{
     background: rgba(241,243,242,0.08); border:none; color:#f1f3f2;
     width:26px; height:26px; border-radius:50%; cursor:pointer;
@@ -313,12 +339,10 @@
     color: rgba(241,243,242,0.72); font-family: var(--font-body); font-size:13.5px; font-weight:500;
     padding: 10px 12px; border-radius:9px; white-space:nowrap;
     transition: background .15s ease, color .15s ease;
-    border-left: 3px solid transparent;
   }
   .side-item:hover, .side-subitem:hover{ background: rgba(241,243,242,0.06); color:#fff; }
   .side-item.active, .side-subitem.active{
-    background: rgba(255,106,26,0.14); color: var(--accent);
-    border-left-color: var(--accent);
+    background: linear-gradient(90deg, #2f7bd6, #1c5f96); color: #fff;
   }
   .side-ico{ font-size:15px; flex-shrink:0; width:18px; text-align:center; }
   .side-caret{ margin-left:auto; font-size:10px; opacity:.6; transition: transform .15s ease; }
@@ -358,7 +382,7 @@
     gap: 24px;
     flex-wrap:wrap;
     margin-bottom: 22px;
-    background: linear-gradient(115deg, #ff8a3d 0%, #e2570e 18%, #7a3a2a 34%, var(--ink) 62%, #0a1526 100%);
+    background: linear-gradient(100deg, #0c1b33 0%, #123a63 55%, #1c5f96 100%);
     border-radius: var(--radius-lg,18px);
     padding: 26px 28px;
     position: relative;
@@ -367,13 +391,13 @@
   .hero::before{
     content:'';
     position:absolute; inset:0;
-    background: radial-gradient(ellipse at 100% 100%, rgba(6,20,40,0.55), transparent 60%);
+    background: radial-gradient(ellipse at 100% 0%, rgba(127,196,255,0.18), transparent 60%);
     pointer-events:none;
   }
   .hero::after{
     content:'';
     position:absolute; inset:0;
-    background: radial-gradient(circle at 85% 20%, rgba(255,200,150,0.28), transparent 55%);
+    background: radial-gradient(circle at 85% 90%, rgba(47,123,214,0.22), transparent 55%);
     pointer-events:none;
   }
   .hero h1{
@@ -383,36 +407,38 @@
     letter-spacing:-0.01em;
     color:#fff;
   }
-  .hero p{ margin:0; color: rgba(255,255,255,0.82); font-size:13.5px; position:relative; }
+  .hero p{ margin:0; color: rgba(255,255,255,0.75); font-size:13.5px; position:relative; }
   .hero > div:first-child{ position:relative; z-index:1; }
-  .hero-badges{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; position:relative; z-index:1; }
-  .hero-badge{
-    display:flex; align-items:center; gap:6px; background: rgba(0,0,0,0.22);
-    border:1px solid rgba(255,255,255,0.22); color:#fff; font-size:11.5px; font-weight:600;
-    padding:6px 12px; border-radius:20px;
+  .hero-estado{
+    display:flex; align-items:center; gap:12px; position:relative; z-index:1;
+    background: rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.14);
+    border-radius:12px; padding:12px 18px;
   }
-  .hero-ilustracion{ position:relative; z-index:1; color: rgba(10,20,35,0.8); flex-shrink:0; }
+  .hero-estado-ico{ width:34px; height:34px; border-radius:9px; background: rgba(127,196,255,0.2); color:#7fc4ff; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .hero-estado-t{ color:#fff; font-size:12.5px; font-weight:700; }
+  .hero-estado-s{ color:rgba(255,255,255,0.6); font-size:11.5px; }
+  .hero-ilustracion{ position:relative; z-index:1; color: rgba(255,255,255,0.35); flex-shrink:0; }
   @media (max-width:700px){ .hero-ilustracion{ display:none; } }
 
   .grid2{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:20px; align-items:start; }
   .dir-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; }
   @media (max-width:620px){ .dir-grid{ grid-template-columns: 1fr; } }
-  .dir-card{ position:relative; overflow:hidden; }
+  .dir-card{ position:relative; overflow:hidden; box-shadow: 0 8px 24px rgba(20,50,90,0.08); }
   .dir-badge{
     position:absolute; top:18px; right:18px; font-size:10px; font-weight:800; letter-spacing:.06em;
     padding:4px 10px; border-radius:20px; color:#fff;
   }
-  .dir-badge-air{ background: var(--accent); }
-  .dir-badge-sea{ background: #2f8fc4; }
+  .dir-badge-air{ background: #2f7bd6; }
+  .dir-badge-sea{ background: #1f9c86; }
   .dir-cta{
     width:100%; margin-top:16px; padding:13px; border:none; border-radius:10px; font-weight:700;
     font-size:13.5px; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
-    gap:8px; transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
+    gap:8px; transition: transform .15s ease, box-shadow .15s ease;
   }
-  .dir-cta-aereo{ background: var(--accent); box-shadow: 0 4px 14px var(--accent-glow); }
-  .dir-cta-aereo:hover{ background: var(--accent-dark); transform: translateY(-1px); }
-  .dir-cta-maritimo{ background: #2f8fc4; box-shadow: 0 4px 14px rgba(47,143,196,0.4); }
-  .dir-cta-maritimo:hover{ background:#25749f; transform: translateY(-1px); }
+  .dir-cta-aereo{ background: linear-gradient(90deg,#4a9dea,#2159a8); box-shadow: 0 4px 14px rgba(47,123,214,0.35); }
+  .dir-cta-aereo:hover{ transform: translateY(-1px); box-shadow: 0 6px 18px rgba(47,123,214,0.45); }
+  .dir-cta-maritimo{ background: linear-gradient(90deg,#31c2a4,#177a63); box-shadow: 0 4px 14px rgba(31,156,134,0.35); }
+  .dir-cta-maritimo:hover{ transform: translateY(-1px); box-shadow: 0 6px 18px rgba(31,156,134,0.45); }
   .campo-ico{
     width:28px; height:28px; border-radius:8px; background: var(--paper); color: var(--ink-soft);
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
@@ -420,11 +446,12 @@
   .campo-textos{ flex:1; min-width:0; }
   .dir-ico{
     width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
-    flex-shrink:0;
+    flex-shrink:0; color:#fff;
   }
-  .dir-ico-aereo{ background: rgba(255,106,26,0.12); color: var(--accent-dark); }
-  .dir-ico-maritimo{ background: rgba(47,143,196,0.14); color: #2f8fc4; }
+  .dir-ico-aereo{ background: linear-gradient(135deg,#4a9dea,#2159a8); }
+  .dir-ico-maritimo{ background: linear-gradient(135deg,#31c2a4,#177a63); }
   .dir-campos{ margin-top:16px; }
+  .mini-card-ico{ width:34px; height:34px; border-radius:9px; background:#eaf2fd; color:#2f7bd6; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
   .rep-stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
   .rep-stat{ background: var(--paper); border-radius:10px; padding: 16px 18px; }
@@ -712,6 +739,17 @@
 <body>
 
 <div class="topbar">
+  <svg class="topbar-ilustracion" width="360" height="90" viewBox="0 0 360 90" fill="none" stroke="#dff0ff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 68 H230 L220 84 H42 Z"/>
+    <path d="M26 68 V50 H200 V68"/>
+    <rect x="34" y="40" width="18" height="14"/>
+    <rect x="56" y="32" width="18" height="22"/>
+    <rect x="78" y="40" width="18" height="14"/>
+    <rect x="100" y="28" width="18" height="26"/>
+    <rect x="122" y="40" width="18" height="14"/>
+    <path d="M160 6 L300 34 L276 42 L250 30 Z" fill="#dff0ff" stroke="none" opacity=".85"/>
+    <path d="M160 6 L156 -10 L192 2 Z" fill="#dff0ff" stroke="none" opacity=".55"/>
+  </svg>
   <a href="#" id="btnBrand" class="brand">
     <div class="mark">N</div>
     <div>
@@ -720,7 +758,7 @@
     </div>
   </a>
   <div class="topbar-right">
-    <span class="casillero-pill" id="pillCasillero"></span>
+    <span class="casillero-pill" id="pillCasillero"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg><span id="pillCasilleroTexto"></span></span>
     <button class="nav-toggle-app" id="btnMenuMovilApp" aria-label="Abrir menú" style="display:none;">☰</button>
     <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
   </div>
@@ -889,6 +927,13 @@
     <div class="sidebar-scrim" id="sidebarScrim"></div>
     <aside class="sidebar" id="sidebar">
       <button class="sidebar-toggle" id="btnSidebarToggle" aria-label="Colapsar menú">‹</button>
+      <div class="sidebar-perfil">
+        <div class="sidebar-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg></div>
+        <div>
+          <div class="sidebar-perfil-nombre" id="sidebarSaludo">Hola</div>
+          <div class="sidebar-perfil-sub">Bienvenido a tu casillero</div>
+        </div>
+      </div>
       <nav class="sidebar-nav">
         <button class="side-item active" data-seccion="inicio">
           <span class="side-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 11 L12 3 L21 11"/><path d="M5 10 V20 H19 V10"/><path d="M10 20 V14 H14 V20"/></svg></span><span class="side-label">Inicio</span>
@@ -923,6 +968,23 @@
           <span class="side-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 2 L20 5 V11 C20 16 16.5 19.5 12 21 C7.5 19.5 4 16 4 11 V5 Z"/><path d="M9 11.5 L11 13.5 L15.5 9"/></svg></span><span class="side-label">Autorizados</span>
         </button>
       </nav>
+      <div class="sidebar-pie">
+        <div class="sidebar-pie-tag">Tus compras<strong>SIN FRONTERAS</strong></div>
+        <div class="sidebar-pie-modos">
+          <div class="sidebar-pie-modo">
+            <div class="sidebar-pie-modo-ico" style="background:rgba(47,123,214,0.22);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7fc4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 L2 9 L11 12.5 L14.5 21 L17 14 Z"/></svg></div>
+            <div class="sidebar-pie-modo-l">AÉREA</div>
+          </div>
+          <div class="sidebar-pie-modo">
+            <div class="sidebar-pie-modo-ico" style="background:rgba(31,156,134,0.22);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7fe0c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 L5 20 H19 L21 17"/><path d="M5 17 L6 10 H18 L19 17"/></svg></div>
+            <div class="sidebar-pie-modo-l">MARÍTIMA</div>
+          </div>
+          <div class="sidebar-pie-modo">
+            <div class="sidebar-pie-modo-ico" style="background:rgba(241,243,242,0.1);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(241,243,242,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="13" height="10"/><path d="M14 10 H19 L22 13 V17 H14 Z"/></svg></div>
+            <div class="sidebar-pie-modo-l">TERRESTRE</div>
+          </div>
+        </div>
+      </div>
     </aside>
 
     <main class="app-main">
@@ -931,10 +993,12 @@
           <div>
             <h1 id="saludoNombre">Hola</h1>
             <p id="subtituloSeccion">Este es el estado de tu casillero y tus paquetes.</p>
-            <div class="hero-badges" id="heroBadges" style="display:none;">
-              <span class="hero-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L20 5 V11 C20 16 16.5 19.5 12 21 C7.5 19.5 4 16 4 11 V5 Z"/><path d="M9 11.5 L11 13.5 L15.5 9"/></svg> Seguro</span>
-              <span class="hero-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L4 14 H11 L10 22 L20 9 H13 Z"/></svg> Rápido</span>
-              <span class="hero-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.5 L11 14.5 L15.5 10"/><circle cx="12" cy="12" r="9.5"/></svg> Confiable</span>
+          </div>
+          <div class="hero-estado" id="heroEstado" style="display:none;">
+            <div class="hero-estado-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/></svg></div>
+            <div>
+              <div class="hero-estado-t">Tu casillero está activo</div>
+              <div class="hero-estado-s">Recibe, gestiona y sigue tus paquetes.</div>
             </div>
           </div>
           <div class="hero-ilustracion">
@@ -990,7 +1054,13 @@
           </div>
           <div class="grid2">
             <div class="card reveal">
-              <h2>Mis paquetes</h2>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+                <div style="display:flex;align-items:center;gap:11px;">
+                  <span class="mini-card-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/></svg></span>
+                  <h2 style="margin:0;">Mis paquetes</h2>
+                </div>
+                <a href="#" onclick="irASeccion('paquetes'); return false;" style="font-size:12.5px;font-weight:700;white-space:nowrap;">Ver todos →</a>
+              </div>
               <p class="card-sub">Resumen de tu actividad.</p>
               <div class="stat-row">
                 <div class="stat">
@@ -1004,7 +1074,13 @@
               </div>
             </div>
             <div class="card reveal">
-              <h2>Últimos paquetes</h2>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+                <div style="display:flex;align-items:center;gap:11px;">
+                  <span class="mini-card-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L16 14"/></svg></span>
+                  <h2 style="margin:0;">Últimos paquetes</h2>
+                </div>
+                <a href="#" onclick="irASeccion('paquetes'); return false;" style="font-size:12.5px;font-weight:700;white-space:nowrap;">Ver todos →</a>
+              </div>
               <p class="card-sub">Vista rápida — ve a "Paquetes" en el menú para ver todo el historial.</p>
               <div id="listaPaquetesInicio"></div>
             </div>
@@ -1328,7 +1404,7 @@
     document.querySelector('.wrap').style.display = mostrar ? 'none' : 'block';
     $('#vistaApp').style.display = mostrar ? 'flex' : 'none';
     $('#btnLogout').style.display = mostrar ? 'inline-block' : 'none';
-    $('#pillCasillero').style.display = mostrar ? 'inline-block' : 'none';
+    $('#pillCasillero').style.display = mostrar ? 'flex' : 'none';
     if (mostrar) activarReveal();
   }
 
@@ -1373,8 +1449,8 @@
       $('#saludoNombre').textContent = seccion === 'inicio' ? info.titulo(nombreUsuarioActual) : info.titulo();
       $('#subtituloSeccion').textContent = info.sub;
     }
-    const heroBadges = document.getElementById('heroBadges');
-    if (heroBadges) heroBadges.style.display = seccion === 'inicio' ? 'flex' : 'none';
+    const heroEstado = document.getElementById('heroEstado');
+    if (heroEstado) heroEstado.style.display = seccion === 'inicio' ? 'flex' : 'none';
 
     if (seccion === 'autorizados') cargarAutorizados();
     if (seccion === 'deliveries') cargarDeliveries();
@@ -1778,7 +1854,8 @@
     usuarioIdActual = usuario.id;
     mostrarBienvenidaSiNecesario(usuario.id);
     $('#saludoNombre').textContent = `Hola, ${usuario.nombre}`;
-    $('#pillCasillero').textContent = 'Cliente ' + usuario.numero_casillero;
+    $('#sidebarSaludo').textContent = `Hola, ${usuario.nombre}`;
+    $('#pillCasilleroTexto').textContent = 'Cliente ' + usuario.numero_casillero;
 
     const nombreCompleto = `${usuario.nombre} ${usuario.apellido || ''}`.trim();
     const CAS = 'PTY-14981';
