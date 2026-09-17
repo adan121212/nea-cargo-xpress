@@ -354,22 +354,64 @@
   .hero{
     display:flex;
     justify-content:space-between;
-    align-items:flex-end;
+    align-items:center;
     gap: 24px;
     flex-wrap:wrap;
-    margin-bottom: 30px;
+    margin-bottom: 22px;
+    background: linear-gradient(120deg, var(--ink) 0%, #16294a 55%, #1b2f52 100%);
+    border-radius: var(--radius-lg,18px);
+    padding: 26px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after{
+    content:'';
+    position:absolute; inset:0;
+    background: radial-gradient(circle at 85% 20%, rgba(255,106,26,0.22), transparent 55%);
+    pointer-events:none;
   }
   .hero h1{
     font-family: var(--font-display);
     font-size: 25px;
     margin:0 0 4px;
     letter-spacing:-0.01em;
+    color:#fff;
   }
-  .hero p{ margin:0; color: var(--ink-soft); font-size:13.5px; }
+  .hero p{ margin:0; color: rgba(241,243,242,0.75); font-size:13.5px; position:relative; }
+  .hero > div:first-child{ position:relative; z-index:1; }
+  .hero-badges{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; position:relative; z-index:1; }
+  .hero-badge{
+    display:flex; align-items:center; gap:6px; background: rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.14); color:#fff; font-size:11.5px; font-weight:600;
+    padding:6px 12px; border-radius:20px;
+  }
+  .hero-ilustracion{ position:relative; z-index:1; color: rgba(255,255,255,0.5); flex-shrink:0; }
+  @media (max-width:700px){ .hero-ilustracion{ display:none; } }
 
   .grid2{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:20px; align-items:start; }
   .dir-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start; }
   @media (max-width:620px){ .dir-grid{ grid-template-columns: 1fr; } }
+  .dir-card{ position:relative; overflow:hidden; }
+  .dir-badge{
+    position:absolute; top:18px; right:18px; font-size:10px; font-weight:800; letter-spacing:.06em;
+    padding:4px 10px; border-radius:20px; color:#fff;
+  }
+  .dir-badge-air{ background: var(--accent); }
+  .dir-badge-sea{ background: var(--cargo-green); }
+  .dir-cta{
+    width:100%; margin-top:16px; padding:13px; border:none; border-radius:10px; font-weight:700;
+    font-size:13.5px; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    gap:8px; transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
+  }
+  .dir-cta-aereo{ background: var(--accent); box-shadow: 0 4px 14px var(--accent-glow); }
+  .dir-cta-aereo:hover{ background: var(--accent-dark); transform: translateY(-1px); }
+  .dir-cta-maritimo{ background: var(--cargo-green); box-shadow: 0 4px 14px var(--cargo-green-bg); }
+  .dir-cta-maritimo:hover{ background:#125f4c; transform: translateY(-1px); }
+  .campo-ico{
+    width:28px; height:28px; border-radius:8px; background: var(--paper); color: var(--ink-soft);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .campo-textos{ flex:1; min-width:0; }
   .dir-ico{
     width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
     flex-shrink:0;
@@ -621,11 +663,11 @@
   .campos-titulo{ font-family:var(--font-display); font-size:13px; font-weight:600; margin:22px 0 2px; }
   .campo-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); }
   .campo-row:last-child{ border-bottom:none; }
-  .campo-l{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); width:160px; flex-shrink:0; }
-  .campo-v{ font-family:var(--font-mono); font-size:12.5px; flex:1; word-break:break-word; }
+  .campo-l{ font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); }
+  .campo-v{ font-size:13px; font-weight:600; word-break:break-word; }
   .campo-b{ border:1px solid var(--line); background:#fff; border-radius:7px; padding:5px 10px; font-size:11.5px; font-weight:600; cursor:pointer; flex-shrink:0; }
   .campo-b:hover{ border-color:var(--accent); color:var(--accent-dark); }
-  @media (max-width:620px){ .campo-l{ width:100%; } .campo-row{ flex-wrap:wrap; } }
+  @media (max-width:620px){ .campo-row{ flex-wrap:wrap; } }
   .modal-overlay{ position:fixed; inset:0; background:rgba(12,27,51,0.55); z-index:200; display:none; align-items:center; justify-content:center; padding:16px; }
   .modal-overlay .modal-box{ background:#fff; border-radius:14px; padding:22px; max-width:420px; width:100%; max-height:90vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
 
@@ -880,6 +922,21 @@
           <div>
             <h1 id="saludoNombre">Hola</h1>
             <p id="subtituloSeccion">Este es el estado de tu casillero y tus paquetes.</p>
+            <div class="hero-badges" id="heroBadges" style="display:none;">
+              <span class="hero-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L20 5 V11 C20 16 16.5 19.5 12 21 C7.5 19.5 4 16 4 11 V5 Z"/><path d="M9 11.5 L11 13.5 L15.5 9"/></svg> Seguro</span>
+              <span class="hero-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L4 14 H11 L10 22 L20 9 H13 Z"/></svg> Rápido</span>
+              <span class="hero-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.5 L11 14.5 L15.5 10"/><circle cx="12" cy="12" r="9.5"/></svg> Confiable</span>
+            </div>
+          </div>
+          <div class="hero-ilustracion">
+            <svg width="120" height="70" viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 52 H70 L64 62 H12 Z"/>
+              <path d="M14 52 V40 H38 V52"/>
+              <path d="M46 52 V30"/>
+              <path d="M46 30 L64 38"/>
+              <path d="M78 18 L112 30 L100 34 L88 29 Z" fill="currentColor" stroke="none" opacity=".55"/>
+              <path d="M78 18 L78 8 L96 15 Z" fill="currentColor" stroke="none" opacity=".35"/>
+            </svg>
           </div>
         </div>
 
@@ -891,7 +948,8 @@
         <!-- ---- Sección: Inicio ---- -->
         <div class="seccion-app" id="seccionInicio">
           <div class="dir-grid" style="margin-bottom:20px;">
-            <div class="card reveal">
+            <div class="card reveal dir-card">
+              <span class="dir-badge dir-badge-air">AIR</span>
               <div style="display:flex;align-items:center;gap:12px;">
                 <span class="dir-ico dir-ico-aereo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 L2 9 L11 12.5 L14.5 21 L17 14 Z"/><path d="M11 12.5 L22 2"/></svg></span>
                 <div>
@@ -900,9 +958,10 @@
                 </div>
               </div>
               <div id="camposDireccionInicioAereo" class="dir-campos"></div>
-              <button class="copy-btn" id="btnCopiar" style="margin-top:14px;">Copiar dirección aérea</button>
+              <button class="dir-cta dir-cta-aereo" id="btnCopiar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección aérea</button>
             </div>
-            <div class="card reveal">
+            <div class="card reveal dir-card">
+              <span class="dir-badge dir-badge-sea">SEA</span>
               <div style="display:flex;align-items:center;gap:12px;">
                 <span class="dir-ico dir-ico-maritimo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 L5 20 H19 L21 17"/><path d="M5 17 L6 10 H18 L19 17"/><path d="M12 10 V3"/><path d="M12 3 L17 6"/></svg></span>
                 <div>
@@ -911,7 +970,7 @@
                 </div>
               </div>
               <div id="camposDireccionInicioMaritimo" class="dir-campos"></div>
-              <button class="copy-btn" id="btnCopiarInicioMaritimo" style="margin-top:14px;">Copiar dirección marítima</button>
+              <button class="dir-cta dir-cta-maritimo" id="btnCopiarInicioMaritimo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección marítima</button>
             </div>
           </div>
           <div class="grid2">
@@ -1293,6 +1352,8 @@
       $('#saludoNombre').textContent = seccion === 'inicio' ? info.titulo(nombreUsuarioActual) : info.titulo();
       $('#subtituloSeccion').textContent = info.sub;
     }
+    const heroBadges = document.getElementById('heroBadges');
+    if (heroBadges) heroBadges.style.display = seccion === 'inicio' ? 'flex' : 'none';
 
     if (seccion === 'autorizados') cargarAutorizados();
     if (seccion === 'deliveries') cargarDeliveries();
@@ -1674,7 +1735,7 @@
 
   // ---------- Cargar perfil / casillero ----------
   function copiarTexto(texto, btn, textoBoton){
-    const listo = () => { btn.textContent = '✓ Copiado'; setTimeout(() => { btn.textContent = textoBoton; }, 1800); };
+    const listo = () => { btn.innerHTML = '✓ Copiado'; setTimeout(() => { btn.innerHTML = textoBoton; }, 1800); };
     function respaldo(){
       try{
         const ta = document.createElement('textarea');
@@ -1682,7 +1743,7 @@
         document.body.appendChild(ta); ta.select();
         document.execCommand('copy'); document.body.removeChild(ta);
         listo();
-      } catch(e){ btn.textContent = 'No se pudo copiar'; setTimeout(() => { btn.textContent = textoBoton; }, 1800); }
+      } catch(e){ btn.innerHTML = 'No se pudo copiar'; setTimeout(() => { btn.innerHTML = textoBoton; }, 1800); }
     }
     if (navigator.clipboard && window.isSecureContext){
       navigator.clipboard.writeText(texto).then(listo).catch(respaldo);
@@ -1721,13 +1782,25 @@
     $('#bloqueDireccionAereo').innerHTML = htmlCasillero;
     $('#bloqueDireccionMaritimo').innerHTML = htmlCasilleroMaritimo;
 
+    const ICONOS_CAMPO = {
+      'Nombre': '<circle cx="12" cy="8" r="4"/><path d="M4 21 C4 16.5 7.5 14 12 14 C16.5 14 20 16.5 20 21"/>',
+      'País': '<circle cx="12" cy="12" r="9"/><path d="M3 12 H21 M12 3 C15 6 15 18 12 21 C9 18 9 6 12 3"/>',
+      'Dirección': '<path d="M12 21 C12 21 19 14.5 19 9.5 A7 7 0 0 0 5 9.5 C5 14.5 12 21 12 21 Z"/><circle cx="12" cy="9.5" r="2.3"/>',
+      'Ciudad': '<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 8 H10 M14 8 H15 M9 12 H10 M14 12 H15 M9 16 H10 M14 16 H15"/>',
+      'Estado / Provincia': '<path d="M9 3 L3 5 V19 L9 17 L15 19 L21 17 V3 L15 5 Z"/><path d="M9 3 V17 M15 5 V19"/>',
+      'Código postal': '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7 L12 13 L21 7"/>',
+      'Teléfono': '<path d="M6.5 2 H9 L11 7 L8.5 8.5 C9.5 11 12 13.5 14.5 14.5 L16 12 L21 14 V16.5 C21 19 19 21 16.5 21 C9 21 3 15 3 7.5 C3 5 5 3 6.5 2 Z"/>'
+    };
     function pintarCampos(contenedorId, campos){
       const cont = document.getElementById(contenedorId);
       if (!cont) return;
       cont.innerHTML = campos.map(([l, v], i) => `
         <div class="campo-row">
-          <div class="campo-l">${l}</div>
-          <div class="campo-v">${escapeHtml(v)}</div>
+          <span class="campo-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONOS_CAMPO[l] || ''}</svg></span>
+          <div class="campo-textos">
+            <div class="campo-l">${l}</div>
+            <div class="campo-v">${escapeHtml(v)}</div>
+          </div>
           <button class="campo-b" data-i="${i}">Copiar</button>
         </div>`).join('');
       cont.querySelectorAll('.campo-b').forEach(b => {
@@ -1755,9 +1828,9 @@
     pintarCampos('camposDireccionInicioMaritimo', CAMPOS_INICIO_MARITIMO);
 
     const btnInicio = document.getElementById('btnCopiar');
-    if (btnInicio) btnInicio.onclick = () => copiarTexto(textoCasillero, btnInicio, 'Copiar dirección aérea');
+    if (btnInicio) btnInicio.onclick = () => copiarTexto(textoCasillero, btnInicio, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección aérea');
     const btnInicioMaritimo = document.getElementById('btnCopiarInicioMaritimo');
-    if (btnInicioMaritimo) btnInicioMaritimo.onclick = () => copiarTexto(textoCasilleroMaritimo, btnInicioMaritimo, 'Copiar dirección marítima');
+    if (btnInicioMaritimo) btnInicioMaritimo.onclick = () => copiarTexto(textoCasilleroMaritimo, btnInicioMaritimo, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección marítima');
 
     const btnAereo = document.getElementById('btnCopiarAereo');
     if (btnAereo) btnAereo.onclick = () => copiarTexto(textoCasillero, btnAereo, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa');
