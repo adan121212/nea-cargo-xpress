@@ -358,16 +358,22 @@
     gap: 24px;
     flex-wrap:wrap;
     margin-bottom: 22px;
-    background: linear-gradient(120deg, var(--ink) 0%, #16294a 55%, #1b2f52 100%);
+    background: linear-gradient(115deg, #ff8a3d 0%, #e2570e 18%, #7a3a2a 34%, var(--ink) 62%, #0a1526 100%);
     border-radius: var(--radius-lg,18px);
     padding: 26px 28px;
     position: relative;
     overflow: hidden;
   }
+  .hero::before{
+    content:'';
+    position:absolute; inset:0;
+    background: radial-gradient(ellipse at 100% 100%, rgba(6,20,40,0.55), transparent 60%);
+    pointer-events:none;
+  }
   .hero::after{
     content:'';
     position:absolute; inset:0;
-    background: radial-gradient(circle at 85% 20%, rgba(255,106,26,0.22), transparent 55%);
+    background: radial-gradient(circle at 85% 20%, rgba(255,200,150,0.28), transparent 55%);
     pointer-events:none;
   }
   .hero h1{
@@ -377,15 +383,15 @@
     letter-spacing:-0.01em;
     color:#fff;
   }
-  .hero p{ margin:0; color: rgba(241,243,242,0.75); font-size:13.5px; position:relative; }
+  .hero p{ margin:0; color: rgba(255,255,255,0.82); font-size:13.5px; position:relative; }
   .hero > div:first-child{ position:relative; z-index:1; }
   .hero-badges{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; position:relative; z-index:1; }
   .hero-badge{
-    display:flex; align-items:center; gap:6px; background: rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.14); color:#fff; font-size:11.5px; font-weight:600;
+    display:flex; align-items:center; gap:6px; background: rgba(0,0,0,0.22);
+    border:1px solid rgba(255,255,255,0.22); color:#fff; font-size:11.5px; font-weight:600;
     padding:6px 12px; border-radius:20px;
   }
-  .hero-ilustracion{ position:relative; z-index:1; color: rgba(255,255,255,0.5); flex-shrink:0; }
+  .hero-ilustracion{ position:relative; z-index:1; color: rgba(10,20,35,0.8); flex-shrink:0; }
   @media (max-width:700px){ .hero-ilustracion{ display:none; } }
 
   .grid2{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:20px; align-items:start; }
@@ -397,7 +403,7 @@
     padding:4px 10px; border-radius:20px; color:#fff;
   }
   .dir-badge-air{ background: var(--accent); }
-  .dir-badge-sea{ background: var(--cargo-green); }
+  .dir-badge-sea{ background: #2f8fc4; }
   .dir-cta{
     width:100%; margin-top:16px; padding:13px; border:none; border-radius:10px; font-weight:700;
     font-size:13.5px; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
@@ -405,8 +411,8 @@
   }
   .dir-cta-aereo{ background: var(--accent); box-shadow: 0 4px 14px var(--accent-glow); }
   .dir-cta-aereo:hover{ background: var(--accent-dark); transform: translateY(-1px); }
-  .dir-cta-maritimo{ background: var(--cargo-green); box-shadow: 0 4px 14px var(--cargo-green-bg); }
-  .dir-cta-maritimo:hover{ background:#125f4c; transform: translateY(-1px); }
+  .dir-cta-maritimo{ background: #2f8fc4; box-shadow: 0 4px 14px rgba(47,143,196,0.4); }
+  .dir-cta-maritimo:hover{ background:#25749f; transform: translateY(-1px); }
   .campo-ico{
     width:28px; height:28px; border-radius:8px; background: var(--paper); color: var(--ink-soft);
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
@@ -417,7 +423,7 @@
     flex-shrink:0;
   }
   .dir-ico-aereo{ background: rgba(255,106,26,0.12); color: var(--accent-dark); }
-  .dir-ico-maritimo{ background: rgba(23,122,99,0.12); color: var(--cargo-green); }
+  .dir-ico-maritimo{ background: rgba(47,143,196,0.14); color: #2f8fc4; }
   .dir-campos{ margin-top:16px; }
 
   .rep-stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
@@ -929,13 +935,19 @@
             </div>
           </div>
           <div class="hero-ilustracion">
-            <svg width="120" height="70" viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 52 H70 L64 62 H12 Z"/>
-              <path d="M14 52 V40 H38 V52"/>
-              <path d="M46 52 V30"/>
-              <path d="M46 30 L64 38"/>
-              <path d="M78 18 L112 30 L100 34 L88 29 Z" fill="currentColor" stroke="none" opacity=".55"/>
-              <path d="M78 18 L78 8 L96 15 Z" fill="currentColor" stroke="none" opacity=".35"/>
+            <svg width="170" height="100" viewBox="0 0 170 100" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 78 H130 L120 94 H22 Z"/>
+              <path d="M14 78 V62 H126 V78"/>
+              <rect x="20" y="48" width="16" height="14"/>
+              <rect x="38" y="40" width="16" height="22"/>
+              <rect x="56" y="48" width="16" height="14"/>
+              <rect x="74" y="36" width="16" height="26"/>
+              <rect x="92" y="48" width="16" height="14"/>
+              <rect x="112" y="52" width="12" height="10"/>
+              <path d="M118 52 V44 H122 V52"/>
+              <path d="M100 20 L160 38 L146 43 L130 37 Z" fill="currentColor" stroke="none" opacity=".8"/>
+              <path d="M100 20 L98 8 L118 16 Z" fill="currentColor" stroke="none" opacity=".55"/>
+              <path d="M130 37 L124 46 L131 44 Z" fill="currentColor" stroke="none" opacity=".55"/>
             </svg>
           </div>
         </div>
