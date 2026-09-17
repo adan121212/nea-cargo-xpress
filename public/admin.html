@@ -2930,7 +2930,7 @@
     const input=$('#recepcionTracking'), tracking=input.value.trim();
     if(!tracking) return;
     const btn=$('#btnRecepcion'); setCargando(btn,true);
-    $('#recepcionResultado').style.display='none'; $('#recepcionFormNuevo').style.display='none'; $('#bannerRecepcion').innerHTML='';
+    $('#recepcionResultado').style.display='none'; $('#recepcionFormNuevo').style.display='none'; mostrarBanner('#bannerRecepcion','','');
     try {
       const res=await apiAdmin(`/admin/recepcion/buscar?tracking=${encodeURIComponent(tracking)}`);
       const data=await res.json().catch(()=>({}));
@@ -3030,8 +3030,8 @@
   });
   function sincBotonLimpiar(){ $('#btnLimpiarRecepcion').classList.toggle('visible', $('#recepcionTracking').value.trim().length>0); }
   $('#recepcionTracking').addEventListener('input', sincBotonLimpiar);
-  function cancelarNuevo(){ $('#recepcionFormNuevo').style.display='none'; $('#bannerRecepcion').innerHTML=''; $('#recepcionTracking').value=''; $('#recepcionTracking').focus(); clienteRecepcionId=null; sincBotonLimpiar(); }
-  function limpiarBusquedaRecepcion(){ $('#recepcionTracking').value=''; $('#recepcionResultado').style.display='none'; $('#recepcionResultado').innerHTML=''; $('#recepcionFormNuevo').style.display='none'; $('#bannerRecepcion').innerHTML=''; clienteRecepcionId=null; $('#recepcionTracking').focus(); sincBotonLimpiar(); }
+  function cancelarNuevo(){ $('#recepcionFormNuevo').style.display='none'; mostrarBanner('#bannerRecepcion','',''); $('#recepcionTracking').value=''; $('#recepcionTracking').focus(); clienteRecepcionId=null; sincBotonLimpiar(); }
+  function limpiarBusquedaRecepcion(){ $('#recepcionTracking').value=''; $('#recepcionResultado').style.display='none'; $('#recepcionResultado').innerHTML=''; $('#recepcionFormNuevo').style.display='none'; mostrarBanner('#bannerRecepcion','',''); clienteRecepcionId=null; $('#recepcionTracking').focus(); sincBotonLimpiar(); }
   $('#btnLimpiarRecepcion').addEventListener('click', limpiarBusquedaRecepcion);
   let zxingControls = null;
   let zxingReader = null;
