@@ -392,6 +392,13 @@
   .card h2{ font-family: var(--font-display); font-size:15px; margin: 0 0 4px; }
   .card .card-sub{ font-size:12.5px; color: var(--ink-soft); margin: 0 0 16px; }
 
+  .dir-toggle-btn{
+    flex:1; padding:8px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff;
+    font-size:12.5px; font-weight:600; cursor:pointer; color: var(--ink-soft); transition: all .15s ease;
+  }
+  .dir-toggle-btn:hover{ border-color: var(--ink); color: var(--ink); }
+  .dir-toggle-btn.active{ background: var(--ink); color:#fff; border-color: var(--ink); }
+
   .address-block{
     background: linear-gradient(160deg, var(--ink), #16294a);
     color: #f1f3f2;
@@ -880,6 +887,10 @@
             <div class="card reveal">
               <h2>Mi dirección de casillero<button type="button" class="ayuda-ico" data-ayuda="Es tu dirección propia en Miami. La usás al pagar en cualquier tienda de EE.UU., como si vivieras ahí — nosotros recibimos el paquete y te lo traemos a Panamá.">?</button></h2>
               <p class="card-sub">Usa esta dirección al comprar en tiendas de EE.UU.</p>
+              <div style="display:flex;gap:6px;margin-bottom:10px;">
+                <button type="button" class="dir-toggle-btn active" id="btnTipoAereo" data-tipo="aereo">Aérea</button>
+                <button type="button" class="dir-toggle-btn" id="btnTipoMaritimo" data-tipo="maritimo">Marítima</button>
+              </div>
               <div class="address-block" id="bloqueDireccion">Cargando…</div>
               <button class="copy-btn" id="btnCopiar">Copiar dirección</button>
               <div class="stat-row">
@@ -1673,16 +1684,6 @@
     ].join('\n');
     const htmlCasillero = `<span class="suite">${CAS}</span> ${escapeHtml(nombreCompleto)} NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS<br>TEL: 1-305-406-3654`;
 
-    ['bloqueDireccion','bloqueDireccionAereo'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = htmlCasillero;
-    });
-
-    const btnInicio = document.getElementById('btnCopiar');
-    if (btnInicio) btnInicio.onclick = () => copiarTexto(textoCasillero, btnInicio, 'Copiar dirección');
-    const btnAereo = document.getElementById('btnCopiarAereo');
-    if (btnAereo) btnAereo.onclick = () => copiarTexto(textoCasillero, btnAereo, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa');
-
     const textoCasilleroMaritimo = [
       `PTY-14996 MARITIMO/${nombreCompleto}`,
       'NEA CARGO XPRESS',
@@ -1691,6 +1692,27 @@
       'ESTADOS UNIDOS'
     ].join('\n');
     const htmlCasilleroMaritimo = `<span class="suite">PTY-14996</span> MARITIMO/${escapeHtml(nombreCompleto)}<br>NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS`;
+
+    $('#bloqueDireccionAereo').innerHTML = htmlCasillero;
+
+    let tipoDireccionInicio = 'aereo';
+    const btnInicio = document.getElementById('btnCopiar');
+    function pintarDireccionInicio(){
+      const el = document.getElementById('bloqueDireccion');
+      if (el) el.innerHTML = tipoDireccionInicio === 'maritimo' ? htmlCasilleroMaritimo : htmlCasillero;
+      if (btnInicio) btnInicio.onclick = () => copiarTexto(tipoDireccionInicio === 'maritimo' ? textoCasilleroMaritimo : textoCasillero, btnInicio, 'Copiar dirección');
+    }
+    pintarDireccionInicio();
+    const btnTipoAereo = document.getElementById('btnTipoAereo');
+    const btnTipoMaritimo = document.getElementById('btnTipoMaritimo');
+    if (btnTipoAereo && btnTipoMaritimo){
+      btnTipoAereo.onclick = () => { tipoDireccionInicio = 'aereo'; btnTipoAereo.classList.add('active'); btnTipoMaritimo.classList.remove('active'); pintarDireccionInicio(); };
+      btnTipoMaritimo.onclick = () => { tipoDireccionInicio = 'maritimo'; btnTipoMaritimo.classList.add('active'); btnTipoAereo.classList.remove('active'); pintarDireccionInicio(); };
+    }
+
+    const btnAereo = document.getElementById('btnCopiarAereo');
+    if (btnAereo) btnAereo.onclick = () => copiarTexto(textoCasillero, btnAereo, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa');
+
     const bloqueMaritimo = document.getElementById('bloqueDireccionMaritimo');
     if (bloqueMaritimo) bloqueMaritimo.innerHTML = htmlCasilleroMaritimo;
     const btnMaritimo = document.getElementById('btnCopiarMaritimo');
