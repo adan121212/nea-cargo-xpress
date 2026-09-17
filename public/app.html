@@ -923,6 +923,21 @@
           </div>
           <div class="card reveal" style="margin-bottom:16px;">
             <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:26px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 17 L5 20 H19 L21 17"/><path d="M5 17 L6 10 H18 L19 17"/><path d="M12 10 V3"/><path d="M12 3 L17 6"/></svg></span>
+              <div>
+                <h2 style="margin:0 0 2px;">Dirección marítima</h2>
+                <p style="margin:0;font-size:12px;color:var(--cargo-green);font-weight:600;">$2.50/lb (por volumen)</p>
+              </div>
+            </div>
+            <div class="aviso-nombre">
+              <strong>Tu nombre completo debe ir en la primera línea.</strong><br>
+              Igual que con la dirección aérea, esto es lo que nos permite identificar que el paquete es tuyo.
+            </div>
+            <div class="address-block" id="bloqueDireccionMaritimo">Cargando…</div>
+            <button class="copy-btn" id="btnCopiarMaritimo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa</button>
+          </div>
+          <div class="card reveal" style="margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;">
               <span style="font-size:26px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 9 V6 H21 V9"/><path d="M12 6 V21"/><path d="M8 6 C6 6 5 4.5 6 3 C8 1.5 10 3.5 12 6"/><path d="M16 6 C18 6 19 4.5 18 3 C16 1.5 14 3.5 12 6"/></svg></span>
               <div>
                 <h2 style="margin:0 0 2px;">Referí y ganá</h2>
@@ -1677,6 +1692,18 @@
     if (btnInicio) btnInicio.onclick = () => copiarTexto(textoCasillero, btnInicio, 'Copiar dirección');
     const btnAereo = document.getElementById('btnCopiarAereo');
     if (btnAereo) btnAereo.onclick = () => copiarTexto(textoCasillero, btnAereo, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa');
+
+    const textoCasilleroMaritimo = [
+      `MARITIMO/${nombreCompleto} NEA CARGO XPRESS`,
+      '8610 NW 72 STREET',
+      'MIAMI, FLORIDA 33195',
+      'ESTADOS UNIDOS'
+    ].join('\n');
+    const htmlCasilleroMaritimo = `<span class="suite">MARITIMO/</span>${escapeHtml(nombreCompleto)} NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS`;
+    const bloqueMaritimo = document.getElementById('bloqueDireccionMaritimo');
+    if (bloqueMaritimo) bloqueMaritimo.innerHTML = htmlCasilleroMaritimo;
+    const btnMaritimo = document.getElementById('btnCopiarMaritimo');
+    if (btnMaritimo) btnMaritimo.onclick = () => copiarTexto(textoCasilleroMaritimo, btnMaritimo, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa');
 
     const CAMPOS = [
       ['Nombre / Name', `${CAS} ${nombreCompleto} NEA CARGO XPRESS`],
