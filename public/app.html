@@ -368,6 +368,15 @@
   .hero p{ margin:0; color: var(--ink-soft); font-size:13.5px; }
 
   .grid2{ display:grid; grid-template-columns: 1.1fr 1.4fr; gap:20px; align-items:start; }
+  .dir-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px; align-items:start; }
+  @media (max-width:620px){ .dir-grid{ grid-template-columns: 1fr; } }
+  .dir-ico{
+    width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .dir-ico-aereo{ background: rgba(255,106,26,0.12); color: var(--accent-dark); }
+  .dir-ico-maritimo{ background: rgba(23,122,99,0.12); color: var(--cargo-green); }
+  .dir-campos{ margin-top:16px; }
 
   .rep-stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
   .rep-stat{ background: var(--paper); border-radius:10px; padding: 16px 18px; }
@@ -912,38 +921,37 @@
 
         <!-- ---- Sección: Casillero ---- -->
                 <div class="seccion-app" id="seccionCasillero" style="display:none;">
-          <div class="card reveal" style="margin-bottom:16px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:26px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M22 2 L2 9 L11 12.5 L14.5 21 L17 14 Z"/><path d="M11 12.5 L22 2"/></svg></span>
-              <div>
-                <h2 style="margin:0 0 2px;">Dirección aérea</h2>
-                <p style="margin:0;font-size:12px;color:var(--cargo-green);font-weight:600;">$3.00/lb · 4 días aprox.</p>
+          <div class="dir-grid">
+            <div class="card reveal">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span class="dir-ico dir-ico-aereo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 L2 9 L11 12.5 L14.5 21 L17 14 Z"/><path d="M11 12.5 L22 2"/></svg></span>
+                <div>
+                  <h2 style="margin:0 0 2px;">Dirección aérea</h2>
+                  <p style="margin:0;font-size:12px;color:var(--cargo-green);font-weight:600;">$3.00/lb · 4 días aprox.</p>
+                </div>
               </div>
-            </div>
-            <div class="aviso-nombre">
-              <strong>Tu nombre completo debe ir en la primera línea.</strong><br>
-              El número PTY-14981 es el mismo para todos nuestros clientes: es la dirección de nuestra bodega. Lo que nos permite saber que un paquete es tuyo es <strong>tu nombre</strong>. Si compras a nombre de otra persona, tu paquete puede demorarse en llegar a tu cuenta.
-            </div>
-            <div class="address-block" id="bloqueDireccionAereo">Cargando…</div>
-            <button class="copy-btn" id="btnCopiarAereo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa</button>
-            <div class="campos-titulo">O copia campo por campo</div>
-            <p style="font-size:12px;color:var(--ink-soft);margin:0 0 6px;">Útil cuando la tienda te pide cada dato en una casilla distinta.</p>
-            <div id="camposCasillero"></div>
-          </div>
-          <div class="card reveal" style="margin-bottom:16px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:26px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M3 17 L5 20 H19 L21 17"/><path d="M5 17 L6 10 H18 L19 17"/><path d="M12 10 V3"/><path d="M12 3 L17 6"/></svg></span>
-              <div>
-                <h2 style="margin:0 0 2px;">Dirección marítima</h2>
-                <p style="margin:0;font-size:12px;color:var(--cargo-green);font-weight:600;">$2.50/lb (por volumen)</p>
+              <div class="aviso-nombre">
+                <strong>Tu nombre completo debe ir en la primera línea.</strong><br>
+                El número PTY-14981 es el mismo para todos nuestros clientes: es la dirección de nuestra bodega. Lo que nos permite saber que un paquete es tuyo es <strong>tu nombre</strong>. Si compras a nombre de otra persona, tu paquete puede demorarse en llegar a tu cuenta.
               </div>
+              <button class="copy-btn" id="btnCopiarAereo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa</button>
+              <div id="camposCasillero" class="dir-campos"></div>
             </div>
-            <div class="aviso-nombre">
-              <strong>Tu nombre completo debe ir en la primera línea.</strong><br>
-              Igual que con la dirección aérea, esto es lo que nos permite identificar que el paquete es tuyo.
+            <div class="card reveal">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span class="dir-ico dir-ico-maritimo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 L5 20 H19 L21 17"/><path d="M5 17 L6 10 H18 L19 17"/><path d="M12 10 V3"/><path d="M12 3 L17 6"/></svg></span>
+                <div>
+                  <h2 style="margin:0 0 2px;">Dirección marítima</h2>
+                  <p style="margin:0;font-size:12px;color:var(--cargo-green);font-weight:600;">$2.50/lb (por volumen)</p>
+                </div>
+              </div>
+              <div class="aviso-nombre">
+                <strong>Tu nombre completo debe ir en la primera línea.</strong><br>
+                Igual que con la dirección aérea, esto es lo que nos permite identificar que el paquete es tuyo.
+              </div>
+              <button class="copy-btn" id="btnCopiarMaritimo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa</button>
+              <div id="camposCasilleroMaritimo" class="dir-campos"></div>
             </div>
-            <div class="address-block" id="bloqueDireccionMaritimo">Cargando…</div>
-            <button class="copy-btn" id="btnCopiarMaritimo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa</button>
           </div>
           <div class="card reveal" style="margin-bottom:16px;">
             <div style="display:flex;align-items:center;gap:10px;">
@@ -1691,7 +1699,6 @@
     ].join('\n');
     const htmlCasilleroMaritimo = `<span class="suite">PTY-14996</span> MARITIMO/${escapeHtml(nombreCompleto)}<br>NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS`;
 
-    $('#bloqueDireccionAereo').innerHTML = htmlCasillero;
     $('#bloqueDireccion').innerHTML = htmlCasillero;
     $('#bloqueDireccionInicioMaritimo').innerHTML = htmlCasilleroMaritimo;
 
@@ -1703,32 +1710,43 @@
     const btnAereo = document.getElementById('btnCopiarAereo');
     if (btnAereo) btnAereo.onclick = () => copiarTexto(textoCasillero, btnAereo, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa');
 
-    const bloqueMaritimo = document.getElementById('bloqueDireccionMaritimo');
-    if (bloqueMaritimo) bloqueMaritimo.innerHTML = htmlCasilleroMaritimo;
     const btnMaritimo = document.getElementById('btnCopiarMaritimo');
     if (btnMaritimo) btnMaritimo.onclick = () => copiarTexto(textoCasilleroMaritimo, btnMaritimo, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa');
 
-    const CAMPOS = [
-      ['Nombre / Name', `${CAS} ${nombreCompleto} NEA CARGO XPRESS`],
-      ['Dirección 1 / Address 1', '8610 NW 72 STREET'],
-      ['Ciudad / City', 'MIAMI'],
-      ['Estado / State', 'FL'],
-      ['ZIP code', '33195'],
-      ['País / Country', 'UNITED STATES'],
-      ['Teléfono / Phone', '1-305-406-3654']
-    ];
-    const contCampos = document.getElementById('camposCasillero');
-    if (contCampos){
-      contCampos.innerHTML = CAMPOS.map(([l, v], i) => `
+    function pintarCampos(contenedorId, campos){
+      const cont = document.getElementById(contenedorId);
+      if (!cont) return;
+      cont.innerHTML = campos.map(([l, v], i) => `
         <div class="campo-row">
           <div class="campo-l">${l}</div>
           <div class="campo-v">${escapeHtml(v)}</div>
           <button class="campo-b" data-i="${i}">Copiar</button>
         </div>`).join('');
-      contCampos.querySelectorAll('.campo-b').forEach(b => {
-        b.onclick = () => copiarTexto(CAMPOS[b.dataset.i][1], b, 'Copiar');
+      cont.querySelectorAll('.campo-b').forEach(b => {
+        b.onclick = () => copiarTexto(campos[b.dataset.i][1], b, 'Copiar');
       });
     }
+
+    const CAMPOS = [
+      ['Nombre', `${CAS} ${nombreCompleto} NEA CARGO XPRESS`],
+      ['País', 'ESTADOS UNIDOS'],
+      ['Dirección', '8610 NW 72 STREET'],
+      ['Ciudad', 'MIAMI'],
+      ['Estado / Provincia', 'FLORIDA'],
+      ['Código postal', '33195'],
+      ['Teléfono', '1-305-406-3654']
+    ];
+    pintarCampos('camposCasillero', CAMPOS);
+
+    const CAMPOS_MARITIMO = [
+      ['Nombre', `PTY-14996 MARITIMO/${nombreCompleto}`],
+      ['País', 'ESTADOS UNIDOS'],
+      ['Dirección', '8610 NW 72 STREET'],
+      ['Ciudad', 'MIAMI'],
+      ['Estado / Provincia', 'FLORIDA'],
+      ['Código postal', '33195']
+    ];
+    pintarCampos('camposCasilleroMaritimo', CAMPOS_MARITIMO);
 
     const codigoRef = usuario.numero_casillero;
     $('#codigoReferidoTexto').textContent = codigoRef;
