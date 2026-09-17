@@ -392,12 +392,10 @@
   .card h2{ font-family: var(--font-display); font-size:15px; margin: 0 0 4px; }
   .card .card-sub{ font-size:12.5px; color: var(--ink-soft); margin: 0 0 16px; }
 
-  .dir-toggle-btn{
-    flex:1; padding:8px 10px; border-radius:8px; border:1.5px solid var(--line); background:#fff;
-    font-size:12.5px; font-weight:600; cursor:pointer; color: var(--ink-soft); transition: all .15s ease;
+  .dir-etiqueta{
+    font-size:11.5px; font-weight:700; letter-spacing:.04em; color: var(--ink-soft);
+    text-transform:uppercase; margin:0 0 6px;
   }
-  .dir-toggle-btn:hover{ border-color: var(--ink); color: var(--ink); }
-  .dir-toggle-btn.active{ background: var(--ink); color:#fff; border-color: var(--ink); }
 
   .address-block{
     background: linear-gradient(160deg, var(--ink), #16294a);
@@ -887,12 +885,12 @@
             <div class="card reveal">
               <h2>Mi dirección de casillero<button type="button" class="ayuda-ico" data-ayuda="Es tu dirección propia en Miami. La usás al pagar en cualquier tienda de EE.UU., como si vivieras ahí — nosotros recibimos el paquete y te lo traemos a Panamá.">?</button></h2>
               <p class="card-sub">Usa esta dirección al comprar en tiendas de EE.UU.</p>
-              <div style="display:flex;gap:6px;margin-bottom:10px;">
-                <button type="button" class="dir-toggle-btn active" id="btnTipoAereo" data-tipo="aereo">Aérea</button>
-                <button type="button" class="dir-toggle-btn" id="btnTipoMaritimo" data-tipo="maritimo">Marítima</button>
-              </div>
+              <div class="dir-etiqueta">✈ Aérea</div>
               <div class="address-block" id="bloqueDireccion">Cargando…</div>
-              <button class="copy-btn" id="btnCopiar">Copiar dirección</button>
+              <button class="copy-btn" id="btnCopiar">Copiar dirección aérea</button>
+              <div class="dir-etiqueta" style="margin-top:16px;">🚢 Marítima</div>
+              <div class="address-block" id="bloqueDireccionInicioMaritimo">Cargando…</div>
+              <button class="copy-btn" id="btnCopiarInicioMaritimo">Copiar dirección marítima</button>
               <div class="stat-row">
                 <div class="stat">
                   <div class="n" id="statTotal">0</div>
@@ -1694,21 +1692,13 @@
     const htmlCasilleroMaritimo = `<span class="suite">PTY-14996</span> MARITIMO/${escapeHtml(nombreCompleto)}<br>NEA CARGO XPRESS<br>8610 NW 72 STREET<br>MIAMI, FLORIDA 33195<br>ESTADOS UNIDOS`;
 
     $('#bloqueDireccionAereo').innerHTML = htmlCasillero;
+    $('#bloqueDireccion').innerHTML = htmlCasillero;
+    $('#bloqueDireccionInicioMaritimo').innerHTML = htmlCasilleroMaritimo;
 
-    let tipoDireccionInicio = 'aereo';
     const btnInicio = document.getElementById('btnCopiar');
-    function pintarDireccionInicio(){
-      const el = document.getElementById('bloqueDireccion');
-      if (el) el.innerHTML = tipoDireccionInicio === 'maritimo' ? htmlCasilleroMaritimo : htmlCasillero;
-      if (btnInicio) btnInicio.onclick = () => copiarTexto(tipoDireccionInicio === 'maritimo' ? textoCasilleroMaritimo : textoCasillero, btnInicio, 'Copiar dirección');
-    }
-    pintarDireccionInicio();
-    const btnTipoAereo = document.getElementById('btnTipoAereo');
-    const btnTipoMaritimo = document.getElementById('btnTipoMaritimo');
-    if (btnTipoAereo && btnTipoMaritimo){
-      btnTipoAereo.onclick = () => { tipoDireccionInicio = 'aereo'; btnTipoAereo.classList.add('active'); btnTipoMaritimo.classList.remove('active'); pintarDireccionInicio(); };
-      btnTipoMaritimo.onclick = () => { tipoDireccionInicio = 'maritimo'; btnTipoMaritimo.classList.add('active'); btnTipoAereo.classList.remove('active'); pintarDireccionInicio(); };
-    }
+    if (btnInicio) btnInicio.onclick = () => copiarTexto(textoCasillero, btnInicio, 'Copiar dirección aérea');
+    const btnInicioMaritimo = document.getElementById('btnCopiarInicioMaritimo');
+    if (btnInicioMaritimo) btnInicioMaritimo.onclick = () => copiarTexto(textoCasilleroMaritimo, btnInicioMaritimo, 'Copiar dirección marítima');
 
     const btnAereo = document.getElementById('btnCopiarAereo');
     if (btnAereo) btnAereo.onclick = () => copiarTexto(textoCasillero, btnAereo, '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="4" width="14" height="18" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M8.5 12 H15.5 M8.5 16 H15.5"/></svg> Copiar dirección completa');
