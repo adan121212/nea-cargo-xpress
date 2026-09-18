@@ -629,12 +629,12 @@
   }
   .caja-historial-box{ border:1px solid var(--line); border-radius:12px; overflow:hidden; }
   .caja-historial-head{
-    display:grid; grid-template-columns:1fr 110px 80px 1fr 90px 80px;
+    display:grid; grid-template-columns:1fr 110px 80px 1fr 150px 80px;
     background:var(--ink); color:#f1f3f2; font-size:11px; font-weight:700;
     text-transform:uppercase; letter-spacing:.04em; padding:10px 16px; gap:10px;
   }
   .caja-historial-row{
-    display:grid; grid-template-columns:1fr 110px 80px 1fr 90px 80px;
+    display:grid; grid-template-columns:1fr 110px 80px 1fr 150px 80px;
     padding:12px 16px; gap:10px; border-bottom:1px solid var(--line);
     font-size:13px; align-items:center; transition:background .1s ease;
   }
@@ -646,6 +646,7 @@
   .chr-total{ font-weight:700; color:var(--cargo-green); }
   .chr-facturas{ color:var(--ink-soft); }
   .chr-hora{ font-size:12px; }
+  .chr-atrasado{ display:inline-block; margin-left:8px; padding:2px 8px; border-radius:999px; background:#fff4e0; color:#b26a00; font-size:10.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; vertical-align:middle; }
   @media (max-width:760px){
     #cajaResumenCards{ grid-template-columns:repeat(3,1fr) !important; gap:8px !important; }
     #cajaResumenCards .caja-stat{ padding:12px 10px !important; }
@@ -1535,7 +1536,7 @@
         <h3 class="dash-section-title">Historial de cierres</h3>
         <div class="caja-historial-box">
           <div class="caja-historial-head">
-            <div>Fecha</div><div>Total</div><div>Facturas</div><div>Cerrado por</div><div>Hora</div><div></div>
+            <div>Fecha</div><div>Total</div><div>Facturas</div><div>Cerrado por</div><div>Cuándo se cerró</div><div></div>
           </div>
           <div id="tbodyCajaHistorial"></div>
           <div class="empty" id="emptyCajaHistorial" style="display:none;">Aún no hay cierres registrados.</div>
@@ -3418,9 +3419,16 @@
       const fechaCruda = (c) => (typeof c.fecha === 'string' ? c.fecha.slice(0,10) : new Date(c.fecha).toISOString().slice(0,10));
       $('#tbodyCajaHistorial').innerHTML=cierres.map(c=>{
         const fecha=formatearFechaSolo(c.fecha);
-        const hora=new Date(c.fecha_cierre).toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'});
+        // Momento real en que se hizo el cierre (en hora de Panamá)
+        const momento = new Date(c.fecha_cierre || c.creado_en);
+        const momentoValido = !isNaN(momento.getTime());
+        const diaCierre = momentoValido ? new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit'}).format(momento) : null;
+        const atrasado = diaCierre && diaCierre !== fechaCruda(c);
+        const horaTxt = momentoValido ? momento.toLocaleTimeString('es-PA',{timeZone:'America/Panama',hour:'2-digit',minute:'2-digit'}) : '—';
+        const hora = !momentoValido ? '—' : (atrasado ? `${formatearFechaSolo(diaCierre).slice(0,6)} · ${horaTxt}` : horaTxt);
+        const marcaAtrasado = atrasado ? '<span class="chr-atrasado" title="Esta caja se cerró otro día">Cierre atrasado</span>' : '';
         return `<div class="caja-historial-row">
-          <div data-label="Fecha" class="chr-fecha">${fecha}</div>
+          <div data-label="Fecha" class="chr-fecha">${fecha}${marcaAtrasado}</div>
           <div data-label="Total" class="chr-total mono">$${Number(c.total_general).toFixed(2)}</div>
           <div data-label="Facturas" class="chr-facturas mono">${c.cantidad_facturas}</div>
           <div data-label="Cerrado por" class="chr-cerrado">${escapeHtml(c.cerrado_por_nombre||'')} ${escapeHtml(c.cerrado_por_apellido||'')}</div>
