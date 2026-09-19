@@ -4699,10 +4699,13 @@
         </div>`;
       aviso.style.display = 'block';
       document.getElementById('btnIrACaja')?.addEventListener('click', () => {
-        const masViejo = d.pendientes[0]?.fecha;
+        const masViejo = d.pendientes[0]?.fecha ? String(d.pendientes[0].fecha).slice(0, 10) : null;
         document.querySelector('.tab-nav-btn[data-tab="cajaCierre"]')?.click();
         if(masViejo){
-          setTimeout(() => { cargarCaja(String(masViejo).slice(0,10)); }, 120);
+          setTimeout(async () => {
+            await cargarCaja(masViejo);
+            cerrarCaja(masViejo);
+          }, 150);
         }
       });
     } catch(e){ console.error('Error revisando cajas pendientes:', e); }
