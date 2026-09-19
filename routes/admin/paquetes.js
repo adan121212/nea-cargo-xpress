@@ -10,6 +10,7 @@ const { enviarCorreoCambioEstado, enviarFacturaListaParaRetiro } = require('../.
 const { generarNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { aplicarSaldoAFavor } = require('../../utils/referidos');
+const { calcularCantidadFacturable } = require('../../utils/facturacion');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -204,12 +205,12 @@ router.patch(
           return res.status(400).json({ mensaje: 'No hay ninguna tarifa configurada.' });
         }
         const tarifa = tarifaRows[0];
-        // Cada tarifa cobra por SU propio peso: si su nombre dice "volumen", se cobra el peso
-        // volumétrico; cualquier otra tarifa cobra el peso real. La tarifa que se elija es la
-        // que decide qué peso se factura — no hay comparación automática entre los dos.
-        const pesoVolumetrico = Number(paquete.peso_volumetrico_lb || 0);
-        const esTarifaVolumetrica = /volum/i.test(tarifa.nombre || '');
-        const pesoParaCobrar = (esTarifaVolumetrica && pesoVolumetrico > 0) ? pesoVolumetrico : Number(pesoConfirmado);
+        // Cada tarifa cobra por SU propia unidad (libras o pie cúbico) — ver utils/facturacion.js.
+        const pesoParaCobrar = calcularCantidadFacturable(paquete, tarifa, pesoConfirmado);
+        if (!pesoParaCobrar) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ mensaje: tarifa.unidad === 'ft3' ? 'Esta tarifa cobra por volumen, pero el paquete no tiene medidas (largo/ancho/alto) registradas.' : 'El paquete no tiene peso registrado.' });
+        }
         const costoEnvio = Math.max(Number(pesoParaCobrar) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
         const seguro = paquete.valor_declarado ? (Number(paquete.valor_declarado) * Number(tarifa.pct_seguro)) / 100 : 0;
         const cargoManejo = Number(tarifa.cargo_manejo);

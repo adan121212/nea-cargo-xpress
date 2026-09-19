@@ -9,6 +9,7 @@ const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
 const { fechaPanama } = require('../../utils/fechas');
 const { aplicarSaldoAFavor, activarCreditoSiCorresponde } = require('../../utils/referidos');
+const { calcularCantidadFacturable: calcularPesoFacturado } = require('../../utils/facturacion');
 
 const router = express.Router();
 
@@ -29,18 +30,10 @@ const MOTIVOS_ANULACION = [
   'otro',
 ];
 
-// Cada tarifa cobra por SU propio peso: si su nombre contiene "volumen", se cobra el peso
-// volumétrico (calculado del tamaño de la caja); cualquier otra tarifa cobra el peso real
-// (balanza). La tarifa elegida es la que decide qué peso se factura — no hay comparación
-// automática entre los dos. Si la tarifa es de volumen pero el paquete no tiene medidas,
-// se usa el peso real para no facturar en $0.
-function calcularPesoFacturado(paquete, tarifa) {
-  const pesoReal = Number(paquete.peso_real_lb ?? paquete.peso_lb ?? 0);
-  const pesoVol = Number(paquete.peso_volumetrico_lb ?? 0);
-  const esTarifaVolumetrica = /volum/i.test((tarifa && tarifa.nombre) || '');
-  const peso = (esTarifaVolumetrica && pesoVol > 0) ? pesoVol : pesoReal;
-  return peso || null;
-}
+// Cada tarifa cobra por SU propia unidad: las de pie cúbico cobran el volumen real
+// de la caja; las de libra cobran peso volumétrico o peso real según su nombre.
+// Ver utils/facturacion.js para el detalle. Si la tarifa es de volumen/ft³ pero el
+// paquete no tiene los datos necesarios, no se puede facturar (se avisa al usuario).
 
 // SELECT reutilizable para armar el objeto factura que va al PDF.
 // Incluye teléfono, RUC y medidas + peso volumétrico para el diseño nuevo.
@@ -86,7 +79,7 @@ router.post(
       if (tarifaRes.rows.length === 0) return res.status(404).json({ mensaje: 'Tarifa no encontrada' });
       const tarifa = tarifaRes.rows[0];
       const pesoFacturado = calcularPesoFacturado(paquete, tarifa);
-      if (!pesoFacturado) return res.status(400).json({ mensaje: 'Este paquete no tiene un peso registrado.' });
+      if (!pesoFacturado) return res.status(400).json({ mensaje: tarifa.unidad === 'ft3' ? 'Este paquete no tiene medidas (largo/ancho/alto) registradas.' : 'Este paquete no tiene un peso registrado.' });
       const yaFacturado = await client.query(`SELECT id FROM facturas WHERE paquete_id = $1 AND estado <> 'anulada'`, [paquete_id]);
       if (yaFacturado.rows.length > 0) return res.status(409).json({ mensaje: 'Este paquete ya tiene una factura activa.' });
       const costoEnvio = Math.max(Number(pesoFacturado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));
@@ -314,7 +307,7 @@ router.post(
       if (tarifaRes.rows.length === 0) return res.status(404).json({ mensaje: 'Tarifa no encontrada' });
       const tarifa = tarifaRes.rows[0];
       const pesoFacturado = calcularPesoFacturado(paquete, tarifa);
-      if (!pesoFacturado || Number(pesoFacturado) === 0) return res.status(400).json({ mensaje: 'El paquete no tiene peso registrado.' });
+      if (!pesoFacturado || Number(pesoFacturado) === 0) return res.status(400).json({ mensaje: tarifa.unidad === 'ft3' ? 'El paquete no tiene medidas (largo/ancho/alto) registradas.' : 'El paquete no tiene peso registrado.' });
       const yaFacturado = await client.query(`SELECT id FROM facturas WHERE paquete_id = $1 AND estado <> 'anulada'`, [paquete_id]);
       if (yaFacturado.rows.length > 0) return res.status(409).json({ mensaje: 'Este paquete ya tiene una factura activa.' });
       const costoEnvio = Math.max(Number(pesoFacturado) * Number(tarifa.precio_libra), Number(tarifa.cargo_minimo));

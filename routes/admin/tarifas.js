@@ -14,6 +14,7 @@ const reglasTarifa = [
   body('cargo_manejo').optional().isFloat({ min: 0 }),
   body('pct_seguro').optional().isFloat({ min: 0, max: 100 }),
   body('activa').optional().isBoolean(),
+  body('unidad').optional().isIn(['lb', 'ft3']).withMessage("unidad debe ser 'lb' o 'ft3'"),
 ];
 
 // --- GET /api/admin/tarifas ---
@@ -34,12 +35,12 @@ router.post('/', reglasTarifa, async (req, res) => {
     return res.status(400).json({ errores: errores.array() });
   }
 
-  const { nombre, precio_libra, cargo_minimo, cargo_manejo, pct_seguro, activa } = req.body;
+  const { nombre, precio_libra, cargo_minimo, cargo_manejo, pct_seguro, activa, unidad } = req.body;
 
   try {
     const resultado = await pool.query(
-      `INSERT INTO tarifas (nombre, precio_libra, cargo_minimo, cargo_manejo, pct_seguro, activa)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      `INSERT INTO tarifas (nombre, precio_libra, cargo_minimo, cargo_manejo, pct_seguro, activa, unidad)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [
         nombre,
         precio_libra,
@@ -47,6 +48,7 @@ router.post('/', reglasTarifa, async (req, res) => {
         cargo_manejo ?? 0,
         pct_seguro ?? 0,
         activa ?? true,
+        unidad || 'lb',
       ]
     );
     return res.status(201).json({ mensaje: 'Tarifa creada', tarifa: resultado.rows[0] });
@@ -63,16 +65,16 @@ router.put('/:id', reglasTarifa, async (req, res) => {
     return res.status(400).json({ errores: errores.array() });
   }
 
-  const { nombre, precio_libra, cargo_minimo, cargo_manejo, pct_seguro, activa } = req.body;
+  const { nombre, precio_libra, cargo_minimo, cargo_manejo, pct_seguro, activa, unidad } = req.body;
 
   try {
     const resultado = await pool.query(
       `UPDATE tarifas
        SET nombre = $1, precio_libra = $2, cargo_minimo = $3, cargo_manejo = $4,
-           pct_seguro = $5, activa = COALESCE($6, activa)
-       WHERE id = $7
+           pct_seguro = $5, activa = COALESCE($6, activa), unidad = COALESCE($7, unidad)
+       WHERE id = $8
        RETURNING *`,
-      [nombre, precio_libra, cargo_minimo ?? 0, cargo_manejo ?? 0, pct_seguro ?? 0, activa, req.params.id]
+      [nombre, precio_libra, cargo_minimo ?? 0, cargo_manejo ?? 0, pct_seguro ?? 0, activa, unidad, req.params.id]
     );
 
     if (resultado.rows.length === 0) {
