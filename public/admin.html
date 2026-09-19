@@ -2473,6 +2473,11 @@
       setTimeout(() => selMotivo.focus(), 50);
     });
   }
+  async function abrirPdfFactura(id){
+    const res = await apiAdmin(`/admin/facturas/${id}/pdf`);
+    const blob = await res.blob();
+    window.open(window.URL.createObjectURL(blob), '_blank');
+  }
   async function cargarFacturas(){
     const params = new URLSearchParams();
     if ($('#filtroFacturaEstado').value) params.set('estado', $('#filtroFacturaEstado').value);
@@ -2552,7 +2557,7 @@
         });
       });
       $('#tbodyFacturas').querySelectorAll('.btn-ver-pdf').forEach(btn => {
-        btn.addEventListener('click', async () => { btn.textContent = '...'; btn.disabled = true; try { const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/pdf`); const blob = await res.blob(); window.open(window.URL.createObjectURL(blob), '_blank'); } catch(err){ alert('No se pudo abrir el PDF.'); } finally { btn.textContent = 'Ver PDF'; btn.disabled = false; } });
+        btn.addEventListener('click', async () => { btn.textContent = '...'; btn.disabled = true; try { await abrirPdfFactura(btn.dataset.id); } catch(err){ alert('No se pudo abrir el PDF.'); } finally { btn.textContent = 'Ver PDF'; btn.disabled = false; } });
       });
       $('#tbodyFacturas').querySelectorAll('.btn-reenviar-factura').forEach(btn => {
         btn.addEventListener('click', async () => { btn.textContent = 'Enviando…'; btn.disabled = true; try { const res = await apiAdmin(`/admin/facturas/${btn.dataset.id}/reenviar`, { method: 'POST' }); const data = await res.json().catch(()=>({})); if(res.ok){ const e=data.envios||{}; mostrarBanner('#bannerFactura', e.correo_enviado||e.whatsapp_enviado?'success':'error', `Reenvío: ${e.correo_enviado?'Correo ✓':'Correo ✗'}`); } else { mostrarBanner('#bannerFactura','error',data.mensaje||'No se pudo reenviar.'); } } catch(err){ mostrarBanner('#bannerFactura','error','No pudimos conectar.'); } finally { btn.textContent='Reenviar'; btn.disabled=false; } });
@@ -2657,12 +2662,14 @@
     } catch(err){ mostrarBanner('#bannerMostrador','error','No pudimos conectar.'); }
     finally { setCargando(btn,false); }
   });
+  let _facturasPendientesUltimaCarga = [];
   async function cargarPendientesMostrador(){
     const cont=$('#pendientesMostrador');
     try {
       const res=await apiAdmin('/admin/facturas?estado=pendiente');
       const data=await res.json();
       const facturas=data.facturas||[];
+      _facturasPendientesUltimaCarga = facturas;
       $('#emptyPendientesMostrador').style.display=facturas.length?'none':'block';
       const totalGlobal=facturas.reduce((s,f)=>s+Number(f.total),0);
       $('#facBadgeCount').textContent=facturas.length;
@@ -3956,8 +3963,8 @@
     try { notifLista = JSON.parse(localStorage.getItem(NOTIF_KEY)||'[]'); } catch(e){ notifLista=[]; }
   }
   function guardarNotificaciones(){ localStorage.setItem(NOTIF_KEY, JSON.stringify(notifLista.slice(0,50))); }
-  function agregarNotificacion(titulo, sub, tipo='info'){
-    const n={ id:Date.now(), titulo, sub, tipo, hora:new Date().toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'}), leida:false };
+  function agregarNotificacion(titulo, sub, tipo='info', facturaId=null){
+    const n={ id:Date.now(), titulo, sub, tipo, facturaId, leida:false };
     notifLista.unshift(n);
     guardarNotificaciones();
     renderNotifBadge();
@@ -3980,41 +3987,56 @@
       return `${d.toLocaleDateString('es-PA',{day:'2-digit',month:'short'})} · ${hora}`;
     };
     lista.innerHTML = notifLista.map(n=>`
-      <div class="notif-item ${n.leida?'':'unread'}" data-id="${n.id}">
+      <div class="notif-item ${n.leida?'':'unread'}" data-id="${n.id}"${n.facturaId?' style="cursor:pointer;"':''}>
         <div class="notif-titulo"><span class="notif-tipo-dot ${n.tipo||'info'}"></span>${escapeHtml(n.titulo)}</div>
         <div class="notif-sub">${escapeHtml(n.sub)}</div>
         <div class="notif-hora">${formatearFechaHoraNotif(n.id)}</div>
       </div>`).join('');
     lista.querySelectorAll('.notif-item').forEach(item=>{
-      item.addEventListener('click',()=>{
+      item.addEventListener('click', async ()=>{
         const n=notifLista.find(x=>x.id==item.dataset.id);
-        if(n){ n.leida=true; guardarNotificaciones(); renderNotifBadge(); item.classList.remove('unread'); }
+        if(!n) return;
+        n.leida=true; guardarNotificaciones(); renderNotifBadge(); item.classList.remove('unread');
+        if(n.facturaId){
+          $('#notifPanel')?.classList.remove('open');
+          const overlay = $('#notifOverlay'); if(overlay) overlay.style.display='none';
+          try { await abrirPdfFactura(n.facturaId); }
+          catch(err){ alert('No se pudo abrir esa factura — puede que se haya eliminado.'); }
+        }
       });
     });
   }
   const _cargarPendientesOriginal = cargarPendientesMostrador;
-  const ULTIMO_TOTAL_KEY = 'nea_ultimo_total_pendientes';
-  let _ultimoTotalPendientes = localStorage.getItem(ULTIMO_TOTAL_KEY);
-  _ultimoTotalPendientes = _ultimoTotalPendientes === null ? null : parseInt(_ultimoTotalPendientes);
+  const IDS_VISTOS_KEY = 'nea_facturas_pendientes_vistas';
+  let _idsVistos = null;
+  try { const guardado = localStorage.getItem(IDS_VISTOS_KEY); _idsVistos = guardado === null ? null : new Set(JSON.parse(guardado)); } catch(e){ _idsVistos = null; }
   cargarPendientesMostrador = async function(){
     const exito = await _cargarPendientesOriginal();
     // Si la carga falló (por ejemplo, el servidor gratis de Render estaba
-    // "despertando" y la petición no respondió a tiempo), NO tocamos el
-    // contador guardado. Antes, un fallo se trataba como "0 facturas", y
-    // cuando el servidor despertaba y encontraba la misma factura de
-    // siempre, el sistema creía que era nueva y avisaba con una campana
-    // falsa — de ahí las notificaciones repetidas sin que nada cambiara.
+    // "despertando" y la petición no respondió a tiempo), NO tocamos lo
+    // guardado. Antes, un fallo se trataba como "0 facturas", y cuando el
+    // servidor despertaba y encontraba la misma factura de siempre, el
+    // sistema creía que era nueva y avisaba con una campana falsa.
     if(!exito) return;
-    const total = parseInt($('#facBadgeCount').textContent)||0;
-    // _ultimoTotalPendientes se guarda en localStorage para que sobreviva a un refresh
-    // de la página. Si no, cada recarga reiniciaba el contador en 0 y avisaba "facturas
-    // nuevas" por facturas que ya llevaban ahí días — de ahí la campana enloquecida.
-    if(_ultimoTotalPendientes !== null && total > _ultimoTotalPendientes){
-      const nuevas = total - _ultimoTotalPendientes;
-      agregarNotificacion(`${nuevas} factura${nuevas>1?'s':''} pendiente${nuevas>1?'s':''}`, 'Ve al Facturador para cobrarlas.', 'warning');
+    const idsActuales = _facturasPendientesUltimaCarga.map(f => f.id);
+    // _idsVistos se guarda en localStorage para que sobreviva a un refresh de la
+    // página. null significa "primera vez que este navegador revisa" — ahí solo
+    // se guarda el punto de partida, sin avisar (si no, cada primera carga
+    // avisaría de facturas que ya llevaban ahí días).
+    if(_idsVistos !== null){
+      _facturasPendientesUltimaCarga
+        .filter(f => !_idsVistos.has(f.id))
+        .forEach(f => {
+          agregarNotificacion(
+            `Factura pendiente: ${f.numero_factura}`,
+            `${f.cliente_nombre} ${f.cliente_apellido} · $${Number(f.total).toFixed(2)} — clic para verla.`,
+            'warning',
+            f.id
+          );
+        });
     }
-    _ultimoTotalPendientes = total;
-    localStorage.setItem(ULTIMO_TOTAL_KEY, String(total));
+    _idsVistos = new Set(idsActuales);
+    localStorage.setItem(IDS_VISTOS_KEY, JSON.stringify(idsActuales));
   };
   function parsearTextoPTY(texto){
     var sep = String.fromCharCode(10);
