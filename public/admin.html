@@ -3972,11 +3972,18 @@
     const lista = $('#notifLista');
     if(!lista) return;
     if(notifLista.length===0){ lista.innerHTML='<div class="notif-empty">Sin notificaciones nuevas</div>'; return; }
+    const hoyStr = new Date().toDateString();
+    const formatearFechaHoraNotif = (id) => {
+      const d = new Date(id);
+      const hora = d.toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'});
+      if(d.toDateString() === hoyStr) return `Hoy · ${hora}`;
+      return `${d.toLocaleDateString('es-PA',{day:'2-digit',month:'short'})} · ${hora}`;
+    };
     lista.innerHTML = notifLista.map(n=>`
       <div class="notif-item ${n.leida?'':'unread'}" data-id="${n.id}">
         <div class="notif-titulo"><span class="notif-tipo-dot ${n.tipo||'info'}"></span>${escapeHtml(n.titulo)}</div>
         <div class="notif-sub">${escapeHtml(n.sub)}</div>
-        <div class="notif-hora">${n.hora}</div>
+        <div class="notif-hora">${formatearFechaHoraNotif(n.id)}</div>
       </div>`).join('');
     lista.querySelectorAll('.notif-item').forEach(item=>{
       item.addEventListener('click',()=>{
