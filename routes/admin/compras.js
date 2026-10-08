@@ -5,6 +5,7 @@ const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const { enviarCorreoGenerico } = require('../../utils/mailer');
 const { ZONA } = require('../../utils/fechas');
+const { cajaCerradaHoy, respuestaCajaCerrada } = require('../../utils/cajaCerrada');
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
@@ -168,6 +169,8 @@ router.patch(
       if (c.estado !== 'comprada') {
         return res.status(409).json({ mensaje: 'Primero marca la compra como comprada.' });
       }
+      const cerrada = await cajaCerradaHoy(pool);
+      if (cerrada) return respuestaCajaCerrada(res, cerrada);
 
       await pool.query(
         `UPDATE compras SET estado = 'pagada', metodo_pago = $1, fecha_pago = NOW() WHERE id = $2`,

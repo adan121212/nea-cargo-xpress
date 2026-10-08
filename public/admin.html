@@ -2061,7 +2061,7 @@
         <td data-label="Actualizar">
           ${p.estado === 'entregado' ? `<span class="estado-bloqueado" title="Ya entregado"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11 V7 A4 4 0 0 1 16 7 V11"/></svg> Entregado</span>` : `
             <select class="estado-select" data-id="${p.id}">
-              ${ESTADOS.map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${ESTADO_LABEL[e]}</option>`).join('')}
+              ${ESTADOS.filter(e => e !== 'entregado').map(e => `<option value="${e}" ${e === p.estado ? 'selected' : ''}>${ESTADO_LABEL[e]}</option>`).join('')}
             </select>
           `}
         </td>
@@ -2820,7 +2820,7 @@
     const cantidadDeLaTarifa = (t) => {
       if (t.unidad === 'ft3') return volumenFt3;
       const esVolumetrica = /volum/i.test(t.nombre || '');
-      return (esVolumetrica && pesoVol > 0) ? pesoVol : pesoReal;
+      return (esVolumetrica && pesoVol > 0) ? Math.max(pesoVol, pesoReal) : pesoReal;
     };
     if(_tarifasCache.length === 0){
       try {

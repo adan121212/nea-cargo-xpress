@@ -6,6 +6,7 @@ const { requiereAdmin } = require('../../middleware/admin');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
 const { activarCreditoSiCorresponde } = require('../../utils/referidos');
+const { cajaCerradaHoy, respuestaCajaCerrada } = require('../../utils/cajaCerrada');
 const router = express.Router();
 router.use(requiereAutenticacion, requiereAdmin);
 
@@ -112,25 +113,39 @@ router.post(
         return res.status(400).json({ mensaje: 'Este paquete ya fue entregado.' });
       }
 
+      // REGLAS DE ENTREGA (las valida el servidor, no solo la pantalla):
+      // - el paquete DEBE tener una factura activa (nunca se entrega sin facturar);
+      // - si viene factura_id, tiene que ser la factura de ESTE paquete;
+      // - si la factura está pendiente, se cobra aquí mismo o no se entrega.
+      const facturaRes = await client.query(
+        `SELECT * FROM facturas WHERE paquete_id = $1 AND estado <> 'anulada'
+         ORDER BY fecha_creacion DESC LIMIT 1`,
+        [paquete_id]
+      );
+      const factura = facturaRes.rows[0];
+      if (!factura) {
+        return res.status(409).json({ mensaje: 'Este paquete no tiene factura. Confirma su peso y factúralo antes de entregarlo.' });
+      }
+      if (factura_id && Number(factura_id) !== factura.id) {
+        return res.status(409).json({ mensaje: 'Esa factura no corresponde a este paquete.' });
+      }
+      const facturaIdReal = factura.id;
+      if (factura.estado === 'pendiente') {
+        if (!metodo_pago) {
+          return res.status(409).json({ mensaje: `Este paquete tiene la factura ${factura.numero_factura} pendiente ($${Number(factura.total).toFixed(2)}). Cóbrala antes de entregarlo.` });
+        }
+        const cerrada = await cajaCerradaHoy(client);
+        if (cerrada) return respuestaCajaCerrada(res, cerrada);
+      }
+
       await client.query('BEGIN');
 
-      if (factura_id) {
-        const facturaRes = await client.query('SELECT * FROM facturas WHERE id = $1', [factura_id]);
-        if (facturaRes.rows.length === 0) {
-          await client.query('ROLLBACK');
-          return res.status(404).json({ mensaje: 'Factura no encontrada' });
-        }
-        if (facturaRes.rows[0].estado === 'pendiente') {
-          if (!metodo_pago) {
-            await client.query('ROLLBACK');
-            return res.status(400).json({ mensaje: 'Indica el método de pago para cobrar esta factura.' });
-          }
-          await client.query(
-            `UPDATE facturas SET estado = 'pagada', fecha_pago = NOW(), metodo_pago = $1 WHERE id = $2`,
-            [metodo_pago, factura_id]
-          );
-          await activarCreditoSiCorresponde(client, facturaRes.rows[0].usuario_id);
-        }
+      if (factura.estado === 'pendiente') {
+        await client.query(
+          `UPDATE facturas SET estado = 'pagada', fecha_pago = NOW(), metodo_pago = $1 WHERE id = $2`,
+          [metodo_pago, facturaIdReal]
+        );
+        await activarCreditoSiCorresponde(client, factura.usuario_id);
       }
 
       const actualizado = await client.query(
@@ -148,7 +163,7 @@ router.post(
       const paquete = actualizado.rows[0];
 
       const envios = { correo_enviado: false };
-      if (factura_id) {
+      if (facturaIdReal) {
         try {
           const datosCompletos = await pool.query(
             `SELECT f.*, u.nombre AS cliente_nombre, u.apellido AS cliente_apellido,
@@ -158,7 +173,7 @@ router.post(
              JOIN usuarios u ON u.id = f.usuario_id
              JOIN paquetes p ON p.id = f.paquete_id
              WHERE f.id = $1`,
-            [factura_id]
+            [facturaIdReal]
           );
           const facturaCompleta = datosCompletos.rows[0];
           if (facturaCompleta) {
@@ -208,6 +223,8 @@ router.post(
       return res.status(400).json({ errores: errores.array() });
     }
     try {
+      const cerrada = await cajaCerradaHoy(pool);
+      if (cerrada) return respuestaCajaCerrada(res, cerrada);
       const resultado = await pool.query(
         `UPDATE facturas SET estado = 'pagada', fecha_pago = NOW(), metodo_pago = $1
          WHERE id = $2 AND estado = 'pendiente'

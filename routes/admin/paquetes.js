@@ -116,6 +116,11 @@ router.patch(
     const errores = validationResult(req);
     if (!errores.isEmpty()) return res.status(400).json({ errores: errores.array() });
     const sucursalId = req.body.sucursal_id || null;
+    // Un paquete SOLO pasa a "entregado" desde el Facturador, que exige
+    // factura cobrada y firma del cliente. Desde aquí no se permite.
+    if (req.body.estado === 'entregado') {
+      return res.status(409).json({ mensaje: 'Para entregar un paquete usa el Facturador: ahí se cobra la factura y el cliente firma.' });
+    }
     try {
       const actual = await pool.query('SELECT estado FROM paquetes WHERE id = $1', [req.params.id]);
       if (actual.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });

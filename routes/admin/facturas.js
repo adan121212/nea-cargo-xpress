@@ -171,7 +171,9 @@ router.patch('/:id/estado', [
   const esAnulacion = req.body.estado === 'anulada';
   if (esAnulacion) {
     if (req.body.codigo_anulacion !== CODIGO_ANULACION) {
-      return res.status(403).json({ mensaje: 'Código de anulación incorrecto.' });
+      // 409 y NO 403: en este proyecto 401/403 son solo para sesión/permisos;
+      // el admin cierra la sesión ante cualquier 403.
+      return res.status(409).json({ mensaje: 'Código de anulación incorrecto.' });
     }
     if (!req.body.motivo) {
       return res.status(400).json({ mensaje: 'Debes indicar el motivo de la anulación.' });
