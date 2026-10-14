@@ -493,7 +493,7 @@
   *{ box-sizing:border-box; }
   @media (prefers-reduced-motion: reduce){ *{ animation-duration:.01ms !important; } }
 
-  /* ============ ESCENA (splash) — globo 3D ============ */
+  /* ============ ESCENA (splash) — puerto, cambia segun la hora (splash-puerto.js) ============ */
   #splash{ position:fixed; inset:0; z-index:9990; transition: opacity .6s ease, visibility .6s ease;
     background: radial-gradient(ellipse 1000px 700px at 50% 30%, #132546 0%, #050b18 70%);
     display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden;
@@ -565,38 +565,9 @@
 </head>
 <body>
 
-<div id="splash">
-<div class="spgl-estrellas"></div>
-
-<div class="spgl-escena-globo">
-  <div class="spgl-anillo-orbita"></div>
-  <div class="spgl-globo-atmosfera"></div>
-  <div class="spgl-globo-sombra"></div>
-  <div class="spgl-globo">
-    <div class="spgl-continentes"></div>
-    <div class="spgl-globo-luz"></div>
-  </div>
-
-  <svg class="spgl-ruta" viewBox="0 0 240 240">
-    <path class="spgl-linea-ruta" d="M 40 82 Q 120 -8 200 128" />
-    <circle class="spgl-punto-ciudad-halo" cx="40" cy="82" r="3.5" />
-    <circle class="spgl-punto-ciudad" cx="40" cy="82" r="3" />
-    <circle class="spgl-punto-ciudad-halo" cx="200" cy="128" r="3.5" style="animation-delay:.9s;" />
-    <circle class="spgl-punto-ciudad" cx="200" cy="128" r="3" />
-  </svg>
-  <div class="spgl-avion-wrap" style="position:absolute; top:0; left:0;">
-    <svg class="spgl-avion-ico" width="18" height="18" viewBox="0 0 24 24" fill="#fff" style="transform:rotate(50deg);">
-      <path d="M22 12 L14 9 L14 3.5 C14 2.7 13 2 12.5 2.5 L11 4 V9.5 L3 11.5 V13.5 L11 12 V17.5 L8.5 19 V20.5 L12 19.5 L15.5 20.5 V19 L13 17.5 V12 L21 13.5 Z"/>
-    </svg>
-  </div>
-</div>
-
-<div class="spgl-carga">
-  <div class="nombre">NEA CARGO XPRESS</div>
-  <div class="spgl-barra"><div class="spgl-barra-fill" id="splashFill"></div></div>
-  <div class="estado"><span id="splashPct">0%</span> — <span id="splashEstado">Conectando con la bodega…</span></div>
-</div>
-</div>
+<div id="splash" role="img" aria-label="NEA Cargo Xpress cargando"></div>
+<script src="splash-puerto.js"></script>
+<script>try{ NEA_PUERTO.pintar(document.getElementById('splash'), {carga:true}); }catch(e){}</script>
 
 <!-- ============ NAV ============ -->
 <nav class="nav">
@@ -1587,6 +1558,7 @@ setLang(lang);
   var pctEl = document.getElementById('splashPct');
   var estadoEl = document.getElementById('splashEstado');
   if(!splash) return;
+  if(!fill || !pctEl || !estadoEl){ setTimeout(function(){ splash.classList.add('oculto'); }, 2500); return; }
 
   var estados = [
     [0, 'Conectando con la bodega…'],
