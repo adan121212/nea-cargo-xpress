@@ -1569,7 +1569,7 @@ setLang(lang);
 
   if(reducido){ splash.classList.add('oculto'); return; }
 
-  var duracionMs = 3800;
+  var duracionMs = (window.NEA_PUERTO && NEA_PUERTO.esCompu()) ? 6000 : 2500;
   var inicio = performance.now();
 
   function paso(ahora){
