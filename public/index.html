@@ -85,7 +85,8 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
-<link rel="apple-touch-icon" href="/favicon-180.png">
+<link rel="apple-touch-icon" href="/app-icon-180.png">
+<link rel="manifest" href="/manifest.json">
 <meta name="description" content="Tu casillero virtual en Miami. Compra en Amazon, eBay, Shein o Alibaba y te lo traemos a Panamá en 4-7 días. Seguimiento en tiempo real, sin complicaciones. Registro gratis.">
 <meta name="keywords" content="casillero panama, compras usa panama, courier miami panama, envios miami panama, casillero miami">
 <meta property="og:title" content="NEA Cargo Xpress — Compra en EE.UU., recibe en Panamá">
@@ -1616,5 +1617,11 @@ setLang(lang);
 })();
 </script>
 
+<script>
+  // Permite instalar la app en el celular (service worker sin caché)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
+  }
+</script>
 </body>
 </html>
