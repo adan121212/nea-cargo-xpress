@@ -93,6 +93,13 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_factura_paquete_activa
 
 CREATE INDEX IF NOT EXISTS idx_facturas_usuario ON facturas (usuario_id);
 
+-- Contador de números de factura (consecutivos, sin saltos). Ver utils/factura.js
+CREATE TABLE IF NOT EXISTS contador_facturas (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    ultimo INTEGER NOT NULL DEFAULT 0
+);
+INSERT INTO contador_facturas (id, ultimo) VALUES (1, 0) ON CONFLICT (id) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS paquete_fotos (
     id SERIAL PRIMARY KEY,
     paquete_id INTEGER NOT NULL REFERENCES paquetes(id) ON DELETE CASCADE,

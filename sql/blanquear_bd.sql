@@ -24,6 +24,10 @@ TRUNCATE TABLE
     sucursales
 RESTART IDENTITY CASCADE;
 
+-- El número de factura sale de contador_facturas: también se reinicia.
+INSERT INTO contador_facturas (id, ultimo) VALUES (1, 0)
+ON CONFLICT (id) DO UPDATE SET ultimo = 0;
+
 -- RESTART IDENTITY reinicia los contadores de ID (el próximo
 -- usuario será id=1, el próximo paquete id=1, etc.) — así los
 -- números de casillero y de factura también vuelven a empezar

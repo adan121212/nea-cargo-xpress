@@ -7,7 +7,7 @@ const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
 const { subirFotoPaquete, eliminarFotoCloudinary } = require('../../utils/cloudinary');
 const { enviarCorreoCambioEstado, enviarFacturaListaParaRetiro } = require('../../utils/mailer');
-const { generarNumeroFactura } = require('../../utils/factura');
+const { siguienteNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { aplicarSaldoAFavor } = require('../../utils/referidos');
 const { calcularCantidadFacturable } = require('../../utils/facturacion');
@@ -231,7 +231,7 @@ router.patch(
            descuentoReferido.toFixed(2), crypto.randomBytes(24).toString('hex')]
         );
         facturaGenerada = insercion.rows[0];
-        const numeroFactura = generarNumeroFactura(facturaGenerada.id);
+        const numeroFactura = await siguienteNumeroFactura(client);
         await client.query('UPDATE facturas SET numero_factura = $1 WHERE id = $2', [numeroFactura, facturaGenerada.id]);
         facturaGenerada.numero_factura = numeroFactura;
       }

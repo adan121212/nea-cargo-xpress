@@ -4,7 +4,7 @@ const { body, query, validationResult } = require('express-validator');
 const pool = require('../../db');
 const { requiereAutenticacion } = require('../../middleware/auth');
 const { requiereAdmin } = require('../../middleware/admin');
-const { generarNumeroFactura } = require('../../utils/factura');
+const { siguienteNumeroFactura } = require('../../utils/factura');
 const { generarPdfFactura } = require('../../utils/facturaPdf');
 const { enviarFacturaPorCorreo } = require('../../utils/mailer');
 const { fechaPanama } = require('../../utils/fechas');
@@ -95,7 +95,7 @@ router.post(
         [paquete_id, paquete.usuario_id, tarifa_id, pesoFacturado, tarifa.precio_libra, costoEnvio.toFixed(2), cargoManejo.toFixed(2), seguro.toFixed(2), total.toFixed(2), descuentoReferido.toFixed(2), crypto.randomBytes(24).toString('hex')]
       );
       const factura = insercion.rows[0];
-      const numeroFactura = generarNumeroFactura(factura.id);
+      const numeroFactura = await siguienteNumeroFactura(client);
       await client.query('UPDATE facturas SET numero_factura = $1 WHERE id = $2', [numeroFactura, factura.id]);
       await client.query(`UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW() WHERE id = $1 AND estado NOT IN ('entregado','listo_para_retiro')`, [paquete_id]);
       await client.query('COMMIT');
@@ -325,7 +325,7 @@ router.post(
         [paquete_id, paquete.usuario_id, tarifa_id, pesoFacturado, tarifa.precio_libra, costoEnvio.toFixed(2), cargoManejo.toFixed(2), seguro.toFixed(2), total.toFixed(2), descuentoReferido.toFixed(2), crypto.randomBytes(24).toString('hex'), metodo_pago]
       );
       const factura = insercion.rows[0];
-      const numeroFactura = generarNumeroFactura(factura.id);
+      const numeroFactura = await siguienteNumeroFactura(client);
       await client.query('UPDATE facturas SET numero_factura = $1 WHERE id = $2', [numeroFactura, factura.id]);
       await client.query(`UPDATE paquetes SET estado = 'listo_para_retiro', fecha_actualizacion = NOW() WHERE id = $1 AND estado NOT IN ('entregado','listo_para_retiro')`, [paquete_id]);
       await activarCreditoSiCorresponde(client, paquete.usuario_id);
