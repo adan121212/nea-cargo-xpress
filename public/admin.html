@@ -1572,6 +1572,46 @@
         <div class="dash-section"><h3 class="dash-section-title">Estado de paquetes</h3><div class="chart-box-sm"><canvas id="chartEstados"></canvas></div></div>
         <div class="dash-section"><h3 class="dash-section-title">Top 5 clientes por paquetes</h3><div class="chart-box-sm"><canvas id="chartTopClientes"></canvas></div></div>
       </div>
+      <!-- ---- Facturación (todo lo facturado) ---- -->
+      <div class="dash-section" id="repFacturacion" style="border-top:1px solid var(--line);padding-top:20px;margin-top:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <div>
+            <h3 class="dash-section-title" style="margin:0 0 2px;">Facturación</h3>
+            <p class="card-sub" style="margin:0;">Todo lo facturado, por fecha de la factura. Respeta el rango de arriba.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+            <div><label for="facRepEstado" style="font-size:11px;">Estado</label><br>
+              <select id="facRepEstado" style="padding:7px 10px;">
+                <option value="">Todas</option>
+                <option value="pagada">Pagadas</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="anulada">Anuladas</option>
+              </select>
+            </div>
+            <label style="font-size:12px;display:flex;align-items:center;gap:6px;height:36px;"><input type="checkbox" id="facRepTodo"> Todo el historial</label>
+            <button class="btn-secondary" id="btnFacRepCsv" style="height:36px;">⬇ CSV facturas</button>
+          </div>
+        </div>
+        <div class="dash-cards" style="margin-bottom:16px;">
+          <div class="dash-card navy"><div class="dash-icon">🧾</div><div class="dash-info"><div class="dash-label">Total facturado</div><div class="dash-num" id="facRepTotal">$0.00</div><div class="dash-sub" id="facRepTotalCant">0 facturas</div></div></div>
+          <div class="dash-card green"><div class="dash-icon">✅</div><div class="dash-info"><div class="dash-label">Pagado</div><div class="dash-num" id="facRepPagado">$0.00</div><div class="dash-sub" id="facRepPagadoCant">0 facturas</div></div></div>
+          <div class="dash-card amber"><div class="dash-icon">⏳</div><div class="dash-info"><div class="dash-label">Pendiente</div><div class="dash-num" id="facRepPend">$0.00</div><div class="dash-sub" id="facRepPendCant">0 facturas</div></div></div>
+          <div class="dash-card blue"><div class="dash-icon">⚖️</div><div class="dash-info"><div class="dash-label">Libras facturadas</div><div class="dash-num" id="facRepLibras">0</div><div class="dash-sub" id="facRepAnuladas">0 anuladas</div></div></div>
+        </div>
+        <div class="dash-grid2">
+          <div class="dash-section"><h3 class="dash-section-title">Por mes</h3><div id="facRepPorMes"></div></div>
+          <div class="dash-section"><h3 class="dash-section-title">Por forma de pago (pagadas)</h3><div id="facRepPorMetodo"></div></div>
+        </div>
+        <div class="dash-section" style="margin-bottom:0;">
+          <h3 class="dash-section-title">Detalle de facturas</h3>
+          <div style="overflow-x:auto;">
+            <table class="tabla-responsive">
+              <thead><tr><th>Factura</th><th>Fecha</th><th>Cliente</th><th style="text-align:right;">Libras</th><th style="text-align:right;">Total</th><th>Pago</th><th>Estado</th></tr></thead>
+              <tbody id="facRepTbody"><tr><td colspan="7" style="color:var(--ink-soft);">Cargando…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- ---- TAB: Reportes de problemas ---- -->
     <div class="card tab-panel" id="tabReportesPaquete" style="display:none;">
@@ -1946,7 +1986,7 @@
       if (tab === 'tarifas'){ $('#tabTarifas').style.display = 'block'; cargarTarifas(); }
       if (tab === 'cajaApertura'){ $('#tabCajaApertura').style.display = 'block'; toggleSubmenuCaja(true); document.getElementById('sbCajaParent')?.classList.add('active'); cargarCaja(); }
       if (tab === 'cajaCierre'){ $('#tabCajaCierre').style.display = 'block'; toggleSubmenuCaja(true); document.getElementById('sbCajaParent')?.classList.add('active'); cargarCaja(); cargarHistorialCaja(); }
-      if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); }
+      if (tab === 'reportes'){ $('#tabReportes').style.display = 'block'; cargarReporte(); cargarFacturacionRep(); }
       if (tab === 'reportesPaquete'){ $('#tabReportesPaquete').style.display = 'block'; cargarReportesPaq(); }
       if (tab === 'pty'){ $('#tabPty').style.display = 'block'; }
       if (window.innerWidth <= 760){
@@ -3575,7 +3615,53 @@
     if(chartTopClientes){ chartTopClientes.destroy(); chartTopClientes=null; }
     chartTopClientes=new Chart(document.getElementById('chartTopClientes').getContext('2d'),{type:'bar',data:{labels:top.map(c=>`${c.nombre} ${c.apellido}`),datasets:[{label:'Paquetes',data:top.map(c=>Number(c.total_paquetes)),backgroundColor:'rgba(255,106,26,0.75)',borderRadius:6,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(12,27,51,0.06)'},ticks:{color:'#6b7280',font:{size:11}}},y:{grid:{display:false},ticks:{color:'#0c1b33',font:{size:11}}}}}});
   }
-  $('#btnActualizarReporte').addEventListener('click',cargarReporte);
+  $('#btnActualizarReporte').addEventListener('click',()=>{ cargarReporte(); cargarFacturacionRep(); });
+  // ---- Reporte de facturación ----
+  let ultimaFacRep=null;
+  const FAC_ESTADO_LABEL={pagada:'Pagada',pendiente:'Pendiente',anulada:'Anulada'};
+  const FAC_ESTADO_ESTILO={pagada:'background:#177a63;color:#fff;',pendiente:'background:#f5c542;color:#5a4a00;',anulada:'background:#b42318;color:#fff;'};
+  const FAC_METODO_LABEL={efectivo:'Efectivo',yappy:'Yappy',tarjeta:'Tarjeta',transferencia:'Transferencia'};
+  function money(n){ return '$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function facFecha(v){ const t=String(v||'').slice(0,10).split('-'); return t.length===3?`${t[2]}/${t[1]}/${t[0]}`:'—'; }
+  function facMes(ym){ const [a,m]=String(ym).split('-'); return `${MESES_CORTOS[Number(m)-1]||m} ${a}`; }
+  function metodoLabel(m){ return FAC_METODO_LABEL[m]||(m? m.charAt(0).toUpperCase()+m.slice(1) : 'Sin dato'); }
+  async function cargarFacturacionRep(){
+    const todo=$('#facRepTodo').checked;
+    const params=new URLSearchParams();
+    if(!todo){ if($('#repDesde').value) params.set('desde',$('#repDesde').value); if($('#repHasta').value) params.set('hasta',$('#repHasta').value); }
+    if($('#facRepEstado').value) params.set('estado',$('#facRepEstado').value);
+    try {
+      const res=await apiAdmin(`/admin/reportes/facturacion?${params.toString()}`);
+      if(!res.ok) throw new Error('error');
+      const d=await res.json(); ultimaFacRep=d; renderFacturacionRep(d);
+    } catch(err){
+      if(err && err.message==='Sesión inválida') return;
+      $('#facRepTbody').innerHTML='<tr><td colspan="7" style="color:#b42318;">No se pudo cargar la facturación. Intenta de nuevo.</td></tr>';
+    }
+  }
+  function renderFacturacionRep(d){
+    const pl=n=>`${n} factura${n==1?'':'s'}`;
+    $('#facRepTotal').textContent=money(d.facturado.total); $('#facRepTotalCant').textContent=pl(d.facturado.cantidad);
+    $('#facRepPagado').textContent=money(d.por_estado.pagada.total); $('#facRepPagadoCant').textContent=pl(d.por_estado.pagada.cantidad);
+    $('#facRepPend').textContent=money(d.por_estado.pendiente.total); $('#facRepPendCant').textContent=pl(d.por_estado.pendiente.cantidad);
+    $('#facRepLibras').textContent=Number(d.facturado.libras).toLocaleString('en-US',{maximumFractionDigits:2})+' lb';
+    const an=d.por_estado.anulada; $('#facRepAnuladas').textContent=`${an.cantidad} anulada${an.cantidad==1?'':'s'}${an.cantidad?' ('+money(an.total)+', no cuentan)':''}`;
+    const filas=(arr,fn,vacio)=> arr.length? `<table class="tabla-responsive"><tbody>${arr.map(fn).join('')}</tbody></table>` : `<div style="color:var(--ink-soft);font-size:13px;">${vacio}</div>`;
+    $('#facRepPorMes').innerHTML=filas(d.por_mes||[],m=>`<tr><td>${escapeHtml(facMes(m.mes))}</td><td style="text-align:right;color:var(--ink-soft);">${m.cantidad} fact. · ${Number(m.libras).toLocaleString('en-US',{maximumFractionDigits:2})} lb</td><td style="text-align:right;font-weight:600;">${money(m.total)}</td></tr>`,'Sin facturas en este período.');
+    $('#facRepPorMetodo').innerHTML=filas(d.por_metodo||[],m=>`<tr><td>${escapeHtml(metodoLabel(m.metodo))}</td><td style="text-align:right;color:var(--ink-soft);">${m.cantidad} fact.</td><td style="text-align:right;font-weight:600;">${money(m.total)}</td></tr>`,'Sin cobros en este período.');
+    const lista=d.facturas||[];
+    $('#facRepTbody').innerHTML=lista.length? lista.map(f=>`<tr${f.estado==='anulada'?' style="opacity:.55;"':''}><td style="font-family:var(--font-mono);">${escapeHtml(f.numero_factura||'#'+f.id)}</td><td>${facFecha(f.fecha)}</td><td>${escapeHtml(f.cliente||'—')}</td><td style="text-align:right;">${Number(f.peso_facturado_lb||0).toLocaleString('en-US',{maximumFractionDigits:2})}</td><td style="text-align:right;font-weight:600;">${money(f.total)}</td><td>${f.estado==='pagada'?escapeHtml(metodoLabel(f.metodo_pago)):'—'}</td><td><span style="padding:2px 9px;border-radius:99px;font-size:11px;${FAC_ESTADO_ESTILO[f.estado]||''}">${escapeHtml(FAC_ESTADO_LABEL[f.estado]||f.estado)}</span></td></tr>`).join('') : '<tr><td colspan="7" style="color:var(--ink-soft);">No hay facturas en este período.</td></tr>';
+  }
+  $('#facRepEstado').addEventListener('change',cargarFacturacionRep);
+  $('#facRepTodo').addEventListener('change',cargarFacturacionRep);
+  $('#btnFacRepCsv').addEventListener('click',()=>{
+    if(!ultimaFacRep||!(ultimaFacRep.facturas||[]).length){ alert('No hay facturas para exportar.'); return; }
+    const cel=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+    const filas=[['Factura','Fecha','Cliente','Libras','Precio por libra','Envio','Manejo','Seguro','Descuento referido','Total','Estado','Forma de pago'],
+      ...ultimaFacRep.facturas.map(f=>[f.numero_factura,facFecha(f.fecha),f.cliente,f.peso_facturado_lb,f.precio_libra,f.costo_envio,f.cargo_manejo,f.seguro,f.descuento_referido,f.total,FAC_ESTADO_LABEL[f.estado]||f.estado,f.estado==='pagada'?metodoLabel(f.metodo_pago):''])];
+    const csv='\ufeff'+filas.map(r=>r.map(cel).join(',')).join('\r\n');
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})); a.download=`facturacion-nea-${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  });
   let filtroReportesPaq = '';
   const REP_TIPO_LABEL = { no_reconozco:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M21 16 V8 L12 3 L3 8 V16 L12 21 Z"/><path d="M3 8 L12 13 L21 8"/><path d="M12 13 V21"/></svg> No reconoce el paquete', danado:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 21 C7 17 3 13.5 3 9.5 A4.5 4.5 0 0 1 12 8 A4.5 4.5 0 0 1 21 9.5 C21 13.5 17 17 12 21 Z"/><path d="M12 8 L10.5 11 L13 13 L11 17"/></svg> Llegó dañado o abierto', peso_precio:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 3 V21 M7 21 H17"/><path d="M12 6 L5 6 L2.5 11.5 A3 3 0 0 0 8.5 11.5 Z"/><path d="M12 6 L19 6 L21.5 11.5 A3 3 0 0 1 15.5 11.5 Z"/></svg> Peso o precio no cuadra', otro:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.2 C9.2 7.8 10.4 7 12 7 C13.7 7 15 7.9 15 9.2 C15 12 9.2 11 9.2 14"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg> Otro problema' };
   const REP_ESTADO_LABEL = { nuevo:'Nuevo', en_proceso:'En proceso', resuelto:'Resuelto' };
