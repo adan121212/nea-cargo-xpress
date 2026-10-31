@@ -2092,7 +2092,7 @@
               <input type="number" step="0.01" min="0" class="peso-input" data-id="${p.id}" data-peso-vol="${p.peso_volumetrico_lb ?? ''}"
                      data-largo="${p.largo_in ?? ''}" data-ancho="${p.ancho_in ?? ''}" data-alto="${p.alto_in ?? ''}"
                      value="${p.peso_real_lb ?? ''}" placeholder="${p.peso_lb ?? '—'}" style="width:70px;padding:6px 8px;font-size:12px;">
-              <button class="btn-secondary btn-guardar-peso" data-id="${p.id}" style="padding:6px 9px;font-size:11px;">OK</button>
+              <button class="btn-secondary btn-guardar-peso" data-id="${p.id}" data-tiene-cliente="${p.usuario_id ? '1' : '0'}" style="padding:6px 9px;font-size:11px;">OK</button>
             </div>
           `}
         </td>
@@ -2176,6 +2176,7 @@
         const alto = parseFloat(input.dataset.alto) || 0;
         const volumenFt3 = (largo && ancho && alto) ? Math.round((largo * ancho * alto) / 1728 * 100) / 100 : 0;
         if (!input.value.trim() || isNaN(peso) || peso <= 0){ mostrarBanner('#bannerPaquetes', 'error', 'El peso no puede quedar en blanco — ingresa un valor válido antes de guardar.'); return; }
+        if (btn.dataset.tieneCliente === '0'){ mostrarBanner('#bannerPaquetes', 'error', 'Este paquete no tiene cliente asignado. Asígnale un cliente (lápiz ✏️) antes de registrar el peso.'); return; }
         const tarifaId = await pedirTarifa(peso, pesoVol, volumenFt3);
         if(!tarifaId) return;
         btn.disabled = true;
