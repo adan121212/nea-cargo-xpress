@@ -179,6 +179,9 @@ router.patch(
       if (actual.rows[0].peso_confirmado) {
         return res.status(409).json({ mensaje: 'El peso de este paquete ya fue confirmado y no se puede modificar.', peso_bloqueado: true });
       }
+      if (!actual.rows[0].usuario_id) {
+        return res.status(400).json({ mensaje: 'Debes asignar un cliente antes de poder registrar el peso.' });
+      }
       const paquete = actual.rows[0];
       const pesoConfirmado = req.body.peso_real_lb;
       const tarifaIdSolicitada = req.body.tarifa_id || null;
