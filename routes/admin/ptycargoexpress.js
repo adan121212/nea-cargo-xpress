@@ -182,10 +182,11 @@ router.get('/paquetes', async (req, res) => {
       return res.status(503).json({ mensaje: detalle });
     }
     const items = data.data?.items || [];
-    // Comparar con paquetes que ya existen en NEA
+    // Comparar con paquetes que ya existen en NEA (sin importar mayúsculas/minúsculas:
+    // PTY a veces manda el tracking en minúscula y en NEA puede haber quedado en mayúscula)
     const trackingsNea = await pool.query(
-      `SELECT numero_tracking FROM paquetes WHERE numero_tracking = ANY($1)`,
-      [items.map(i => i.TrackingNum).filter(Boolean)]
+      `SELECT UPPER(numero_tracking) AS numero_tracking FROM paquetes WHERE UPPER(numero_tracking) = ANY($1)`,
+      [items.map(i => (i.TrackingNum || '').toUpperCase()).filter(Boolean)]
     );
     const yaEnNea = new Set(trackingsNea.rows.map(r => r.numero_tracking.toLowerCase()));
     const enriquecidos = items.map(p => ({
@@ -219,9 +220,9 @@ router.post('/importar', async (req, res) => {
   for (const p of paquetes) {
     if (!p.TrackingNum) { resultados.errores.push({ tracking: '—', error: 'Sin número de tracking' }); continue; }
     try {
-      // Verificar si ya existe
+      // Verificar si ya existe (sin importar mayúsculas/minúsculas)
       const existe = await pool.query(
-        'SELECT id FROM paquetes WHERE numero_tracking = $1', [p.TrackingNum]
+        'SELECT id FROM paquetes WHERE UPPER(numero_tracking) = UPPER($1)', [p.TrackingNum]
       );
       if (existe.rows.length > 0) {
         resultados.duplicados.push(p.TrackingNum);
@@ -263,6 +264,10 @@ router.post('/importar', async (req, res) => {
       // Fecha de prealerta: usar la de PTY o ahora
       const fechaPrealerta = p.Fecha ? new Date(p.Fecha) : new Date();
 
+      // Se guarda siempre en mayúsculas para que las comparaciones futuras
+      // (aquí y en otras pantallas) no fallen por mayúscula/minúscula
+      const trackingNormalizado = p.TrackingNum.trim().toUpperCase();
+
       await pool.query(
         `INSERT INTO paquetes
            (usuario_id, numero_tracking, tienda, estado, peso_lb,
@@ -270,7 +275,7 @@ router.post('/importar', async (req, res) => {
          VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())`,
         [
           usuarioId,
-          p.TrackingNum,
+          trackingNormalizado,
           tienda,
           estadoNea,
           pesoLb,
@@ -329,8 +334,8 @@ router.post('/verificar', async (req, res) => {
   }
   try {
     const resultado = await pool.query(
-      `SELECT numero_tracking FROM paquetes WHERE numero_tracking = ANY($1)`,
-      [trackings]
+      `SELECT numero_tracking FROM paquetes WHERE UPPER(numero_tracking) = ANY($1)`,
+      [trackings.map(t => (t || '').toUpperCase())]
     );
     return res.json({ en_nea: resultado.rows.map(r => r.numero_tracking) });
   } catch (err) {
