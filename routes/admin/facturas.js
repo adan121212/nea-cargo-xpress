@@ -75,6 +75,7 @@ router.post(
       const paqueteRes = await client.query('SELECT * FROM paquetes WHERE id = $1', [paquete_id]);
       if (paqueteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       const paquete = paqueteRes.rows[0];
+      if (!paquete.usuario_id) return res.status(400).json({ mensaje: 'Este paquete no tiene un cliente asignado. Asígnale un cliente antes de generar la factura.' });
       const tarifaRes = await client.query('SELECT * FROM tarifas WHERE id = $1', [tarifa_id]);
       if (tarifaRes.rows.length === 0) return res.status(404).json({ mensaje: 'Tarifa no encontrada' });
       const tarifa = tarifaRes.rows[0];
@@ -305,6 +306,7 @@ router.post(
       const paqueteRes = await client.query('SELECT * FROM paquetes WHERE id = $1', [paquete_id]);
       if (paqueteRes.rows.length === 0) return res.status(404).json({ mensaje: 'Paquete no encontrado' });
       const paquete = paqueteRes.rows[0];
+      if (!paquete.usuario_id) return res.status(400).json({ mensaje: 'Este paquete no tiene un cliente asignado. Asígnale un cliente antes de generar la factura.' });
       const tarifaRes = await client.query('SELECT * FROM tarifas WHERE id = $1', [tarifa_id]);
       if (tarifaRes.rows.length === 0) return res.status(404).json({ mensaje: 'Tarifa no encontrada' });
       const tarifa = tarifaRes.rows[0];
