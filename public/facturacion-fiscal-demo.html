@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEA Cargo Xpress | Demo Facturación Fiscal</title>
+<style>
+:root{--navy:#10243e;--blue:#1769d2;--orange:#ff6a1a;--bg:#f3f6fa;--ink:#18283d;--muted:#68788d;--line:#e1e8f0;--green:#14805e;--amber:#a85a00;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px Inter,system-ui,Segoe UI,sans-serif;color:var(--ink)}
+header{background:linear-gradient(110deg,#10243e,#174d85);color:#fff;padding:22px 30px;display:flex;justify-content:space-between;align-items:center;gap:15px}
+.brand{font-size:22px;font-weight:800;letter-spacing:.2px}.brand small{display:block;font-size:11px;font-weight:500;opacity:.75;margin-top:4px}
+.demo{background:#fff1d6;color:#8a4b00;border-radius:30px;padding:8px 13px;font-weight:800;font-size:12px}
+.shell{max-width:1440px;margin:auto;padding:24px}.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.heading h1{font-size:24px;margin:0}.heading p{color:var(--muted);margin:5px 0 0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px #132b4610}.stat{padding:17px}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:27px;margin-top:7px}
+.columns{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.panel h2{margin:0;padding:16px 18px;border-bottom:1px solid var(--line);font-size:16px}.body{padding:18px}
+label{display:block;font-weight:700;font-size:12px;margin:0 0 7px}input,select{width:100%;padding:11px 12px;border:1px solid #cfd9e5;border-radius:9px;background:white;font:inherit;color:var(--ink);margin-bottom:15px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.check{display:flex;align-items:center;gap:8px;color:#43546a;margin:0 0 10px}.check input{width:auto;margin:0}
+.btn{border:0;border-radius:9px;padding:12px 15px;background:var(--blue);color:white;font-weight:800;cursor:pointer}.btn.secondary{background:#eaf2fc;color:#1557a5}.btn:disabled{opacity:.5;cursor:not-allowed}
+.total{display:flex;justify-content:space-between;padding:14px;background:#eef5ff;border-radius:10px;font-weight:800;font-size:17px;margin:12px 0}
+.notice{padding:12px 14px;border-radius:10px;background:#fff5e5;color:#81500d;border:1px solid #f3d39b;line-height:1.5;margin-bottom:14px}
+.preview{border:1px dashed #b7c6d8;border-radius:12px;padding:18px;background:#fbfdff;min-height:330px}.preview h3{text-align:center;margin:3px 0 16px;letter-spacing:.06em}.preview .muted{color:var(--muted);font-size:12px}.preview table{width:100%;border-collapse:collapse;margin:18px 0}.preview td{border-bottom:1px solid var(--line);padding:9px 5px}.right{text-align:right}
+.status{display:inline-block;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:800;background:#fff1d6;color:#8a4b00}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.item{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}
+small.muted{color:var(--muted)}footer{text-align:center;color:var(--muted);font-size:11px;padding:22px}
+@media(max-width:850px){.stats{grid-template-columns:repeat(2,1fr)}.columns,.bottom{grid-template-columns:1fr}.shell{padding:14px}header{padding:17px}.heading{align-items:flex-start;flex-direction:column}}
+@media(max-width:480px){.stats{grid-template-columns:1fr 1fr}.stat strong{font-size:22px}.row{grid-template-columns:1fr}.brand{font-size:18px}}
+</style>
+</head>
+<body>
+<header><div class="brand">NEA Cargo Xpress<small>Panel administrativo · Panamá</small></div><div class="demo">MODO DEMOSTRACIÓN · SIN VALIDEZ FISCAL</div></header>
+<main class="shell">
+<div class="heading"><div><h1>Facturación Fiscal · DGI Panamá</h1><p>Propuesta visual del módulo que se conectará al sistema actual de NEA.</p></div><span class="status">PAC: NO CONFIGURADO</span></div>
+<section class="stats">
+<div class="stat"><span>Facturas fiscales autorizadas</span><strong>—</strong><small class="muted">No hay conexión real</small></div>
+<div class="stat"><span>Pendientes de envío</span><strong>0</strong><small class="muted">Datos de prueba</small></div>
+<div class="stat"><span>Rechazadas</span><strong>0</strong><small class="muted">Datos de prueba</small></div>
+<div class="stat"><span>Notas de crédito</span><strong>—</strong><small class="muted">Fase posterior</small></div>
+</section>
+<section class="columns">
+<div class="panel"><h2>1 · Simular factura electrónica</h2><div class="body">
+<div class="notice"><b>Importante:</b> esta pantalla solo calcula una vista previa local. No crea una factura fiscal, no genera CUFE/QR válido y no envía información a la DGI.</div>
+<label for="cliente">Cliente de ejemplo</label><input id="cliente" value="Cliente de prueba">
+<div class="row"><div><label for="ruc">RUC / identificación</label><input id="ruc" placeholder="Identificación del cliente"></div><div><label for="numero">Factura interna NEA</label><input id="numero" value="NEA-DEMO-0001" readonly></div></div>
+<label for="concepto">Descripción del servicio</label><input id="concepto" value="Servicio de transporte de carga">
+<div class="row"><div><label for="base">Subtotal (B/.)</label><input id="base" type="number" min="0" step=".01" value="100"></div><div><label for="itbms">ITBMS demo (%)</label><input id="itbms" type="number" min="0" max="100" step=".01" value="7"></div></div>
+<label class="check"><input id="aplica" type="checkbox" checked> Aplicar ITBMS solo para esta simulación</label>
+<div class="total"><span>Total de ejemplo</span><strong id="total">B/. 107.00</strong></div>
+<button class="btn" id="generar">Actualizar vista previa</button>
+<button class="btn secondary" id="limpiar" type="button">Restablecer</button>
+</div></div>
+<div class="panel"><h2>2 · Vista previa del documento (no fiscal)</h2><div class="body"><div class="preview">
+<div style="display:flex;justify-content:space-between;gap:10px"><b>NEA Cargo Xpress</b><span class="status">BORRADOR DEMO</span></div>
+<p class="muted">Sabanitas, Colón · Panamá<br>RUC del emisor: pendiente de validar/configurar</p>
+<h3>DOCUMENTO DE PRUEBA</h3>
+<div class="item"><span>Cliente</span><b id="pvCliente">Cliente de prueba</b></div>
+<div class="item"><span>Identificación</span><b id="pvRuc">—</b></div>
+<div class="item"><span>Concepto</span><b id="pvConcepto">Servicio de transporte de carga</b></div>
+<table><tr><td>Subtotal</td><td class="right" id="pvBase">B/. 100.00</td></tr><tr><td>ITBMS simulado</td><td class="right" id="pvTax">B/. 7.00</td></tr><tr><td><b>Total demo</b></td><td class="right" id="pvTotal"><b>B/. 107.00</b></td></tr></table>
+<p class="muted">CUFE: no generado · QR: no generado · Autorización PAC: no existe</p>
+</div></div></div>
+</section>
+<section class="bottom">
+<div class="panel"><h2>3 · Conexión con proveedor PAC</h2><div class="body">
+<div class="item"><span>Proveedor PAC</span><b>No contratado</b></div><div class="item"><span>Credenciales API</span><b>No configuradas</b></div><div class="item"><span>Certificado electrónico</span><b>Por gestionar</b></div><div class="item"><span>Ambiente de pruebas</span><b>Preparación pendiente</b></div>
+<p class="muted">La integración se activará mediante un adaptador independiente. Las credenciales se guardarán como secretos en Render, nunca dentro del repositorio.</p>
+</div></div>
+<div class="panel"><h2>4 · Flujo propuesto</h2><div class="body">
+<div class="item"><span>① Factura interna NEA</span><b>Se conserva</b></div><div class="item"><span>② Validar datos fiscales</span><b>Por implementar</b></div><div class="item"><span>③ XML + firma electrónica</span><b>Por implementar</b></div><div class="item"><span>④ Envío al PAC y DGI</span><b>Al contratar PAC</b></div><div class="item"><span>⑤ Guardar CUFE, CAFE y QR</span><b>Tras autorización real</b></div>
+</div></div>
+</section>
+</main><footer>NEA Cargo Xpress · Prototipo de interfaz · No utilizar como comprobante fiscal</footer>
+<script>
+const $=id=>document.getElementById(id), money=n=>'B/. '+(Number.isFinite(n)?n:0).toFixed(2);
+function update(){const base=Math.max(0,Number($('base').value)||0),rate=Math.max(0,Number($('itbms').value)||0),tax=$('aplica').checked?base*rate/100:0,total=base+tax;
+$('total').textContent=money(total);$('pvCliente').textContent=$('cliente').value||'—';$('pvRuc').textContent=$('ruc').value||'—';$('pvConcepto').textContent=$('concepto').value||'—';$('pvBase').textContent=money(base);$('pvTax').textContent=money(tax);$('pvTotal').innerHTML='<b>'+money(total)+'</b>';}
+$('generar').addEventListener('click',update);$('limpiar').addEventListener('click',()=>{ $('cliente').value='Cliente de prueba';$('ruc').value='';$('concepto').value='Servicio de transporte de carga';$('base').value='100';$('itbms').value='7';$('aplica').checked=true;update();});
+['cliente','ruc','concepto','base','itbms','aplica'].forEach(id=>$(id).addEventListener('input',update));update();
+</script>
+</body></html>
