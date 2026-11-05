@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#061a45">
+  <meta name="description" content="NEA Cargo Xpress — conectando Panamá con el mundo.">
+  <title>NEA Cargo Xpress | Cargando sistema</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/splash.css">
+  <script src="/splash.js" defer></script>
+</head>
+<body>
+  <main class="nea-splash" id="neaSplash" aria-label="NEA Cargo Xpress está cargando">
+    <div class="sky-glow" aria-hidden="true"></div>
+    <div class="fireworks fireworks-a" aria-hidden="true"></div>
+    <div class="fireworks fireworks-b" aria-hidden="true"></div>
+    <div class="flag flag-left" aria-hidden="true"><i></i><b></b></div>
+    <div class="flag flag-right" aria-hidden="true"><i></i><b></b></div>
+
+    <header class="patriot-note">
+      <span class="patriot-kicker">Panamá · 3 de noviembre</span>
+      <strong>¡Viva Panamá!</strong>
+      <span>Fiestas Patrias</span>
+      <em></em>
+    </header>
+
+    <section class="brand-block" aria-label="NEA Cargo Xpress">
+      <div class="globe-mark" aria-hidden="true">
+        <svg viewBox="0 0 120 120" role="img">
+          <defs><linearGradient id="globeBlue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#75d5ff"/><stop offset="1" stop-color="#0751b5"/></linearGradient></defs>
+          <circle cx="60" cy="60" r="48" fill="url(#globeBlue)" stroke="#eaf8ff" stroke-width="2"/>
+          <path d="M18 54h84M60 12c-20 19-25 76 0 96M60 12c20 19 25 76 0 96M25 32c22 12 48 12 70 0M25 88c22-12 48-12 70 0" fill="none" stroke="#d9f4ff" stroke-width="2" opacity=".8"/>
+          <path d="M39 32l10-7 7 5-3 10 8 8-6 8-11-3-7 8-8-5 4-11-5-8zM75 63l10-7 9 5-3 11-9 3-2 10-10-2-4-10z" fill="#eaf8ff" opacity=".8"/>
+        </svg>
+      </div>
+      <div class="brand-name"><span>NEA</span><b>Cargo <i>Xpress</i></b></div>
+      <div class="service-line">AÉREA <i>•</i> MARÍTIMA <i>•</i> TERRESTRE</div>
+      <div class="slogan">¡Compra sin límites!</div>
+    </section>
+
+    <section class="transport-scene" aria-hidden="true">
+      <div class="plane">
+        <svg viewBox="0 0 240 100"><path d="M8 52l86-8 42-36 16 2-22 34 62-5 35 10-35 10-62-5 22 34-16 2-42-36-86-8z" fill="#f7fbff" stroke="#8fcfff" stroke-width="2"/><path d="M18 52h180" stroke="#d8eaff" stroke-width="2"/></svg>
+      </div>
+      <div class="port-cranes"><span></span><span></span><span></span></div>
+      <div class="ship">
+        <div class="containers"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="hull"><b>NEA CARGO XPRESS</b></div>
+      </div>
+      <div class="truck">
+        <div class="truck-box"><strong>NEA</strong><small>CARGO XPRESS</small></div>
+        <div class="truck-cab"><i></i></div>
+        <div class="wheel wheel-one"></div><div class="wheel wheel-two"></div>
+      </div>
+      <div class="waterline"></div>
+    </section>
+
+    <footer class="loading-panel">
+      <div class="loading-label"><span class="pulse-dot"></span><span id="loadingMessage">Conectando con Panamá...</span><b id="loadingPercent">0%</b></div>
+      <div class="progress-track" role="progressbar" aria-label="Progreso de carga" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><span id="progressFill"></span></div>
+      <div class="loading-foot"><span>SEGURO Y CONFIABLE</span><i></i><span>RÁPIDO Y EFICIENTE</span><i></i><span>SIEMPRE CONTIGO</span></div>
+    </footer>
+    <div class="ribbon ribbon-bottom" aria-hidden="true"><span>★</span><b></b><span>★</span></div>
+  </main>
+</body>
+</html>
