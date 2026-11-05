@@ -55,15 +55,17 @@ app.use(
           "'self'", "'unsafe-inline'",
           'https://cdnjs.cloudflare.com', 'https://unpkg.com', 'https://cdn.jsdelivr.net',
         ],
-        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
         // admin.html usa unos pocos onclick="..." en botones (cámara, copiar
         // casillero). Sin esto, Helmet los bloquea por defecto aunque scriptSrc
         // ya permita 'unsafe-inline' (script-src-attr manda sobre script-src
         // para atributos onX=).
         scriptSrcAttr: ["'unsafe-inline'"],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-        imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'],
-        connectSrc: ["'self'"],
+        // https://*.tile.openstreetmap.org: las imágenes del mapa de delivery (Leaflet)
+        imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com', 'https://*.tile.openstreetmap.org'],
+        // https://nominatim.openstreetmap.org: buscador de dirección y "usar mi ubicación" del delivery
+        connectSrc: ["'self'", 'https://nominatim.openstreetmap.org'],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
