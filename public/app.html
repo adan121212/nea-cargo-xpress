@@ -2590,7 +2590,7 @@
   function inicializarMapaDelivery(){
     if (mapaDeliveryListo) return;
     mapaDelivery = L.map('delMapa', { zoomControl:false }).setView([SUCURSAL_DELIVERY.lat, SUCURSAL_DELIVERY.lng], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(mapaDelivery);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19, subdomains:'abcd', attribution:'© OpenStreetMap contributors © CARTO' }).addTo(mapaDelivery);
     L.control.zoom({ position:'bottomright' }).addTo(mapaDelivery);
 
     const iconoSucursal = L.divIcon({

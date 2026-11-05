@@ -63,7 +63,7 @@ app.use(
         scriptSrcAttr: ["'unsafe-inline'"],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         // https://*.tile.openstreetmap.org: las imágenes del mapa de delivery (Leaflet)
-        imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com', 'https://*.tile.openstreetmap.org'],
+        imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com', 'https://*.basemaps.cartocdn.com'],
         // https://nominatim.openstreetmap.org: buscador de dirección y "usar mi ubicación" del delivery
         connectSrc: ["'self'", 'https://nominatim.openstreetmap.org'],
         objectSrc: ["'none'"],
