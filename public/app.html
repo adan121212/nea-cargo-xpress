@@ -17,8 +17,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
 <style>
   :root{
     --ink:#0c1b33;
@@ -2394,9 +2393,7 @@
   }
 
   // ---- Modal de pedir delivery ----
-  const SUCURSAL_DELIVERY = { lat: 9.3422, lng: -79.8011 }; // Sabanitas, Colón
-  let mapaDeliveryListo = false, mapaDelivery, marcadorDelivery, debounceBusquedaDelivery = null;
-  let deliverySeleccion = { paqueteId: null, telefono: '', direccion: '', referencia: '', lat: null, lng: null, zonaNombre: null, zonaPrecio: 0 };
+  let deliverySeleccion = { paqueteId: null, telefono: '', direccion: '', referencia: '', lat: null, lng: null, zonaNombre: 'Manual', zonaPrecio: 0 };
 
   function abrirModalDelivery(paqueteId, tienda){
     let modal = document.getElementById('modalDelivery');
@@ -2409,30 +2406,9 @@
           <h3 style="margin:0 0 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="1" y="7" width="13" height="10"/><path d="M14 10 H19 L22 13 V17 H14 Z"/><circle cx="6" cy="19" r="1.8"/><circle cx="18" cy="19" r="1.8"/></svg> Pedir delivery</h3>
           <p class="modal-sub" id="delSub" style="font-size:13px;color:var(--ink-soft);margin:0 0 14px;"></p>
 
-          <div style="position:relative;margin-bottom:8px;">
-            <input type="text" id="delBuscador" placeholder="Busca tu calle, barrio o edificio..."
-                   style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;">
-            <div id="delResultados" style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;
-                 border:1.5px solid var(--line);border-radius:8px;box-shadow:0 10px 24px rgba(12,27,51,.12);
-                 max-height:170px;overflow-y:auto;z-index:20;display:none;"></div>
-          </div>
-          <button type="button" id="delUsarUbicacion" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;
-                  border:1.5px dashed var(--accent);background:#fff6f0;color:var(--accent);border-radius:8px;
-                  padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 21 C12 21 19 14.5 19 9.5 A7 7 0 0 0 5 9.5 C5 14.5 12 21 12 21 Z"/><circle cx="12" cy="9.5" r="2.3"/></svg> Usar mi ubicación actual
-          </button>
-
-          <div id="delMapa" style="width:100%;height:190px;border-radius:10px;margin-bottom:6px;border:1.5px solid var(--line);"></div>
-          <p style="font-size:10.5px;color:var(--ink-soft);text-align:center;margin:0 0 10px;">Puedes arrastrar el pin <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 21 C12 21 19 14.5 19 9.5 A7 7 0 0 0 5 9.5 C5 14.5 12 21 12 21 Z"/><circle cx="12" cy="9.5" r="2.3"/></svg> para ajustar el punto exacto</p>
-
-          <div id="delZonaBox" style="display:none;background:#fff6f0;border:1.5px solid var(--accent-glow);border-radius:8px;
-               padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
-            <div>
-              <div id="delZonaNombre" style="font-weight:700;font-size:13px;color:var(--ink);">—</div>
-              <div id="delZonaDesc" style="font-size:11px;color:var(--ink-soft);"></div>
-            </div>
-            <div id="delZonaPrecio" style="font-size:16px;font-weight:800;color:var(--accent);">—</div>
-          </div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Dirección de entrega</label>
+          <textarea id="delDireccion" rows="3" placeholder="Escribe tu dirección completa: calle, barrio, corregimiento, referencias..."
+                    style="width:100%;padding:10px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;margin-bottom:10px;"></textarea>
 
           <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Teléfono de contacto</label>
           <input type="tel" id="delTelefono" placeholder="6XXX-XXXX" maxlength="9"
@@ -2455,8 +2431,7 @@
           </div>
         </div>`;
       document.body.appendChild(modal);
-      modal.querySelector('#delBuscador').addEventListener('input', busquedaDireccionDelivery);
-      modal.querySelector('#delUsarUbicacion').addEventListener('click', usarMiUbicacionDelivery);
+      modal.querySelector('#delDireccion').addEventListener('input', actualizarBotonDelivery);
       modal.querySelector('#delTelefono').addEventListener('input', function(){
         let v = this.value.replace(/\D/g,'').slice(0,8);
         if (v.length > 4) v = v.slice(0,4) + '-' + v.slice(4);
@@ -2465,22 +2440,15 @@
       });
     }
 
-    deliverySeleccion = { paqueteId, telefono:'', direccion:'', referencia:'', lat:null, lng:null, zonaNombre:null, zonaPrecio:0 };
+    deliverySeleccion = { paqueteId, telefono:'', direccion:'', referencia:'', lat:null, lng:null, zonaNombre:'Manual', zonaPrecio:0 };
     modal.querySelector('#delSub').textContent = `Paquete de ${tienda}`;
-    modal.querySelector('#delBuscador').value = '';
+    modal.querySelector('#delDireccion').value = '';
     modal.querySelector('#delTelefono').value = '';
     modal.querySelector('#delReferencia').value = '';
-    modal.querySelector('#delZonaBox').style.display = 'none';
-    modal.querySelector('#delResumen').style.display = 'none';
     modal.querySelector('#delError').style.display = 'none';
     modal.querySelector('#delEnviar').disabled = true;
     modal.querySelector('#delEnviar').style.opacity = '.5';
     modal.style.display = 'flex';
-
-    setTimeout(() => {
-      inicializarMapaDelivery();
-      if (mapaDelivery) mapaDelivery.invalidateSize();
-    }, 60);
 
     modal.querySelector('#delCancelar').onclick = () => { modal.style.display = 'none'; };
     modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
@@ -2492,7 +2460,8 @@
     const btnEnviar = modal.querySelector('#delEnviar');
     btnEnviar.onclick = async () => {
       const err = modal.querySelector('#delError');
-      if (!deliverySeleccion.lat || !deliverySeleccion.zonaNombre){ err.textContent = 'Marca tu ubicación en el mapa.'; err.style.display = 'block'; return; }
+      const direccion = modal.querySelector('#delDireccion').value.trim();
+      if (!direccion){ err.textContent = 'Escribe tu dirección de entrega.'; err.style.display = 'block'; return; }
       const telefono = modal.querySelector('#delTelefono').value.replace(/\D/g,'');
       if (telefono.length < 7){ err.textContent = 'Ingresa un teléfono de contacto válido.'; err.style.display = 'block'; return; }
       btnEnviar.disabled = true; btnEnviar.textContent = 'Enviando…';
@@ -2502,12 +2471,12 @@
           body: JSON.stringify({
             paquete_id: parseInt(paqueteId),
             telefono: modal.querySelector('#delTelefono').value,
-            direccion_texto: deliverySeleccion.direccion || 'Punto marcado en el mapa',
+            direccion_texto: direccion,
             referencia: modal.querySelector('#delReferencia').value.trim(),
-            latitud: deliverySeleccion.lat,
-            longitud: deliverySeleccion.lng,
-            zona_nombre: deliverySeleccion.zonaNombre,
-            zona_precio: deliverySeleccion.zonaPrecio,
+            latitud: null,
+            longitud: null,
+            zona_nombre: 'Manual',
+            zona_precio: 0,
           })
         });
         if (res.ok){
@@ -2587,143 +2556,19 @@
     });
   }
 
-  function inicializarMapaDelivery(){
-    if (mapaDeliveryListo) return;
-    mapaDelivery = L.map('delMapa', { zoomControl:false }).setView([SUCURSAL_DELIVERY.lat, SUCURSAL_DELIVERY.lng], 13);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19, subdomains:'abcd', attribution:'© OpenStreetMap contributors © CARTO' }).addTo(mapaDelivery);
-    L.control.zoom({ position:'bottomright' }).addTo(mapaDelivery);
 
-    const iconoSucursal = L.divIcon({
-      className:'', html:'<div style="background:#0c1b33;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7 H10 M14 7 H15 M9 11 H10 M14 11 H15 M9 15 H10 M14 15 H15"/><path d="M10 21 V17 H14 V21"/></svg></div>',
-      iconSize:[24,24], iconAnchor:[12,12]
-    });
-    L.marker([SUCURSAL_DELIVERY.lat, SUCURSAL_DELIVERY.lng], { icon: iconoSucursal, interactive:false })
-      .addTo(mapaDelivery).bindTooltip('Sucursal NEA — Sabanitas', { direction:'top' });
-
-    const iconoPin = L.divIcon({ className:'', html:'<div style="font-size:28px;transform:translateY(-6px);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;"><path d="M12 21 C12 21 19 14.5 19 9.5 A7 7 0 0 0 5 9.5 C5 14.5 12 21 12 21 Z"/><circle cx="12" cy="9.5" r="2.3"/></svg></div>', iconSize:[28,28], iconAnchor:[14,28] });
-    marcadorDelivery = L.marker([SUCURSAL_DELIVERY.lat, SUCURSAL_DELIVERY.lng], { icon: iconoPin, draggable:true }).addTo(mapaDelivery);
-
-    marcadorDelivery.on('dragend', () => {
-      const p = marcadorDelivery.getLatLng();
-      actualizarZonaDelivery(p.lat, p.lng);
-      reverseGeocodeDelivery(p.lat, p.lng);
-    });
-    mapaDelivery.on('click', (e) => {
-      marcadorDelivery.setLatLng(e.latlng);
-      actualizarZonaDelivery(e.latlng.lat, e.latlng.lng);
-      reverseGeocodeDelivery(e.latlng.lat, e.latlng.lng);
-    });
-    mapaDeliveryListo = true;
-  }
-
-  function distanciaKmDelivery(lat1, lng1, lat2, lng2){
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180, dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  }
-
-  function actualizarZonaDelivery(lat, lng){
-    const km = distanciaKmDelivery(SUCURSAL_DELIVERY.lat, SUCURSAL_DELIVERY.lng, lat, lng);
-    let nombre, precio;
-    if (km <= 1.5){ nombre='Cerca de la sucursal'; precio=3; }
-    else if (km <= 5){ nombre='Zona media'; precio=5; }
-    else { nombre='Zona extendida'; precio=8; }
-
-    deliverySeleccion.lat = lat; deliverySeleccion.lng = lng;
-    deliverySeleccion.zonaNombre = nombre; deliverySeleccion.zonaPrecio = precio;
-
-    const modal = document.getElementById('modalDelivery');
-    modal.querySelector('#delZonaNombre').textContent = nombre;
-    modal.querySelector('#delZonaDesc').textContent = `A ${km.toFixed(1)} km de la sucursal`;
-    modal.querySelector('#delZonaPrecio').textContent = '$' + precio.toFixed(2);
-    modal.querySelector('#delZonaBox').style.display = 'flex';
-
-    const flete = deliverySeleccion.fletePreview || 0;
-    modal.querySelector('#delFlete').textContent = '$' + flete.toFixed(2);
-    modal.querySelector('#delDeliveryPrecio').textContent = '$' + precio.toFixed(2);
-    modal.querySelector('#delTotal').textContent = '$' + (flete + precio).toFixed(2);
-    modal.querySelector('#delResumen').style.display = 'block';
-
-    actualizarBotonDelivery();
-  }
 
   function actualizarBotonDelivery(){
     const modal = document.getElementById('modalDelivery');
     if (!modal) return;
     const telOk = modal.querySelector('#delTelefono').value.replace(/\D/g,'').length >= 7;
+    const dirOk = modal.querySelector('#delDireccion').value.trim().length > 0;
     const btn = modal.querySelector('#delEnviar');
-    const habilitado = telOk && !!deliverySeleccion.zonaNombre;
+    const habilitado = telOk && dirOk;
     btn.disabled = !habilitado; btn.style.opacity = habilitado ? '1' : '.5';
   }
 
-  async function reverseGeocodeDelivery(lat, lng){
-    const modal = document.getElementById('modalDelivery');
-    modal.querySelector('#delBuscador').value = 'Ubicando dirección...';
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
-      const data = await res.json();
-      const direccion = data.display_name || `Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`;
-      deliverySeleccion.direccion = direccion;
-      modal.querySelector('#delBuscador').value = direccion;
-    } catch (e){
-      deliverySeleccion.direccion = `Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`;
-      modal.querySelector('#delBuscador').value = deliverySeleccion.direccion;
-    }
-  }
 
-  function moverMapaADelivery(lat, lng, etiqueta){
-    mapaDelivery.setView([lat, lng], 16);
-    marcadorDelivery.setLatLng([lat, lng]);
-    actualizarZonaDelivery(lat, lng);
-    deliverySeleccion.direccion = etiqueta;
-    const modal = document.getElementById('modalDelivery');
-    modal.querySelector('#delBuscador').value = etiqueta;
-    modal.querySelector('#delResultados').style.display = 'none';
-  }
-
-  function busquedaDireccionDelivery(){
-    const texto = this.value.trim();
-    clearTimeout(debounceBusquedaDelivery);
-    const cont = document.getElementById('delResultados');
-    if (texto.length < 3){ cont.style.display = 'none'; return; }
-    debounceBusquedaDelivery = setTimeout(async () => {
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(texto)}&countrycodes=pa&limit=5&addressdetails=1&viewbox=-79.95,9.45,-79.65,9.25`);
-        const data = await res.json();
-        cont.innerHTML = '';
-        if (data.length === 0){
-          cont.innerHTML = '<div style="padding:9px 12px;font-size:12px;color:var(--ink-soft);">Sin resultados</div>';
-        } else {
-          data.forEach(lugar => {
-            const item = document.createElement('div');
-            item.style.cssText = 'padding:9px 12px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--line);';
-            item.textContent = lugar.display_name;
-            item.onmouseenter = () => item.style.background = '#fff6f0';
-            item.onmouseleave = () => item.style.background = '';
-            item.onclick = () => moverMapaADelivery(parseFloat(lugar.lat), parseFloat(lugar.lon), lugar.display_name);
-            cont.appendChild(item);
-          });
-        }
-        cont.style.display = 'block';
-      } catch (e){ /* silencioso */ }
-    }, 450);
-  }
-
-  function usarMiUbicacionDelivery(){
-    if (!navigator.geolocation){ mostrarToast('Tu navegador no permite compartir ubicación.', 'error'); return; }
-    const btn = document.getElementById('delUsarUbicacion');
-    const original = btn.textContent;
-    btn.innerHTML = ICONOS.pin + ' Ubicando...';
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        moverMapaADelivery(pos.coords.latitude, pos.coords.longitude, 'Ubicando dirección...');
-        reverseGeocodeDelivery(pos.coords.latitude, pos.coords.longitude);
-        btn.textContent = original;
-      },
-      () => { mostrarToast('No pudimos obtener tu ubicación. Búscala manualmente arriba.', 'error'); btn.textContent = original; }
-    );
-  }
 
 
   async function toggleFotosPaquete(id, btn){
