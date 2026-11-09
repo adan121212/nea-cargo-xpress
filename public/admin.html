@@ -2056,12 +2056,17 @@
     if (tel.length < 7) return '';
     const numero = tel.length === 8 ? '507' + tel : tel;
     const nombre = (p.cliente_nombre || '').split(' ')[0] || 'cliente';
+    const peso = p.peso_real_lb != null ? `${Number(p.peso_real_lb).toFixed(2)} lb` : null;
+    const total = p.factura_total != null ? `$${Number(p.factura_total).toFixed(2)}` : null;
     const msg =
       `Hola ${nombre} 👋\n\n` +
       `Te escribimos de *NEA Cargo Xpress*. ¡Tu paquete` +
       (p.tienda ? ` de ${p.tienda}` : '') +
       ` (casillero ${p.numero_casillero}) ya está en Panamá y listo para retiro en tu sucursal! 📦✅\n\n` +
-      `¡Gracias por preferirnos!`;
+      (p.numero_tracking ? `📦 Tracking: ${p.numero_tracking}\n` : '') +
+      (peso ? `⚖️ Peso: ${peso}\n` : '') +
+      (total ? `💵 Total a pagar: ${total}\n` : '') +
+      `\n¡Gracias por preferirnos!`;
     return `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
   }
   function renderPaquetes(paquetes){

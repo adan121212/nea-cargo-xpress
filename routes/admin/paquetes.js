@@ -81,7 +81,7 @@ router.get(
                 (NOW()::date - p.fecha_prealerta::date) AS dias_transcurridos,
                 (p.fecha_entrega::date - p.fecha_prealerta::date) AS dias_hasta_entrega,
                 s.nombre AS sucursal_nombre,
-                f.id AS factura_id, f.numero_factura, f.estado AS factura_estado
+                f.id AS factura_id, f.numero_factura, f.estado AS factura_estado, f.total AS factura_total
          FROM paquetes p
          LEFT JOIN usuarios u ON u.id = p.usuario_id
          LEFT JOIN sucursales s ON s.id = p.sucursal_id
